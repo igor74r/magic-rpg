@@ -52,7 +52,7 @@ function drawPlayerByClass(ctx, x, y, playerClass, shadowColor) {
     ctx.fillStyle = '#b03030';
     ctx.fillRect(x - 11, y - 6, 22, 16);
     ctx.fillStyle = '#8a2020';
-    ctx.fillRect(x - 11, y - 6, 22, 4); // ремень
+    ctx.fillRect(x - 11, y - 6, 22, 4);
     // Наплечники
     ctx.fillStyle = '#666';
     ctx.beginPath();
@@ -232,39 +232,30 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
 
   // ============ ГОБЛИН ============
   if (id === 'goblin') {
-    // Уши
     ctx.fillStyle = '#3a7030';
     ctx.beginPath();
     ctx.moveTo(x - size + 2, y - 4); ctx.lineTo(x - size - 8, y - 10); ctx.lineTo(x - size + 2, y - 8);
     ctx.moveTo(x + size - 2, y - 4); ctx.lineTo(x + size + 8, y - 10); ctx.lineTo(x + size - 2, y - 8);
     ctx.fill();
-    // Тело
     ctx.fillStyle = '#4a8040';
     ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
-    // Глаза
     ctx.fillStyle = '#ffe000';
     ctx.beginPath(); ctx.arc(x - 4, y - 2, 2.5, 0, Math.PI * 2); ctx.arc(x + 4, y - 2, 2.5, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.arc(x - 4, y - 2, 1, 0, Math.PI * 2); ctx.arc(x + 4, y - 2, 1, 0, Math.PI * 2); ctx.fill();
-    // Клыки
     ctx.fillStyle = '#fff';
     ctx.fillRect(x - 3, y + 5, 2, 3);
     ctx.fillRect(x + 1, y + 5, 2, 3);
   }
   // ============ СКЕЛЕТ / СКЕЛЕТ-ЛУЧНИК ============
   else if (id === 'skeleton' || id === 'skeleton-archer') {
-    // Череп
     ctx.fillStyle = '#f0ead0';
     ctx.beginPath(); ctx.arc(x, y - 4, size * 0.75, 0, Math.PI * 2); ctx.fill();
-    // Челюсть
     ctx.fillRect(x - size * 0.5, y + 2, size, 4);
-    // Глазницы
     ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.arc(x - 4, y - 5, 2, 0, Math.PI * 2); ctx.arc(x + 4, y - 5, 2, 0, Math.PI * 2); ctx.fill();
-    // Рёбра
     ctx.fillStyle = '#f0ead0';
     for (let i = 0; i < 3; i++) ctx.fillRect(x - size * 0.7, y + 8 + i * 3, size * 1.4, 2);
-    // Лук для лучника
     if (id === 'skeleton-archer') {
       ctx.strokeStyle = '#8b4513';
       ctx.lineWidth = 2;
@@ -277,19 +268,14 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   // ============ ВОЛК / МОРОЗНЫЙ ВОЛК ============
   else if (id === 'wolf' || id === 'frost-wolf') {
     const c = id === 'frost-wolf' ? '#8cc8e8' : '#505050';
-    // Тело (вытянутое)
     ctx.fillStyle = c;
     ctx.beginPath(); ctx.ellipse(x - 2, y, size * 1.3, size * 0.75, 0, 0, Math.PI * 2); ctx.fill();
-    // Голова
     ctx.beginPath(); ctx.arc(x + size * 0.7, y - 3, size * 0.6, 0, Math.PI * 2); ctx.fill();
-    // Уши
     ctx.beginPath();
     ctx.moveTo(x + size * 0.5, y - size * 0.6); ctx.lineTo(x + size * 0.45, y - size * 1.0); ctx.lineTo(x + size * 0.75, y - size * 0.55);
     ctx.fill();
-    // Глаз
     ctx.fillStyle = id === 'frost-wolf' ? '#00c8ff' : '#ff4040';
     ctx.beginPath(); ctx.arc(x + size * 0.9, y - 4, 2, 0, Math.PI * 2); ctx.fill();
-    // Хвост
     ctx.strokeStyle = c;
     ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(x - size * 1.2, y); ctx.quadraticCurveTo(x - size * 1.6, y - 6, x - size * 1.5, y - 10); ctx.stroke();
@@ -299,10 +285,8 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
     const c = id === 'dust-wraith' ? '#a08050' : id === 'wraith' ? '#4a4a6a' : '#a0d0ff';
     ctx.globalAlpha = 0.85;
     ctx.fillStyle = c;
-    // Верх-купол
     ctx.beginPath();
     ctx.arc(x, y - 4, size, Math.PI, 0);
-    // Волнистый низ
     ctx.lineTo(x + size, y + 6);
     ctx.quadraticCurveTo(x + size * 0.66, y + 12, x + size * 0.33, y + 8);
     ctx.quadraticCurveTo(x, y + 14, x - size * 0.33, y + 8);
@@ -310,27 +294,21 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
     ctx.closePath();
     ctx.fill();
     ctx.globalAlpha = 1;
-    // Глаза
     ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.arc(x - 4, y - 6, 2, 0, Math.PI * 2); ctx.arc(x + 4, y - 6, 2, 0, Math.PI * 2); ctx.fill();
   }
   // ============ ТЁМНЫЙ РЫЦАРЬ ============
   else if (id === 'dark-knight') {
-    // Тело
     ctx.fillStyle = '#2a2a3a';
     ctx.fillRect(x - 10, y - 6, 20, 20);
-    // Наплечники с шипами
     ctx.fillStyle = '#1a1a2a';
     ctx.beginPath(); ctx.arc(x - 11, y - 4, 5, 0, Math.PI * 2); ctx.arc(x + 11, y - 4, 5, 0, Math.PI * 2); ctx.fill();
-    // Голова в шлеме
     ctx.fillStyle = '#3a3a4a';
     ctx.beginPath(); ctx.arc(x, y - 14, 7, 0, Math.PI * 2); ctx.fill();
-    // Прорезь-визор
     ctx.fillStyle = '#ff2020';
     ctx.shadowBlur = 8; ctx.shadowColor = '#ff2020';
     ctx.fillRect(x - 6, y - 15, 12, 3);
     ctx.shadowBlur = 0;
-    // Меч
     ctx.fillStyle = '#8a1010';
     ctx.fillRect(x + 13, y - 10, 3, 24);
     ctx.fillStyle = '#3a0a0a';
@@ -338,20 +316,16 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   }
   // ============ ТЕНЕВОЙ МАГ (босс) ============
   else if (id === 'shadow-mage') {
-    // Мантия
     ctx.fillStyle = '#1a0a2a';
     ctx.beginPath();
     ctx.moveTo(x - 14, y + 20); ctx.lineTo(x + 14, y + 20); ctx.lineTo(x + 10, y - 8); ctx.lineTo(x - 10, y - 8);
     ctx.closePath(); ctx.fill();
-    // Капюшон
     ctx.fillStyle = '#0a0010';
     ctx.beginPath(); ctx.arc(x, y - 10, 10, 0, Math.PI * 2); ctx.fill();
-    // Глаза
     ctx.fillStyle = '#b060ff';
     ctx.shadowBlur = 12; ctx.shadowColor = '#b060ff';
     ctx.beginPath(); ctx.arc(x - 4, y - 10, 2, 0, Math.PI * 2); ctx.arc(x + 4, y - 10, 2, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
-    // Посох
     ctx.fillStyle = '#2a1a0a';
     ctx.fillRect(x + 16, y - 16, 3, 36);
     ctx.fillStyle = '#b060ff';
@@ -361,20 +335,15 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   }
   // ============ КОРОЛЬ КУРГАНОВ (босс) ============
   else if (id === 'grave-king') {
-    // Череп
     ctx.fillStyle = '#d0c8a8';
     ctx.beginPath(); ctx.arc(x, y - 6, 16, 0, Math.PI * 2); ctx.fill();
-    // Челюсть
     ctx.fillRect(x - 10, y + 4, 20, 6);
-    // Глазницы
     ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.arc(x - 6, y - 8, 3, 0, Math.PI * 2); ctx.arc(x + 6, y - 8, 3, 0, Math.PI * 2); ctx.fill();
-    // Красные глаза
     ctx.fillStyle = '#ff0000';
     ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
     ctx.beginPath(); ctx.arc(x - 6, y - 8, 1.5, 0, Math.PI * 2); ctx.arc(x + 6, y - 8, 1.5, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
-    // Корона
     ctx.fillStyle = '#ffd060';
     ctx.beginPath();
     ctx.moveTo(x - 12, y - 20);
@@ -391,7 +360,6 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   }
   // ============ ОГНЕННЫЙ ЭЛЕМЕНТАЛЬ ============
   else if (id === 'fire-elemental') {
-    // Пламя (треугольник с изгибом)
     const grd = ctx.createLinearGradient(x, y - size * 1.2, x, y + size);
     grd.addColorStop(0, '#ffff00');
     grd.addColorStop(0.5, '#ff8000');
@@ -404,19 +372,15 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
     ctx.quadraticCurveTo(x - size * 0.5, y + size, x - size, y + size * 0.5);
     ctx.quadraticCurveTo(x - size * 1.2, y - size * 0.3, x, y - size * 1.3);
     ctx.fill();
-    // Глаза
     ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.arc(x - 3, y, 1.5, 0, Math.PI * 2); ctx.arc(x + 3, y, 1.5, 0, Math.PI * 2); ctx.fill();
   }
   // ============ МАГМОВЫЙ ГОЛЕМ ============
   else if (id === 'magma-golem') {
-    // Крупное тело из блоков
     ctx.fillStyle = '#5a2a0a';
     ctx.fillRect(x - 14, y - 10, 28, 26);
-    // Голова-камень
     ctx.fillStyle = '#4a1a0a';
     ctx.fillRect(x - 10, y - 22, 20, 14);
-    // Трещины с лавой
     ctx.strokeStyle = '#ff6000';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -425,7 +389,6 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
     ctx.beginPath();
     ctx.moveTo(x - 10, y + 2); ctx.lineTo(x + 4, y + 8);
     ctx.stroke();
-    // Глаза
     ctx.fillStyle = '#ff8000';
     ctx.shadowBlur = 8; ctx.shadowColor = '#ff8000';
     ctx.fillRect(x - 6, y - 18, 4, 3);
@@ -434,14 +397,12 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   }
   // ============ ВЛАДЫКА ПЛАМЕНИ (босс) ============
   else if (id === 'flame-lord') {
-    // Огромное пламя
     ctx.fillStyle = '#ff4000';
     ctx.shadowBlur = 25; ctx.shadowColor = '#ff4000';
     ctx.beginPath();
     ctx.arc(x, y, 20, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
-    // Языки пламени
     for (let i = 0; i < 5; i++) {
       const a = (i / 5) * Math.PI * 2;
       const px = x + Math.cos(a) * 16;
@@ -451,13 +412,11 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
       ctx.arc(px, py, 6, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Глаза
     ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.arc(x - 5, y - 2, 3, 0, Math.PI * 2); ctx.arc(x + 5, y - 2, 3, 0, Math.PI * 2); ctx.fill();
   }
   // ============ ЛЕДЯНОЙ ЭЛЕМЕНТАЛЬ ============
   else if (id === 'ice-elemental') {
-    // Кристалл (ромб)
     ctx.fillStyle = '#a0e0ff';
     ctx.shadowBlur = 10; ctx.shadowColor = '#a0e0ff';
     ctx.beginPath();
@@ -471,21 +430,17 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 1.5;
     ctx.stroke();
-    // Глаза
     ctx.fillStyle = '#004080';
     ctx.beginPath(); ctx.arc(x - 3, y - 2, 1.5, 0, Math.PI * 2); ctx.arc(x + 3, y - 2, 1.5, 0, Math.PI * 2); ctx.fill();
   }
   // ============ КОРОЛЕВА СТУЖИ (босс) ============
   else if (id === 'ice-queen') {
-    // Платье изо льда
     ctx.fillStyle = '#80c8e8';
     ctx.beginPath();
     ctx.moveTo(x - 18, y + 22); ctx.lineTo(x + 18, y + 22); ctx.lineTo(x + 10, y - 4); ctx.lineTo(x - 10, y - 4);
     ctx.closePath(); ctx.fill();
-    // Тело
     ctx.fillStyle = '#a0e0ff';
     ctx.beginPath(); ctx.arc(x, y - 8, 10, 0, Math.PI * 2); ctx.fill();
-    // Корона изо льда
     ctx.fillStyle = '#e0f8ff';
     ctx.shadowBlur = 15; ctx.shadowColor = '#a0e0ff';
     ctx.beginPath();
@@ -494,25 +449,20 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
     ctx.lineTo(x + 2, y - 22); ctx.lineTo(x + 8, y - 26); ctx.lineTo(x + 12, y - 22); ctx.lineTo(x + 12, y - 16);
     ctx.closePath(); ctx.fill();
     ctx.shadowBlur = 0;
-    // Глаза
     ctx.fillStyle = '#0080c0';
     ctx.beginPath(); ctx.arc(x - 3, y - 10, 1.5, 0, Math.PI * 2); ctx.arc(x + 3, y - 10, 1.5, 0, Math.PI * 2); ctx.fill();
   }
   // ============ ПЕСЧАНЫЙ ЧЕРВЬ ============
   else if (id === 'sand-worm') {
     ctx.fillStyle = '#c8a060';
-    // Тело (сегментированное)
     for (let i = 0; i < 4; i++) {
       ctx.beginPath();
       ctx.ellipse(x - 10 + i * 7, y + Math.sin(i) * 3, 8, 10, 0, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Голова
     ctx.beginPath(); ctx.arc(x + 10, y - 3, 10, 0, Math.PI * 2); ctx.fill();
-    // Глаза
     ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.arc(x + 12, y - 6, 2, 0, Math.PI * 2); ctx.fill();
-    // Зубы
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.moveTo(x + 6, y + 4); ctx.lineTo(x + 8, y + 8); ctx.lineTo(x + 10, y + 4);
@@ -520,30 +470,23 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   }
   // ============ КОРОЛЬ ПУСТЫНИ (босс) ============
   else if (id === 'sand-king') {
-    // Тело в тюрбане
     ctx.fillStyle = '#c89860';
     ctx.fillRect(x - 12, y - 6, 24, 22);
-    // Голова
     ctx.fillStyle = '#e0c090';
     ctx.beginPath(); ctx.arc(x, y - 12, 10, 0, Math.PI * 2); ctx.fill();
-    // Тюрбан
     ctx.fillStyle = '#a07040';
     ctx.beginPath();
     ctx.arc(x, y - 18, 12, Math.PI, 0);
     ctx.fill();
     ctx.fillRect(x - 12, y - 18, 24, 6);
-    // Драгоценность
     ctx.fillStyle = '#ff2040';
     ctx.shadowBlur = 10; ctx.shadowColor = '#ff2040';
     ctx.beginPath(); ctx.arc(x, y - 16, 3, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
-    // Борода
     ctx.fillStyle = '#000';
     ctx.beginPath();
     ctx.moveTo(x - 6, y - 6); ctx.lineTo(x + 6, y - 6); ctx.lineTo(x, y + 2);
     ctx.closePath(); ctx.fill();
-    // Глаза
-    ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.arc(x - 4, y - 12, 1.5, 0, Math.PI * 2); ctx.arc(x + 4, y - 12, 1.5, 0, Math.PI * 2); ctx.fill();
   }
   // ============ ЛЕТАЮЩАЯ КНИГА ============
@@ -553,10 +496,8 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
     ctx.strokeStyle = '#5a2a1a';
     ctx.lineWidth = 1.5;
     ctx.strokeRect(x - 12, y - 8, 24, 16);
-    // Страницы
     ctx.fillStyle = '#f0ead0';
     ctx.fillRect(x - 10, y - 6, 20, 12);
-    // Глаза
     ctx.fillStyle = '#000';
     ctx.beginPath(); ctx.arc(x - 4, y, 2, 0, Math.PI * 2); ctx.arc(x + 4, y, 2, 0, Math.PI * 2); ctx.fill();
   }
@@ -567,10 +508,8 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
     ctx.strokeStyle = '#3a1a0a';
     ctx.lineWidth = 2;
     ctx.strokeRect(x - 16, y - 12, 32, 22);
-    // Замок
     ctx.fillStyle = '#ffd060';
     ctx.fillRect(x - 3, y - 12, 6, 22);
-    // Глаза
     ctx.fillStyle = '#ffe000';
     ctx.shadowBlur = 8; ctx.shadowColor = '#ffe000';
     ctx.beginPath(); ctx.arc(x - 8, y - 2, 2, 0, Math.PI * 2); ctx.arc(x + 8, y - 2, 2, 0, Math.PI * 2); ctx.fill();
@@ -578,27 +517,22 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   }
   // ============ АРХИМАГ (босс) ============
   else if (id === 'archmage') {
-    // Мантия
     ctx.fillStyle = '#4a1a80';
     ctx.beginPath();
     ctx.moveTo(x - 14, y + 20); ctx.lineTo(x + 14, y + 20); ctx.lineTo(x + 8, y - 8); ctx.lineTo(x - 8, y - 8);
     ctx.closePath(); ctx.fill();
-    // Голова
     ctx.fillStyle = '#ffcc99';
     ctx.beginPath(); ctx.arc(x, y - 12, 7, 0, Math.PI * 2); ctx.fill();
-    // Шляпа
     ctx.fillStyle = '#2a0a4a';
     ctx.beginPath();
     ctx.moveTo(x - 12, y - 16); ctx.lineTo(x + 12, y - 16); ctx.lineTo(x, y - 38);
     ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#ffe060';
     ctx.fillRect(x - 12, y - 17, 24, 3);
-    // Борода
     ctx.fillStyle = '#f0f0f0';
     ctx.beginPath();
     ctx.moveTo(x - 6, y - 6); ctx.lineTo(x + 6, y - 6); ctx.lineTo(x, y + 6);
     ctx.fill();
-    // Посох
     ctx.fillStyle = '#3a1a0a';
     ctx.fillRect(x + 16, y - 16, 3, 36);
     ctx.shadowBlur = 15; ctx.shadowColor = '#ffd060';
@@ -609,21 +543,16 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   // ============ ДРАКОНЧИК ============
   else if (id === 'dragonling') {
     ctx.fillStyle = '#c04020';
-    // Тело
     ctx.beginPath(); ctx.ellipse(x, y + 2, 14, 10, 0, 0, Math.PI * 2); ctx.fill();
-    // Крылья
     ctx.fillStyle = '#8a2010';
     ctx.beginPath();
     ctx.moveTo(x - 8, y - 4); ctx.lineTo(x - 20, y - 12); ctx.lineTo(x - 8, y + 2);
     ctx.moveTo(x + 8, y - 4); ctx.lineTo(x + 20, y - 12); ctx.lineTo(x + 8, y + 2);
     ctx.fill();
-    // Голова
     ctx.fillStyle = '#c04020';
     ctx.beginPath(); ctx.arc(x, y - 8, 7, 0, Math.PI * 2); ctx.fill();
-    // Глаз
     ctx.fillStyle = '#ffe000';
     ctx.beginPath(); ctx.arc(x + 2, y - 9, 2, 0, Math.PI * 2); ctx.fill();
-    // Рога
     ctx.fillStyle = '#3a1a0a';
     ctx.beginPath();
     ctx.moveTo(x - 4, y - 14); ctx.lineTo(x - 6, y - 20); ctx.lineTo(x - 2, y - 15);
@@ -632,30 +561,24 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   }
   // ============ ОГНЕДЫШАЩИЙ ДРАКОН (босс) ============
   else if (id === 'fire-drake') {
-    // Тело
     ctx.fillStyle = '#8a2010';
     ctx.beginPath(); ctx.ellipse(x, y + 4, 20, 14, 0, 0, Math.PI * 2); ctx.fill();
-    // Крылья
     ctx.fillStyle = '#5a1008';
     ctx.beginPath();
     ctx.moveTo(x - 12, y - 4); ctx.lineTo(x - 30, y - 16); ctx.lineTo(x - 12, y + 6);
     ctx.moveTo(x + 12, y - 4); ctx.lineTo(x + 30, y - 16); ctx.lineTo(x + 12, y + 6);
     ctx.fill();
-    // Голова
     ctx.fillStyle = '#8a2010';
     ctx.beginPath(); ctx.arc(x, y - 12, 10, 0, Math.PI * 2); ctx.fill();
-    // Глаза
     ctx.fillStyle = '#ffe000';
     ctx.shadowBlur = 8; ctx.shadowColor = '#ffe000';
     ctx.beginPath(); ctx.arc(x - 3, y - 13, 2.5, 0, Math.PI * 2); ctx.arc(x + 3, y - 13, 2.5, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
-    // Рога
     ctx.fillStyle = '#3a0a04';
     ctx.beginPath();
     ctx.moveTo(x - 6, y - 20); ctx.lineTo(x - 10, y - 28); ctx.lineTo(x - 2, y - 21);
     ctx.moveTo(x + 6, y - 20); ctx.lineTo(x + 10, y - 28); ctx.lineTo(x + 2, y - 21);
     ctx.fill();
-    // Огонь из пасти
     ctx.fillStyle = '#ff8000';
     ctx.shadowBlur = 12; ctx.shadowColor = '#ff8000';
     ctx.beginPath();
@@ -666,19 +589,15 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   // ============ ДРАКОН-СТРАЖ ============
   else if (id === 'dragon-guardian') {
     ctx.fillStyle = '#2a3a2a';
-    // Крупное тело
     ctx.fillRect(x - 14, y - 8, 28, 22);
-    // Голова
     ctx.fillStyle = '#3a4a3a';
     ctx.beginPath(); ctx.arc(x, y - 14, 11, 0, Math.PI * 2); ctx.fill();
-    // Чешуя-шипы
     ctx.fillStyle = '#1a2a1a';
     for (let i = 0; i < 3; i++) {
       ctx.beginPath();
       ctx.moveTo(x - 8 + i * 8, y - 24); ctx.lineTo(x - 6 + i * 8, y - 30); ctx.lineTo(x - 4 + i * 8, y - 24);
       ctx.fill();
     }
-    // Глаза
     ctx.fillStyle = '#00ff80';
     ctx.shadowBlur = 8; ctx.shadowColor = '#00ff80';
     ctx.beginPath(); ctx.arc(x - 4, y - 14, 2, 0, Math.PI * 2); ctx.arc(x + 4, y - 14, 2, 0, Math.PI * 2); ctx.fill();
@@ -686,26 +605,21 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
   }
   // ============ ДРЕВНИЙ ДРАКОН (босс) ============
   else if (id === 'ancient-dragon') {
-    // Тело
     ctx.fillStyle = '#8a1010';
     ctx.shadowBlur = 20; ctx.shadowColor = '#ff0000';
     ctx.beginPath(); ctx.ellipse(x, y + 6, 24, 16, 0, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
-    // Крылья
     ctx.fillStyle = '#5a0808';
     ctx.beginPath();
     ctx.moveTo(x - 14, y - 4); ctx.lineTo(x - 38, y - 20); ctx.lineTo(x - 14, y + 8);
     ctx.moveTo(x + 14, y - 4); ctx.lineTo(x + 38, y - 20); ctx.lineTo(x + 14, y + 8);
     ctx.fill();
-    // Голова
     ctx.fillStyle = '#8a1010';
     ctx.beginPath(); ctx.arc(x, y - 16, 12, 0, Math.PI * 2); ctx.fill();
-    // Глаза
     ctx.fillStyle = '#ffe000';
     ctx.shadowBlur = 15; ctx.shadowColor = '#ffe000';
     ctx.beginPath(); ctx.arc(x - 4, y - 17, 3, 0, Math.PI * 2); ctx.arc(x + 4, y - 17, 3, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
-    // Рога
     ctx.fillStyle = '#2a0404';
     ctx.beginPath();
     ctx.moveTo(x - 8, y - 26); ctx.lineTo(x - 14, y - 38); ctx.lineTo(x - 2, y - 27);
@@ -723,7 +637,6 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
 
   ctx.shadowBlur = 0;
 
-  // HP bar
   const bw = isBoss ? 60 : 40;
   const hpY = y - size - (isBoss ? 25 : isElite ? 20 : 15);
   ctx.fillStyle = '#05020a';
@@ -735,7 +648,6 @@ function drawEnemyByType(ctx, e, x, y, shadowColor) {
 function drawStatic(ctx, obj, x, y, shadowColor) {
   const id = obj.id;
 
-  // Тень
   if (id !== 'well' && id !== 'questBoard') {
     ctx.fillStyle = shadowColor;
     ctx.beginPath();
@@ -745,21 +657,16 @@ function drawStatic(ctx, obj, x, y, shadowColor) {
 
   switch (id) {
     case 'blacksmith': {
-      // Тело (фартук)
       ctx.fillStyle = '#3a2a1a';
       ctx.fillRect(x - 9, y - 2, 18, 16);
-      // Рубаха
       ctx.fillStyle = '#8a6a3a';
       ctx.fillRect(x - 9, y - 8, 18, 8);
-      // Голова
       ctx.fillStyle = '#ffcc99';
       ctx.beginPath(); ctx.arc(x, y - 14, 6, 0, Math.PI * 2); ctx.fill();
-      // Борода
       ctx.fillStyle = '#3a2010';
       ctx.beginPath();
       ctx.moveTo(x - 5, y - 10); ctx.lineTo(x + 5, y - 10); ctx.lineTo(x, y - 2);
       ctx.fill();
-      // Молот
       ctx.fillStyle = '#5a3a20';
       ctx.fillRect(x + 12, y - 8, 3, 20);
       ctx.fillStyle = '#666';
@@ -767,19 +674,15 @@ function drawStatic(ctx, obj, x, y, shadowColor) {
       break;
     }
     case 'healer': {
-      // Белая мантия
       ctx.fillStyle = '#e8f0e8';
       ctx.beginPath();
       ctx.moveTo(x - 9, y + 14); ctx.lineTo(x + 9, y + 14); ctx.lineTo(x + 7, y - 6); ctx.lineTo(x - 7, y - 6);
       ctx.fill();
-      // Зелёный крест
       ctx.fillStyle = '#40c040';
       ctx.fillRect(x - 1, y - 4, 2, 8);
       ctx.fillRect(x - 4, y - 1, 8, 2);
-      // Голова
       ctx.fillStyle = '#ffcc99';
       ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      // Волосы (длинные)
       ctx.fillStyle = '#c9a060';
       ctx.beginPath(); ctx.arc(x, y - 15, 6, Math.PI, 0); ctx.fill();
       ctx.fillRect(x - 6, y - 15, 3, 10);
@@ -787,18 +690,14 @@ function drawStatic(ctx, obj, x, y, shadowColor) {
       break;
     }
     case 'alchemist': {
-      // Фиолетовая мантия
       ctx.fillStyle = '#5a2090';
       ctx.beginPath();
       ctx.moveTo(x - 9, y + 14); ctx.lineTo(x + 9, y + 14); ctx.lineTo(x + 7, y - 6); ctx.lineTo(x - 7, y - 6);
       ctx.fill();
-      // Голова
       ctx.fillStyle = '#ffcc99';
       ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      // Капюшон
       ctx.fillStyle = '#3a1060';
       ctx.beginPath(); ctx.arc(x, y - 14, 7, Math.PI, 0); ctx.fill();
-      // Колба
       ctx.fillStyle = '#a0f0ff';
       ctx.shadowBlur = 8; ctx.shadowColor = '#a0f0ff';
       ctx.beginPath(); ctx.arc(x + 13, y - 2, 4, 0, Math.PI * 2); ctx.fill();
@@ -808,66 +707,50 @@ function drawStatic(ctx, obj, x, y, shadowColor) {
       break;
     }
     case 'merchant': {
-      // Красная рубаха
       ctx.fillStyle = '#a02020';
       ctx.fillRect(x - 9, y - 4, 18, 18);
-      // Пояс
       ctx.fillStyle = '#ffd060';
       ctx.fillRect(x - 9, y + 4, 18, 2);
-      // Голова
       ctx.fillStyle = '#ffcc99';
       ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      // Шляпа
       ctx.fillStyle = '#5a2a1a';
       ctx.beginPath();
       ctx.ellipse(x, y - 17, 10, 3, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillRect(x - 5, y - 22, 10, 6);
-      // Монета в руке
       ctx.fillStyle = '#ffd060';
       ctx.beginPath(); ctx.arc(x + 12, y, 3, 0, Math.PI * 2); ctx.fill();
       break;
     }
     case 'elder': {
-      // Коричневая мантия
       ctx.fillStyle = '#6a4a2a';
       ctx.beginPath();
       ctx.moveTo(x - 9, y + 14); ctx.lineTo(x + 9, y + 14); ctx.lineTo(x + 6, y - 6); ctx.lineTo(x - 6, y - 6);
       ctx.fill();
-      // Голова
       ctx.fillStyle = '#ffcc99';
       ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      // Седая борода
       ctx.fillStyle = '#e0e0e0';
       ctx.beginPath();
       ctx.moveTo(x - 5, y - 8); ctx.lineTo(x + 5, y - 8); ctx.lineTo(x, y + 4);
       ctx.fill();
-      // Лысина + редкие волосы
       ctx.fillStyle = '#e0e0e0';
       ctx.fillRect(x - 6, y - 16, 12, 3);
-      // Трость
       ctx.fillStyle = '#5a3a20';
       ctx.fillRect(x + 12, y - 8, 2, 22);
       break;
     }
     case 'guard': {
-      // Кольчуга
       ctx.fillStyle = '#606060';
       ctx.fillRect(x - 9, y - 4, 18, 18);
-      // Наплечники
       ctx.fillStyle = '#404040';
       ctx.beginPath(); ctx.arc(x - 10, y - 2, 4, 0, Math.PI * 2); ctx.arc(x + 10, y - 2, 4, 0, Math.PI * 2); ctx.fill();
-      // Голова
       ctx.fillStyle = '#ffcc99';
       ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      // Шлем
       ctx.fillStyle = '#707070';
       ctx.beginPath(); ctx.arc(x, y - 14, 7, Math.PI, 0); ctx.fill();
-      // Щит слева
       ctx.fillStyle = '#2a4a8a';
       ctx.beginPath();
       ctx.moveTo(x - 16, y - 6); ctx.lineTo(x - 16, y + 6); ctx.lineTo(x - 12, y + 10); ctx.lineTo(x - 8, y + 6); ctx.lineTo(x - 8, y - 6);
       ctx.closePath(); ctx.fill();
-      // Копьё справа
       ctx.fillStyle = '#5a3a20';
       ctx.fillRect(x + 12, y - 18, 2, 32);
       ctx.fillStyle = '#ccc';
@@ -877,37 +760,29 @@ function drawStatic(ctx, obj, x, y, shadowColor) {
       break;
     }
     case 'bard': {
-      // Розово-фиолетовая одежда
       ctx.fillStyle = '#c060a0';
       ctx.fillRect(x - 9, y - 4, 18, 18);
-      // Голова
       ctx.fillStyle = '#ffcc99';
       ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      // Шляпа с пером
       ctx.fillStyle = '#5a1a4a';
       ctx.beginPath();
       ctx.ellipse(x, y - 16, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillRect(x - 5, y - 22, 10, 6);
       ctx.fillStyle = '#ffd060';
       ctx.beginPath(); ctx.arc(x + 6, y - 20, 2, 0, Math.PI * 2); ctx.fill();
-      // Лютня
       ctx.fillStyle = '#8b4513';
       ctx.beginPath(); ctx.ellipse(x + 13, y + 2, 6, 8, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillRect(x + 11, y - 10, 2, 12);
       break;
     }
     case 'herald': {
-      // Красная одежда
       ctx.fillStyle = '#c02020';
       ctx.fillRect(x - 9, y - 4, 18, 18);
-      // Голова
       ctx.fillStyle = '#ffcc99';
       ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      // Шляпа
       ctx.fillStyle = '#8a1010';
       ctx.fillRect(x - 6, y - 20, 12, 4);
       ctx.fillRect(x - 4, y - 22, 8, 4);
-      // Громкоговоритель
       ctx.fillStyle = '#c9a227';
       ctx.beginPath();
       ctx.moveTo(x + 10, y); ctx.lineTo(x + 20, y - 6); ctx.lineTo(x + 20, y + 6);
@@ -915,45 +790,35 @@ function drawStatic(ctx, obj, x, y, shadowColor) {
       break;
     }
     case 'cat': {
-      // Тело (чёрная кошка)
       ctx.fillStyle = '#2a2a2a';
       ctx.beginPath(); ctx.ellipse(x, y + 2, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
-      // Голова
       ctx.beginPath(); ctx.arc(x + 6, y - 4, 6, 0, Math.PI * 2); ctx.fill();
-      // Уши
       ctx.beginPath();
       ctx.moveTo(x + 2, y - 8); ctx.lineTo(x + 1, y - 14); ctx.lineTo(x + 6, y - 10);
       ctx.moveTo(x + 10, y - 8); ctx.lineTo(x + 11, y - 14); ctx.lineTo(x + 6, y - 10);
       ctx.fill();
-      // Глаза
       ctx.fillStyle = '#ffe000';
       ctx.beginPath(); ctx.arc(x + 4, y - 5, 1.5, 0, Math.PI * 2); ctx.arc(x + 8, y - 5, 1.5, 0, Math.PI * 2); ctx.fill();
-      // Хвост
       ctx.strokeStyle = '#2a2a2a';
       ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(x - 9, y + 2); ctx.quadraticCurveTo(x - 15, y - 2, x - 12, y - 8); ctx.stroke();
       break;
     }
     case 'kids': {
-      // Ребёнок
       ctx.fillStyle = '#5a8ac8';
       ctx.fillRect(x - 6, y, 12, 12);
       ctx.fillStyle = '#ffcc99';
       ctx.beginPath(); ctx.arc(x, y - 6, 5, 0, Math.PI * 2); ctx.fill();
-      // Волосы
       ctx.fillStyle = '#c9a060';
       ctx.beginPath(); ctx.arc(x, y - 8, 5, Math.PI, 0); ctx.fill();
       break;
     }
     case 'well': {
-      // Вода
       ctx.fillStyle = '#2a4a8a';
       ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
-      // Каменный бортик
       ctx.strokeStyle = '#7a7a7a';
       ctx.lineWidth = 5;
       ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.stroke();
-      // Свечение воды
       ctx.fillStyle = '#4ac8ff';
       ctx.shadowBlur = 12; ctx.shadowColor = '#4ac8ff';
       ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.fill();
@@ -961,14 +826,11 @@ function drawStatic(ctx, obj, x, y, shadowColor) {
       break;
     }
     case 'questBoard': {
-      // Стойки
       ctx.fillStyle = '#5a3a20';
       ctx.fillRect(x - 14, y - 18, 3, 36);
       ctx.fillRect(x + 11, y - 18, 3, 36);
-      // Доска
       ctx.fillStyle = '#8a5a2a';
       ctx.fillRect(x - 14, y - 18, 28, 22);
-      // Бумаги
       ctx.fillStyle = '#f0ead0';
       ctx.fillRect(x - 11, y - 16, 8, 10);
       ctx.fillRect(x + 1, y - 14, 9, 8);
@@ -976,7 +838,6 @@ function drawStatic(ctx, obj, x, y, shadowColor) {
       break;
     }
     default: {
-      // Универсальный NPC
       ctx.fillStyle = '#c9a227';
       ctx.fillRect(x - 9, y - 4, 18, 18);
       ctx.fillStyle = '#ffcc99';
@@ -1009,9 +870,29 @@ function startAutosave() {
   }, 30000);
 }
 
+// ==================== ИСПРАВЛЕНИЕ РАСКЛАДКИ ====================
+function getLogicalKey(e) {
+  const code = e.code;
+  if (code === 'KeyW' || code === 'ArrowUp') return 'w';
+  if (code === 'KeyS' || code === 'ArrowDown') return 's';
+  if (code === 'KeyA' || code === 'ArrowLeft') return 'a';
+  if (code === 'KeyD' || code === 'ArrowRight') return 'd';
+  if (code === 'Space') return ' ';
+  if (code === 'Escape') return 'escape';
+  if (code === 'Digit1' || code === 'Numpad1') return '1';
+  if (code === 'Digit2' || code === 'Numpad2') return '2';
+  if (code === 'Digit3' || code === 'Numpad3') return '3';
+  if (code === 'Digit4' || code === 'Numpad4') return '4';
+  if (code === 'Digit5' || code === 'Numpad5') return '5';
+  if (code === 'Digit6' || code === 'Numpad6') return '6';
+  return e.key.toLowerCase();
+}
+// ============================================================
+
 function onKeyDown(e) {
   if (!state.overworld || !state.overworld.active) return;
-  const k = e.key.toLowerCase();
+  const k = getLogicalKey(e);
+  
   if (paused) { if (k === 'escape') { e.preventDefault(); closePauseMenu(); } return; }
   if (k === 'escape') {
     e.preventDefault(); if (state.overworld.defeated) return;
@@ -1043,10 +924,14 @@ function onKeyDown(e) {
     if (k === '6') { e.preventDefault(); owOpenAbilities(); return; }
     return;
   }
-  if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd'].includes(k)) { e.preventDefault(); state.overworld.keys[k] = true; }
+  if (['w', 'a', 's', 'd'].includes(k)) { e.preventDefault(); state.overworld.keys[k] = true; }
 }
 
-function onKeyUp(e) { if (!state.overworld) return; state.overworld.keys[e.key.toLowerCase()] = false; }
+function onKeyUp(e) { 
+  if (!state.overworld) return; 
+  const k = getLogicalKey(e);
+  state.overworld.keys[k] = false; 
+}
 export function closeDialogAndResume() { paused = false; lastNpcKey = ''; renderNpcPanel(); }
 
 function tick(ts) {
@@ -1238,7 +1123,6 @@ function render() {
 
   drawPlayerByClass(ctx, p.x - cam.x, p.y - cam.y, state.game.player.class, theme.shadow);
 
-  // Полоски HP/MP над игроком
   const px = p.x - cam.x, py = p.y - cam.y;
   const bw = 50;
   ctx.fillStyle = '#05020a'; ctx.fillRect(px - bw / 2, py - 42, bw, 4); ctx.fillRect(px - bw / 2, py - 36, bw, 3);
@@ -1282,23 +1166,6 @@ function render() {
 
   const stats = getEffStats();
   drawHud(ctx, p, stats, state.game.player.class);
-
-  if (state.settings?.showFps) {
-    if (!window._fpsState) window._fpsState = { frames: 0, lastTime: performance.now(), value: 0 };
-    window._fpsState.frames++;
-    const nowT = performance.now();
-    if (nowT - window._fpsState.lastTime >= 1000) {
-      window._fpsState.value = window._fpsState.frames;
-      window._fpsState.frames = 0;
-      window._fpsState.lastTime = nowT;
-    }
-    ctx.font = 'bold 12px monospace';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'bottom';
-    ctx.fillStyle = '#00ff00';
-    ctx.fillText(`FPS: ${window._fpsState.value}`, VIEW_W - 160, VIEW_H - 12);
-  }
-
   ctx.restore();
 
   drawMinimap(ctx, ow);
