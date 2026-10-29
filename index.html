@@ -75,11 +75,10 @@
       <div class="divider"></div>
       <h3>💡 Советы новичкам</h3>
       <ul>
-        <li>Следи за индикатором особой атаки врага (⚠️ в панели боя) — когда «следующий ход», лучше ставить блок.</li>
-        <li>В деревне есть кузнец (улучшает экипировку), алхимик (крафтит зелья), лекарь (лечит за золото).</li>
-        <li>Не забывай про ежедневный сундук в деревне — 100 золота + случайное зелье раз в сутки.</li>
-        <li>Достижения дают золото. Заглядывай в «🏆 Достижения» в игре.</li>
-        <li>В бою следи за значками эффектов — яд/ожог/кровотечение тикают урон каждый ход.</li>
+        <li>Следи за индикатором особой атаки врага (⚠️ в панели боя).</li>
+        <li>В деревне есть кузнец, алхимик и лекарь.</li>
+        <li>Не забывай про ежедневный сундук в деревне.</li>
+        <li>Достижения дают золото.</li>
       </ul>
     </div>
     <button onclick="GameAPI.showScreen('screen-main')" class="settings-back-btn">← Назад</button>
@@ -109,25 +108,41 @@
   </div>
 </div>
 
-<!-- ================== ИГРА ================== -->
+<!-- ================== ИГРА (ДАШБОРД) ================== -->
 <div id="screen-game" class="screen">
-  <div class="game-container">
-    <div class="panel" id="game-header"></div>
-    <div class="panel" id="location-info"></div>
-    <div class="tabs">
-      <div class="tab active" data-tab="locations" onclick="GameAPI.switchTab('locations')">🗺️ Локации</div>
-      <div class="tab" data-tab="inventory" onclick="GameAPI.switchTab('inventory')">🎒 Инвентарь</div>
-      <div class="tab" data-tab="spells" onclick="GameAPI.switchTab('spells')">✨ Магия</div>
-      <div class="tab" data-tab="quests" onclick="GameAPI.switchTab('quests')">📜 Квесты</div>
-      <div class="tab" data-tab="achievements" onclick="GameAPI.switchTab('achievements')">🏆 Достижения</div>
-      <div class="tab" data-tab="statistics" onclick="GameAPI.switchTab('statistics')">📊 Статистика</div>
-      <div class="tab" data-tab="talents" onclick="GameAPI.switchTab('talents')">🌳 Таланты</div>
+  <div class="dashboard-layout">
+    
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ СТАТОВ -->
+    <div class="dashboard-header" id="game-header"></div>
+    
+    <div class="dashboard-body">
+      <!-- ЛЕВАЯ ПАНЕЛЬ (ВКЛАДКИ) -->
+      <div class="dashboard-sidebar">
+        <div class="tab active" data-tab="locations" onclick="GameAPI.switchTab('locations')"><span class="tab-icon">🗺️</span> <span class="tab-text">Локации</span></div>
+        <div class="tab" data-tab="inventory" onclick="GameAPI.switchTab('inventory')"><span class="tab-icon">🎒</span> <span class="tab-text">Инвентарь</span></div>
+        <div class="tab" data-tab="spells" onclick="GameAPI.switchTab('spells')"><span class="tab-icon">✨</span> <span class="tab-text">Магия</span></div>
+        <div class="tab" data-tab="quests" onclick="GameAPI.switchTab('quests')"><span class="tab-icon">📜</span> <span class="tab-text">Квесты</span></div>
+        <div class="tab" data-tab="achievements" onclick="GameAPI.switchTab('achievements')"><span class="tab-icon">🏆</span> <span class="tab-text">Достижения</span></div>
+        <div class="tab" data-tab="statistics" onclick="GameAPI.switchTab('statistics')"><span class="tab-icon">📊</span> <span class="tab-text">Статистика</span></div>
+        <div class="tab" data-tab="talents" onclick="GameAPI.switchTab('talents')"><span class="tab-icon">🌳</span> <span class="tab-text">Таланты</span></div>
+        
+        <div style="margin-top: auto; padding-top: 20px;">
+          <button onclick="GameAPI.saveAndMenu()" style="width: 100%; font-size: 12px; padding: 12px 8px; border-color: #8b1a1a; background: linear-gradient(180deg, #4a1a1a, #2a0a0a);">💾 Сохранить и в меню</button>
+        </div>
+      </div>
+
+      <!-- ПРАВАЯ ПАНЕЛЬ (КОНТЕНТ) -->
+      <div class="dashboard-main">
+        <div class="panel" id="location-info" style="margin-bottom: 15px;"></div>
+        <div class="panel" id="tab-content" style="flex: 1; overflow-y: auto;"></div>
+      </div>
     </div>
-    <div class="panel" id="tab-content"></div>
-    <div class="panel"><h3>Журнал</h3><div class="log" id="game-log"></div></div>
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:5px;margin-bottom:20px;">
-      <button onclick="GameAPI.saveAndMenu()">💾 Сохранить и в меню</button>
+
+    <!-- НИЖНЯЯ ПАНЕЛЬ (ЛОГ) -->
+    <div class="dashboard-footer">
+      <div class="log" id="game-log"></div>
     </div>
+
   </div>
 </div>
 

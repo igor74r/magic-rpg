@@ -29,19 +29,35 @@ function totalKills() { const kills = state.game.player.stats?.kills || {}; retu
 export function renderHeader() {
   const p = state.game.player; const points = p.statPoints || 0;
   const statBlock = points > 0 ? `<div class="stat-points-panel"><span class="stat-points-label">🎯 Очков характеристик: ${points}</span><div class="stat-buttons"><button onclick="GameAPI.spendStat('str')">+1 СИЛ</button><button onclick="GameAPI.spendStat('int')">+1 ИНТ</button><button onclick="GameAPI.spendStat('wis')">+1 МДР</button><button onclick="GameAPI.spendStat('con')">+1 ТЕЛ</button></div></div>` : '';
-  const effectsHtml = renderActiveEffectsInline(p.effects); const endgameHtml = renderEndgameHint(p);
+  
+  const effectsHtml = renderActiveEffectsInline(p.effects); 
+  const endgameHtml = renderEndgameHint(p);
   
   const mpLabel = p.class === 'warrior' ? '🔥 Ярость' : 'MP';
-  const mpClass = p.class === 'warrior' ? 'bar-rage' : 'bar-mp'; // <--- ИЗМЕНЕНО НА bar-rage
+  const mpClass = p.class === 'warrior' ? 'bar-rage' : 'bar-mp'; 
   
   document.getElementById('game-header').innerHTML = `
-    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;"><div><span style="color:#c9a227;font-size:18px;">${CLASSES[p.class].emoji} ${p.name}</span> <span style="color:#a89060;">— ${CLASSES[p.class].name}, Ур. ${p.level}</span></div><div><span style="color:#ffd060;">💰 ${p.gold}</span></div></div>
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+      <div><span style="color:#c9a227;font-size:18px;">${CLASSES[p.class].emoji} ${p.name}</span> <span style="color:#a89060;">— ${CLASSES[p.class].name}, Ур. ${p.level}</span></div>
+      <div><span style="color:#ffd060;">💰 ${p.gold}</span></div>
+    </div>
     <div class="bar"><div class="bar-fill bar-hp" style="width:${p.hp/p.maxHp*100}%"></div><div class="bar-text">HP ${p.hp}/${p.maxHp}</div></div>
     <div class="bar"><div class="bar-fill ${mpClass}" style="width:${p.mp/p.maxMp*100}%"></div><div class="bar-text">${mpLabel} ${p.mp}/${p.maxMp}</div></div>
     <div class="bar"><div class="bar-fill bar-exp" style="width:${p.exp/p.expNext*100}%"></div><div class="bar-text">EXP ${p.exp}/${p.expNext}</div></div>
+    
     <div style="text-align:center;font-size:11px;color:#a89060;margin-bottom:2px;">До следующего уровня: ${p.expNext - p.exp} EXP</div>
-    <div style="margin-top:8px;font-size:13px;color:#a89060;text-align:center;">СИЛ ${p.str} · ИНТ ${p.int} · МДР ${p.wis} · ТЕЛ ${p.con} · ⚔️ ${totalKills()} убийств</div>
-    ${effectsHtml} ${endgameHtml} ${statBlock}`;
+    
+    <div style="margin-top:8px;font-size:13px;color:#a89060;text-align:center;">
+      СИЛ ${p.str} · ИНТ ${p.int} · МДР ${p.wis} · ТЕЛ ${p.con} · ⚔️ ${totalKills()} убийств
+    </div>
+    
+    ${effectsHtml}
+    
+    <div style="display: flex; justify-content: center; width: 100%; margin-top: 6px;">
+      ${endgameHtml}
+    </div>
+    
+    ${statBlock}`;
 }
 
 function renderEndgameHint(p) {
@@ -54,7 +70,7 @@ function renderEndgameHint(p) {
 function renderActiveEffectsInline(effects) {
   if (!Array.isArray(effects) || !effects.length) return '';
   const badges = effects.map(e => { const d = EFFECTS[e.id]; if (!d) return ''; return `<span class="fx-badge" style="border-color:${d.color};color:${d.color};" title="${d.name}${d.desc ? ': ' + d.desc : ''} (${e.duration} ${e.duration === 1 ? 'ход' : 'хода'})">${d.icon}${e.duration}</span>`; }).join('');
-  return `<div class="effects-inline"><span style="color:#a89060;font-size:11px;margin-right:6px;">Эффекты:</span>${badges}</div>`;
+  return `<div class="effects-inline" style="display:flex; justify-content:center; width:100%; margin-top:6px;"><span style="color:#a89060;font-size:11px;margin-right:6px;">Эффекты:</span>${badges}</div>`;
 }
 
 const STAT_NAMES = { str: 'Силе', int: 'Интеллекту', wis: 'Мудрости', con: 'Телосложению' };
