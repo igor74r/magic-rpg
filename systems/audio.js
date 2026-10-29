@@ -2,9 +2,18 @@ import { state } from './state.js';
 
 let ctx = null;
 let masterGain = null;
-let ambientNodes = null;
-let ambientInterval = null;
+let bgmGain = null;
+let bgmState = { current: null };
 let lastStepTime = 0;
+
+const BGM_TRACKS = {
+  village: 'audio/village.mp3',
+  explore: 'audio/explore.mp3',
+  combat: 'audio/combat.mp3'
+};
+
+let currentBgmAudio = null;
+let currentBgmSource = null;
 
 export function initAudio() {
   if (ctx) return;
@@ -13,6 +22,10 @@ export function initAudio() {
     masterGain = ctx.createGain();
     masterGain.gain.value = getVolume();
     masterGain.connect(ctx.destination);
+    
+    bgmGain = ctx.createGain();
+    bgmGain.gain.value = 0.5; 
+    bgmGain.connect(masterGain);
   } catch (e) {
     console.warn('Web Audio не поддерживается:', e);
   }
@@ -33,6 +46,7 @@ export function resumeContext() {
   if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
 }
 
+// ---------- СИНТЕЗАТОР ЗВУКОВ ----------
 function noiseBuffer(duration) {
   const sr = ctx.sampleRate;
   const len = Math.floor(sr * duration);
@@ -139,62 +153,49 @@ export function playSound(name) {
   try { fn(); } catch (e) {}
 }
 
-export function startAmbient() {
-  if (!ctx || ambientNodes) return;
-  if (state.settings?.soundEnabled === false) return;
+// ---------- ФОНОВАЯ МУЗЫКА ----------
+export function playBGM(type) {
+  if (!ctx) return;
+  if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+  if (bgmState.current === type) return;
+  
+  stopBGM(); 
+  bgmState.current = type;
 
-  const t0 = ctx.currentTime;
-  const osc1 = ctx.createOscillator();
-  osc1.type = 'sine';
-  osc1.frequency.value = 55;
+  const trackUrl = BGM_TRACKS[type];
+  if (!trackUrl) return;
 
-  const osc2 = ctx.createOscillator();
-  osc2.type = 'sine';
-  osc2.frequency.value = 82.5;
-
-  const droneGain = ctx.createGain();
-  droneGain.gain.setValueAtTime(0, t0);
-  droneGain.gain.linearRampToValueAtTime(0.04, t0 + 2);
-
-  const lfo = ctx.createOscillator();
-  lfo.frequency.value = 0.15;
-  const lfoGain = ctx.createGain();
-  lfoGain.gain.value = 0.015;
-  lfo.connect(lfoGain).connect(droneGain.gain);
-
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 400;
-
-  osc1.connect(filter);
-  osc2.connect(filter);
-  filter.connect(droneGain).connect(masterGain);
-
-  osc1.start(t0); osc2.start(t0); lfo.start(t0);
-  ambientNodes = { osc1, osc2, lfo, droneGain };
-
-  ambientInterval = setInterval(() => {
-    if (!ctx || !ambientNodes) return;
-    if (state.settings?.soundEnabled === false) return;
-    if (Math.random() < 0.5) {
-      playNoise({ duration: 1.5, vol: 0.03, filterFreq: 600, filterEnd: 300 });
-    }
-  }, 5000);
-}
-
-export function stopAmbient() {
-  if (!ambientNodes || !ctx) return;
-  const t0 = ctx.currentTime;
+  currentBgmAudio = new Audio(trackUrl);
+  currentBgmAudio.loop = true;
+  
   try {
-    ambientNodes.droneGain.gain.linearRampToValueAtTime(0, t0 + 1);
-    ambientNodes.osc1.stop(t0 + 1.1);
-    ambientNodes.osc2.stop(t0 + 1.1);
-    ambientNodes.lfo.stop(t0 + 1.1);
-  } catch (e) {}
-  ambientNodes = null;
-  if (ambientInterval) { clearInterval(ambientInterval); ambientInterval = null; }
+    currentBgmSource = ctx.createMediaElementSource(currentBgmAudio);
+    currentBgmSource.connect(bgmGain);
+  } catch (e) {
+    console.warn('Не удалось подключить аудио к контексту.', e);
+  }
+
+  // Настройка громкости: бой - 30%, остальное - 100%
+  if (type === 'combat') {
+    currentBgmAudio.volume = 0.3; 
+  } else {
+    currentBgmAudio.volume = 1.0; 
+  }
+
+  currentBgmAudio.play().catch(e => {
+    console.warn('Не удалось воспроизвести музыку (404?):', trackUrl);
+  });
 }
 
-export function isAudioReady() {
-  return !!ctx;
+export function stopBGM() {
+  if (currentBgmAudio) {
+    currentBgmAudio.pause();
+    currentBgmAudio.currentTime = 0;
+    currentBgmAudio = null;
+  }
+  if (currentBgmSource) {
+    try { currentBgmSource.disconnect(); } catch(e){}
+    currentBgmSource = null;
+  }
+  bgmState.current = null;
 }

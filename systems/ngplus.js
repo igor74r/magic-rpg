@@ -57,6 +57,7 @@ export function startNGPlus() {
     cooldowns: {},
     effects: [],
     ngPlus: newCycle,
+    victoryAchieved: false, // <--- ВОТ ЭТА СТРОЧКА СБРАСЫВАЕТ ГАЛОЧКУ
     ...carry
   });
 

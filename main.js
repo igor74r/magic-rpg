@@ -28,8 +28,7 @@ import { isRiftReady, getRandomRiftLocation } from './systems/rift.js';
 import { startNGPlus } from './systems/ngplus.js';
 import { showScreen, toast, logTo } from './ui/screens.js';
 import {
-  initAudio, playSound, startAmbient, stopAmbient,
-  updateVolume, resumeContext
+  initAudio, playSound, playBGM, updateVolume, resumeContext
 } from './systems/audio.js';
 
 on('toast', toast);
@@ -42,26 +41,33 @@ on('game:started', () => {
   renderGame();
   initAudio();
   updateVolume();
-  startAmbient();
+  playBGM('village');
 });
 on('game:update', renderGame);
 
 on('overworld:start', () => {
   showScreen('screen-overworld');
   initOverworld();
+  playBGM('explore');
 });
 on('overworld:end', () => {
   showScreen('screen-game');
   renderGame();
+  playBGM('village');
 });
 on('overworld:defeat', () => {
-  stopAmbient();
   showScreen('screen-death');
 });
 
+on('combat:start', () => playBGM('combat'));
+on('combat:end', () => playBGM('explore'));
+
 on('victory', () => {
+  if (state.game && state.game.player) {
+    state.game.player.victoryAchieved = true; // Ставим флаг, чтобы не спамило
+    saveGame();
+  }
   playSound('victory');
-  stopAmbient();
   showScreen('screen-victory');
 });
 
@@ -88,7 +94,7 @@ document.addEventListener('click', (e) => {
   if (!audioBooted) {
     audioBooted = true;
     initAudio();
-    if (state.game) startAmbient();
+    resumeContext();
   }
   resumeContext();
   const btn = e.target.closest('button');
@@ -110,7 +116,7 @@ function respawnInVillage() {
   saveGame();
   showScreen('screen-game');
   renderGame();
-  startAmbient();
+  playBGM('village');
   toast('Вы возродились в деревне');
 }
 

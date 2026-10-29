@@ -8,13 +8,12 @@ import { getEffStats } from '../stats.js';
 import { addItem, removeItem } from '../inventory.js';
 import { addExp } from '../progression.js';
 import { checkAchievements } from '../achievements.js';
-import { applyEffect, tickEffects, getAtkMult, getDefMult, getLifesteal, isStunned, clearDebuffs, hasEffect } from '../status.js';
+import { applyEffect, tickEffects, getAtkMult, getDefMult, getLifesteal, isStunned, clearDebuffs } from '../status.js';
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
-import { getTalentBonus } from '../talents.js';
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
 import { MODIFIERS, ELITE_ATK_MULT, getDropChance, getRespawnMs } from './spawn.js';
@@ -58,6 +57,7 @@ export function enterCombat(enemy) {
   enemy.state = 'combat';
   ow.combat = { enemy, turn: 'player', over: false, turnCount: 0, blocking: false, playerChargeNext: false, playerResurrectionUsed: false };
   pushLog(`⚔️ Бой: ${enemyDisplayName(enemy)}`, 'info');
+  emit('combat:start');
 }
 
 function checkBossPhase(e) {
@@ -81,12 +81,10 @@ export function combatAttack() {
   const p = state.game.player;
   const st = getEffStats();
   const atkMult = getAtkMult(p);
-  const tb = getTalentBonus(p);
   let dmg = Math.max(1, Math.floor((st.atk + Math.floor(Math.random() * 5) - Math.floor(enemyDefValue(e) / 2)) * atkMult));
-  dmg = Math.floor(dmg * tb.dmgMult);
-  const isCrit = Math.random() < (0.1 + tb.critChance);
+  const isCrit = Math.random() < 0.1;
   if (isCrit) {
-    dmg = Math.floor(dmg * tb.critMult);
+    dmg = Math.floor(dmg * 1.5);
     triggerShake(8, 0.3);
     spawnParticles(e.x, e.y, 'spark', 10);
   }
@@ -96,7 +94,7 @@ export function combatAttack() {
     pushLog('⚡ Рывок: двойной урон!', 'damage');
     spawnParticles(e.x, e.y, 'spark', 8);
   }
-  const ls = Math.max(getLifesteal(p), tb.lifesteal);
+  const ls = getLifesteal(p);
   if (ls > 0 && dmg > 0) {
     const heal = Math.floor(dmg * ls);
     p.hp = Math.min(p.maxHp, p.hp + heal);
@@ -106,7 +104,7 @@ export function combatAttack() {
   }
   e.hp -= dmg;
   ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: (isCrit ? '!' : '-') + dmg, type: isCrit ? 'crit' : 'damage', life: 1.2 });
-  pushLog(`Вы: ${dmg}${isCrit ? ' (крит!)' : ''}`, 'damage');
+  pushLog(`Вы нанесли ${dmg} урона (${enemyDisplayName(e)})${isCrit ? ' КРИТ!' : ''}`, 'damage');
   playSound(isCrit ? 'crit' : 'hit');
   if (e.hp <= 0) { e.hp = 0; return combatVictory(); }
   checkBossPhase(e);
@@ -122,38 +120,29 @@ export function combatCastSpell(spellId) {
   const sp = SPELLS[spellId];
   const p = state.game.player;
   if (!sp) return;
-  const freeMana = hasEffect(p, 'manaShield');
+  const freeMana = p.effects?.some(ef => ef.id === 'manaShield');
   if (!freeMana && p.mp < sp.cost) { pushLog('Мало маны', 'info'); return; }
   if (!freeMana) { p.mp -= sp.cost; ow.player.mp = p.mp; }
   else { pushLog('💧 Эликсир маны: мана не тратится', 'success'); }
+  
   const st = getEffStats();
   const e = ow.combat.enemy;
   if (sp.damage) {
     const dmg = Math.max(1, sp.damage + Math.floor(st.mag / 2) - Math.floor(enemyDefValue(e) / 2));
     e.hp -= dmg;
     ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: '-' + dmg, type: 'damage', life: 1.2 });
-    pushLog(`${sp.name}: ${dmg}`, 'damage');
+    pushLog(`${sp.name}: нанесено ${dmg} урона`, 'damage');
     playSound('cast');
     spawnParticles(e.x, e.y, 'spark', 5);
     if (e.hp <= 0) { e.hp = 0; return combatVictory(); }
     checkBossPhase(e);
   } else if (sp.heal) {
-    const h = Math.floor((sp.heal + Math.floor(st.mag / 2)) * tb.healMult);
+    const h = sp.heal + Math.floor(st.mag / 2);
     p.hp = Math.min(p.maxHp, p.hp + h);
     ow.player.hp = p.hp;
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '+' + h, type: 'heal', life: 1.2 });
-    pushLog(`${sp.name}: +${h} HP`, 'heal');
+    pushLog(`${sp.name}: восстановлено ${h} HP`, 'heal');
     playSound('heal');
-    spawnParticles(ow.player.x, ow.player.y, 'levelup', 6);
-  }
-
-  if (sp.effect) {
-    applyEffect(e, sp.effect);
-    pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage');
-  }
-  if (sp.selfEffect) {
-    applyEffect(p, sp.selfEffect);
-    pushLog(`🛡️ Эффект на вас: ${sp.selfEffect}`, 'success');
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 6);
   }
   tickEnemyEffects();
@@ -176,8 +165,7 @@ export function combatUseAbility(abilityId) {
   if (ability.cost) p.mp -= ability.cost;
   ow.player.mp = p.mp;
   if (!p.cooldowns) p.cooldowns = {};
-  const tb = getTalentBonus(p);
-  p.cooldowns[abilityId] = Math.max(1, ability.cooldown + tb.abilityCdDelta);
+  p.cooldowns[abilityId] = ability.cooldown;
 
   const e = ow.combat.enemy;
   const st = getEffStats();
@@ -215,18 +203,18 @@ export function combatUseAbility(abilityId) {
     }, 500);
     return;
   } else if (abilityId === 'meteor') {
-    const dmg = Math.floor((60 + Math.floor(st.mag / 2)) * tb.meteorMult);
+    const dmg = 60 + Math.floor(st.mag / 2);
     e.hp -= dmg;
     applyEffect(e, 'burn');
     ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: '-' + dmg, type: 'crit', life: 1.4 });
-    pushLog(`☄️ Метеор: ${dmg} + ожог`, 'damage');
+    pushLog(`☄️ Метеор: ${dmg} урона + ожог`, 'damage');
     playSound('cast');
     triggerShake(10, 0.4);
     spawnParticles(e.x, e.y, 'spark', 15);
     if (e.hp <= 0) { e.hp = 0; return combatVictory(); }
     checkBossPhase(e);
   } else if (abilityId === 'prayer') {
-    const h = Math.floor((50 + Math.floor(st.mag / 2)) * tb.prayerMult * tb.healMult);
+    const h = 50 + Math.floor(st.mag / 2);
     p.hp = Math.min(p.maxHp, p.hp + h);
     ow.player.hp = p.hp;
     clearDebuffs(p);
@@ -239,7 +227,7 @@ export function combatUseAbility(abilityId) {
     e.hp -= dmg;
     applyEffect(e, 'burn');
     ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: '-' + dmg, type: 'damage', life: 1.2 });
-    pushLog(`☀️ Освящение: ${dmg} + ожог`, 'damage');
+    pushLog(`☀️ Освящение: ${dmg} урона + ожог`, 'damage');
     playSound('cast');
     spawnParticles(e.x, e.y, 'spark', 6);
     if (e.hp <= 0) { e.hp = 0; return combatVictory(); }
@@ -257,8 +245,9 @@ export function combatUseItem(itemId) {
   if (!ow || !ow.combat || ow.combat.turn !== 'player') return;
   const item = ITEMS[itemId];
   if (!item || item.type !== 'consumable') return;
-    const before = { hp: state.game.player.hp, mp: state.game.player.mp };
+  const before = { hp: state.game.player.hp, mp: state.game.player.mp };
   item.use(state.game.player);
+  
   if (item.effect === 'antidote') {
     clearDebuffs(state.game.player);
     pushLog('🧪 Антидот: дебаффы сняты', 'heal');
@@ -266,6 +255,7 @@ export function combatUseItem(itemId) {
     applyEffect(state.game.player, item.effect);
     pushLog(`✨ Эффект: ${item.name}`, 'success');
   }
+
   const healed = state.game.player.hp - before.hp;
   const mana = state.game.player.mp - before.mp;
   ow.player.hp = state.game.player.hp;
@@ -273,12 +263,14 @@ export function combatUseItem(itemId) {
   if (healed > 0) {
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '+' + healed, type: 'heal', life: 1.2 });
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 5);
+    pushLog(`Вы восстановили ${healed} HP`, 'heal');
   } else if (mana > 0) {
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '+' + mana, type: 'heal', life: 1.2 });
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 5);
+    pushLog(`Вы восстановили ${mana} MP`, 'heal');
   }
+  
   removeItem(itemId);
-  pushLog(`Использовано: ${item.name}`, 'heal');
   playSound('heal');
   tickEnemyEffects();
   if (ow.combat && ow.combat.enemy.hp <= 0) { ow.combat.enemy.hp = 0; return combatVictory(); }
@@ -356,6 +348,7 @@ function enemyCombatTurn() {
   const st = getEffStats();
   const p = state.game.player;
   const name = enemyDisplayName(e);
+
   if (e.modifier === 'regenerating' && e.hp < e.maxHp) {
     e.hp = Math.min(e.maxHp, e.hp + (MODIFIERS.regenerating.regenPerTurn || 5));
     ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: '+' + MODIFIERS.regenerating.regenPerTurn, type: 'heal', life: 1.0 });
@@ -399,7 +392,7 @@ function enemyCombatTurn() {
     ow.player.hp = Math.max(0, p.hp);
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '-' + d1, type: 'damage', life: 1.2 });
     ow.floatingNumbers.push({ x: ow.player.x + 12, y: ow.player.y - 30, text: '-' + d2, type: 'damage', life: 1.2 });
-    pushLog(`${name} (${sp.name}): ${d1}+${d2}`, 'damage');
+    pushLog(`${name} использовал ${sp.name} и нанёс вам ${d1}+${d2} урона`, 'damage');
     if (sp.effect) {
       applyEffect(p, sp.effect);
       pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage');
@@ -410,7 +403,7 @@ function enemyCombatTurn() {
     p.hp -= dmg;
     ow.player.hp = Math.max(0, p.hp);
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '-' + dmg, type: 'crit', life: 1.4 });
-    pushLog(`${name} (${sp.name}): ${dmg}`, 'damage');
+    pushLog(`${name} использовал ${sp.name} и нанёс вам ${dmg} урона`, 'damage');
     if (sp.effect) {
       applyEffect(p, sp.effect);
       pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage');
@@ -422,7 +415,7 @@ function enemyCombatTurn() {
     e.hp = Math.min(e.maxHp, e.hp + dmg);
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '-' + dmg, type: 'damage', life: 1.2 });
     ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: '+' + dmg, type: 'heal', life: 1.2 });
-    pushLog(`${name} (${sp.name}): ${dmg}, лечится`, 'damage');
+    pushLog(`${name} использовал ${sp.name} (${dmg} урона) и восстановил ${dmg} HP`, 'damage');
     if (sp.effect) {
       applyEffect(p, sp.effect);
       pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage');
@@ -431,7 +424,7 @@ function enemyCombatTurn() {
     p.hp -= baseDmg;
     ow.player.hp = Math.max(0, p.hp);
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '-' + baseDmg, type: 'damage', life: 1.2 });
-    pushLog(`${name}: ${baseDmg}`, 'damage');
+    pushLog(`${name} нанёс вам ${baseDmg} урона`, 'damage');
   }
 
   if (e.modifier === 'vampiric' && baseDmg > 0) {
@@ -541,7 +534,10 @@ function combatVictory() {
     }
   }
 
-  if (Object.values(state.game.shards).every(Boolean)) setTimeout(() => emit('victory'), 1500);
+  // ФИКС: Показываем экран победы только ОДИН раз, если игрок ещё не перешёл на NG+
+  if (Object.values(state.game.shards).every(Boolean) && !p.victoryAchieved) {
+    setTimeout(() => emit('victory'), 1500);
+  }
 }
 
 function combatDefeat() {
@@ -553,8 +549,7 @@ function combatDefeat() {
   const hasRes = cls.abilities?.some(a => a.id === 'resurrection');
   if (hasRes && !ow.combat.playerResurrectionUsed) {
     ow.combat.playerResurrectionUsed = true;
-    const tb = getTalentBonus(p);
-    const restore = Math.ceil(p.maxHp * tb.resurrectPct);
+    const restore = Math.ceil(p.maxHp * 0.3);
     p.hp = restore;
     ow.player.hp = restore;
     pushLog(`✨ Воскрешение! Возрождение с ${restore} HP`, 'success');
@@ -586,4 +581,5 @@ function endCombat() {
   if (!ow) return;
   if (ow.combat) ow.combat.enemy.state = 'idle';
   ow.combat = null;
+  emit('combat:end');
 }

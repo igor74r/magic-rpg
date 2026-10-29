@@ -4,6 +4,7 @@ import {
   combatAttack, combatCastSpell, combatUseItem, combatBlock, combatFlee,
   combatUseAbility
 } from '../systems/overworld.js';
+import { getEffStats } from '../systems/stats.js'; // <--- ДОБАВЛЕНО ДЛЯ УРОНА/БРОНИ
 import { saveGame } from '../systems/save.js';
 import { saveAndMenu } from './menu.js';
 import { LOCATIONS } from '../data/locations.js';
@@ -27,35 +28,43 @@ let paused = false;
 const THEMES = {
   default: {
     colors: { 0: '#2a4a2a', 1: '#6a5a3a', 2: '#1a3a1a', 3: '#1a3a6a', 4: '#5a5a5a' },
-    icons:  { 2: '🌲', 3: '💧', 4: '🪨' }
+    icons:  { 2: '🌲', 3: '💧', 4: '🪨' },
+    vignette: 0.4
   },
   swamp: {
     colors: { 0: '#2a3a1a', 1: '#4a3a1a', 2: '#1a2a1a', 3: '#2a4a5a', 4: '#3a2a2a' },
-    icons:  { 2: '🍄', 3: '💧', 4: '🦴' }
+    icons:  { 2: '🍄', 3: '💧', 4: '🦴' },
+    vignette: 0.7
   },
   graveyard: {
     colors: { 0: '#1a1a2a', 1: '#4a4a5a', 2: '#0a0a1a', 3: '#2a2a4a', 4: '#6a5a5a' },
-    icons:  { 2: '🪦', 3: '💧', 4: '🦴' }
+    icons:  { 2: '🪦', 3: '💧', 4: '🦴' },
+    vignette: 0.85
   },
   volcano: {
     colors: { 0: '#3a1a0a', 1: '#5a3a0a', 2: '#1a0a0a', 3: '#ff6020', 4: '#2a1a1a' },
-    icons:  { 2: '🔥', 3: '🌋', 4: '🗿' }
+    icons:  { 2: '🔥', 3: '🌋', 4: '🗿' },
+    vignette: 0.6
   },
   ice: {
     colors: { 0: '#2a3a5a', 1: '#6a7a9a', 2: '#1a2a4a', 3: '#6ac8ff', 4: '#a0c0d0' },
-    icons:  { 2: '🌲', 3: '🧊', 4: '⛰️' }
+    icons:  { 2: '🌲', 3: '🧊', 4: '⛰️' },
+    vignette: 0.5
   },
   desert: {
     colors: { 0: '#8a6a3a', 1: '#a08050', 2: '#6a4a2a', 3: '#4a8ac8', 4: '#5a4a3a' },
-    icons:  { 2: '🌵', 3: '💧', 4: '🏜️' }
+    icons:  { 2: '🌵', 3: '💧', 4: '🏜️' },
+    vignette: 0.35
   },
   library: {
     colors: { 0: '#2a1a3a', 1: '#5a3a6a', 2: '#1a0a2a', 3: '#6a3a9a', 4: '#4a3a5a' },
-    icons:  { 2: '📚', 3: '💧', 4: '🪑' }
+    icons:  { 2: '📚', 3: '💧', 4: '🪑' },
+    vignette: 0.75
   },
   dragon: {
     colors: { 0: '#3a1a0a', 1: '#5a2a0a', 2: '#1a0a0a', 3: '#ff4010', 4: '#4a2a1a' },
-    icons:  { 2: '🔥', 3: '🌋', 4: '💎' }
+    icons:  { 2: '🔥', 3: '🌋', 4: '💎' },
+    vignette: 0.8
   }
 };
 
@@ -195,13 +204,26 @@ function render() {
   const theme = getTheme(ow.theme);
 
   ctx.save();
+  
+  let shakeX = 0, shakeY = 0;
   if (ow.shake && ow.shake.t > 0) {
-    const m = ow.shake.mag;
-    ctx.translate((Math.random() * 2 - 1) * m, (Math.random() * 2 - 1) * m);
+    shakeX = (Math.random() * 2 - 1) * ow.shake.mag;
+    shakeY = (Math.random() * 2 - 1) * ow.shake.mag;
+    ctx.translate(shakeX, shakeY);
   }
 
-  ctx.fillStyle = '#0a0612';
+  ctx.fillStyle = '#05020a';
   ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
+
+  const time = performance.now() * 0.001;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+  for (let i = 0; i < 30; i++) {
+    const px = (i * 137 + Math.sin(time + i) * 20) % VIEW_W;
+    const py = (i * 73 + Math.cos(time * 0.5 + i) * 15) % VIEW_H;
+    ctx.beginPath();
+    ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   const startCol = Math.max(0, Math.floor(cam.x / ow.tile));
   const startRow = Math.max(0, Math.floor(cam.y / ow.tile));
@@ -400,6 +422,64 @@ function render() {
     ctx.setLineDash([]);
   }
 
+  const gradient = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, 150, VIEW_W / 2, VIEW_H / 2, 500);
+  gradient.addColorStop(0, 'rgba(0,0,0,0)');
+  gradient.addColorStop(1, `rgba(0,0,0,${theme.vignette || 0.4})`);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
+
+  if (ow.shake && ow.shake.t > 0 && ow.combat) {
+    let targetX, targetY, color;
+    if (ow.shake.mag === 8) {
+      targetX = ow.combat.enemy.x - cam.x;
+      targetY = ow.combat.enemy.y - cam.y;
+      color = '#ffd060';
+    } else if (ow.shake.mag === 5) {
+      targetX = ow.player.x - cam.x;
+      targetY = ow.player.y - cam.y;
+      color = '#ff4040';
+    }
+    if (color) {
+      const radius = 60 * (1 - (ow.shake.t / 0.3)); 
+      const flashGrad = ctx.createRadialGradient(targetX, targetY, 0, targetX, targetY, radius + 20);
+      flashGrad.addColorStop(0, color);
+      flashGrad.addColorStop(0.5, color + '80');
+      flashGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = flashGrad;
+      ctx.beginPath();
+      ctx.arc(targetX, targetY, radius + 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // ---------- ПАНЕЛЬ ХАРАКТЕРИСТИК (СЛЕВА ВВЕРХУ) ----------
+  const stats = getEffStats();
+  const hudX = 12, hudY = 12;
+  ctx.fillStyle = 'rgba(10, 6, 18, 0.75)';
+  ctx.fillRect(hudX, hudY, 190, 74);
+  ctx.strokeStyle = 'rgba(201, 162, 39, 0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(hudX, hudY, 190, 74);
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 14px Georgia';
+  
+  // ХП
+  ctx.fillStyle = '#ff6060';
+  ctx.fillText(`❤️ HP: ${p.hp} / ${p.maxHp}`, hudX + 10, hudY + 18);
+  // МП
+  ctx.fillStyle = '#60a0ff';
+  ctx.fillText(`💙 MP: ${p.mp} / ${p.maxMp}`, hudX + 10, hudY + 38);
+  
+  // Урон и Броня
+  ctx.font = '13px Georgia';
+  ctx.fillStyle = '#ffd060';
+  ctx.fillText(`⚔️ Урон: ${stats.atk}`, hudX + 10, hudY + 58);
+  ctx.fillStyle = '#60ff60';
+  ctx.fillText(`🛡️ Броня: ${stats.def}`, hudX + 105, hudY + 58);
+  // -----------------------------------------------------
+
   ctx.restore();
 
   drawMinimap(ctx, ow);
@@ -493,7 +573,10 @@ function onCanvasMouseMove(e) {
 const MOD_LABEL = {
   poisonous: '☣️ ядовитый',
   armored: '🛡️ бронированный',
-  swift: '💨 стремительный'
+  swift: '💨 стремительный',
+  vampiric: '🧛 вампирский',
+  regenerating: '💚 регенерирующий',
+  berserk: '💢 берсерк'
 };
 
 function showMapTooltip(cx, cy, enemy) {
@@ -559,23 +642,9 @@ function closePauseMenu() {
   paused = false;
 }
 
-export function owPauseResume() {
-  closePauseMenu();
-}
-
-export function owPauseSaveVillage() {
-  saveGame();
-  closePauseMenu();
-  exitOverworld();
-}
-
-export function owPauseExit() {
-  saveGame();
-  closePauseMenu();
-  state.overworld = null;
-  emit('overworld:end');
-  saveAndMenu();
-}
+export function owPauseResume() { closePauseMenu(); }
+export function owPauseSaveVillage() { saveGame(); closePauseMenu(); exitOverworld(); }
+export function owPauseExit() { saveGame(); closePauseMenu(); state.overworld = null; emit('overworld:end'); saveAndMenu(); }
 
 const EFFECTS_DATA = {
   poison:    { name: 'Отравление',    icon: '☠️', color: '#60a060' },
@@ -584,13 +653,18 @@ const EFFECTS_DATA = {
   stun:      { name: 'Оглушение',     icon: '💫', color: '#d6c030' },
   atkBuff:   { name: 'Боевой клич',   icon: '📢', color: '#ffd060' },
   defBuff:   { name: 'Щит маны',      icon: '🛡️', color: '#60a0ff' },
-  lifesteal: { name: 'Кровожадность', icon: '🩸', color: '#d63030' }
+  lifesteal: { name: 'Кровожадность', icon: '🩸', color: '#d63030' },
+  strength:  { name: 'Эликсир силы',  icon: '💪', color: '#ff9060' },
+  manaShield:{ name: 'Эликсир маны',  icon: '💧', color: '#60d0ff' }
 };
 
 const MODIFIERS_LABEL = {
   poisonous: { name: 'Ядовитый', prefix: '☣️', color: '#60a060' },
   armored: { name: 'Бронированный', prefix: '🛡️', color: '#a0a0a0' },
-  swift: { name: 'Стремительный', prefix: '💨', color: '#60a0ff' }
+  swift: { name: 'Стремительный', prefix: '💨', color: '#60a0ff' },
+  vampiric: { name: 'Вампирский', prefix: '🧛', color: '#800060' },
+  regenerating: { name: 'Регенерирующий', prefix: '💚', color: '#60ff60' },
+  berserk: { name: 'Берсерк', prefix: '💢', color: '#ff4040' }
 };
 
 function renderCombatPanel() {

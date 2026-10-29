@@ -5,7 +5,7 @@ import {
 } from '../systems/save.js';
 import { renderClassSelection } from './character.js';
 import { emit } from '../systems/events.js';
-import { updateVolume, stopAmbient, playSound } from '../systems/audio.js';
+import { updateVolume, stopBGM, playBGM } from '../systems/audio.js'; // Добавлен playBGM
 import { CLASSES } from '../data/classes.js';
 import { LOCATIONS } from '../data/locations.js';
 
@@ -66,7 +66,7 @@ export function backFromSettings() {
   state.settings.soundEnabled = document.getElementById('set-sound').value === 'on';
   saveSettings();
   updateVolume();
-  if (state.settings.soundEnabled === false) stopAmbient();
+  if (state.settings.soundEnabled === false) stopBGM();
   showScreen('screen-main');
   updateMainMenu();
 }
@@ -79,6 +79,7 @@ export function loadSlot(slot) {
     showScreen('screen-game');
     emit('log', { channel: 'game', msg: `С возвращением, ${state.game.player.name}!`, cls: 'success' });
     emit('game:update');
+    playBGM('village'); // <--- ВАЖНО: Включаем музыку при загрузке слота
   } else {
     toast('Не удалось загрузить слот');
   }
@@ -101,12 +102,11 @@ export function deleteSlot(slot) {
 export function saveAndMenu() {
   saveGameWrapper();
   toast('Игра сохранена');
-  stopAmbient();
+  stopBGM();
   showScreen('screen-main');
   updateMainMenu();
 }
 
 function saveGameWrapper() {
-  // импорт в начале модуля не подходит из-за циклов — импортируем здесь
   import('../systems/save.js').then(m => m.saveGame());
 }

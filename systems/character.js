@@ -33,6 +33,7 @@ export function createCharacter(name, className) {
       playtimeSec: 0,
       createdAt: Date.now(),
       talents: [],
+      victoryAchieved: false, // <--- Флаг для фикса спама NG+
     },
     location: 'village',
     shards: { forest: false, ruins: false, shadow: false },
