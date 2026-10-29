@@ -205,9 +205,8 @@ function render() {
   const bw = 50; ctx.fillStyle = '#0a0612'; ctx.fillRect(px - bw / 2, py - 30, bw, 4); ctx.fillRect(px - bw / 2, py - 24, bw, 3);
   ctx.fillStyle = '#d63030'; ctx.fillRect(px - bw / 2, py - 30, bw * (p.hp / p.maxHp), 4); 
   
-  // ФИКС: Берем класс из state.game.player.class
   const pClass = state.game.player.class;
-  ctx.fillStyle = pClass === 'warrior' ? '#ff6020' : '#3060d6';
+  ctx.fillStyle = pClass === 'warrior' ? '#d000ff' : '#3060d6'; // <--- ФИОЛЕТОВЫЙ ЦВЕТ ДЛЯ ЯРОСТИ
   ctx.fillRect(px - bw / 2, py - 24, bw * (p.mp / p.maxMp), 3);
 
   for (const part of ow.particles || []) {
@@ -248,9 +247,8 @@ function render() {
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = 'bold 14px Georgia';
   ctx.fillStyle = '#ff6060'; ctx.fillText(`❤️ HP: ${p.hp} / ${p.maxHp}`, hudX + 10, hudY + 18);
   
-  // ФИКС: Берем класс из state.game.player.class для HUD
   const mpLabel = pClass === 'warrior' ? '🔥 Ярость' : '💙 MP';
-  ctx.fillStyle = pClass === 'warrior' ? '#ff9060' : '#60a0ff'; 
+  ctx.fillStyle = pClass === 'warrior' ? '#d000ff' : '#60a0ff'; // <--- ФИОЛЕТОВЫЙ ЦВЕТ ДЛЯ HUD
   ctx.fillText(`${mpLabel}: ${p.mp} / ${p.maxMp}`, hudX + 10, hudY + 38);
   
   ctx.font = '13px Georgia'; ctx.fillStyle = '#ffd060'; ctx.fillText(`⚔️ Урон: ${stats.atk}`, hudX + 10, hudY + 58);
@@ -387,7 +385,6 @@ function renderCombatPanel() {
     return; 
   }
 
-  // СКРЫВАЕМ КНОПКУ МАГИИ ДЛЯ ВОИНА
   const hideMagic = p.class === 'warrior';
   actions.innerHTML = `
     <button onclick="GameAPI.owAttack()">[1] ⚔️ Атака</button>

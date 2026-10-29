@@ -31,9 +31,8 @@ export function renderHeader() {
   const statBlock = points > 0 ? `<div class="stat-points-panel"><span class="stat-points-label">🎯 Очков характеристик: ${points}</span><div class="stat-buttons"><button onclick="GameAPI.spendStat('str')">+1 СИЛ</button><button onclick="GameAPI.spendStat('int')">+1 ИНТ</button><button onclick="GameAPI.spendStat('wis')">+1 МДР</button><button onclick="GameAPI.spendStat('con')">+1 ТЕЛ</button></div></div>` : '';
   const effectsHtml = renderActiveEffectsInline(p.effects); const endgameHtml = renderEndgameHint(p);
   
-  // Для воина показываем Ярость, для остальных MP
   const mpLabel = p.class === 'warrior' ? '🔥 Ярость' : 'MP';
-  const mpClass = p.class === 'warrior' ? 'bar-hp' : 'bar-mp'; // Оранжевый цвет для ярости
+  const mpClass = p.class === 'warrior' ? 'bar-rage' : 'bar-mp'; // <--- ИЗМЕНЕНО НА bar-rage
   
   document.getElementById('game-header').innerHTML = `
     <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;"><div><span style="color:#c9a227;font-size:18px;">${CLASSES[p.class].emoji} ${p.name}</span> <span style="color:#a89060;">— ${CLASSES[p.class].name}, Ур. ${p.level}</span></div><div><span style="color:#ffd060;">💰 ${p.gold}</span></div></div>
@@ -66,7 +65,6 @@ export function switchTab(tab) { state.currentTab = tab; document.querySelectorA
 function renderTab(tab) {
   const el = document.getElementById('tab-content');
   
-  // СКРЫВАЕМ ВКЛАДКУ МАГИИ ДЛЯ ВОИНА
   if (tab === 'spells' && state.game.player.class === 'warrior') {
     el.innerHTML = `<p style="color:#a89060;text-align:center;padding:15px;">Воин не умеет колдовать. Используйте способности!</p>`;
     return;
