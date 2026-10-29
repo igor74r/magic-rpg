@@ -13,6 +13,7 @@ import { emit } from '../events.js';
 import { saveGame } from '../save.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
+import { getTalentBonus } from '../talents.js'; // <--- ДОБАВЛЕН ИМПОРТ
 import { getRiftMult } from '../rift.js';
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
