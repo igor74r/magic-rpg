@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Осколки Кристалла Маны</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="screen-main" class="screen active">
+  <div class="center-flex">
+    <h1>Осколки Кристалла Маны</h1>
+    <p class="subtitle">Тёмное фэнтези · Магия · RPG</p>
+    <div class="slots-grid" id="slots-grid"></div>
+    <button onclick="GameAPI.openSettings()" style="margin-top:20px;min-width:200px;">⚙️ Настройки</button>
+  </div>
+</div>
+<div id="screen-settings" class="screen">
+  <div class="game-container" style="max-width:500px;">
+    <h1>⚙️ Настройки</h1>
+    <div class="panel">
+      <div class="settings-row"><label>🔊 Громкость</label><input type="range" id="set-volume" min="0" max="100" style="width:180px;"></div>
+      <div class="settings-row"><label>🔉 Звук</label>
+        <select id="set-sound"><option value="on">Вкл</option><option value="off">Выкл</option></select>
+      </div>
+      <div class="settings-row"><label>⚔️ Сложность</label>
+        <select id="set-difficulty"><option value="easy">Лёгкая</option><option value="normal">Обычная</option><option value="hard">Сложная</option></select>
+      </div>
+    </div>
+    <button onclick="GameAPI.backFromSettings()" style="margin-top:15px;align-self:center;">← Назад</button>
+  </div>
+</div>
+<div id="screen-char" class="screen">
+  <div class="game-container" style="align-items:center;">
+    <h1>Выбор класса</h1>
+    <p class="subtitle">Каждый класс — свой путь через тьму</p>
+    <div class="classes-grid" id="classes-grid"></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="char-name" placeholder="Имя героя" value="Герой" style="max-width:250px;">
+      <button onclick="GameAPI.confirmClassSelection()">Начать путь →</button>
+    </div>
+    <button onclick="GameAPI.showScreen('screen-main');GameAPI.updateMainMenu();" style="margin-top:15px;">← Назад</button>
+  </div>
+</div>
+<div id="screen-game" class="screen">
+  <div class="game-container">
+    <div class="panel" id="game-header"></div>
+    <div class="panel" id="location-info"></div>
+    <div class="tabs">
+      <div class="tab active" data-tab="locations" onclick="GameAPI.switchTab('locations')">🗺️ Локации</div>
+      <div class="tab" data-tab="inventory" onclick="GameAPI.switchTab('inventory')">🎒 Инвентарь</div>
+      <div class="tab" data-tab="spells" onclick="GameAPI.switchTab('spells')">✨ Магия</div>
+      <div class="tab" data-tab="quests" onclick="GameAPI.switchTab('quests')">📜 Квесты</div>
+      <div class="tab" data-tab="achievements" onclick="GameAPI.switchTab('achievements')">🏆 Достижения</div>
+	  <div class="tab" data-tab="statistics" onclick="GameAPI.switchTab('statistics')">📊 Статистика</div>
+	  <div class="tab" data-tab="talents" onclick="GameAPI.switchTab('talents')">🌳 Таланты</div>
+    </div>
+    <div class="panel" id="tab-content"></div>
+    <div class="panel"><h3>Журнал</h3><div class="log" id="game-log"></div></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:5px;margin-bottom:20px;">
+      <button onclick="GameAPI.saveAndMenu()">💾 Сохранить и в меню</button>
+    </div>
+  </div>
+</div>
+<div id="screen-overworld" class="screen">
+  <div class="game-container" style="max-width:840px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;">
+      <h2 id="overworld-title" style="margin:0;">Локация</h2>
+      <button onclick="GameAPI.exitOverworld()">← Выйти</button>
+    </div>
+    <div style="position:relative;">
+      <canvas id="overworld-canvas" width="800" height="500" style="border:2px solid #5a4a3a;border-radius:8px;max-width:100%;height:auto;display:block;background:#1a2e1a;"></canvas>
+      <div id="combat-panel">
+        <div id="combat-panel-info"></div>
+        <div class="actions" id="combat-panel-actions"></div>
+      </div>
+    </div>
+    <p style="color:#a89060;font-size:13px;text-align:center;margin-top:8px;">
+      WASD / стрелки — движение · Пробел / 1 — атака · 2 — магия · 3 — предмет · 4 — побег · 5 — блок · 6 — способность · Esc — выход
+    </p>
+  </div>
+</div>
+<div id="screen-death" class="screen">
+  <div class="center-flex">
+    <h1 style="color:#8b1a1a;font-size:60px;text-shadow:0 0 30px rgba(139,26,26,0.6);">💀 Вы пали</h1>
+    <p class="subtitle" style="max-width:500px;line-height:1.7;text-align:center;">
+      Тьма оказалась сильнее. Но смерть — это ещё не конец пути.<br>
+      Возродитесь в деревне с половиной здоровья и маны.
+    </p>
+    <div class="menu">
+      <button onclick="GameAPI.respawnInVillage()" style="min-width:280px;border-color:#60ff60;">🏘️ Возродиться в деревне</button>
+      <button onclick="GameAPI.deathToMenu()" style="min-width:280px;">← В главное меню</button>
+    </div>
+  </div>
+</div>
+<div id="screen-victory" class="screen">
+  <div class="center-flex">
+    <h1 style="font-size:50px;">🏆 Победа!</h1>
+    <p class="subtitle" style="font-size:16px;max-width:600px;line-height:1.7;">
+      Вы собрали все три осколка Кристалла Маны и восстановили его. Свет вернулся в мир, тьма отступила.<br><br>Вы — истинный герой!
+    </p>
+    <div class="menu">
+      <button onclick="GameAPI.startNGPlus()" style="min-width:320px;border-color:#b060ff;">🔄 Начать NG+ (сохранить экипировку)</button>
+      <button onclick="GameAPI.showScreen('screen-main');GameAPI.updateMainMenu();" style="min-width:320px;">← В главное меню</button>
+    </div>
+  </div>
+</div>
+<script type="module" src="main.js"></script>
+</body>
+</html>
