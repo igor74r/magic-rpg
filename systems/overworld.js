@@ -1,9 +1,9 @@
 import { state } from './state.js';
 import { LOCATIONS } from '../data/locations.js';
 import { on, emit } from './events.js';
-import { getRandomRiftLocation, endRift } from './rift.js';
+import { getRandomRiftLocation, endRift, recordRiftFloor } from './rift.js';
 import { TILE, generateMap } from './overworld/map.js';
-import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics } from './overworld/spawn.js';
+import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
 
@@ -20,19 +20,20 @@ export function enterOverworld(locationId, opts = {}) {
   const cols = loc.mapCols || 40;
   const rows = loc.mapRows || 30;
   const map = generateMap(locationId, cols, rows);
-  
+
   const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
-  
+
   let spawnX = cx;
   let spawnY = cy;
-  if (locationId === 'village') spawnY = cy + 4; 
-  
+  if (locationId === 'village') spawnY = cy + 4;
+
   const playerPos = { x: spawnX * TILE + TILE / 2, y: spawnY * TILE + TILE / 2 };
 
   const enemies = spawnEnemies(loc, map, cols, rows, playerPos, opts);
   const chests = spawnChests(loc, map, cols, rows, enemies, playerPos);
   const npcs = spawnNPCs(loc);
   const statics = spawnStatics(loc);
+  const events = spawnEvents(loc, map, cols, rows, playerPos);
   const camera = initCamera(playerPos, cols, rows);
 
   state.overworld = {
@@ -45,7 +46,7 @@ export function enterOverworld(locationId, opts = {}) {
       hp: state.game.player.hp, maxHp: state.game.player.maxHp,
       mp: state.game.player.mp, maxMp: state.game.player.maxMp
     },
-    keys: {}, enemies, chests, npcs, statics,
+    keys: {}, enemies, chests, npcs, statics, events,
     camera, shake: { t: 0, mag: 0 },
     combat: null, defeated: false,
     floatingNumbers: [], particles: [], log: [],
@@ -71,7 +72,8 @@ export function advanceRiftFloor() {
   const ow = state.overworld;
   if (!ow || !ow.rifMode) return;
   const nextFloor = ow.rifFloor + 1;
-  const locId = getRandomRiftLocation(ow.locationId);
+  const locId = getRandomRiftLocation(ow.locationId, nextFloor);
+  recordRiftFloor(nextFloor);
   emit('toast', `🌀 Этаж ${nextFloor}`);
   enterOverworld(locId, { rifMode: true, rifFloor: nextFloor });
 }

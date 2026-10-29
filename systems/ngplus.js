@@ -50,14 +50,14 @@ export function startNGPlus() {
   Object.assign(p, {
     level: 1, exp: 0, expNext: 100,
     hp: newMaxHp, maxHp: newMaxHp,
-    mp: newMaxMp, maxMp: newMaxMp,
+    mp: p.class === 'warrior' ? 0 : newMaxMp, maxMp: newMaxMp,   // ⬅️ Воин — с 0 Ярости
     str: s.str, int: s.int, wis: s.wis, con: s.con,
     statPoints: 0,
     spells: [...cls.startingSpells],
     cooldowns: {},
     effects: [],
     ngPlus: newCycle,
-    victoryAchieved: false, // <--- ВОТ ЭТА СТРОЧКА СБРАСЫВАЕТ ГАЛОЧКУ
+    victoryAchieved: false,
     ...carry
   });
 
@@ -72,6 +72,7 @@ export function startNGPlus() {
   emit('game:started', {});
 }
 
+// ⬇️ ВОЗВРАЩЁН: используется в spawn.js и combat.js
 export function getNGPlusMult() {
   const n = state.game?.player?.ngPlus || 0;
   return {

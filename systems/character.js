@@ -17,7 +17,7 @@ export function createCharacter(name, className) {
       statPoints: 0, gold: 50,
       inventory: [], equipped: { weapon: null, armor: null },
       spells: [...cls.startingSpells],
-      stats: { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 },
+      stats: { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0, eliteKills: 0, bossKills: 0, flawlessStreak: 0 },
       achievements: [], weaponLevel: 0, armorLevel: 0,
       herbs: {}, cooldowns: {}, effects: [],
       ngPlus: 0, riftBest: 0, playtimeSec: 0, createdAt: Date.now(),
@@ -29,6 +29,9 @@ export function createCharacter(name, className) {
     shards: { forest: false, ruins: false, shadow: false },
     quests: {},
   };
+
+  if (className === 'warrior') state.game.player.mp = 0;
+
   cls.startingItems.forEach(id => addItem(id, 1, { rarity: 'common' }));
   STORY.quests.forEach(q => state.game.quests[q.id] = false);
   saveGame();

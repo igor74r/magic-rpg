@@ -1,6 +1,8 @@
 import { state } from './systems/state.js';
-import { on } from './systems/events.js';
+import { on, emit } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
+import { addItem } from './systems/inventory.js';
+import { addExp } from './systems/progression.js';
 import {
   updateMainMenu, openSettings, backFromSettings, saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
@@ -21,7 +23,7 @@ import {
   openBard, openGuard, openCat, openKids, openHerald, openQuestBoard,
   payBardUI, petCatUI, claimQuestUI,
   upgradeEquipmentUI, healAtHealerUI, craftRecipeUI,
-  showShopTooltip, equipBestUI, takeTalentUI
+  showShopTooltip, equipBestUI, takeTalentUI, resetTalentsUI, sellJunkUI
 } from './ui/game.js';
 import {
   initOverworld, owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
@@ -115,7 +117,7 @@ function respawnInVillage() {
   if (!state.game) return;
   const p = state.game.player;
   p.hp = Math.ceil(p.maxHp / 2);
-  p.mp = Math.ceil(p.maxMp / 2);
+  p.mp = p.class === 'warrior' ? 0 : Math.ceil(p.maxMp / 2);
   p.effects = [];
   p.cooldowns = {};
   state.game.location = 'village';
@@ -131,7 +133,7 @@ function deathToMenu() {
   if (!state.game) return;
   const p = state.game.player;
   p.hp = Math.ceil(p.maxHp / 2);
-  p.mp = Math.ceil(p.maxMp / 2);
+  p.mp = p.class === 'warrior' ? 0 : Math.ceil(p.maxMp / 2);
   p.effects = [];
   p.cooldowns = {};
   state.overworld = null;
@@ -146,13 +148,15 @@ function enterRift() {
     toast('Сначала соберите все 3 осколка');
     return;
   }
-  const locId = getRandomRiftLocation();
+  const locId = getRandomRiftLocation(null, 1);
   enterOverworld(locId, { rifMode: true, rifFloor: 1 });
 }
 
 function interactNpc(npcId) {
   if (!state.overworld) return;
   state.overworld.paused = true;
+
+  if (npcId.startsWith('event-')) { handleWorldEvent(npcId); return; }
 
   if (npcId === 'blacksmith') openBlacksmith();
   else if (npcId === 'healer') openHealer();
@@ -168,6 +172,60 @@ function interactNpc(npcId) {
   else if (npcId === 'questBoard') openQuestBoard();
 }
 
+// ⬇️ НОВОЕ: обработчик случайных событий
+function handleWorldEvent(eventId) {
+  const ow = state.overworld;
+  if (!ow) return;
+  const ev = (ow.events || []).find(e => e.id === eventId);
+  if (!ev) return;
+
+  const p = state.game.player;
+  if (!Array.isArray(p.effects)) p.effects = [];
+
+  let logMsg = '';
+  let toastMsg = '';
+
+  if (ev.eventType === 'altar') {
+    const buffs = ['atkBuff', 'defBuff', 'lifesteal'];
+    const buff = buffs[Math.floor(Math.random() * buffs.length)];
+    const buffNames = { atkBuff: 'Боевой клич (+30% атаки)', defBuff: 'Щит (+50% защиты)', lifesteal: 'Кровожадность (50% вампиризм)' };
+    p.effects.push({ id: buff, duration: 3 });
+    logMsg = `⛩️ Алтарь дарует ${buffNames[buff]} на 3 боя`;
+    toastMsg = `⛩️ ${buffNames[buff]}!`;
+  } else if (ev.eventType === 'mimic') {
+    if (Math.random() < 0.5) {
+      p.gold = (p.gold || 0) + 100;
+      logMsg = `🎁 Сундук: +100💰`;
+      toastMsg = `🎁 +100💰!`;
+    } else {
+      p.hp = Math.max(1, p.hp - 20);
+      ow.player.hp = p.hp;
+      logMsg = `🎁 Мимик! −20 HP`;
+      toastMsg = `🎁 Мимик! −20 HP`;
+    }
+  } else if (ev.eventType === 'crystal') {
+    p.gold = (p.gold || 0) + 50;
+    addExp(30);
+    logMsg = `💎 Кристалл маны: +50💰, +30 EXP`;
+    toastMsg = `💎 +50💰, +30 EXP`;
+  } else if (ev.eventType === 'traveler') {
+    const items = ['health-potion', 'mana-potion', 'herb-life', 'herb-moon'];
+    const itemId = items[Math.floor(Math.random() * items.length)];
+    addItem(itemId, 1);
+    logMsg = `🧙 Странник дарит: ${itemId}`;
+    toastMsg = `🧙 Подарок странника!`;
+  }
+
+  saveGame();
+  emit('log', { channel: 'game', msg: logMsg, cls: 'success' });
+  toast(toastMsg);
+
+  ow.events = ow.events.filter(e => e.id !== eventId);
+  ow.paused = false;
+
+  import('./ui/overworld.js').then(m => m.closeDialogAndResume());
+}
+
 window.GameAPI = {
   updateMainMenu,
   openSettings, switchSettingsTab, applySettings, backFromSettings,
@@ -179,6 +237,7 @@ window.GameAPI = {
   switchTab, travelTo, useItemOutside,
   equipByIndex: equipItemByIndexUI, unequip: unequipItemUI,
   sellByIndex: sellItemByIndexUI,
+  sellJunk: sellJunkUI,
   openShop, buy: buyItemUI,
   enterOverworld: enterOverworldFromUI,
   exitOverworld,
@@ -205,6 +264,7 @@ window.GameAPI = {
   showShopTooltip,
   equipBest: equipBestUI,
   takeTalent: takeTalentUI,
+  resetTalents: resetTalentsUI,
   startNGPlus,
   enterRift,
   showScreen,

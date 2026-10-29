@@ -16,7 +16,7 @@ import { upgradeEquipment, healAtHealer, craftRecipe, canUpgrade, getEquipmentFo
 import { saveGame } from '../systems/save.js';
 import { toast, showScreen } from './screens.js';
 import { canOpenDaily, timeUntilDaily, formatRemaining } from './village.js';
-import { getAvailableTalents, getTakenTalents, takeTalent, getNextTierLevel } from '../systems/talents.js';
+import { getAvailableTalents, getTakenTalents, takeTalent, getNextTierLevel, resetTalents } from '../systems/talents.js';
 import { getClassTalents } from '../data/talents.js';
 import { emit } from '../systems/events.js';
 import { getDailyQuests, claimQuestReward } from '../systems/dailyQuests.js';
@@ -29,13 +29,13 @@ function totalKills() { const kills = state.game.player.stats?.kills || {}; retu
 export function renderHeader() {
   const p = state.game.player; const points = p.statPoints || 0;
   const statBlock = points > 0 ? `<div class="stat-points-panel"><span class="stat-points-label">🎯 Очков характеристик: ${points}</span><div class="stat-buttons"><button onclick="GameAPI.spendStat('str')">+1 СИЛ</button><button onclick="GameAPI.spendStat('int')">+1 ИНТ</button><button onclick="GameAPI.spendStat('wis')">+1 МДР</button><button onclick="GameAPI.spendStat('con')">+1 ТЕЛ</button></div></div>` : '';
-  
-  const effectsHtml = renderActiveEffectsInline(p.effects); 
+
+  const effectsHtml = renderActiveEffectsInline(p.effects);
   const endgameHtml = renderEndgameHint(p);
-  
+
   const mpLabel = p.class === 'warrior' ? '🔥 Ярость' : 'MP';
-  const mpClass = p.class === 'warrior' ? 'bar-rage' : 'bar-mp'; 
-  
+  const mpClass = p.class === 'warrior' ? 'bar-rage' : 'bar-mp';
+
   document.getElementById('game-header').innerHTML = `
     <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
       <div><span style="color:#c9a227;font-size:18px;">${CLASSES[p.class].emoji} ${p.name}</span> <span style="color:#a89060;">— ${CLASSES[p.class].name}, Ур. ${p.level}</span></div>
@@ -44,19 +44,19 @@ export function renderHeader() {
     <div class="bar"><div class="bar-fill bar-hp" style="width:${p.hp/p.maxHp*100}%"></div><div class="bar-text">HP ${p.hp}/${p.maxHp}</div></div>
     <div class="bar"><div class="bar-fill ${mpClass}" style="width:${p.mp/p.maxMp*100}%"></div><div class="bar-text">${mpLabel} ${p.mp}/${p.maxMp}</div></div>
     <div class="bar"><div class="bar-fill bar-exp" style="width:${p.exp/p.expNext*100}%"></div><div class="bar-text">EXP ${p.exp}/${p.expNext}</div></div>
-    
+
     <div style="text-align:center;font-size:11px;color:#a89060;margin-bottom:2px;">До следующего уровня: ${p.expNext - p.exp} EXP</div>
-    
+
     <div style="margin-top:8px;font-size:13px;color:#a89060;text-align:center;">
       СИЛ ${p.str} · ИНТ ${p.int} · МДР ${p.wis} · ТЕЛ ${p.con} · ⚔️ ${totalKills()} убийств
     </div>
-    
+
     ${effectsHtml}
-    
+
     <div style="display: flex; justify-content: center; width: 100%; margin-top: 6px;">
       ${endgameHtml}
     </div>
-    
+
     ${statBlock}`;
 }
 
@@ -80,7 +80,7 @@ export function switchTab(tab) { state.currentTab = tab; document.querySelectorA
 
 function renderTab(tab) {
   const el = document.getElementById('tab-content');
-  
+
   if (tab === 'spells' && state.game.player.class === 'warrior') {
     el.innerHTML = `<p style="color:#a89060;text-align:center;padding:15px;">Воин не умеет колдовать. Используйте способности!</p>`;
     return;
@@ -93,6 +93,7 @@ function renderTab(tab) {
   else if (tab === 'achievements') el.innerHTML = renderAchievementsHTML();
   else if (tab === 'statistics') el.innerHTML = renderStatisticsHTML();
   else if (tab === 'talents') el.innerHTML = renderTalentsHTML();
+  else if (tab === 'bestiary') el.innerHTML = renderBestiaryHTML();
 }
 
 function renderLocationsHTML() {
@@ -145,7 +146,8 @@ export function openAlchemist() {
 }
 
 export function openMerchant() {
-  const p = state.game.player; const shopItems = NPCS.merchant.stock; const stock = shopItems.sort(() => 0.5 - Math.random()).slice(0, 5);
+  const p = state.game.player;
+  const stock = [...NPCS.merchant.stock].sort(() => 0.5 - Math.random()).slice(0, 5);
   const html = stock.map(id => { const item = ITEMS[id]; return `<div class="item" onmouseover="GameAPI.showShopTooltip(event, '${id}')" onmouseout="GameAPI.hideTooltip()"><div class="item-info"><div class="item-name">${item.icon} ${item.name}</div><div class="item-desc">${item.desc} · 💰 ${item.price}</div></div><button onclick="GameAPI.buy('${id}')" ${p.gold < item.price ? 'disabled' : ''} style="font-size:12px;padding:6px 12px;">Купить</button></div>`; }).join('');
   document.getElementById('tab-content').innerHTML = `<div class="npc-header"><div class="npc-emoji">🛒</div><div><h3 style="margin:0;">Странствующий торговец</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('merchant')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><h3>Товары дня</h3><div class="item-list">${html}</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`;
   showScreen('screen-game');
@@ -194,11 +196,14 @@ export function openQuestBoard() {
   const quests = getDailyQuests();
   const html = quests.map(q => {
     const pct = Math.min(100, (q.current / q.max) * 100);
+    const reward = [];
+    if (q.gold) reward.push(`${q.gold}💰`);
+    if (q.exp) reward.push(`${q.exp} EXP`);
     return `<div class="npc-slot">
       <div style="font-weight:bold; color:#c9a227;">${q.completed ? '✅' : '⏳'} ${q.text}</div>
       <div class="bar" style="margin-top:8px;"><div class="bar-fill bar-exp" style="width:${pct}%"></div><div class="bar-text">${q.current} / ${q.max}</div></div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-        <div style="color:#ffd060; font-size:12px;">Награда: ${q.gold}💰</div>
+        <div style="color:#ffd060; font-size:12px;">Награда: ${reward.join(' + ')}</div>
         ${q.completed && !q.claimed ? `<button onclick="GameAPI.claimQuest('${q.id}')" class="sell-btn" style="padding:6px 12px; font-size:12px;">Забрать</button>` : (q.claimed ? `<span style="color:#60ff60; font-size:12px;">Получено</span>` : '')}
       </div>
     </div>`;
@@ -226,7 +231,17 @@ export function claimQuestUI(id) {
 
 export function closeNpcAndResumeUI() { import('./overworld.js').then(m => { m.closeDialogAndResume(); showScreen('screen-overworld'); }); }
 export function takeElderBlessingUI() { const p = state.game.player; if (!p.effects) p.effects = []; p.effects.push({ id: 'elderBlessing', duration: 10 }); saveGame(); openElder(); toast('✨ Вы получили благословение (+20% опыта)'); }
-export function useWellUI() { const p = state.game.player; p.hp = p.maxHp; p.mp = p.maxMp; if (!p.stats) p.stats = {}; p.stats.lastWellUse = Date.now(); saveGame(); openWell(); toast('💧 Вы полностью исцелены!'); }
+
+export function useWellUI() { 
+  const p = state.game.player; 
+  p.hp = p.maxHp; 
+  if (p.class !== 'warrior') p.mp = p.maxMp; 
+  if (!p.stats) p.stats = {}; 
+  p.stats.lastWellUse = Date.now(); 
+  saveGame(); 
+  openWell(); 
+  toast('💧 Вы полностью исцелены!'); 
+}
 
 function itemHeader(inst, item) { const rar = inst.rarity ? RARITIES[inst.rarity] : null; const color = rar ? rar.color : '#c9a227'; const label = rar && inst.rarity !== 'common' ? ` [${rar.name}]` : ''; const forge = inst.forgeLevel ? ` <span style="color:#ffd060;">+${inst.forgeLevel}</span>` : ''; return `<div class="item-name" style="color:${color};">${item.icon} ${item.name}${label}${forge}</div>`; }
 function itemBonus(inst, item) { const b = inst.bonus || item.bonus; if (!b) return ''; const parts = []; if (b.attack) parts.push(`+${b.attack} атака`); if (b.magic) parts.push(`+${b.magic} магия`); if (b.defense) parts.push(`+${b.defense} защита`); return parts.length ? ` (${parts.join(', ')})` : ''; }
@@ -239,10 +254,41 @@ function filterBarHTML() { const f = (key, label) => `<button class="inv-filter-
 function itemScore(inst) { if (!inst) return 0; const obj = typeof inst === 'string' ? { id: inst, qty: 1 } : inst; const item = ITEMS[obj.id]; if (!item) return 0; const b = obj.bonus || item.bonus || {}; let score = (b.attack || 0) + (b.magic || 0) + (b.defense || 0); const forge = obj.forgeLevel || 0; score += FORGE_BONUS[forge] || 0; return score; }
 function hasBetterFor(slot, inv, eq) { const eqInst = eq[slot]; const eqScore = itemScore(eqInst); for (const it of inv) { const item = ITEMS[it.id]; if (!item || item.type !== slot) continue; if (itemScore(it) > eqScore) return true; } return false; }
 
+// ⬇️ НОВОЕ: подсчёт мусора
+function getJunkCount() {
+  const p = state.game.player;
+  const inv = p.inventory;
+  const eq = p.equipped;
+  const eqScore = { weapon: itemScore(eq.weapon), armor: itemScore(eq.armor) };
+  let count = 0;
+  for (const it of inv) {
+    const item = ITEMS[it.id];
+    if (!item) continue;
+    if (item.type === 'quest' || item.type === 'scroll') continue;
+    if (item.type === 'consumable' || item.type === 'material') continue;
+    if (it.rarity && it.rarity !== 'common') continue;
+    if ((item.type === 'weapon' || item.type === 'armor') && itemScore(it) > eqScore[item.type]) continue;
+    count++;
+  }
+  return count;
+}
+
 function renderInventoryHTML() {
   const rawInv = state.game.player.inventory; const eq = state.game.player.equipped; let html = '';
   const canUpgradeWeapon = hasBetterFor('weapon', rawInv, eq); const canUpgradeArmor = hasBetterFor('armor', rawInv, eq);
-  if (canUpgradeWeapon || canUpgradeArmor) html += `<div style="text-align:right;margin-bottom:8px;"><button onclick="GameAPI.equipBest()" class="equip-best-btn">⚡ Экипировать лучшее</button></div>`;
+  const junkCount = getJunkCount();
+
+  if (canUpgradeWeapon || canUpgradeArmor || junkCount > 0) {
+    html += `<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap;">`;
+    if (canUpgradeWeapon || canUpgradeArmor) {
+      html += `<button onclick="GameAPI.equipBest()" class="equip-best-btn">⚡ Экипировать лучшее</button>`;
+    }
+    if (junkCount > 0) {
+      html += `<button onclick="GameAPI.sellJunk()" style="background:linear-gradient(180deg,#5a4a1a,#2a1a0a);border-color:#a89060;padding:8px 16px;font-size:13px;">💰 Продать мусор (${junkCount})</button>`;
+    }
+    html += `</div>`;
+  }
+
   if (eq.weapon || eq.armor) {
     html += `<h3>Экипировано</h3><div class="item-list" style="margin-bottom:12px;">`;
     for (const slot of ['weapon', 'armor']) {
@@ -286,7 +332,84 @@ function renderSpellsHTML() {
 function renderQuestsHTML() { const done = Object.values(state.game.shards).filter(Boolean).length; const items = STORY.quests.map(q => { const c = state.game.quests[q.id]; return `<div class="item" style="${c ? 'border-color:#60ff60;' : ''}"><div class="item-info"><div class="item-name">${c ? '✅' : '⏳'} ${q.name}</div><div class="item-desc">${q.desc}</div></div></div>`; }).join(''); return `<h3>Осколки Кристалла: ${done}/3</h3><div class="item-list">${items}</div>`; }
 function renderAchievementsHTML() { const unlocked = state.game.player.achievements || []; const total = ACHIEVEMENTS.length; const got = unlocked.length; const items = ACHIEVEMENTS.map(a => { const done = unlocked.includes(a.id); let progressText = ''; if (!done && a.progress && a.target !== undefined) { let cur = 0; try { cur = a.progress(state.game); } catch (e) { cur = 0; } cur = Math.min(cur, a.target); progressText = ` <span style="color:#60ff60;">(${cur}/${a.target})</span>`; } return `<div class="achievement ${done ? 'done' : ''}"><div class="achievement-icon">${done ? a.icon : '🔒'}</div><div class="achievement-body"><div class="achievement-name">${done ? a.name : '???'}</div><div class="achievement-desc">${a.desc}${progressText}</div><div class="achievement-reward">${done ? `✅ Получено (+${a.reward}💰)` : `🎁 ${a.reward}💰`}</div></div></div>`; }).join(''); const pct = total > 0 ? Math.round((got / total) * 100) : 0; return `<h3>🏆 Достижения: ${got}/${total} <span style="color:#a89060;font-size:14px;">(${pct}%)</span></h3><div class="achievement-list">${items}</div>`; }
 function renderStatisticsHTML() { const p = state.game.player; const s = p.stats || {}; const kills = s.kills || {}; const totalKillsVal = Object.values(kills).reduce((a, b) => a + b, 0); const deaths = s.deaths || 0; const goldEarned = s.goldEarned || 0; const chestsOpened = s.chestsOpened || 0; const playtimeSec = p.playtimeSec || 0; const eliteKills = s.eliteKills || 0; const bossKills = s.bossKills || 0; const riftBest = p.riftBest || 0; const ngPlus = p.ngPlus || 0; const achievementsCount = (p.achievements || []).length; const hours = Math.floor(playtimeSec / 3600); const minutes = Math.floor((playtimeSec % 3600) / 60); const playtimeStr = hours > 0 ? `${hours}ч ${minutes}м` : `${minutes}м`; const killRows = Object.entries(kills).filter(([id, n]) => n > 0 && ENEMIES[id]).sort((a, b) => b[1] - a[1]).map(([id, n]) => `<div class="stat-row"><span>${ENEMIES[id].emoji} ${ENEMIES[id].name}</span><span class="stat-val">${n}</span></div>`).join(''); return `<h3>📊 Статистика</h3><div class="stats-grid"><div class="stat-card"><div class="stat-label">⚔️ Убийств</div><div class="stat-value">${totalKillsVal}</div></div><div class="stat-card"><div class="stat-label">💀 Смертей</div><div class="stat-value">${deaths}</div></div><div class="stat-card"><div class="stat-label">💰 Золота</div><div class="stat-value">${goldEarned}</div></div><div class="stat-card"><div class="stat-label">📦 Сундуков</div><div class="stat-value">${chestsOpened}</div></div><div class="stat-card"><div class="stat-label">★ Элитных</div><div class="stat-value">${eliteKills}</div></div><div class="stat-card"><div class="stat-label">☠️ Боссов</div><div class="stat-value">${bossKills}</div></div><div class="stat-card"><div class="stat-label">🏆 Достижений</div><div class="stat-value">${achievementsCount}/${ACHIEVEMENTS.length}</div></div><div class="stat-card"><div class="stat-label">🌀 Разлом</div><div class="stat-value">${riftBest}</div></div><div class="stat-card"><div class="stat-label">🔄 NG+</div><div class="stat-value">${ngPlus}</div></div><div class="stat-card"><div class="stat-label">⏱️ Время</div><div class="stat-value">${playtimeStr}</div></div></div>${killRows ? `<h3 style="margin-top:15px;">Детали по врагам</h3><div class="kill-list">${killRows}</div>` : ''}`; }
-function renderTalentsHTML() { const p = state.game.player; const allTalents = getClassTalents(p.class); const taken = getTakenTalents(p); const available = getAvailableTalents(p); const nextTier = getNextTierLevel(p); let html = ''; if (available.length) { html += `<h3>🌳 Доступные таланты <span style="color:#60ff60;font-size:14px;">(${available.length})</span></h3><p style="color:#a89060;font-size:12px;margin-bottom:10px;">Выбери один из двух.</p><div class="talents-grid">`; html += available.map(t => `<div class="talent-card"><div class="talent-icon">${t.icon}</div><div class="talent-name">${t.name}</div><div class="talent-tier">Уровень ${t.tier}</div><div class="talent-desc">${t.desc}</div><button onclick="GameAPI.takeTalent('${t.id}')" class="talent-btn">Выбрать</button></div>`).join(''); html += `</div>`; } else if (nextTier) { html += `<div class="talent-next-hint">🌳 Следующий выбор таланта откроется на <b>${nextTier} уровне</b><br><small style="color:#a89060;">Сейчас у тебя ${p.level} уровень</small></div>`; } else { html += `<div class="talent-next-hint">🌟 Все таланты взяты!</div>`; } if (taken.length) { html += `<h3 style="margin-top:20px;">Взятые таланты (${taken.length}/${allTalents.length / 2})</h3><div class="talents-grid">`; html += taken.map(t => `<div class="talent-card taken"><div class="talent-icon">${t.icon}</div><div class="talent-name">${t.name}</div><div class="talent-tier">Уровень ${t.tier}</div><div class="talent-desc">${t.desc}</div><div class="talent-badge">✅ Взят</div></div>`).join(''); html += `</div>`; } return html; }
+
+// ⬇️ НОВОЕ: бестиарий
+function renderBestiaryHTML() {
+  const kills = state.game.player.stats?.kills || {};
+  const totalKilled = Object.values(kills).reduce((a, b) => a + b, 0);
+  const allIds = Object.keys(ENEMIES);
+  const totalEnemies = allIds.length;
+  const known = allIds.filter(id => (kills[id] || 0) > 0).length;
+
+  const sorted = allIds.sort((a, b) => {
+    const ka = (kills[a] || 0) > 0 ? 0 : 1;
+    const kb = (kills[b] || 0) > 0 ? 0 : 1;
+    if (ka !== kb) return ka - kb;
+    return (ENEMIES[a].hp || 0) - (ENEMIES[b].hp || 0);
+  });
+
+  const cards = sorted.map(id => {
+    const def = ENEMIES[id];
+    const cnt = kills[id] || 0;
+    const killed = cnt > 0;
+
+    if (!killed) {
+      return `<div class="item bestiary-card" style="opacity:0.45;">
+        <div class="item-info">
+          <div class="item-name" style="color:#6a5a3a;">❓ ??? </div>
+          <div class="item-desc">Неизвестное существо. Убейте его, чтобы открыть запись.</div>
+        </div>
+      </div>`;
+    }
+
+    const drops = (def.drops || []).map(d => ITEMS[d]?.name || d).join(', ') || '—';
+    const bossTag = def.boss ? ' <span style="color:#b060ff;font-weight:bold;">[БОСС]</span>' : '';
+    return `<div class="item bestiary-card">
+      <div class="item-info">
+        <div class="item-name">${def.emoji || '❓'} ${def.name}${bossTag} <span style="color:#60ff60;font-size:12px;">×${cnt}</span></div>
+        <div class="item-desc">
+          ❤️ ${def.hp} · ⚔️ ${def.attack} · 🛡️ ${def.defense}<br>
+          🏆 ${def.exp} EXP · 💰 ${def.gold} золота<br>
+          📦 Дроп: ${drops}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<h3>📖 Бестиарий <span style="color:#a89060;font-size:14px;">(${known}/${totalEnemies})</span></h3>
+    <p style="color:#a89060;font-size:13px;margin-bottom:12px;">Всего убито врагов: <b style="color:#ffd060;">${totalKilled}</b></p>
+    <div class="item-list">${cards}</div>`;
+}
+
+function renderTalentsHTML() {
+  const p = state.game.player;
+  const allTalents = getClassTalents(p.class);
+  const taken = getTakenTalents(p);
+  const available = getAvailableTalents(p);
+  const nextTier = getNextTierLevel(p);
+  let html = '';
+
+  if (available.length) {
+    html += `<h3>🌳 Доступные таланты <span style="color:#60ff60;font-size:14px;">(${available.length})</span></h3><p style="color:#a89060;font-size:12px;margin-bottom:10px;">Выбери один из двух.</p><div class="talents-grid">`;
+    html += available.map(t => `<div class="talent-card"><div class="talent-icon">${t.icon}</div><div class="talent-name">${t.name}</div><div class="talent-tier">Уровень ${t.tier}</div><div class="talent-desc">${t.desc}</div><button onclick="GameAPI.takeTalent('${t.id}')" class="talent-btn">Выбрать</button></div>`).join('');
+    html += `</div>`;
+  } else if (nextTier) {
+    html += `<div class="talent-next-hint">🌳 Следующий выбор таланта откроется на <b>${nextTier} уровне</b><br><small style="color:#a89060;">Сейчас у тебя ${p.level} уровень</small></div>`;
+  } else {
+    html += `<div class="talent-next-hint">🌟 Все таланты взяты!</div>`;
+  }
+
+  if (taken.length) {
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;flex-wrap:wrap;gap:10px;">
+      <h3 style="margin:0;">Взятые таланты (${taken.length}/${allTalents.length / 2})</h3>
+      <button onclick="GameAPI.resetTalents()" style="padding:8px 16px;font-size:13px;background:linear-gradient(180deg,#5a1a1a,#2a0a0a);border-color:#ff6060;">🔄 Сбросить (500💰)</button>
+    </div>
+    <div class="talents-grid">`;
+    html += taken.map(t => `<div class="talent-card taken"><div class="talent-icon">${t.icon}</div><div class="talent-name">${t.name}</div><div class="talent-tier">Уровень ${t.tier}</div><div class="talent-desc">${t.desc}</div><div class="talent-badge">✅ Взят</div></div>`).join('');
+    html += `</div>`;
+  }
+  return html;
+}
 
 export function travelTo(locId) { state.game.location = locId; emit('log', { channel: 'game', msg: `Вы прибыли в ${LOCATIONS[locId].name}.`, cls: 'info' }); saveGame(); renderGame(); }
 export function enterOverworldFromUI() { enterOverworld(state.game.location); }
@@ -295,6 +418,38 @@ export function equipItemByIndexUI(idx) { equipItemByIndex(idx); toast(`Экип
 export function equipBestUI() { const changed = equipBest(); if (changed) { toast('⚡ Экипировано лучшее'); saveGame(); renderGame(); } else toast('Всё уже оптимально'); }
 export function unequipItemUI(slot) { unequipItemBySlot(slot); saveGame(); renderGame(); }
 export function sellItemByIndexUI(idx) { const ok = sellItemByIndex(idx); if (ok) renderGame(); }
+
+// ⬇️ НОВОЕ: продажа мусора
+export function sellJunkUI() {
+  const p = state.game.player;
+  const inv = p.inventory;
+  const eq = p.equipped;
+  const eqScore = { weapon: itemScore(eq.weapon), armor: itemScore(eq.armor) };
+
+  let totalGold = 0, count = 0;
+  for (let i = inv.length - 1; i >= 0; i--) {
+    const it = inv[i];
+    const item = ITEMS[it.id];
+    if (!item) continue;
+    if (item.type === 'quest' || item.type === 'scroll') continue;
+    if (item.type === 'consumable' || item.type === 'material') continue;
+    if (it.rarity && it.rarity !== 'common') continue;
+    if ((item.type === 'weapon' || item.type === 'armor') && itemScore(it) > eqScore[item.type]) continue;
+    const price = getSellPrice(it);
+    if (price > 0) {
+      totalGold += price;
+      count++;
+      inv.splice(i, 1);
+    }
+  }
+
+  if (count === 0) { toast('Нечего продавать — мусора нет'); return; }
+  p.gold += totalGold;
+  saveGame();
+  toast(`💰 Продано ${count} предметов (+${totalGold}💰)`);
+  renderGame();
+}
+
 export function openShop() { const p = state.game.player; const html = SHOP_ITEMS.map(id => { const item = ITEMS[id]; return `<div class="item" onmouseover="GameAPI.showShopTooltip(event, '${id}')" onmouseout="GameAPI.hideTooltip()"><div class="item-info"><div class="item-name">${item.icon} ${item.name}</div><div class="item-desc">${item.desc} · 💰 ${item.price}</div></div><button onclick="GameAPI.buy('${id}')" ${p.gold < item.price ? 'disabled' : ''} style="font-size:12px;padding:6px 12px;">Купить</button></div>`; }).join(''); document.getElementById('tab-content').innerHTML = `<h3>🛒 Магазин</h3><div class="item-list">${html}</div><button onclick="GameAPI.backToVillage()" style="width:100%;margin-top:15px;">← Назад</button>`; }
 export function showShopTooltip(e, id) { const inst = { id, qty: 1, rarity: 'common' }; renderTooltip(e, inst); }
 export function buyItemUI(id) { if (buyItem(id)) { renderHeader(); openShop(); } }
@@ -303,6 +458,12 @@ export function upgradeEquipmentUI(slot) { const res = upgradeEquipment(slot); i
 export function healAtHealerUI() { const res = healAtHealer(); if (!res.ok && res.msg) toast(res.msg); renderHeader(); openHealer(); }
 export function craftRecipeUI(recipeId) { const res = craftRecipe(recipeId); if (!res.ok && res.msg) toast(res.msg); renderHeader(); openAlchemist(); }
 export function takeTalentUI(id) { const p = state.game.player; const ok = takeTalent(p, id); if (ok) { saveGame(); renderGame(); } }
+export function resetTalentsUI() {
+  const p = state.game.player;
+  const res = resetTalents(p);
+  if (!res.ok && res.msg) toast(res.msg);
+  else { saveGame(); renderGame(); }
+}
 
 const TYPE_LABELS = { weapon: 'Оружие', armor: 'Броня', consumable: 'Расходник', material: 'Материал', scroll: 'Свиток', quest: 'Квестовый предмет' };
 function buildCompareHTML(inst, item) { if (item.type !== 'weapon' && item.type !== 'armor') return ''; const p = state.game.player; const eqInst = p.equipped[item.type]; if (!eqInst) return `<div class="tooltip-compare"><div style="color:#60ff60;">Слот пуст — можно экипировать</div></div>`; const eqObj = typeof eqInst === 'string' ? { id: eqInst, qty: 1 } : eqInst; const oldB = eqObj.bonus || ITEMS[eqObj.id]?.bonus || {}; const newB = inst.bonus || item.bonus || {}; const lines = []; for (const key of ['attack', 'magic', 'defense']) { const newV = newB[key] || 0; const oldV = oldB[key] || 0; if (newV === 0 && oldV === 0) continue; const diff = newV - oldV; const label = key === 'attack' ? 'Атака' : key === 'magic' ? 'Магия' : 'Защита'; if (diff === 0) lines.push(`<div style="color:#a89060;">${label}: ${newV} (как сейчас)</div>`); else if (diff > 0) lines.push(`<div style="color:#60ff60;">${label}: ${newV} (+${diff})</div>`); else lines.push(`<div style="color:#ff6060;">${label}: ${newV} (${diff})</div>`); } const newForge = inst.forgeLevel || 0; const oldForge = eqObj.forgeLevel || 0; const newForgeBonus = FORGE_BONUS[newForge] || 0; const oldForgeBonus = FORGE_BONUS[oldForge] || 0; if (newForgeBonus > 0 || oldForgeBonus > 0) { const label = item.type === 'armor' ? 'Защита (ковка)' : (item.bonus && item.bonus.magic !== undefined) ? 'Магия (ковка)' : 'Атака (ковка)'; const diff = newForgeBonus - oldForgeBonus; const color = diff > 0 ? '#60ff60' : diff < 0 ? '#ff6060' : '#a89060'; lines.push(`<div style="color:${color};">⚒️ ${label}: +${newForgeBonus}${diff !== 0 ? ` (${diff > 0 ? '+' : ''}${diff})` : ''}</div>`); } return lines.length ? `<div class="tooltip-compare">${lines.join('')}</div>` : ''; }

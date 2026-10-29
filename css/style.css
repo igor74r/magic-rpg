@@ -274,3 +274,429 @@ input[type="text"] { width: 100%; }
 #combat-panel-info { color: #d4c8a8; font-size: 14px; margin-bottom: 8px; line-height: 1.5; }
 #combat-panel .actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; }
 #combat-panel button { padding: 10px 14px; font-size: 14px; }
+/* ============ ТАЛАНТЫ ============ */
+.talents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+.talent-card {
+  background: linear-gradient(180deg, rgba(58,37,96,0.5), rgba(26,15,46,0.8));
+  border: 2px solid #5a4a3a;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  text-align: center;
+  transition: all 0.2s;
+  position: relative;
+}
+.talent-card:hover {
+  border-color: #c9a227;
+  box-shadow: 0 0 20px rgba(201,162,39,0.35);
+  transform: translateY(-2px);
+}
+.talent-card.taken {
+  border-color: #60ff60;
+  background: linear-gradient(180deg, rgba(42,90,58,0.4), rgba(26,58,42,0.7));
+  opacity: 0.9;
+}
+.talent-icon {
+  font-size: 40px;
+  line-height: 1;
+  filter: drop-shadow(0 0 12px rgba(201,162,39,0.5));
+}
+.talent-name {
+  color: #ffd060;
+  font-size: 16px;
+  font-weight: bold;
+}
+.talent-tier {
+  color: #a89060;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: bold;
+}
+.talent-desc {
+  color: #d4c8a8;
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 40px;
+}
+.talent-btn {
+  margin-top: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
+  background: linear-gradient(180deg, #2a5a3a, #1a3a2a);
+  border-color: #60ff60;
+  font-weight: bold;
+}
+.talent-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #3a7a4a, #2a5a3a);
+  box-shadow: 0 0 15px rgba(96,255,96,0.5);
+}
+.talent-badge {
+  margin-top: 6px;
+  padding: 6px 14px;
+  background: rgba(96,255,96,0.15);
+  border: 1px solid #60ff60;
+  border-radius: 4px;
+  color: #60ff60;
+  font-size: 12px;
+  font-weight: bold;
+}
+.talent-next-hint {
+  text-align: center;
+  padding: 30px 20px;
+  background: rgba(10,6,18,0.5);
+  border: 1px dashed #5a4a3a;
+  border-radius: 8px;
+  color: #a89060;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-top: 10px;
+}
+.talent-next-hint b { color: #c9a227; }
+
+/* ============ ДОСТИЖЕНИЯ ============ */
+.achievement-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.achievement {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(58,37,96,0.3);
+  border: 1px solid #3a2a5a;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+.achievement:hover { background: rgba(58,37,96,0.5); }
+.achievement.done {
+  background: linear-gradient(90deg, rgba(42,90,58,0.35), rgba(26,58,42,0.5));
+  border-color: #60ff60;
+  box-shadow: 0 0 12px rgba(96,255,96,0.15);
+}
+.achievement-icon {
+  font-size: 30px;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));
+}
+.achievement.done .achievement-icon {
+  filter: drop-shadow(0 0 12px rgba(255,215,0,0.6));
+}
+.achievement-body { flex: 1; min-width: 0; }
+.achievement-name {
+  color: #ffd060;
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 3px;
+}
+.achievement.done .achievement-name { color: #60ff60; }
+.achievement-desc {
+  color: #a89060;
+  font-size: 12px;
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+.achievement-reward {
+  color: #c9a227;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* ============ ИНВЕНТАРЬ: ФИЛЬТРЫ И СОРТИРОВКА ============ */
+.inv-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: rgba(10,6,18,0.4);
+  border: 1px solid #3a2a5a;
+  border-radius: 6px;
+}
+.inv-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.inv-filter-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  margin: 0;
+  background: rgba(26,15,46,0.7);
+  border: 1px solid #5a4a3a;
+  color: #a89060;
+  border-radius: 4px;
+}
+.inv-filter-btn:hover:not(.active) {
+  border-color: #c9a227;
+  color: #d4c8a8;
+  box-shadow: none;
+}
+.inv-filter-btn.active {
+  background: linear-gradient(180deg, rgba(201,162,39,0.35), rgba(122,96,20,0.5));
+  border-color: #c9a227;
+  color: #ffd060;
+  font-weight: bold;
+}
+
+/* ============ СПОСОБНОСТИ (вкладка «Магия») ============ */
+.ability-item {
+  align-items: center;
+}
+.ability-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ability-status.ready {
+  background: rgba(96,255,96,0.15);
+  border: 1px solid #60ff60;
+  color: #60ff60;
+}
+.ability-status.cooldown {
+  background: rgba(255,160,0,0.15);
+  border: 1px solid #ffa500;
+  color: #ffa500;
+}
+.ability-status.nomana {
+  background: rgba(255,96,96,0.15);
+  border: 1px solid #ff6060;
+  color: #ff6060;
+}
+.ability-status.passive {
+  background: rgba(176,96,255,0.15);
+  border: 1px solid #b060ff;
+  color: #b060ff;
+}
+
+/* ============ ЭКИПИРОВКА: КНОПКА «ЛУЧШЕЕ» И БЕЙДЖ УЛУЧШЕНИЯ ============ */
+.equip-best-btn {
+  padding: 8px 18px;
+  font-size: 13px;
+  background: linear-gradient(180deg, #5a2a7a, #3a1a4a);
+  border-color: #b060ff;
+  font-weight: bold;
+}
+.equip-best-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #7a3a9a, #4a2a5a);
+  box-shadow: 0 0 15px rgba(176,96,255,0.5);
+}
+.item.slot-upgrade {
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(96,255,96,0.4), 0 0 15px rgba(96,255,96,0.15);
+}
+.item.slot-upgrade::after {
+  content: '↑';
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  color: #60ff60;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 0 0 8px #60ff60;
+  pointer-events: none;
+}
+
+/* ============ СТАТИСТИКА ============ */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.stat-card {
+  background: linear-gradient(180deg, rgba(58,37,96,0.4), rgba(26,15,46,0.7));
+  border: 1px solid #5a4a3a;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+.stat-label {
+  color: #a89060;
+  font-size: 12px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.stat-value {
+  color: #ffd060;
+  font-size: 22px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255,208,96,0.3);
+}
+.kill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: rgba(10,6,18,0.5);
+  border: 1px solid #3a2a5a;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #d4c8a8;
+}
+.stat-val {
+  color: #c9a227;
+  font-weight: bold;
+}
+
+/* ============ ЭНДГЕЙМ / ЭФФЕКТЫ / РАЗЛОМ ============ */
+.endgame-hint {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: #a89060;
+  background: rgba(10,6,18,0.6);
+  border: 1px solid #3a2a5a;
+  border-radius: 20px;
+}
+.endgame-hint b { color: #ffd060; }
+.endgame-hint.rift {
+  color: #d0a0ff;
+  border-color: #b060ff;
+  background: rgba(176,96,255,0.1);
+  box-shadow: 0 0 12px rgba(176,96,255,0.25);
+}
+.endgame-hint.rift b { color: #d0a0ff; }
+
+.effects-inline {
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.fx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: bold;
+  border: 1px solid;
+  border-radius: 10px;
+  background: rgba(10,6,18,0.6);
+}
+
+.rift-btn {
+  background: linear-gradient(180deg, #5a2a7a, #3a1a4a) !important;
+  border-color: #b060ff !important;
+}
+.rift-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #7a3a9a, #4a2a5a) !important;
+  box-shadow: 0 0 18px rgba(176,96,255,0.6) !important;
+}
+
+/* ============ HOVER-ТУЛТИП НА ВРАГАХ (canvas) ============ */
+.map-tooltip {
+  position: fixed;
+  z-index: 10000;
+  background: rgba(10,6,18,0.96);
+  border: 2px solid #c9a227;
+  border-radius: 6px;
+  padding: 10px 14px;
+  min-width: 180px;
+  max-width: 280px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.75);
+  pointer-events: none;
+  font-family: 'Georgia', serif;
+  font-size: 12px;
+  color: #d4c8a8;
+  animation: tooltipFade 0.12s ease-out;
+}
+.map-tt-name {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.map-tt-row {
+  color: #a89060;
+  line-height: 1.6;
+}
+
+/* ============ ПАУЗА (overworld) ============ */
+.pause-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,2,10,0.85);
+  backdrop-filter: blur(3px);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: tooltipFade 0.15s ease-out;
+}
+.pause-panel {
+  background: linear-gradient(180deg, rgba(26,15,46,0.98), rgba(10,6,18,0.98));
+  border: 2px solid #c9a227;
+  border-radius: 10px;
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 320px;
+  box-shadow: 0 0 40px rgba(201,162,39,0.35);
+}
+.pause-panel h2 {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 28px;
+}
+.pause-panel button {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 15px;
+}
+
+/* ============ ОШИБКИ (глобальный перехват) ============ */
+.error-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #5a1a1a, #2a0a0a);
+  border: 2px solid #ff4040;
+  color: #ffd0d0;
+  padding: 12px 20px;
+  border-radius: 6px;
+  z-index: 10001;
+  font-size: 13px;
+  max-width: 90%;
+  box-shadow: 0 0 20px rgba(255,64,64,0.4);
+  animation: errorIn 0.3s ease-out;
+}
+@keyframes errorIn {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ============ АДАПТИВ: таланты/ачивки на мобилках ============ */
+@media (max-width: 640px) {
+  .talents-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .achievement { padding: 10px; }
+  .achievement-icon { font-size: 24px; }
+  .pause-panel { padding: 20px; min-width: unset; width: 90%; }
+  .inv-filter-btn { font-size: 11px; padding: 5px 10px; }
+}

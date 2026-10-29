@@ -56,7 +56,8 @@ export function healAtHealer() {
 
   p.gold -= cost;
   p.hp = p.maxHp;
-  p.mp = p.maxMp;
+  if (p.class !== 'warrior') p.mp = p.maxMp;
+  
   saveGame();
   emit('toast', `💚 Полное исцеление (−${cost}💰)`);
   emit('game:update');

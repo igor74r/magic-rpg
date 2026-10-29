@@ -22,15 +22,18 @@ const VIEW_W = 800, VIEW_H = 500;
 let rafId = null, lastTs = 0, listenersAttached = false, lastNpcKey = '', autosaveTimer = null, autosaveAt = 0, paused = false, nearNpc = null;
 
 const THEMES = {
-  default: { colors: { 0: '#2a4a2a', 1: '#6a5a3a', 2: '#1a3a1a', 3: '#1a3a6a', 4: '#5a5a5a' }, vignette: 0.4, shadow: 'rgba(0,0,0,0.4)' },
-  village: { colors: { 0: '#4a6a4a', 1: '#7a6a5a', 2: '#5a4a3a', 3: '#4a8ac8', 4: '#8a7a6a' }, vignette: 0.1, shadow: 'rgba(0,0,0,0.2)' },
-  swamp: { colors: { 0: '#2a3a1a', 1: '#4a3a1a', 2: '#1a2a1a', 3: '#2a4a5a', 4: '#3a2a2a' }, vignette: 0.7, shadow: 'rgba(0,0,0,0.6)' },
+  default:   { colors: { 0: '#2a4a2a', 1: '#6a5a3a', 2: '#1a3a1a', 3: '#1a3a6a', 4: '#5a5a5a' }, vignette: 0.4,  shadow: 'rgba(0,0,0,0.4)' },
+  village:   { colors: { 0: '#4a6a4a', 1: '#7a6a5a', 2: '#5a4a3a', 3: '#4a8ac8', 4: '#8a7a6a' }, vignette: 0.1,  shadow: 'rgba(0,0,0,0.2)' },
+  forest:    { colors: { 0: '#1a3a1a', 1: '#3a2a1a', 2: '#0a1a0a', 3: '#1a4a5a', 4: '#3a3a2a' }, vignette: 0.55, shadow: 'rgba(0,0,0,0.5)' },
+  ruins:     { colors: { 0: '#4a4a3a', 1: '#6a6a5a', 2: '#3a3a2a', 3: '#4a5a6a', 4: '#8a7a6a' }, vignette: 0.5,  shadow: 'rgba(0,0,0,0.45)' },
+  shadow:    { colors: { 0: '#1a0a1a', 1: '#3a1a2a', 2: '#0a000a', 3: '#4a1a5a', 4: '#3a2a3a' }, vignette: 0.9,  shadow: 'rgba(0,0,0,0.85)' },
+  swamp:     { colors: { 0: '#2a3a1a', 1: '#4a3a1a', 2: '#1a2a1a', 3: '#2a4a5a', 4: '#3a2a2a' }, vignette: 0.7,  shadow: 'rgba(0,0,0,0.6)' },
   graveyard: { colors: { 0: '#1a1a2a', 1: '#4a4a5a', 2: '#0a0a1a', 3: '#2a2a4a', 4: '#6a5a5a' }, vignette: 0.85, shadow: 'rgba(0,0,0,0.8)' },
-  volcano: { colors: { 0: '#3a1a0a', 1: '#5a3a0a', 2: '#1a0a0a', 3: '#ff6020', 4: '#2a1a1a' }, vignette: 0.6, shadow: 'rgba(0,0,0,0.5)' },
-  ice: { colors: { 0: '#2a3a5a', 1: '#6a7a9a', 2: '#1a2a4a', 3: '#6ac8ff', 4: '#a0c0d0' }, vignette: 0.5, shadow: 'rgba(0,0,0,0.3)' },
-  desert: { colors: { 0: '#8a6a3a', 1: '#a08050', 2: '#6a4a2a', 3: '#4a8ac8', 4: '#5a4a3a' }, vignette: 0.35, shadow: 'rgba(0,0,0,0.25)' },
-  library: { colors: { 0: '#2a1a3a', 1: '#5a3a6a', 2: '#1a0a2a', 3: '#6a3a9a', 4: '#4a3a5a' }, vignette: 0.75, shadow: 'rgba(0,0,0,0.7)' },
-  dragon: { colors: { 0: '#3a1a0a', 1: '#5a2a0a', 2: '#1a0a0a', 3: '#ff4010', 4: '#4a2a1a' }, vignette: 0.8, shadow: 'rgba(0,0,0,0.7)' }
+  volcano:   { colors: { 0: '#3a1a0a', 1: '#5a3a0a', 2: '#1a0a0a', 3: '#ff6020', 4: '#2a1a1a' }, vignette: 0.6,  shadow: 'rgba(0,0,0,0.5)' },
+  ice:       { colors: { 0: '#2a3a5a', 1: '#6a7a9a', 2: '#1a2a4a', 3: '#6ac8ff', 4: '#a0c0d0' }, vignette: 0.5,  shadow: 'rgba(0,0,0,0.3)' },
+  desert:    { colors: { 0: '#8a6a3a', 1: '#a08050', 2: '#6a4a2a', 3: '#4a8ac8', 4: '#5a4a3a' }, vignette: 0.35, shadow: 'rgba(0,0,0,0.25)' },
+  library:   { colors: { 0: '#2a1a3a', 1: '#5a3a6a', 2: '#1a0a2a', 3: '#6a3a9a', 4: '#4a3a5a' }, vignette: 0.75, shadow: 'rgba(0,0,0,0.7)' },
+  dragon:    { colors: { 0: '#3a1a0a', 1: '#5a2a0a', 2: '#1a0a0a', 3: '#ff4010', 4: '#4a2a1a' }, vignette: 0.8,  shadow: 'rgba(0,0,0,0.7)' }
 };
 
 const MOD_LABEL = { poisonous: '☣️ ядовитый', armored: '🛡️ бронированный', swift: '💨 стремительный', vampiric: '🧛 вампирский', regenerating: '💚 регенерирующий', berserk: '💢 берсерк' };
@@ -225,17 +228,24 @@ function render() {
 
   ctx.save();
   if (ow.shake && ow.shake.t > 0) ctx.translate((Math.random() * 2 - 1) * ow.shake.mag, (Math.random() * 2 - 1) * ow.shake.mag);
-  ctx.fillStyle = '#05020a'; ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
+  
+  // ⬇️ Фон и границы карты (убирает черные полосы)
+  ctx.fillStyle = theme.colors[0] || '#2a4a2a'; 
+  ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
 
   const time = performance.now() * 0.001; ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
   for (let i = 0; i < 30; i++) { ctx.beginPath(); ctx.arc((i * 137 + Math.sin(time + i) * 20) % VIEW_W, (i * 73 + Math.cos(time * 0.5 + i) * 15) % VIEW_H, 1.5, 0, Math.PI * 2); ctx.fill(); }
 
   const startCol = Math.max(0, Math.floor(cam.x / ow.tile)), startRow = Math.max(0, Math.floor(cam.y / ow.tile));
-  const endCol = Math.min(ow.cols, startCol + Math.ceil(VIEW_W / ow.tile) + 1), endRow = Math.min(ow.rows, startRow + Math.ceil(VIEW_H / ow.tile) + 1);
+  const endCol = Math.min(ow.cols, startCol + Math.ceil(VIEW_W / ow.tile) + 2), endRow = Math.min(ow.rows, startRow + Math.ceil(VIEW_H / ow.tile) + 2);
 
   for (let y = startRow; y < endRow; y++) {
+    if (!ow.map[y]) continue;
     for (let x = startCol; x < endCol; x++) {
-      drawTile(ctx, ow.map[y][x], x * ow.tile - cam.x, y * ow.tile - cam.y, ow.tile, ow.locationId, theme.colors);
+      const tile = ow.map[y][x];
+      if (tile !== undefined) {
+        drawTile(ctx, tile, x * ow.tile - cam.x, y * ow.tile - cam.y, ow.tile, ow.locationId, theme.colors);
+      }
     }
   }
 
@@ -278,6 +288,38 @@ function render() {
     drawStatic(ctx, npc, sx, sy, theme.shadow);
     ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
     ctx.strokeText(npc.name, sx, sy - 24); ctx.fillStyle = '#d4c8a8'; ctx.fillText(npc.name, sx, sy - 24);
+  }
+
+  // ⬇️ Отрисовка случайных событий
+  for (const ev of ow.events || []) {
+    const sx = ev.x - cam.x, sy = ev.y - cam.y;
+    if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
+
+    const dist = Math.hypot(ev.x - p.x, ev.y - p.y);
+    if (dist < ev.interactionRadius && !ow.combat) {
+      nearNpc = ev;
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.25)';
+      ctx.beginPath(); ctx.arc(sx, sy, 32, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.9)';
+      ctx.lineWidth = 2; ctx.stroke();
+    }
+
+    const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 400);
+    ctx.fillStyle = `rgba(255, 215, 0, ${0.15 + pulse * 0.15})`;
+    ctx.beginPath(); ctx.arc(sx, sy, 28 + pulse * 4, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = `rgba(255, 215, 0, ${0.5 + pulse * 0.3})`;
+    ctx.lineWidth = 2; ctx.stroke();
+
+    ctx.font = '28px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(ev.emoji, sx, sy);
+
+    ctx.font = 'bold 11px Georgia';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.lineWidth = 3; ctx.strokeStyle = '#000';
+    ctx.strokeText(ev.name, sx, sy - 24);
+    ctx.fillStyle = '#ffd060';
+    ctx.fillText(ev.name, sx, sy - 24);
   }
 
   const loc = LOCATIONS[ow.locationId];
@@ -371,19 +413,42 @@ function renderNpcPanel() {
   if (key === lastNpcKey) return;
   lastNpcKey = key;
   panel.style.display = 'block';
-  document.getElementById('npc-panel-info').innerHTML = `<b style="color:#c9a227;">${nearNpc.name}</b> — вы подошли к объекту. Выберите действие:`;
+
+  // ⬇️ Разный текст и стиль для событий и NPC
+  const isEvent = !!nearNpc.isEvent;
+  const infoText = isEvent
+    ? `<b style="color:#ffd060;">✨ ${nearNpc.name}</b> — вы нашли что-то интересное.`
+    : `<b style="color:#c9a227;">${nearNpc.name}</b> — вы подошли к объекту. Выберите действие:`;
+  document.getElementById('npc-panel-info').innerHTML = infoText;
+
   const actions = document.getElementById('npc-panel-actions');
-  actions.innerHTML = `<button onclick="GameAPI.interactNpc('${nearNpc.id}')" style="background:linear-gradient(180deg,#2a5a3a,#1a3a2a);border-color:#60ff60;">💬 Взаимодействовать</button>`;
+  const btnStyle = isEvent
+    ? 'background:linear-gradient(180deg,#8a6a1a,#4a2a0a);border-color:#ffd060;'
+    : 'background:linear-gradient(180deg,#2a5a3a,#1b3a2a);border-color:#60ff60;';
+  const btnLabel = isEvent ? '✨ Исследовать' : '💬 Взаимодействовать';
+  
+  actions.innerHTML = `<button onclick="GameAPI.interactNpc('${nearNpc.id}')" style="${btnStyle}">${btnLabel}</button>`;
 }
 
 function drawMinimap(ctx, ow) {
   const size = 140, pad = 8, x0 = VIEW_W - size - pad, y0 = pad;
   const mapW = ow.cols * ow.tile, mapH = ow.rows * ow.tile; const scaleX = size / mapW, scaleY = size / mapH;
-  ctx.fillStyle = 'rgba(10,6,18,0.82)'; ctx.fillRect(x0, y0, size, size);
+  
+  ctx.fillStyle = 'rgba(10,6,18,0.82)'; 
+  ctx.fillRect(x0, y0, size, size);
+  
+  const theme = getTheme(ow.theme);
+  ctx.fillStyle = theme.colors[0] || '#2a4a2a';
+  ctx.globalAlpha = 0.3;
+  ctx.fillRect(x0, y0, size, size);
+  ctx.globalAlpha = 1.0;
+
   for (const e of ow.enemies) { if (e.dead) continue; const sx = x0 + e.x * scaleX, sy = y0 + e.y * scaleY; ctx.fillStyle = e.boss ? '#b060ff' : e.elite ? '#ffa500' : '#ff4040'; const s = e.boss ? 5 : e.elite ? 4 : 2; ctx.fillRect(sx - s / 2, sy - s / 2, s, s); }
   for (const c of ow.chests) { if (c.opened) continue; const sx = x0 + c.x * scaleX, sy = y0 + c.y * scaleY; ctx.fillStyle = '#ffd060'; ctx.fillRect(sx - 1, sy - 1, 2, 2); }
   for (const n of ow.npcs || []) { const sx = x0 + n.x * scaleX, sy = y0 + n.y * scaleY; ctx.fillStyle = '#60ff60'; ctx.fillRect(sx - 1.5, sy - 1.5, 3, 3); }
   for (const o of ow.statics || []) { const sx = x0 + o.x * scaleX, sy = y0 + o.y * scaleY; ctx.fillStyle = '#ffa500'; ctx.fillRect(sx - 1.5, sy - 1.5, 3, 3); }
+  for (const ev of ow.events || []) { const sx = x0 + ev.x * scaleX, sy = y0 + ev.y * scaleY; ctx.fillStyle = '#ffd060'; ctx.fillRect(sx - 1.5, sy - 1.5, 3, 3); }
+
   const camSx = x0 + ow.camera.x * scaleX, camSy = y0 + ow.camera.y * scaleY; const camW = VIEW_W * scaleX, camH = VIEW_H * scaleY;
   ctx.strokeStyle = 'rgba(201,162,39,0.35)'; ctx.lineWidth = 1; ctx.strokeRect(camSx, camSy, camW, camH);
   const px = x0 + ow.player.x * scaleX, py = y0 + ow.player.y * scaleY; ctx.fillStyle = '#60ff60'; ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.stroke();
@@ -433,7 +498,6 @@ export function owPauseResume() { closePauseMenu(); }
 export function owPauseSaveVillage() { saveGame(); closePauseMenu(); exitOverworld(); }
 export function owPauseExit() { saveGame(); closePauseMenu(); state.overworld = null; emit('overworld:end'); saveAndMenu(); }
 
-// Экспортируем всё для main.js
 export { 
   owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub, 
   owAttack, owCast, owUseItem, owBlock, owUseAbility, owFlee 

@@ -92,3 +92,30 @@ export function getNextTierLevel(player) {
   }
   return null;
 }
+
+// ⬅️ E4: сброс талантов
+export function resetTalents(player) {
+  if (!player) return { ok: false, msg: 'Нет игрока' };
+  const cost = 500;
+  if ((player.gold || 0) < cost) return { ok: false, msg: `Нужно ${cost}💰` };
+  if (!Array.isArray(player.talents) || player.talents.length === 0) return { ok: false, msg: 'Нет взятых талантов' };
+
+  let hpMult = 1, mpMult = 1;
+  for (const id of player.talents) {
+    const t = findTalentById(player.class, id);
+    if (t?.effects?.hpMult) hpMult *= t.effects.hpMult;
+    if (t?.effects?.mpMult) mpMult *= t.effects.mpMult;
+  }
+
+  player.gold -= cost;
+  player.maxHp = Math.round(player.maxHp / hpMult);
+  player.hp = Math.min(player.hp, player.maxHp);
+  player.maxMp = Math.round(player.maxMp / mpMult);
+  player.mp = Math.min(player.mp, player.maxMp);
+  player.talents = [];
+
+  saveGame();
+  emit('toast', `🌳 Таланты сброшены (−${cost}💰)`);
+  emit('log', { channel: 'game', msg: '🌳 Все таланты сброшены — можно выбрать заново', cls: 'info' });
+  return { ok: true };
+}

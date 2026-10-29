@@ -101,6 +101,33 @@ export function spawnChests(loc, map, cols, rows, enemies, playerPos) {
   return chests;
 }
 
+// ⬇️ НОВОЕ: спавн случайных событий на карте
+export function spawnEvents(loc, map, cols, rows, playerPos) {
+  if (loc.safe) return [];
+  const events = [];
+  const count = 1 + Math.floor(Math.random() * 2);
+  const types = ['altar', 'mimic', 'crystal', 'traveler'];
+  const NAMES = { altar: 'Древний алтарь', mimic: 'Подозрительный сундук', crystal: 'Кристалл маны', traveler: 'Странник' };
+  const EMOJIS = { altar: '⛩️', mimic: '🎁', crystal: '💎', traveler: '🧙' };
+
+  for (let i = 0; i < count; i++) {
+    const pos = findFreeCell(map, cols, rows, [], 200, playerPos);
+    if (!pos) continue;
+    const type = types[Math.floor(Math.random() * types.length)];
+    events.push({
+      id: `event-${type}-${i}`,
+      eventType: type,
+      name: NAMES[type],
+      emoji: EMOJIS[type],
+      x: pos.x * TILE + TILE / 2,
+      y: pos.y * TILE + TILE / 2,
+      interactionRadius: 65,
+      isEvent: true,
+    });
+  }
+  return events;
+}
+
 export function openChest(chest) {
   chest.opened = true;
   const ow = state.overworld;

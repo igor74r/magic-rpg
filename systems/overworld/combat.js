@@ -35,6 +35,7 @@ export function clearPlayerEffects() {
   if (!p) return;
   p.effects = [];
   p.cooldowns = {};
+  if (p.class === 'warrior') p.mp = 0; // ⬅️ Сброс Ярости вне боя
 }
 
 function enemyDisplayName(e) {
@@ -52,6 +53,18 @@ function enemyDefValue(e) {
   const base = ENEMIES[e.enemyId].defense;
   const mult = e.modifier ? MODIFIERS[e.modifier].defMult : 1;
   return Math.floor(base * mult);
+}
+
+function hasBuff(p, id) {
+  return Array.isArray(p.buffs) && p.buffs.some(b => b.id === id);
+}
+
+function consumeBuffRound(p, id) {
+  if (!Array.isArray(p.buffs)) return;
+  const b = p.buffs.find(x => x.id === id);
+  if (!b) return;
+  b.duration -= 1;
+  if (b.duration <= 0) p.buffs = p.buffs.filter(x => x.id !== id);
 }
 
 export function enterCombat(enemy) {
@@ -83,10 +96,17 @@ export function combatAttack() {
   const p = state.game.player;
   const st = getEffStats();
   const atkMult = getAtkMult(p);
-  let dmg = Math.max(1, Math.floor((st.atk + Math.floor(Math.random() * 5) - Math.floor(enemyDefValue(e) / 2)) * atkMult));
-  const isCrit = Math.random() < 0.1;
+  const tb = getTalentBonus(p);
+
+  let dmg = Math.max(1, Math.floor(
+    (st.atk + Math.floor(Math.random() * 5) - Math.floor(enemyDefValue(e) / 2))
+    * atkMult * tb.dmgMult
+  ));
+
+  const catLuckBonus = hasBuff(p, 'catLuck') ? 0.05 : 0;
+  const isCrit = Math.random() < (0.1 + tb.critChance + catLuckBonus);
   if (isCrit) {
-    dmg = Math.floor(dmg * 1.5);
+    dmg = Math.floor(dmg * tb.critMult);
     triggerShake(8, 0.3);
     spawnParticles(e.x, e.y, 'spark', 10);
   }
@@ -96,7 +116,7 @@ export function combatAttack() {
     pushLog('⚡ Рывок: двойной урон!', 'damage');
     spawnParticles(e.x, e.y, 'spark', 8);
   }
-  const ls = getLifesteal(p);
+  const ls = Math.min(1, getLifesteal(p) + tb.lifesteal);
   if (ls > 0 && dmg > 0) {
     const heal = Math.floor(dmg * ls);
     p.hp = Math.min(p.maxHp, p.hp + heal);
@@ -107,8 +127,7 @@ export function combatAttack() {
   e.hp -= dmg;
   ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: (isCrit ? '!' : '-') + dmg, type: isCrit ? 'crit' : 'damage', life: 1.2 });
   pushLog(`Вы нанесли ${dmg} урона (${enemyDisplayName(e)})${isCrit ? ' КРИТ!' : ''}`, 'damage');
-  
-  // ⚔️ ВОИН: Генерация Ярости от удара
+
   if (p.class === 'warrior') {
     p.mp = Math.min(p.maxMp, p.mp + 15);
     ow.player.mp = p.mp;
@@ -127,11 +146,9 @@ export function combatAttack() {
 export function combatCastSpell(spellId) {
   const ow = state.overworld;
   if (!ow || !ow.combat || ow.combat.turn !== 'player') return;
-  
   const p = state.game.player;
   const sp = SPELLS[spellId];
   if (!sp) return;
-
   if (p.class === 'warrior') { pushLog('Воин не умеет колдовать!', 'info'); return; }
 
   if (spellId === 'sacrifice') {
@@ -154,11 +171,13 @@ export function combatCastSpell(spellId) {
   if (!freeMana && p.mp < sp.cost) { pushLog('Мало маны', 'info'); return; }
   if (!freeMana) { p.mp -= sp.cost; ow.player.mp = p.mp; }
   else { pushLog('💧 Эликсир маны: мана не тратится', 'success'); }
-  
+
   const st = getEffStats();
+  const tb = getTalentBonus(p);
   const e = ow.combat.enemy;
+
   if (sp.damage) {
-    const dmg = Math.max(1, sp.damage + Math.floor(st.mag / 2) - Math.floor(enemyDefValue(e) / 2));
+    const dmg = Math.max(1, Math.floor((sp.damage + Math.floor(st.mag / 2) - Math.floor(enemyDefValue(e) / 2)) * tb.spellMult));
     e.hp -= dmg;
     ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: '-' + dmg, type: 'damage', life: 1.2 });
     pushLog(`${sp.name}: нанесено ${dmg} урона`, 'damage');
@@ -167,7 +186,7 @@ export function combatCastSpell(spellId) {
     if (e.hp <= 0) { e.hp = 0; return combatVictory(); }
     checkBossPhase(e);
   } else if (sp.heal) {
-    const h = sp.heal + Math.floor(st.mag / 2);
+    const h = Math.floor((sp.heal + Math.floor(st.mag / 2)) * tb.healMult);
     p.hp = Math.min(p.maxHp, p.hp + h);
     ow.player.hp = p.hp;
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '+' + h, type: 'heal', life: 1.2 });
@@ -193,19 +212,22 @@ export function combatUseAbility(abilityId) {
   if (!ability || ability.passive) return;
   const cd = p.cooldowns?.[abilityId] || 0;
   if (cd > 0) { pushLog(`${ability.name}: перезарядка (${cd})`, 'info'); return; }
-  
-  if (p.mp < (ability.cost || 0)) { 
-    pushLog(p.class === 'warrior' ? 'Недостаточно Ярости!' : 'Мало маны', 'info'); 
-    return; 
+
+  const freeMana = p.effects?.some(ef => ef.id === 'manaShield');
+  if (!freeMana && p.mp < (ability.cost || 0)) {
+    pushLog(p.class === 'warrior' ? 'Недостаточно Ярости!' : 'Мало маны', 'info');
+    return;
   }
 
-  if (ability.cost) p.mp -= ability.cost;
+  if (ability.cost && !freeMana) p.mp -= ability.cost;
+  if (freeMana && ability.cost > 0) pushLog('💧 Эликсир маны: мана не тратится', 'success');
   ow.player.mp = p.mp;
   if (!p.cooldowns) p.cooldowns = {};
-  p.cooldowns[abilityId] = ability.cooldown;
 
   const e = ow.combat.enemy;
   const st = getEffStats();
+  const tb = getTalentBonus(p);
+  p.cooldowns[abilityId] = Math.max(1, ability.cooldown + (tb.abilityCdDelta || 0));
 
   if (abilityId === 'charge') {
     ow.combat.playerChargeNext = true;
@@ -240,7 +262,7 @@ export function combatUseAbility(abilityId) {
     }, 500);
     return;
   } else if (abilityId === 'meteor') {
-    const dmg = 60 + Math.floor(st.mag / 2);
+    const dmg = Math.floor((60 + Math.floor(st.mag / 2)) * tb.meteorMult * tb.spellMult);
     e.hp -= dmg;
     applyEffect(e, 'burn');
     ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: '-' + dmg, type: 'crit', life: 1.4 });
@@ -251,7 +273,7 @@ export function combatUseAbility(abilityId) {
     if (e.hp <= 0) { e.hp = 0; return combatVictory(); }
     checkBossPhase(e);
   } else if (abilityId === 'prayer') {
-    const h = 50 + Math.floor(st.mag / 2);
+    const h = Math.floor((50 + Math.floor(st.mag / 2)) * tb.prayerMult * tb.healMult);
     p.hp = Math.min(p.maxHp, p.hp + h);
     ow.player.hp = p.hp;
     clearDebuffs(p);
@@ -260,7 +282,7 @@ export function combatUseAbility(abilityId) {
     playSound('heal');
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 8);
   } else if (abilityId === 'sanctify') {
-    const dmg = 25 + Math.floor(st.mag / 2);
+    const dmg = Math.floor((25 + Math.floor(st.mag / 2)) * tb.spellMult);
     e.hp -= dmg;
     applyEffect(e, 'burn');
     ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: '-' + dmg, type: 'damage', life: 1.2 });
@@ -284,7 +306,7 @@ export function combatUseItem(itemId) {
   if (!item || item.type !== 'consumable') return;
   const before = { hp: state.game.player.hp, mp: state.game.player.mp };
   item.use(state.game.player);
-  
+
   if (item.effect === 'antidote') {
     clearDebuffs(state.game.player);
     pushLog('🧪 Антидот: дебаффы сняты', 'heal');
@@ -292,6 +314,8 @@ export function combatUseItem(itemId) {
     applyEffect(state.game.player, item.effect);
     pushLog(`✨ Эффект: ${item.name}`, 'success');
   }
+
+  updateQuestProgress('potion-used', 'any', 1);
 
   const healed = state.game.player.hp - before.hp;
   const mana = state.game.player.mp - before.mp;
@@ -306,7 +330,7 @@ export function combatUseItem(itemId) {
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 5);
     pushLog(`Вы восстановили ${mana} MP`, 'heal');
   }
-  
+
   removeItem(itemId);
   playSound('heal');
   tickEnemyEffects();
@@ -430,10 +454,7 @@ function enemyCombatTurn() {
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '-' + d1, type: 'damage', life: 1.2 });
     ow.floatingNumbers.push({ x: ow.player.x + 12, y: ow.player.y - 30, text: '-' + d2, type: 'damage', life: 1.2 });
     pushLog(`${name} использовал ${sp.name} и нанёс вам ${d1}+${d2} урона`, 'damage');
-    if (sp.effect) {
-      applyEffect(p, sp.effect);
-      pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage');
-    }
+    if (sp.effect) { applyEffect(p, sp.effect); pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage'); }
   } else if (useSpecial && sp.type === 'snipe') {
     const mult = sp.mult || 2;
     const dmg = Math.max(1, Math.floor(baseDmg * mult));
@@ -441,10 +462,7 @@ function enemyCombatTurn() {
     ow.player.hp = Math.max(0, p.hp);
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '-' + dmg, type: 'crit', life: 1.4 });
     pushLog(`${name} использовал ${sp.name} и нанёс вам ${dmg} урона`, 'damage');
-    if (sp.effect) {
-      applyEffect(p, sp.effect);
-      pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage');
-    }
+    if (sp.effect) { applyEffect(p, sp.effect); pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage'); }
   } else if (useSpecial && sp.type === 'drain') {
     const dmg = baseDmg;
     p.hp -= dmg;
@@ -453,10 +471,7 @@ function enemyCombatTurn() {
     ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '-' + dmg, type: 'damage', life: 1.2 });
     ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: '+' + dmg, type: 'heal', life: 1.2 });
     pushLog(`${name} использовал ${sp.name} (${dmg} урона) и восстановил ${dmg} HP`, 'damage');
-    if (sp.effect) {
-      applyEffect(p, sp.effect);
-      pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage');
-    }
+    if (sp.effect) { applyEffect(p, sp.effect); pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage'); }
   } else {
     p.hp -= baseDmg;
     ow.player.hp = Math.max(0, p.hp);
@@ -475,7 +490,6 @@ function enemyCombatTurn() {
   ow.combat.blocking = false;
   playSound('hurt');
 
-  // ⚔️ ВОИН: Генерация Ярости от получения урона
   if (p.hp > 0 && p.class === 'warrior') {
     p.mp = Math.min(p.maxMp, p.mp + 10);
     ow.player.mp = p.mp;
@@ -511,29 +525,39 @@ function combatVictory() {
   const ng = getNGPlusMult();
   const riftM = ow.rifMode ? getRiftMult(ow.rifFloor) : { goldMult: 1, expMult: 1 };
   const gold = Math.round(def.gold * (e.elite ? 2 : 1) * ng.goldMult * riftM.goldMult);
-  
+
   const hasElderBlessing = p.effects?.some(ef => ef.id === 'elderBlessing');
-  let savedBlessingDuration = 0; // <--- ФИКС: Выносим переменную наружу
-  
+  let savedBlessingDuration = 0;
+
   let exp = Math.round(def.exp * (e.elite ? 1.5 : 1) * ng.expMult * riftM.expMult);
+
   if (hasElderBlessing) {
     exp = Math.round(exp * 1.2);
     const b = p.effects.find(ef => ef.id === 'elderBlessing');
     b.duration -= 1;
-    savedBlessingDuration = b.duration; // <--- СОХРАНЯЕМ ЗНАЧЕНИЕ
+    savedBlessingDuration = b.duration;
     if (b.duration <= 0) {
       p.effects = p.effects.filter(ef => ef.id !== 'elderBlessing');
       pushLog(`✨ Благословение старейшины закончилось.`, 'info');
     }
   }
 
+  if (hasBuff(p, 'bardBuff')) {
+    exp = Math.round(exp * 1.1);
+    pushLog(`🎵 Вдохновение барда: +10% опыта`, 'info');
+  }
+
   pushLog(`🏆 Победа! +${exp} опыта, +${gold} золота`, 'success');
   updateQuestProgress('kill', e.enemyId, 1);
+
+  if (e.boss) updateQuestProgress('boss-kill', 'any', 1);
+  if (!p.stats) p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0, flawlessStreak: 0 };
+  p.stats.flawlessStreak = (p.stats.flawlessStreak || 0) + 1;
+  updateQuestProgress('flawless', 'any', p.stats.flawlessStreak, 'max');
 
   spawnParticles(e.x, e.y, 'smoke', 15);
   spawnParticles(e.x, e.y, 'spark', 6);
 
-  if (!p.stats) p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 };
   p.stats.kills[e.enemyId] = (p.stats.kills[e.enemyId] || 0) + 1;
   p.stats.goldEarned = (p.stats.goldEarned || 0) + gold;
   if (e.elite) p.stats.eliteKills = (p.stats.eliteKills || 0) + 1;
@@ -585,20 +609,20 @@ function combatVictory() {
   e.respawnAt = performance.now() + getRespawnMs();
   e.effects = [];
   clearPlayerEffects();
-  
-  // <--- ФИКС: Восстанавливаем бафф с сохраненным значением
+
   if (hasElderBlessing && savedBlessingDuration > 0) {
-      p.effects.push({ id: 'elderBlessing', duration: savedBlessingDuration });
+    p.effects.push({ id: 'elderBlessing', duration: savedBlessingDuration });
   }
+
+  if (hasBuff(p, 'catLuck')) consumeBuffRound(p, 'catLuck');
+  if (hasBuff(p, 'bardBuff')) consumeBuffRound(p, 'bardBuff');
 
   endCombat();
   checkAchievements();
 
   if (ow.rifMode) {
     const alive = ow.enemies.filter(en => !en.dead).length;
-    if (alive === 0) {
-      setTimeout(() => emit('rift:floor-cleared'), 900);
-    }
+    if (alive === 0) setTimeout(() => emit('rift:floor-cleared'), 900);
   }
 
   if (Object.values(state.game.shards).every(Boolean) && !p.victoryAchieved) {
@@ -615,7 +639,8 @@ function combatDefeat() {
   const hasRes = cls.abilities?.some(a => a.id === 'resurrection');
   if (hasRes && !ow.combat.playerResurrectionUsed) {
     ow.combat.playerResurrectionUsed = true;
-    const restore = Math.ceil(p.maxHp * 0.3);
+    const tb = getTalentBonus(p);
+    const restore = Math.ceil(p.maxHp * (tb.resurrectPct || 0.3));
     p.hp = restore;
     ow.player.hp = restore;
     pushLog(`✨ Воскрешение! Возрождение с ${restore} HP`, 'success');
@@ -630,8 +655,16 @@ function combatDefeat() {
   pushLog('💀 Поражение...', 'damage');
   playSound('defeat');
   spawnParticles(ow.player.x, ow.player.y, 'hurt', 25);
-  if (!p.stats) p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 };
+  
+  if (!p.stats) p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0, flawlessStreak: 0 };
   p.stats.deaths = (p.stats.deaths || 0) + 1;
+  p.stats.flawlessStreak = 0;
+  
+  if (p.dailyQuests?.list) {
+    const q = p.dailyQuests.list.find(x => x.type === 'flawless' && !x.completed && !x.claimed);
+    if (q) q.current = 0;
+  }
+
   p.hp = 0;
   ow.player.hp = 0;
   e.state = 'idle';
