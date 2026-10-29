@@ -72,14 +72,6 @@
       <p><b>⚔️ Воин</b> — не знает заклинаний, но копит <b>Ярость</b> от ударов и полученного урона. Тратит её на мощные способности.</p>
       <p><b>🧙 Маг</b> — слаб физически (урон от оружия вдвое ниже), но его заклинания сокрушительны. Полностью зависит от маны.</p>
       <p><b>✨ Жрец</b> — лечит, снимает дебаффы, а заклинание «Жертва» обменивает HP на ману. Уникальная пассивка «Воскрешение» — раз за бой спасает от смерти.</p>
-      <div class="divider"></div>
-      <h3>💡 Советы новичкам</h3>
-      <ul>
-        <li>Следи за индикатором особой атаки врага (⚠️ в панели боя).</li>
-        <li>В деревне есть кузнец, алхимик и лекарь.</li>
-        <li>Не забывай про ежедневный сундук в деревне.</li>
-        <li>Достижения дают золото.</li>
-      </ul>
     </div>
     <button onclick="GameAPI.showScreen('screen-main')" class="settings-back-btn">← Назад</button>
   </div>
@@ -131,16 +123,19 @@
         </div>
       </div>
 
-      <!-- ПРАВАЯ ПАНЕЛЬ (КОНТЕНТ) -->
+      <!-- ЦЕНТРАЛЬНАЯ ПАНЕЛЬ (КОНТЕНТ) -->
       <div class="dashboard-main">
         <div class="panel" id="location-info" style="margin-bottom: 15px;"></div>
         <div class="panel" id="tab-content" style="flex: 1; overflow-y: auto;"></div>
       </div>
-    </div>
 
-    <!-- НИЖНЯЯ ПАНЕЛЬ (ЛОГ) -->
-    <div class="dashboard-footer">
-      <div class="log" id="game-log"></div>
+      <!-- ПРАВАЯ ПАНЕЛЬ (ЛОГ) -->
+      <div class="dashboard-log-container">
+        <div class="panel" style="height: 100%; display: flex; flex-direction: column; padding: 10px;">
+          <h3 style="text-align: center; margin-bottom: 8px;">📜 Журнал</h3>
+          <div class="log" id="game-log" style="flex: 1; height: auto; max-height: none;"></div>
+        </div>
+      </div>
     </div>
 
   </div>
