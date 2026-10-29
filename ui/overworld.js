@@ -204,7 +204,10 @@ function render() {
   ctx.font = '38px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(CLASSES[state.game.player.class].emoji, px, py);
   const bw = 50; ctx.fillStyle = '#0a0612'; ctx.fillRect(px - bw / 2, py - 30, bw, 4); ctx.fillRect(px - bw / 2, py - 24, bw, 3);
   ctx.fillStyle = '#d63030'; ctx.fillRect(px - bw / 2, py - 30, bw * (p.hp / p.maxHp), 4); 
-  ctx.fillStyle = p.class === 'warrior' ? '#ff6020' : '#3060d6'; // Оранжевая ярость у воина
+  
+  // ФИКС: Берем класс из state.game.player.class
+  const pClass = state.game.player.class;
+  ctx.fillStyle = pClass === 'warrior' ? '#ff6020' : '#3060d6';
   ctx.fillRect(px - bw / 2, py - 24, bw * (p.mp / p.maxMp), 3);
 
   for (const part of ow.particles || []) {
@@ -245,9 +248,9 @@ function render() {
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = 'bold 14px Georgia';
   ctx.fillStyle = '#ff6060'; ctx.fillText(`❤️ HP: ${p.hp} / ${p.maxHp}`, hudX + 10, hudY + 18);
   
-  // Меняем цвет и название для Воина
-  const mpLabel = p.class === 'warrior' ? '🔥 Ярость' : '💙 MP';
-  ctx.fillStyle = p.class === 'warrior' ? '#ff9060' : '#60a0ff'; 
+  // ФИКС: Берем класс из state.game.player.class для HUD
+  const mpLabel = pClass === 'warrior' ? '🔥 Ярость' : '💙 MP';
+  ctx.fillStyle = pClass === 'warrior' ? '#ff9060' : '#60a0ff'; 
   ctx.fillText(`${mpLabel}: ${p.mp} / ${p.maxMp}`, hudX + 10, hudY + 38);
   
   ctx.font = '13px Georgia'; ctx.fillStyle = '#ffd060'; ctx.fillText(`⚔️ Урон: ${stats.atk}`, hudX + 10, hudY + 58);
