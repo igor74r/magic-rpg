@@ -14,6 +14,10 @@ import {
   spendStat, sellItemByIndexUI,
   setInvFilter, setInvSort,
   openBlacksmith, openHealer, openAlchemist, backToVillage,
+  openMerchant, openElder, openWell, closeNpcAndResumeUI,
+  takeElderBlessingUI, useWellUI,
+  openBard, openGuard, openCat, openKids, openHerald, openQuestBoard,
+  payBardUI, petCatUI, claimQuestUI,
   upgradeEquipmentUI, healAtHealerUI, craftRecipeUI,
   showShopTooltip, equipBestUI, takeTalentUI
 } from './ui/game.js';
@@ -48,7 +52,8 @@ on('game:update', renderGame);
 on('overworld:start', () => {
   showScreen('screen-overworld');
   initOverworld();
-  playBGM('explore');
+  if (state.overworld.locationId === 'village') playBGM('village');
+  else playBGM('explore');
 });
 on('overworld:end', () => {
   showScreen('screen-game');
@@ -64,7 +69,7 @@ on('combat:end', () => playBGM('explore'));
 
 on('victory', () => {
   if (state.game && state.game.player) {
-    state.game.player.victoryAchieved = true; // Ставим флаг, чтобы не спамило
+    state.game.player.victoryAchieved = true;
     saveGame();
   }
   playSound('victory');
@@ -98,7 +103,7 @@ document.addEventListener('click', (e) => {
   }
   resumeContext();
   const btn = e.target.closest('button');
-  if (btn && !btn.closest('#combat-panel') && !btn.closest('.stat-buttons')) playSound('click');
+  if (btn && !btn.closest('#combat-panel') && !btn.closest('#npc-panel') && !btn.closest('.stat-buttons')) playSound('click');
 });
 
 document.addEventListener('visibilitychange', () => { if (document.hidden) hideTooltip(); });
@@ -143,6 +148,24 @@ function enterRift() {
   enterOverworld(locId, { rifMode: true, rifFloor: 1 });
 }
 
+function interactNpc(npcId) {
+  if (!state.overworld) return;
+  state.overworld.paused = true;
+
+  if (npcId === 'blacksmith') openBlacksmith();
+  else if (npcId === 'healer') openHealer();
+  else if (npcId === 'alchemist') openAlchemist();
+  else if (npcId === 'merchant') openMerchant();
+  else if (npcId === 'elder') openElder();
+  else if (npcId === 'well') openWell();
+  else if (npcId === 'bard') openBard();
+  else if (npcId === 'guard') openGuard();
+  else if (npcId === 'cat') openCat();
+  else if (npcId === 'kids') openKids();
+  else if (npcId === 'herald') openHerald();
+  else if (npcId === 'questBoard') openQuestBoard();
+}
+
 window.GameAPI = {
   openSettings, backFromSettings, saveAndMenu, updateMainMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
@@ -162,6 +185,14 @@ window.GameAPI = {
   respawnInVillage, deathToMenu,
   openDailyChest,
   openBlacksmith, openHealer, openAlchemist, backToVillage,
+  openMerchant, openElder, openWell,
+  closeNpcAndResume: closeNpcAndResumeUI,
+  takeElderBlessing: takeElderBlessingUI,
+  useWell: useWellUI,
+  payBard: payBardUI,
+  petCat: petCatUI,
+  claimQuest: claimQuestUI,
+  interactNpc,
   upgradeEquipment: upgradeEquipmentUI,
   healAtHealer: healAtHealerUI,
   craftRecipe: craftRecipeUI,

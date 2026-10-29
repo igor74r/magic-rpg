@@ -13,8 +13,9 @@ import { emit } from '../events.js';
 import { saveGame } from '../save.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
-import { getTalentBonus } from '../talents.js'; // <--- ДОБАВЛЕН ИМПОРТ
+import { getTalentBonus } from '../talents.js';
 import { getRiftMult } from '../rift.js';
+import { updateQuestProgress } from '../dailyQuests.js'; // <--- ДОБАВЛЕНО ДЛЯ КВЕСТОВ
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
 import { MODIFIERS, ELITE_ATK_MULT, getDropChance, getRespawnMs } from './spawn.js';
@@ -467,8 +468,23 @@ function combatVictory() {
   const ng = getNGPlusMult();
   const riftM = ow.rifMode ? getRiftMult(ow.rifFloor) : { goldMult: 1, expMult: 1 };
   const gold = Math.round(def.gold * (e.elite ? 2 : 1) * ng.goldMult * riftM.goldMult);
-  const exp = Math.round(def.exp * (e.elite ? 1.5 : 1) * ng.expMult * riftM.expMult);
+  
+  const hasElderBlessing = p.effects?.some(ef => ef.id === 'elderBlessing');
+  let exp = Math.round(def.exp * (e.elite ? 1.5 : 1) * ng.expMult * riftM.expMult);
+  if (hasElderBlessing) {
+    exp = Math.round(exp * 1.2);
+    const b = p.effects.find(ef => ef.id === 'elderBlessing');
+    b.duration -= 1;
+    if (b.duration <= 0) {
+      p.effects = p.effects.filter(ef => ef.id !== 'elderBlessing');
+      pushLog(`✨ Благословение старейшины закончилось.`, 'info');
+    }
+  }
+
   pushLog(`🏆 Победа! +${exp} опыта, +${gold} золота`, 'success');
+
+  // ОБНОВЛЕНИЕ КВЕСТОВ ЗА УБИЙСТВО
+  updateQuestProgress('kill', e.enemyId, 1);
 
   spawnParticles(e.x, e.y, 'smoke', 15);
   spawnParticles(e.x, e.y, 'spark', 6);
@@ -525,6 +541,10 @@ function combatVictory() {
   e.respawnAt = performance.now() + getRespawnMs();
   e.effects = [];
   clearPlayerEffects();
+  if (hasElderBlessing && p.effects.length === 0) {
+      p.effects.push({ id: 'elderBlessing', duration: b ? b.duration : 1 });
+  }
+
   endCombat();
   checkAchievements();
 
@@ -535,7 +555,6 @@ function combatVictory() {
     }
   }
 
-  // ФИКС: Показываем экран победы только ОДИН раз, если игрок ещё не перешёл на NG+
   if (Object.values(state.game.shards).every(Boolean) && !p.victoryAchieved) {
     setTimeout(() => emit('victory'), 1500);
   }

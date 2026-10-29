@@ -10,6 +10,7 @@ import { getRiftMult } from '../rift.js';
 import { findFreeCell, TILE } from './map.js';
 import { spawnParticles } from './particles.js';
 import { pushLog } from './log.js';
+import { updateQuestProgress } from '../dailyQuests.js';
 
 export const ELITE_HP_MULT = 1.5;
 export const ELITE_ATK_MULT = 1.3;
@@ -17,30 +18,20 @@ export const MODIFIER_CHANCE = 0.10;
 const CHEST_HERB_CHANCE = 0.40;
 
 export const MODIFIERS = {
-  poisonous:    { name: 'Ядовитый',      prefix: '☣️', hpMult: 1.0, atkMult: 1.15, defMult: 1.0, color: '#60a060' },
+  poisonous:    { name: 'Ядовитый', prefix: '☣️', hpMult: 1.0, atkMult: 1.15, defMult: 1.0, color: '#60a060' },
   armored:      { name: 'Бронированный', prefix: '🛡️', hpMult: 1.3, atkMult: 1.0,  defMult: 1.5, color: '#a0a0a0' },
   swift:        { name: 'Стремительный', prefix: '💨', hpMult: 0.9, atkMult: 1.2,  defMult: 1.0, color: '#60a0ff' },
-  vampiric:     { name: 'Вампирский',    prefix: '🧛', hpMult: 1.0, atkMult: 1.0,  defMult: 1.0, color: '#800060', vampiricPct: 0.3 },
+  vampiric:     { name: 'Вампирский', prefix: '🧛', hpMult: 1.0, atkMult: 1.0,  defMult: 1.0, color: '#800060', vampiricPct: 0.3 },
   regenerating: { name: 'Регенерирующий', prefix: '💚', hpMult: 1.1, atkMult: 1.0, defMult: 1.0, color: '#60ff60', regenPerTurn: 5 },
   berserk:      { name: 'Берсерк',       prefix: '💢', hpMult: 0.9, atkMult: 1.25, defMult: 1.0, color: '#ff4040' }
 };
 
-export function getRespawnMs() {
-  const d = state.settings.difficulty;
-  return d === 'easy' ? 15000 : d === 'hard' ? 60000 : 30000;
-}
-
-export function getEliteChance() {
-  const d = state.settings.difficulty;
-  return d === 'easy' ? 0.15 : d === 'hard' ? 0.35 : 0.20;
-}
-
-export function getDropChance() {
-  const d = state.settings.difficulty;
-  return d === 'easy' ? 0.70 : d === 'hard' ? 0.30 : 0.50;
-}
+export function getRespawnMs() { const d = state.settings.difficulty; return d === 'easy' ? 15000 : d === 'hard' ? 60000 : 30000; }
+export function getEliteChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.15 : d === 'hard' ? 0.35 : 0.20; }
+export function getDropChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.70 : d === 'hard' ? 0.30 : 0.50; }
 
 export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}) {
+  if (loc.safe) return [];
   const ng = getNGPlusMult();
   const riftM = opts.rifMode ? getRiftMult(opts.rifFloor || 1) : { hpMult: 1 };
   const enemies = [];
@@ -63,25 +54,44 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}) {
     const mod = modifier ? MODIFIERS[modifier] : null;
     const hp = Math.round(def.hp * (isElite ? ELITE_HP_MULT : 1) * (mod ? mod.hpMult : 1) * ng.hpMult * riftM.hpMult);
     enemies.push({
-      id: i, enemyId,
-      x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
+      id: i, enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
       homeX: pos.x * TILE + TILE / 2, homeY: pos.y * TILE + TILE / 2,
-      hp, maxHp: hp,
-      elite: isElite,
-      boss: isBoss,
-      modifier,
-      effects: [],
-      phase: 0,
-      state: 'idle',
-      wanderTimer: 1 + Math.random() * 2,
-      wanderDx: 0, wanderDy: 0,
+      hp, maxHp: hp, elite: isElite, boss: isBoss, modifier,
+      effects: [], phase: 0, state: 'idle',
+      wanderTimer: 1 + Math.random() * 2, wanderDx: 0, wanderDy: 0,
       dead: false, respawnAt: 0,
     });
   }
   return enemies;
 }
 
+export function spawnNPCs(loc) {
+  if (!loc.npcs) return [];
+  return loc.npcs.map(npc => ({
+    ...npc,
+    x: npc.x * TILE + TILE / 2,
+    y: npc.y * TILE + TILE / 2,
+    homeX: npc.x * TILE + TILE / 2,
+    homeY: npc.y * TILE + TILE / 2,
+    interactionRadius: 65,
+    wanderTimer: Math.random() * 3,
+    wanderDx: 0, wanderDy: 0,
+    facing: 'down'
+  }));
+}
+
+export function spawnStatics(loc) {
+  if (!loc.statics) return [];
+  return loc.statics.map(obj => ({
+    ...obj,
+    x: obj.x * TILE + TILE / 2,
+    y: obj.y * TILE + TILE / 2,
+    interactionRadius: 65
+  }));
+}
+
 export function spawnChests(loc, map, cols, rows, enemies, playerPos) {
+  if (loc.safe) return [];
   const chests = [];
   const chestsCount = loc.chestsCount || 3;
   for (let i = 0; i < chestsCount; i++) {
@@ -111,6 +121,8 @@ export function openChest(chest) {
     addItem(herbId, 1);
     pushLog(`🌿 Сундук: ${ITEMS[herbId].name}`, 'success');
   }
+
+  updateQuestProgress('chest', 'chest', 1);
 
   if (!p.stats) p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 };
   p.stats.chestsOpened = (p.stats.chestsOpened || 0) + 1;

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Осколки Кристалла Маны</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -53,8 +54,8 @@
       <div class="tab" data-tab="spells" onclick="GameAPI.switchTab('spells')">✨ Магия</div>
       <div class="tab" data-tab="quests" onclick="GameAPI.switchTab('quests')">📜 Квесты</div>
       <div class="tab" data-tab="achievements" onclick="GameAPI.switchTab('achievements')">🏆 Достижения</div>
-	  <div class="tab" data-tab="statistics" onclick="GameAPI.switchTab('statistics')">📊 Статистика</div>
-	  <div class="tab" data-tab="talents" onclick="GameAPI.switchTab('talents')">🌳 Таланты</div>
+      <div class="tab" data-tab="statistics" onclick="GameAPI.switchTab('statistics')">📊 Статистика</div>
+      <div class="tab" data-tab="talents" onclick="GameAPI.switchTab('talents')">🌳 Таланты</div>
     </div>
     <div class="panel" id="tab-content"></div>
     <div class="panel"><h3>Журнал</h3><div class="log" id="game-log"></div></div>
@@ -71,9 +72,16 @@
     </div>
     <div style="position:relative;">
       <canvas id="overworld-canvas" width="800" height="500" style="border:2px solid #5a4a3a;border-radius:8px;max-width:100%;height:auto;display:block;background:#1a2e1a;"></canvas>
+      
       <div id="combat-panel">
         <div id="combat-panel-info"></div>
         <div class="actions" id="combat-panel-actions"></div>
+      </div>
+
+      <!-- ПАНЕЛЬ ДИАЛОГОВ NPC -->
+      <div id="npc-panel" style="display:none; background:rgba(10,6,18,0.94); border:2px solid #c9a227; border-top:none; border-radius:0 0 8px 8px; padding:12px;">
+        <div id="npc-panel-info" style="color:#d4c8a8; font-size:14px; margin-bottom:8px;"></div>
+        <div class="actions" id="npc-panel-actions"></div>
       </div>
     </div>
     <p style="color:#a89060;font-size:13px;text-align:center;margin-top:8px;">

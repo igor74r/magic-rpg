@@ -5,17 +5,12 @@ import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
 
-const VIEW_W = 800;
-const VIEW_H = 500;
-const AGGRO_RANGE = 200;
-const LEASH_RANGE = 340;
-const COMBAT_RANGE = 44;
-const CAMERA_LERP = 0.15;
+const VIEW_W = 800, VIEW_H = 500;
+const AGGRO_RANGE = 200, LEASH_RANGE = 340, COMBAT_RANGE = 44, CAMERA_LERP = 0.15;
 
 export function initCamera(playerPos, cols, rows) {
   const mapW = cols * TILE, mapH = rows * TILE;
-  let cx = playerPos.x - VIEW_W / 2;
-  let cy = playerPos.y - VIEW_H / 2;
+  let cx = playerPos.x - VIEW_W / 2, cy = playerPos.y - VIEW_H / 2;
   cx = mapW <= VIEW_W ? (mapW - VIEW_W) / 2 : Math.max(0, Math.min(mapW - VIEW_W, cx));
   cy = mapH <= VIEW_H ? (mapH - VIEW_H) / 2 : Math.max(0, Math.min(mapH - VIEW_H, cy));
   return { x: cx, y: cy };
@@ -27,12 +22,9 @@ export function tryMovePlayer(dx, dy) {
   const len = Math.hypot(dx, dy);
   if (len === 0) return;
   dx /= len; dy /= len;
-  const speed = 3.2;
-  const p = ow.player;
-  const r = 12;
+  const speed = 3.2, p = ow.player, r = 12;
   let moved = false;
-  const nx = p.x + dx * speed;
-  const ny = p.y + dy * speed;
+  const nx = p.x + dx * speed, ny = p.y + dy * speed;
   if (isWalkable(ow.map, ow.cols, ow.rows, nx - r, p.y) && isWalkable(ow.map, ow.cols, ow.rows, nx + r, p.y)) { p.x = nx; moved = true; }
   if (isWalkable(ow.map, ow.cols, ow.rows, p.x, ny - r) && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny + r)) { p.y = ny; moved = true; }
   p.x = Math.max(TILE / 2, Math.min(ow.cols * TILE - TILE / 2, p.x));
@@ -44,31 +36,47 @@ export function updateOverworld(dt) {
   const ow = state.overworld;
   if (!ow || !ow.active) return;
   updateCamera();
-
-  if (ow.shake && ow.shake.t > 0) {
-    ow.shake.t -= dt * 0.0167;
-    if (ow.shake.t <= 0) { ow.shake.t = 0; ow.shake.mag = 0; }
-  }
-
+  if (ow.shake && ow.shake.t > 0) { ow.shake.t -= dt * 0.0167; if (ow.shake.t <= 0) { ow.shake.t = 0; ow.shake.mag = 0; } }
   updateParticles(dt);
-
-  ow.floatingNumbers = ow.floatingNumbers.filter(fn => {
-    fn.life -= dt * 0.02;
-    fn.y -= dt * 0.6;
-    return fn.life > 0;
-  });
+  ow.floatingNumbers = ow.floatingNumbers.filter(fn => { fn.life -= dt * 0.02; fn.y -= dt * 0.6; return fn.life > 0; });
 
   const now = performance.now();
   for (const e of ow.enemies) {
     if (e.dead && e.respawnAt && now >= e.respawnAt) {
-      e.dead = false; e.hp = e.maxHp;
-      e.x = e.homeX; e.y = e.homeY;
-      e.state = 'idle'; e.respawnAt = 0;
-      e.effects = []; e.phase = 0;
+      e.dead = false; e.hp = e.maxHp; e.x = e.homeX; e.y = e.homeY; e.state = 'idle'; e.respawnAt = 0; e.effects = []; e.phase = 0;
     }
   }
 
   if (ow.combat || ow.defeated) return;
+
+  // AI NPC
+  for (const npc of ow.npcs) {
+    const distToPlayer = Math.hypot(npc.x - ow.player.x, npc.y - ow.player.y);
+    
+    // Если игрок близко, NPC останавливается
+    if (distToPlayer < npc.interactionRadius + 20) {
+      npc.state = 'idle';
+      continue;
+    }
+
+    // Иначе гуляет вокруг дома
+    npc.wanderTimer -= dt * 0.02;
+    if (npc.wanderTimer <= 0) {
+      npc.wanderTimer = 2 + Math.random() * 4;
+      const a = Math.random() * Math.PI * 2;
+      npc.wanderDx = Math.cos(a);
+      npc.wanderDy = Math.sin(a);
+    }
+    const dHome = Math.hypot(npc.x - npc.homeX, npc.y - npc.homeY);
+    if (dHome > 80) {
+      npc.wanderDx = (npc.homeX - npc.x) / (dHome || 1);
+      npc.wanderDy = (npc.homeY - npc.y) / (dHome || 1);
+    }
+    const spd = 0.5 * dt;
+    const nx = npc.x + npc.wanderDx * spd, ny = npc.y + npc.wanderDy * spd;
+    if (isWalkable(ow.map, ow.cols, ow.rows, nx, npc.y)) npc.x = nx; else npc.wanderDx = -npc.wanderDx;
+    if (isWalkable(ow.map, ow.cols, ow.rows, npc.x, ny)) npc.y = ny; else npc.wanderDy = -npc.wanderDy;
+  }
 
   for (const e of ow.enemies) {
     if (e.dead) continue;
@@ -79,8 +87,7 @@ export function updateOverworld(dt) {
 
     if (e.state === 'chase') {
       const dx = ow.player.x - e.x, dy = ow.player.y - e.y;
-      const ln = Math.hypot(dx, dy) || 1;
-      const spd = 2.2 * dt;
+      const ln = Math.hypot(dx, dy) || 1, spd = 2.2 * dt;
       const nx = e.x + (dx / ln) * spd, ny = e.y + (dy / ln) * spd;
       if (isWalkable(ow.map, ow.cols, ow.rows, nx, e.y)) e.x = nx;
       if (isWalkable(ow.map, ow.cols, ow.rows, e.x, ny)) e.y = ny;
@@ -117,7 +124,6 @@ function updateCamera() {
   else targetX = Math.max(0, Math.min(mapW - VIEW_W, ow.player.x - VIEW_W / 2));
   if (mapH <= VIEW_H) targetY = (mapH - VIEW_H) / 2;
   else targetY = Math.max(0, Math.min(mapH - VIEW_H, ow.player.y - VIEW_H / 2));
-
   ow.camera.x += (targetX - ow.camera.x) * CAMERA_LERP;
   ow.camera.y += (targetY - ow.camera.y) * CAMERA_LERP;
 }
