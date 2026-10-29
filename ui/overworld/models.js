@@ -20,140 +20,80 @@ export const EFFECTS_DATA = {
   elderBlessing: { name: 'Благословение', icon: '✨', color: '#ffd060' }
 };
 
+// Анимация покачивания
+const getBob = () => Math.sin(performance.now() / 200) * 1.5;
+
 // ==================== ИГРОК ====================
 export function drawPlayerByClass(ctx, x, y, playerClass, shadowColor) {
+  const bob = getBob();
+  const py = y + bob;
+
+  // Тень
   ctx.fillStyle = shadowColor;
   ctx.beginPath();
   ctx.ellipse(x, y + 14, 14, 6, 0, 0, Math.PI * 2);
   ctx.fill();
 
+  // Обводка для контраста (спрайтовый эффект)
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = '#000';
+
   if (playerClass === 'warrior') {
-    ctx.fillStyle = '#4a2a1a';
-    ctx.fillRect(x - 7, y + 8, 5, 8);
-    ctx.fillRect(x + 2, y + 8, 5, 8);
-    ctx.fillStyle = '#b03030';
-    ctx.fillRect(x - 11, y - 6, 22, 16);
-    ctx.fillStyle = '#8a2020';
-    ctx.fillRect(x - 11, y - 6, 22, 4);
-    ctx.fillStyle = '#666';
-    ctx.beginPath();
-    ctx.arc(x - 12, y - 4, 5, 0, Math.PI * 2);
-    ctx.arc(x + 12, y - 4, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ffcc99';
-    ctx.beginPath();
-    ctx.arc(x, y - 14, 7, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#888';
-    ctx.beginPath();
-    ctx.arc(x, y - 16, 8, Math.PI, 0);
-    ctx.fill();
-    ctx.fillRect(x - 8, y - 16, 16, 4);
-    ctx.fillStyle = '#000';
-    ctx.fillRect(x - 6, y - 15, 4, 2);
-    ctx.fillRect(x + 2, y - 15, 4, 2);
-    ctx.fillStyle = '#e0e0e0';
-    ctx.fillRect(x + 14, y - 8, 3, 22);
-    ctx.fillStyle = '#8b4513';
-    ctx.fillRect(x + 12, y - 8, 7, 4);
-    ctx.fillStyle = '#ffd060';
-    ctx.beginPath();
-    ctx.moveTo(x + 15.5, y - 12);
-    ctx.lineTo(x + 17.5, y - 8);
-    ctx.lineTo(x + 13.5, y - 8);
-    ctx.closePath();
-    ctx.fill();
+    // Ноги
+    ctx.fillStyle = '#2a1a10'; ctx.fillRect(x - 6, py + 6, 5, 8); ctx.fillRect(x + 1, py + 6, 5, 8);
+    // Плащ
+    ctx.fillStyle = '#600'; ctx.beginPath();
+    ctx.moveTo(x - 12, py - 4); ctx.lineTo(x + 12, py - 4); ctx.lineTo(x + 16, py + 14); ctx.lineTo(x - 16, py + 14); ctx.fill();
+    // Броня
+    ctx.fillStyle = '#808080'; ctx.fillRect(x - 9, py - 6, 18, 14);
+    ctx.fillStyle = '#a0a0a0'; ctx.fillRect(x - 7, py - 6, 14, 8);
+    // Голова и шлем
+    ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 12, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#606060'; ctx.beginPath(); ctx.arc(x, py - 14, 7, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.fillRect(x - 5, py - 12, 10, 2); // Прорезь шлема
+    // Меч
+    ctx.fillStyle = '#d0d0d0'; ctx.fillRect(x + 10, py - 10, 3, 20);
+    ctx.fillStyle = '#8b4513'; ctx.fillRect(x + 8, py + 10, 7, 3);
+    ctx.fillStyle = '#ffd060'; ctx.beginPath(); ctx.arc(x + 11.5, py - 12, 2, 0, Math.PI * 2); ctx.fill();
 
   } else if (playerClass === 'mage') {
-    ctx.fillStyle = '#3a1560';
-    ctx.beginPath();
-    ctx.moveTo(x - 10, y + 16);
-    ctx.lineTo(x + 10, y + 16);
-    ctx.lineTo(x + 8, y + 2);
-    ctx.lineTo(x - 8, y + 2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#5a2090';
-    ctx.beginPath();
-    ctx.moveTo(x - 10, y + 2);
-    ctx.lineTo(x + 10, y + 2);
-    ctx.lineTo(x + 7, y - 8);
-    ctx.lineTo(x - 7, y - 8);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#ffe060';
-    ctx.fillRect(x - 5, y + 5, 2, 2);
-    ctx.fillRect(x + 3, y + 10, 2, 2);
-    ctx.fillStyle = '#ffcc99';
-    ctx.beginPath();
-    ctx.arc(x, y - 14, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#f0f0f0';
-    ctx.beginPath();
-    ctx.moveTo(x - 5, y - 10);
-    ctx.lineTo(x + 5, y - 10);
-    ctx.lineTo(x, y - 4);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#3a1060';
-    ctx.beginPath();
-    ctx.moveTo(x - 11, y - 18);
-    ctx.lineTo(x + 11, y - 18);
-    ctx.lineTo(x + 4, y - 40);
-    ctx.lineTo(x - 4, y - 40);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#2a0540';
-    ctx.fillRect(x - 13, y - 19, 26, 3);
-    ctx.fillStyle = '#ffe060';
-    ctx.beginPath();
-    ctx.arc(x, y - 24, 1.5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#5a3a20';
-    ctx.fillRect(x + 13, y - 12, 3, 30);
-    ctx.shadowBlur = 12; ctx.shadowColor = '#00ffff';
-    ctx.fillStyle = '#a0f0ff';
-    ctx.beginPath();
-    ctx.arc(x + 14.5, y - 14, 5, 0, Math.PI * 2);
-    ctx.fill();
+    // Мантия
+    ctx.fillStyle = '#2a0a4a'; 
+    ctx.beginPath(); ctx.moveTo(x - 10, py + 14); ctx.lineTo(x + 10, py + 14); ctx.lineTo(x + 6, py - 6); ctx.lineTo(x - 6, py - 6); ctx.fill();
+    // Рукава
+    ctx.fillStyle = '#3a1560'; ctx.fillRect(x - 12, py - 2, 6, 8); ctx.fillRect(x + 6, py - 2, 6, 8);
+    // Звезды на мантии
+    ctx.fillStyle = '#ffd060'; ctx.fillRect(x - 4, py + 2, 2, 2); ctx.fillRect(x + 3, py + 6, 2, 2);
+    // Голова
+    ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 12, 6, 0, Math.PI * 2); ctx.fill();
+    // Борода
+    ctx.fillStyle = '#e0e0e0'; ctx.beginPath(); ctx.moveTo(x - 5, py - 8); ctx.lineTo(x + 5, py - 8); ctx.lineTo(x, py + 2); ctx.fill();
+    // Шляпа
+    ctx.fillStyle = '#1a0530'; ctx.beginPath(); ctx.moveTo(x - 12, py - 14); ctx.lineTo(x + 12, py - 14); ctx.lineTo(x, py - 32); ctx.fill();
+    ctx.fillStyle = '#ffd060'; ctx.fillRect(x - 12, py - 15, 24, 2);
+    // Посох
+    ctx.fillStyle = '#5a3a20'; ctx.fillRect(x + 13, py - 10, 2, 24);
+    ctx.shadowBlur = 10; ctx.shadowColor = '#00ffff';
+    ctx.fillStyle = '#a0f0ff'; ctx.beginPath(); ctx.arc(x + 14, py - 12, 4, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
 
   } else if (playerClass === 'priest') {
+    // Роба
     ctx.fillStyle = '#e8e0d0';
-    ctx.beginPath();
-    ctx.moveTo(x - 10, y + 16);
-    ctx.lineTo(x + 10, y + 16);
-    ctx.lineTo(x + 8, y - 8);
-    ctx.lineTo(x - 8, y - 8);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = '#ffd060';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.fillStyle = '#ffd060';
-    ctx.fillRect(x - 8, y + 3, 16, 2);
-    ctx.fillRect(x - 1, y - 6, 2, 6);
-    ctx.fillRect(x - 3, y - 4, 6, 2);
-    ctx.fillStyle = '#ffcc99';
-    ctx.beginPath();
-    ctx.arc(x, y - 14, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#c9a060';
-    ctx.beginPath();
-    ctx.arc(x, y - 16, 6, Math.PI, 0);
-    ctx.fill();
-    ctx.shadowBlur = 10; ctx.shadowColor = '#ffd060';
-    ctx.strokeStyle = '#ffd060';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(x, y - 24, 7, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 10, py + 14); ctx.lineTo(x + 10, py + 14); ctx.lineTo(x + 7, py - 6); ctx.lineTo(x - 7, py - 6); ctx.fill();
+    // Золотая отделка
+    ctx.fillStyle = '#ffd060'; ctx.fillRect(x - 8, py + 4, 16, 2); ctx.fillRect(x - 1, py - 4, 2, 6); ctx.fillRect(x - 3, py - 2, 6, 2);
+    // Голова
+    ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 12, 6, 0, Math.PI * 2); ctx.fill();
+    // Капюшон
+    ctx.fillStyle = '#d0c8a0'; ctx.beginPath(); ctx.arc(x, py - 14, 7, Math.PI, 0); ctx.fill();
+    // Святой символ над головой
+    ctx.shadowBlur = 8; ctx.shadowColor = '#ffd060';
+    ctx.strokeStyle = '#ffd060'; ctx.beginPath(); ctx.arc(x, py - 24, 5, 0, Math.PI * 2); ctx.stroke();
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#8b4513';
-    ctx.fillRect(x + 13, y - 10, 2, 28);
-    ctx.fillStyle = '#ffd060';
-    ctx.fillRect(x + 11, y - 12, 6, 2);
-    ctx.fillRect(x + 13.5, y - 15, 1, 6);
+    // Посох с крестом
+    ctx.fillStyle = '#8b4513'; ctx.fillRect(x + 12, py - 8, 2, 22);
+    ctx.fillStyle = '#ffd060'; ctx.fillRect(x + 10, py - 10, 6, 2); ctx.fillRect(x + 12, py - 13, 2, 8);
   }
 }
 
@@ -162,412 +102,133 @@ export function drawEnemyByType(ctx, e, x, y, shadowColor) {
   const size = e.boss ? 22 : e.elite ? 16 : 12;
   const isBoss = e.boss;
   const isElite = e.elite;
-  let glowColor = null;
-  if (isBoss) glowColor = '#b060ff';
-  else if (isElite) glowColor = '#ffa500';
+  const bob = getBob();
+  const ey = y + bob;
 
+  // Тень
   ctx.fillStyle = shadowColor;
   ctx.beginPath();
   ctx.ellipse(x, y + size - 2, size, size / 2, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  if (glowColor) { ctx.shadowBlur = isBoss ? 20 : 10; ctx.shadowColor = glowColor; }
-
-  if (e.modifier) {
-    const m = MODIFIERS_LABEL[e.modifier];
-    if (m) {
-      ctx.strokeStyle = m.color;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(x, y, size + 6, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  }
+  if (isBoss) { ctx.shadowBlur = 20; ctx.shadowColor = '#b060ff'; }
+  else if (isElite) { ctx.shadowBlur = 10; ctx.shadowColor = '#ffa500'; }
 
   const id = e.enemyId;
+  ctx.lineWidth = 1.5; ctx.strokeStyle = '#000';
 
   if (id === 'goblin') {
-    ctx.fillStyle = '#3a7030';
-    ctx.beginPath();
-    ctx.moveTo(x - size + 2, y - 4); ctx.lineTo(x - size - 8, y - 10); ctx.lineTo(x - size + 2, y - 8);
-    ctx.moveTo(x + size - 2, y - 4); ctx.lineTo(x + size + 8, y - 10); ctx.lineTo(x + size - 2, y - 8);
-    ctx.fill();
-    ctx.fillStyle = '#4a8040';
-    ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffe000';
-    ctx.beginPath(); ctx.arc(x - 4, y - 2, 2.5, 0, Math.PI * 2); ctx.arc(x + 4, y - 2, 2.5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(x - 4, y - 2, 1, 0, Math.PI * 2); ctx.arc(x + 4, y - 2, 1, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(x - 3, y + 5, 2, 3);
-    ctx.fillRect(x + 1, y + 5, 2, 3);
+    // Тело
+    ctx.fillStyle = '#3a7030'; ctx.beginPath(); ctx.ellipse(x, ey, size, size*0.8, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Уши
+    ctx.beginPath(); ctx.moveTo(x - size + 2, ey - 4); ctx.lineTo(x - size - 8, ey - 10); ctx.lineTo(x - size + 2, ey - 8); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + size - 2, ey - 4); ctx.lineTo(x + size + 8, ey - 10); ctx.lineTo(x + size - 2, ey - 8); ctx.fill(); ctx.stroke();
+    // Глаза
+    ctx.fillStyle = '#ffe000'; ctx.beginPath(); ctx.arc(x - 4, ey - 2, 2.5, 0, Math.PI * 2); ctx.arc(x + 4, ey - 2, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x - 4, ey - 2, 1, 0, Math.PI * 2); ctx.arc(x + 4, ey - 2, 1, 0, Math.PI * 2); ctx.fill();
+    // Кинжал
+    ctx.fillStyle = '#a0a0a0'; ctx.fillRect(x + size, ey, 2, 10);
 
   } else if (id === 'skeleton' || id === 'skeleton-archer') {
-    ctx.fillStyle = '#f0ead0';
-    ctx.beginPath(); ctx.arc(x, y - 4, size * 0.75, 0, Math.PI * 2); ctx.fill();
-    ctx.fillRect(x - size * 0.5, y + 2, size, 4);
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(x - 4, y - 5, 2, 0, Math.PI * 2); ctx.arc(x + 4, y - 5, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#f0ead0';
-    for (let i = 0; i < 3; i++) ctx.fillRect(x - size * 0.7, y + 8 + i * 3, size * 1.4, 2);
+    // Кости
+    ctx.fillStyle = '#e0dcd0'; 
+    ctx.beginPath(); ctx.arc(x, ey - 4, size * 0.7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // Глазницы
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x - 4, ey - 5, 2, 0, Math.PI * 2); ctx.arc(x + 4, ey - 5, 2, 0, Math.PI * 2); ctx.fill();
+    // Ребра
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath(); ctx.ellipse(x, ey + 4 + i * 3, size * 0.6, 1.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
     if (id === 'skeleton-archer') {
-      ctx.strokeStyle = '#8b4513';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(x + size + 4, y, 8, -Math.PI / 2, Math.PI / 2); ctx.stroke();
-      ctx.strokeStyle = '#d0d0d0';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(x + size + 4, y - 8); ctx.lineTo(x + size + 4, y + 8); ctx.stroke();
+      // Лук
+      ctx.strokeStyle = '#5a3a20'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x + size + 4, ey, 8, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x + size + 4, ey - 8); ctx.lineTo(x + size + 4, ey + 8); ctx.stroke();
+    } else {
+      // Ржавый меч
+      ctx.fillStyle = '#6a6a6a'; ctx.fillRect(x + size, ey - 8, 3, 16);
     }
 
   } else if (id === 'wolf' || id === 'frost-wolf') {
-    const c = id === 'frost-wolf' ? '#8cc8e8' : '#505050';
+    const c = id === 'frost-wolf' ? '#8cc8e8' : '#404040';
     ctx.fillStyle = c;
-    ctx.beginPath(); ctx.ellipse(x - 2, y, size * 1.3, size * 0.75, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + size * 0.7, y - 3, size * 0.6, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(x + size * 0.5, y - size * 0.6); ctx.lineTo(x + size * 0.45, y - size * 1.0); ctx.lineTo(x + size * 0.75, y - size * 0.55);
-    ctx.fill();
-    ctx.fillStyle = id === 'frost-wolf' ? '#00c8ff' : '#ff4040';
-    ctx.beginPath(); ctx.arc(x + size * 0.9, y - 4, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = c;
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(x - size * 1.2, y); ctx.quadraticCurveTo(x - size * 1.6, y - 6, x - size * 1.5, y - 10); ctx.stroke();
+    // Туловище
+    ctx.beginPath(); ctx.ellipse(x - 2, ey, size * 1.3, size * 0.7, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // Голова
+    ctx.beginPath(); ctx.arc(x + size * 0.8, ey - 4, size * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // Уши
+    ctx.beginPath(); ctx.moveTo(x + size*0.5, ey - size*0.6); ctx.lineTo(x + size*0.45, ey - size*1.0); ctx.lineTo(x + size*0.8, ey - size*0.5); ctx.fill(); ctx.stroke();
+    // Глаз
+    ctx.fillStyle = id === 'frost-wolf' ? '#00ffff' : '#ff2020'; ctx.beginPath(); ctx.arc(x + size * 0.9, ey - 5, 1.5, 0, Math.PI * 2); ctx.fill();
+    // Хвост
+    ctx.strokeStyle = c; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x - size * 1.2, ey); ctx.quadraticCurveTo(x - size * 1.8, ey - 8, x - size * 1.5, ey - 14); ctx.stroke();
 
   } else if (id === 'ghost' || id === 'wraith' || id === 'dust-wraith') {
     const c = id === 'dust-wraith' ? '#a08050' : id === 'wraith' ? '#4a4a6a' : '#a0d0ff';
-    ctx.globalAlpha = 0.85;
-    ctx.fillStyle = c;
+    ctx.globalAlpha = 0.8; ctx.fillStyle = c;
     ctx.beginPath();
-    ctx.arc(x, y - 4, size, Math.PI, 0);
-    ctx.lineTo(x + size, y + 6);
-    ctx.quadraticCurveTo(x + size * 0.66, y + 12, x + size * 0.33, y + 8);
-    ctx.quadraticCurveTo(x, y + 14, x - size * 0.33, y + 8);
-    ctx.quadraticCurveTo(x - size * 0.66, y + 12, x - size, y + 6);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(x - 4, y - 6, 2, 0, Math.PI * 2); ctx.arc(x + 4, y - 6, 2, 0, Math.PI * 2); ctx.fill();
-
-  } else if (id === 'dark-knight') {
-    ctx.fillStyle = '#2a2a3a';
-    ctx.fillRect(x - 10, y - 6, 20, 20);
-    ctx.fillStyle = '#1a1a2a';
-    ctx.beginPath(); ctx.arc(x - 11, y - 4, 5, 0, Math.PI * 2); ctx.arc(x + 11, y - 4, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#3a3a4a';
-    ctx.beginPath(); ctx.arc(x, y - 14, 7, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ff2020';
-    ctx.shadowBlur = 8; ctx.shadowColor = '#ff2020';
-    ctx.fillRect(x - 6, y - 15, 12, 3);
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#8a1010';
-    ctx.fillRect(x + 13, y - 10, 3, 24);
-    ctx.fillStyle = '#3a0a0a';
-    ctx.fillRect(x + 11, y - 10, 7, 4);
-
-  } else if (id === 'shadow-mage') {
-    ctx.fillStyle = '#1a0a2a';
-    ctx.beginPath();
-    ctx.moveTo(x - 14, y + 20); ctx.lineTo(x + 14, y + 20); ctx.lineTo(x + 10, y - 8); ctx.lineTo(x - 10, y - 8);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#0a0010';
-    ctx.beginPath(); ctx.arc(x, y - 10, 10, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#b060ff';
-    ctx.shadowBlur = 12; ctx.shadowColor = '#b060ff';
-    ctx.beginPath(); ctx.arc(x - 4, y - 10, 2, 0, Math.PI * 2); ctx.arc(x + 4, y - 10, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#2a1a0a';
-    ctx.fillRect(x + 16, y - 16, 3, 36);
-    ctx.fillStyle = '#b060ff';
-    ctx.shadowBlur = 15; ctx.shadowColor = '#b060ff';
-    ctx.beginPath(); ctx.arc(x + 17.5, y - 18, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-
-  } else if (id === 'grave-king') {
-    ctx.fillStyle = '#d0c8a8';
-    ctx.beginPath(); ctx.arc(x, y - 6, 16, 0, Math.PI * 2); ctx.fill();
-    ctx.fillRect(x - 10, y + 4, 20, 6);
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(x - 6, y - 8, 3, 0, Math.PI * 2); ctx.arc(x + 6, y - 8, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ff0000';
-    ctx.shadowBlur = 10; ctx.shadowColor = '#ff0000';
-    ctx.beginPath(); ctx.arc(x - 6, y - 8, 1.5, 0, Math.PI * 2); ctx.arc(x + 6, y - 8, 1.5, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#ffd060';
-    ctx.beginPath();
-    ctx.moveTo(x - 12, y - 20); ctx.lineTo(x - 12, y - 28); ctx.lineTo(x - 8, y - 24);
-    ctx.lineTo(x - 4, y - 32); ctx.lineTo(x, y - 24); ctx.lineTo(x + 4, y - 32);
-    ctx.lineTo(x + 8, y - 24); ctx.lineTo(x + 12, y - 28); ctx.lineTo(x + 12, y - 20);
-    ctx.closePath(); ctx.fill();
+    ctx.arc(x, ey - 6, size, Math.PI, 0);
+    ctx.lineTo(x + size, ey + 4);
+    ctx.quadraticCurveTo(x + size * 0.66, ey + 10, x + size * 0.33, ey + 6);
+    ctx.quadraticCurveTo(x, ey + 12, x - size * 0.33, ey + 6);
+    ctx.quadraticCurveTo(x - size * 0.66, ey + 10, x - size, ey + 4);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.fillStyle = '#000';
+    // Глаза-дыры
+    ctx.beginPath(); ctx.arc(x - 4, ey - 8, 2, 0, Math.PI * 2); ctx.arc(x + 4, ey - 8, 2, 0, Math.PI * 2); ctx.fill();
 
   } else if (id === 'fire-elemental') {
-    const grd = ctx.createLinearGradient(x, y - size * 1.2, x, y + size);
-    grd.addColorStop(0, '#ffff00');
-    grd.addColorStop(0.5, '#ff8000');
-    grd.addColorStop(1, '#a00000');
+    const grd = ctx.createLinearGradient(x, ey - size * 1.5, x, ey + size);
+    grd.addColorStop(0, '#fff'); grd.addColorStop(0.4, '#ff8000'); grd.addColorStop(1, '#a00000');
     ctx.fillStyle = grd;
     ctx.beginPath();
-    ctx.moveTo(x, y - size * 1.3);
-    ctx.quadraticCurveTo(x + size * 1.2, y - size * 0.3, x + size, y + size * 0.5);
-    ctx.quadraticCurveTo(x + size * 0.5, y + size, x, y + size * 0.7);
-    ctx.quadraticCurveTo(x - size * 0.5, y + size, x - size, y + size * 0.5);
-    ctx.quadraticCurveTo(x - size * 1.2, y - size * 0.3, x, y - size * 1.3);
-    ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(x - 3, y, 1.5, 0, Math.PI * 2); ctx.arc(x + 3, y, 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.moveTo(x, ey - size * 1.3); ctx.quadraticCurveTo(x + size * 1.2, ey - size * 0.3, x + size, ey + size * 0.5);
+    ctx.quadraticCurveTo(x + size * 0.5, ey + size, x, ey + size * 0.7); ctx.quadraticCurveTo(x - size * 0.5, ey + size, x - size, ey + size * 0.5);
+    ctx.quadraticCurveTo(x - size * 1.2, ey - size * 0.3, x, ey - size * 1.3); ctx.fill();
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x - 3, ey, 1.5, 0, Math.PI * 2); ctx.arc(x + 3, ey, 1.5, 0, Math.PI * 2); ctx.fill();
 
-  } else if (id === 'magma-golem') {
-    ctx.fillStyle = '#5a2a0a';
-    ctx.fillRect(x - 14, y - 10, 28, 26);
-    ctx.fillStyle = '#4a1a0a';
-    ctx.fillRect(x - 10, y - 22, 20, 14);
-    ctx.strokeStyle = '#ff6000';
-    ctx.lineWidth = 2;
+  } else if (id === 'dragonling' || id === 'fire-drake' || id === 'ancient-dragon') {
+    const isAncient = id === 'ancient-dragon';
+    const isDrake = id === 'fire-drake';
+    const scale = isAncient ? 1.6 : isDrake ? 1.3 : 1;
+    const cBody = isAncient ? '#500' : '#c04020';
+    const cWing = isAncient ? '#300' : '#8a2010';
+    
+    // Крылья (сзади)
+    ctx.fillStyle = cWing;
     ctx.beginPath();
-    ctx.moveTo(x - 8, y - 18); ctx.lineTo(x - 2, y - 10); ctx.lineTo(x + 6, y - 16);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x - 10, y + 2); ctx.lineTo(x + 4, y + 8);
-    ctx.stroke();
-    ctx.fillStyle = '#ff8000';
-    ctx.shadowBlur = 8; ctx.shadowColor = '#ff8000';
-    ctx.fillRect(x - 6, y - 18, 4, 3);
-    ctx.fillRect(x + 2, y - 18, 4, 3);
+    ctx.moveTo(x - size*0.5, ey); ctx.lineTo(x - size*2*scale, ey - size*1.2*scale); ctx.lineTo(x - size*0.8, ey + size*0.5);
+    ctx.moveTo(x + size*0.5, ey); ctx.lineTo(x + size*2*scale, ey - size*1.2*scale); ctx.lineTo(x + size*0.8, ey + size*0.5);
+    ctx.fill(); ctx.stroke();
+    // Тело
+    ctx.fillStyle = cBody; ctx.beginPath(); ctx.ellipse(x, ey + size*0.2, size*1.2*scale, size*0.8*scale, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Голова
+    ctx.beginPath(); ctx.arc(x, ey - size*0.8*scale, size*0.7*scale, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Рога
+    ctx.fillStyle = '#222';
+    ctx.beginPath(); ctx.moveTo(x - 4, ey - size*1.4*scale); ctx.lineTo(x - 8, ey - size*2*scale); ctx.lineTo(x - 2, ey - size*1.4*scale); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + 4, ey - size*1.4*scale); ctx.lineTo(x + 8, ey - size*2*scale); ctx.lineTo(x + 2, ey - size*1.4*scale); ctx.fill();
+    // Глаза
+    ctx.fillStyle = '#ff0'; ctx.shadowBlur = 10; ctx.shadowColor = '#f00';
+    ctx.beginPath(); ctx.arc(x - 4, ey - size*0.9*scale, 2, 0, Math.PI*2); ctx.arc(x + 4, ey - size*0.9*scale, 2, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
-
-  } else if (id === 'flame-lord') {
-    ctx.fillStyle = '#ff4000';
-    ctx.shadowBlur = 25; ctx.shadowColor = '#ff4000';
-    ctx.beginPath();
-    ctx.arc(x, y, 20, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    for (let i = 0; i < 5; i++) {
-      const a = (i / 5) * Math.PI * 2;
-      const px = x + Math.cos(a) * 16;
-      const py = y + Math.sin(a) * 16;
-      ctx.fillStyle = i % 2 ? '#ff8020' : '#ffff00';
-      ctx.beginPath();
-      ctx.arc(px, py, 6, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(x - 5, y - 2, 3, 0, Math.PI * 2); ctx.arc(x + 5, y - 2, 3, 0, Math.PI * 2); ctx.fill();
-
-  } else if (id === 'ice-elemental') {
-    ctx.fillStyle = '#a0e0ff';
-    ctx.shadowBlur = 10; ctx.shadowColor = '#a0e0ff';
-    ctx.beginPath();
-    ctx.moveTo(x, y - size * 1.3);
-    ctx.lineTo(x + size, y);
-    ctx.lineTo(x, y + size * 1.3);
-    ctx.lineTo(x - size, y);
-    ctx.closePath();
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.fillStyle = '#004080';
-    ctx.beginPath(); ctx.arc(x - 3, y - 2, 1.5, 0, Math.PI * 2); ctx.arc(x + 3, y - 2, 1.5, 0, Math.PI * 2); ctx.fill();
-
-  } else if (id === 'ice-queen') {
-    ctx.fillStyle = '#80c8e8';
-    ctx.beginPath();
-    ctx.moveTo(x - 18, y + 22); ctx.lineTo(x + 18, y + 22); ctx.lineTo(x + 10, y - 4); ctx.lineTo(x - 10, y - 4);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#a0e0ff';
-    ctx.beginPath(); ctx.arc(x, y - 8, 10, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#e0f8ff';
-    ctx.shadowBlur = 15; ctx.shadowColor = '#a0e0ff';
-    ctx.beginPath();
-    ctx.moveTo(x - 12, y - 16);
-    ctx.lineTo(x - 12, y - 26); ctx.lineTo(x - 6, y - 22); ctx.lineTo(x - 2, y - 30);
-    ctx.lineTo(x + 2, y - 22); ctx.lineTo(x + 8, y - 26); ctx.lineTo(x + 12, y - 22); ctx.lineTo(x + 12, y - 16);
-    ctx.closePath(); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#0080c0';
-    ctx.beginPath(); ctx.arc(x - 3, y - 10, 1.5, 0, Math.PI * 2); ctx.arc(x + 3, y - 10, 1.5, 0, Math.PI * 2); ctx.fill();
-
-  } else if (id === 'sand-worm') {
-    ctx.fillStyle = '#c8a060';
-    for (let i = 0; i < 4; i++) {
-      ctx.beginPath();
-      ctx.ellipse(x - 10 + i * 7, y + Math.sin(i) * 3, 8, 10, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.beginPath(); ctx.arc(x + 10, y - 3, 10, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(x + 12, y - 6, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.moveTo(x + 6, y + 4); ctx.lineTo(x + 8, y + 8); ctx.lineTo(x + 10, y + 4);
-    ctx.fill();
-
-  } else if (id === 'sand-king') {
-    ctx.fillStyle = '#c89860';
-    ctx.fillRect(x - 12, y - 6, 24, 22);
-    ctx.fillStyle = '#e0c090';
-    ctx.beginPath(); ctx.arc(x, y - 12, 10, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#a07040';
-    ctx.beginPath();
-    ctx.arc(x, y - 18, 12, Math.PI, 0);
-    ctx.fill();
-    ctx.fillRect(x - 12, y - 18, 24, 6);
-    ctx.fillStyle = '#ff2040';
-    ctx.shadowBlur = 10; ctx.shadowColor = '#ff2040';
-    ctx.beginPath(); ctx.arc(x, y - 16, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.moveTo(x - 6, y - 6); ctx.lineTo(x + 6, y - 6); ctx.lineTo(x, y + 2);
-    ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.arc(x - 4, y - 12, 1.5, 0, Math.PI * 2); ctx.arc(x + 4, y - 12, 1.5, 0, Math.PI * 2); ctx.fill();
-
-  } else if (id === 'flying-tome') {
-    ctx.fillStyle = '#8a4a2a';
-    ctx.fillRect(x - 12, y - 8, 24, 16);
-    ctx.strokeStyle = '#5a2a1a';
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(x - 12, y - 8, 24, 16);
-    ctx.fillStyle = '#f0ead0';
-    ctx.fillRect(x - 10, y - 6, 20, 12);
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(x - 4, y, 2, 0, Math.PI * 2); ctx.arc(x + 4, y, 2, 0, Math.PI * 2); ctx.fill();
-
-  } else if (id === 'book-guardian') {
-    ctx.fillStyle = '#6a2a1a';
-    ctx.fillRect(x - 16, y - 12, 32, 22);
-    ctx.strokeStyle = '#3a1a0a';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x - 16, y - 12, 32, 22);
-    ctx.fillStyle = '#ffd060';
-    ctx.fillRect(x - 3, y - 12, 6, 22);
-    ctx.fillStyle = '#ffe000';
-    ctx.shadowBlur = 8; ctx.shadowColor = '#ffe000';
-    ctx.beginPath(); ctx.arc(x - 8, y - 2, 2, 0, Math.PI * 2); ctx.arc(x + 8, y - 2, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-
-  } else if (id === 'archmage') {
-    ctx.fillStyle = '#4a1a80';
-    ctx.beginPath();
-    ctx.moveTo(x - 14, y + 20); ctx.lineTo(x + 14, y + 20); ctx.lineTo(x + 8, y - 8); ctx.lineTo(x - 8, y - 8);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#ffcc99';
-    ctx.beginPath(); ctx.arc(x, y - 12, 7, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#2a0a4a';
-    ctx.beginPath();
-    ctx.moveTo(x - 12, y - 16); ctx.lineTo(x + 12, y - 16); ctx.lineTo(x, y - 38);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#ffe060';
-    ctx.fillRect(x - 12, y - 17, 24, 3);
-    ctx.fillStyle = '#f0f0f0';
-    ctx.beginPath();
-    ctx.moveTo(x - 6, y - 6); ctx.lineTo(x + 6, y - 6); ctx.lineTo(x, y + 6);
-    ctx.fill();
-    ctx.fillStyle = '#3a1a0a';
-    ctx.fillRect(x + 16, y - 16, 3, 36);
-    ctx.shadowBlur = 15; ctx.shadowColor = '#ffd060';
-    ctx.fillStyle = '#ffe060';
-    ctx.beginPath(); ctx.arc(x + 17.5, y - 18, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-
-  } else if (id === 'dragonling') {
-    ctx.fillStyle = '#c04020';
-    ctx.beginPath(); ctx.ellipse(x, y + 2, 14, 10, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#8a2010';
-    ctx.beginPath();
-    ctx.moveTo(x - 8, y - 4); ctx.lineTo(x - 20, y - 12); ctx.lineTo(x - 8, y + 2);
-    ctx.moveTo(x + 8, y - 4); ctx.lineTo(x + 20, y - 12); ctx.lineTo(x + 8, y + 2);
-    ctx.fill();
-    ctx.fillStyle = '#c04020';
-    ctx.beginPath(); ctx.arc(x, y - 8, 7, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffe000';
-    ctx.beginPath(); ctx.arc(x + 2, y - 9, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#3a1a0a';
-    ctx.beginPath();
-    ctx.moveTo(x - 4, y - 14); ctx.lineTo(x - 6, y - 20); ctx.lineTo(x - 2, y - 15);
-    ctx.moveTo(x + 4, y - 14); ctx.lineTo(x + 6, y - 20); ctx.lineTo(x + 2, y - 15);
-    ctx.fill();
-
-  } else if (id === 'fire-drake') {
-    ctx.fillStyle = '#8a2010';
-    ctx.beginPath(); ctx.ellipse(x, y + 4, 20, 14, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#5a1008';
-    ctx.beginPath();
-    ctx.moveTo(x - 12, y - 4); ctx.lineTo(x - 30, y - 16); ctx.lineTo(x - 12, y + 6);
-    ctx.moveTo(x + 12, y - 4); ctx.lineTo(x + 30, y - 16); ctx.lineTo(x + 12, y + 6);
-    ctx.fill();
-    ctx.fillStyle = '#8a2010';
-    ctx.beginPath(); ctx.arc(x, y - 12, 10, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffe000';
-    ctx.shadowBlur = 8; ctx.shadowColor = '#ffe000';
-    ctx.beginPath(); ctx.arc(x - 3, y - 13, 2.5, 0, Math.PI * 2); ctx.arc(x + 3, y - 13, 2.5, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#3a0a04';
-    ctx.beginPath();
-    ctx.moveTo(x - 6, y - 20); ctx.lineTo(x - 10, y - 28); ctx.lineTo(x - 2, y - 21);
-    ctx.moveTo(x + 6, y - 20); ctx.lineTo(x + 10, y - 28); ctx.lineTo(x + 2, y - 21);
-    ctx.fill();
-    ctx.fillStyle = '#ff8000';
-    ctx.shadowBlur = 12; ctx.shadowColor = '#ff8000';
-    ctx.beginPath();
-    ctx.moveTo(x - 4, y - 4); ctx.lineTo(x, y + 4); ctx.lineTo(x + 4, y - 4);
-    ctx.closePath(); ctx.fill();
-    ctx.shadowBlur = 0;
-
-  } else if (id === 'dragon-guardian') {
-    ctx.fillStyle = '#2a3a2a';
-    ctx.fillRect(x - 14, y - 8, 28, 22);
-    ctx.fillStyle = '#3a4a3a';
-    ctx.beginPath(); ctx.arc(x, y - 14, 11, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#1a2a1a';
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath();
-      ctx.moveTo(x - 8 + i * 8, y - 24); ctx.lineTo(x - 6 + i * 8, y - 30); ctx.lineTo(x - 4 + i * 8, y - 24);
-      ctx.fill();
-    }
-    ctx.fillStyle = '#00ff80';
-    ctx.shadowBlur = 8; ctx.shadowColor = '#00ff80';
-    ctx.beginPath(); ctx.arc(x - 4, y - 14, 2, 0, Math.PI * 2); ctx.arc(x + 4, y - 14, 2, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-
-  } else if (id === 'ancient-dragon') {
-    ctx.fillStyle = '#8a1010';
-    ctx.shadowBlur = 20; ctx.shadowColor = '#ff0000';
-    ctx.beginPath(); ctx.ellipse(x, y + 6, 24, 16, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#5a0808';
-    ctx.beginPath();
-    ctx.moveTo(x - 14, y - 4); ctx.lineTo(x - 38, y - 20); ctx.lineTo(x - 14, y + 8);
-    ctx.moveTo(x + 14, y - 4); ctx.lineTo(x + 38, y - 20); ctx.lineTo(x + 14, y + 8);
-    ctx.fill();
-    ctx.fillStyle = '#8a1010';
-    ctx.beginPath(); ctx.arc(x, y - 16, 12, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffe000';
-    ctx.shadowBlur = 15; ctx.shadowColor = '#ffe000';
-    ctx.beginPath(); ctx.arc(x - 4, y - 17, 3, 0, Math.PI * 2); ctx.arc(x + 4, y - 17, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#2a0404';
-    ctx.beginPath();
-    ctx.moveTo(x - 8, y - 26); ctx.lineTo(x - 14, y - 38); ctx.lineTo(x - 2, y - 27);
-    ctx.moveTo(x + 8, y - 26); ctx.lineTo(x + 14, y - 38); ctx.lineTo(x + 2, y - 27);
-    ctx.fill();
 
   } else {
+    // Стандартный враг (если не найден ID)
     ctx.fillStyle = isBoss ? '#b060ff' : isElite ? '#ffa500' : '#d63030';
-    ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, ey, size, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // Злые глаза
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x - 4, ey, 2, 0, Math.PI * 2); ctx.arc(x + 4, ey, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; 
+    ctx.beginPath(); ctx.moveTo(x - 7, ey - 4); ctx.lineTo(x - 2, ey - 2); 
+    ctx.moveTo(x + 7, ey - 4); ctx.lineTo(x + 2, ey - 2); ctx.stroke();
   }
 
-  ctx.shadowBlur = 0;
+  ctx.shadowBlur = 0; // Сброс свечения
 
+  // Полоска HP
   const bw = isBoss ? 60 : 40;
-  const hpY = y - size - (isBoss ? 25 : isElite ? 20 : 15);
-  ctx.fillStyle = '#05020a';
-  ctx.fillRect(x - bw / 2, hpY, bw, 4);
+  const hpY = ey - size - (isBoss ? 25 : isElite ? 20 : 15);
+  ctx.fillStyle = '#05020a'; ctx.fillRect(x - bw / 2, hpY, bw, 4);
   ctx.fillStyle = isBoss ? '#b060ff' : isElite ? '#ffa500' : '#d63030';
   ctx.fillRect(x - bw / 2, hpY, bw * (e.hp / e.maxHp), 4);
 }
@@ -575,201 +236,97 @@ export function drawEnemyByType(ctx, e, x, y, shadowColor) {
 // ==================== NPC И СТАТИКА ====================
 export function drawStatic(ctx, obj, x, y, shadowColor) {
   const id = obj.id;
+  const bob = getBob();
+  const py = y + bob;
 
   if (id !== 'well' && id !== 'questBoard') {
     ctx.fillStyle = shadowColor;
-    ctx.beginPath();
-    ctx.ellipse(x, y + 14, 14, 6, 0, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x, y + 14, 14, 6, 0, 0, Math.PI * 2); ctx.fill();
   }
+
+  ctx.lineWidth = 1.5; ctx.strokeStyle = '#000';
 
   switch (id) {
     case 'blacksmith': {
-      ctx.fillStyle = '#3a2a1a';
-      ctx.fillRect(x - 9, y - 2, 18, 16);
-      ctx.fillStyle = '#8a6a3a';
-      ctx.fillRect(x - 9, y - 8, 18, 8);
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 14, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#3a2010';
-      ctx.beginPath();
-      ctx.moveTo(x - 5, y - 10); ctx.lineTo(x + 5, y - 10); ctx.lineTo(x, y - 2);
-      ctx.fill();
-      ctx.fillStyle = '#5a3a20';
-      ctx.fillRect(x + 12, y - 8, 3, 20);
-      ctx.fillStyle = '#666';
-      ctx.fillRect(x + 8, y - 12, 11, 6);
+      // Наковальня
+      ctx.fillStyle = '#444'; ctx.fillRect(x - 12, py + 4, 24, 8); ctx.strokeRect(x - 12, py + 4, 24, 8);
+      ctx.fillStyle = '#555'; ctx.fillRect(x - 8, py + 12, 16, 4);
+      // Кузнец
+      ctx.fillStyle = '#5a3a20'; ctx.fillRect(x - 6, py - 4, 12, 14);
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 10, 5, 0, Math.PI*2); ctx.fill();
+      // Молот
+      ctx.fillStyle = '#8b4513'; ctx.fillRect(x + 6, py - 8, 2, 12);
+      ctx.fillStyle = '#888'; ctx.fillRect(x + 4, py - 10, 6, 4);
       break;
     }
     case 'healer': {
-      ctx.fillStyle = '#e8f0e8';
-      ctx.beginPath();
-      ctx.moveTo(x - 9, y + 14); ctx.lineTo(x + 9, y + 14); ctx.lineTo(x + 7, y - 6); ctx.lineTo(x - 7, y - 6);
-      ctx.fill();
-      ctx.fillStyle = '#40c040';
-      ctx.fillRect(x - 1, y - 4, 2, 8);
-      ctx.fillRect(x - 4, y - 1, 8, 2);
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#c9a060';
-      ctx.beginPath(); ctx.arc(x, y - 15, 6, Math.PI, 0); ctx.fill();
-      ctx.fillRect(x - 6, y - 15, 3, 10);
-      ctx.fillRect(x + 3, y - 15, 3, 10);
-      break;
-    }
-    case 'alchemist': {
-      ctx.fillStyle = '#5a2090';
-      ctx.beginPath();
-      ctx.moveTo(x - 9, y + 14); ctx.lineTo(x + 9, y + 14); ctx.lineTo(x + 7, y - 6); ctx.lineTo(x - 7, y - 6);
-      ctx.fill();
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#3a1060';
-      ctx.beginPath(); ctx.arc(x, y - 14, 7, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = '#a0f0ff';
-      ctx.shadowBlur = 8; ctx.shadowColor = '#a0f0ff';
-      ctx.beginPath(); ctx.arc(x + 13, y - 2, 4, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#8b4513';
-      ctx.fillRect(x + 12, y - 10, 2, 6);
-      ctx.shadowBlur = 0;
+      // Палатка
+      ctx.fillStyle = '#e8f0e8'; ctx.beginPath(); ctx.moveTo(x - 14, py + 12); ctx.lineTo(x + 14, py + 12); ctx.lineTo(x, py - 16); ctx.fill(); ctx.stroke();
+      // Крест
+      ctx.fillStyle = '#40c040'; ctx.fillRect(x - 2, py - 6, 4, 10); ctx.fillRect(x - 5, py - 2, 10, 4);
       break;
     }
     case 'merchant': {
-      ctx.fillStyle = '#a02020';
-      ctx.fillRect(x - 9, y - 4, 18, 18);
-      ctx.fillStyle = '#ffd060';
-      ctx.fillRect(x - 9, y + 4, 18, 2);
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#5a2a1a';
-      ctx.beginPath();
-      ctx.ellipse(x, y - 17, 10, 3, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillRect(x - 5, y - 22, 10, 6);
-      ctx.fillStyle = '#ffd060';
-      ctx.beginPath(); ctx.arc(x + 12, y, 3, 0, Math.PI * 2); ctx.fill();
-      break;
-    }
-    case 'elder': {
-      ctx.fillStyle = '#6a4a2a';
-      ctx.beginPath();
-      ctx.moveTo(x - 9, y + 14); ctx.lineTo(x + 9, y + 14); ctx.lineTo(x + 6, y - 6); ctx.lineTo(x - 6, y - 6);
-      ctx.fill();
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#e0e0e0';
-      ctx.beginPath();
-      ctx.moveTo(x - 5, y - 8); ctx.lineTo(x + 5, y - 8); ctx.lineTo(x, y + 4);
-      ctx.fill();
-      ctx.fillStyle = '#e0e0e0';
-      ctx.fillRect(x - 6, y - 16, 12, 3);
-      ctx.fillStyle = '#5a3a20';
-      ctx.fillRect(x + 12, y - 8, 2, 22);
+      // Ящик
+      ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x - 10, py + 2, 20, 10); ctx.strokeRect(x - 10, py + 2, 20, 10);
+      // Торговец
+      ctx.fillStyle = '#a02020'; ctx.fillRect(x - 6, py - 8, 12, 12);
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 12, 5, 0, Math.PI*2); ctx.fill();
+      // Шляпа
+      ctx.fillStyle = '#2a1a0a'; ctx.fillRect(x - 8, py - 18, 16, 4);
+      // Монетка
+      ctx.fillStyle = '#ffd060'; ctx.beginPath(); ctx.arc(x + 12, py - 6, 3, 0, Math.PI*2); ctx.fill(); ctx.stroke();
       break;
     }
     case 'guard': {
-      ctx.fillStyle = '#606060';
-      ctx.fillRect(x - 9, y - 4, 18, 18);
-      ctx.fillStyle = '#404040';
-      ctx.beginPath(); ctx.arc(x - 10, y - 2, 4, 0, Math.PI * 2); ctx.arc(x + 10, y - 2, 4, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#707070';
-      ctx.beginPath(); ctx.arc(x, y - 14, 7, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = '#2a4a8a';
-      ctx.beginPath();
-      ctx.moveTo(x - 16, y - 6); ctx.lineTo(x - 16, y + 6); ctx.lineTo(x - 12, y + 10); ctx.lineTo(x - 8, y + 6); ctx.lineTo(x - 8, y - 6);
-      ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#5a3a20';
-      ctx.fillRect(x + 12, y - 18, 2, 32);
-      ctx.fillStyle = '#ccc';
-      ctx.beginPath();
-      ctx.moveTo(x + 13, y - 24); ctx.lineTo(x + 16, y - 18); ctx.lineTo(x + 10, y - 18);
-      ctx.closePath(); ctx.fill();
-      break;
-    }
-    case 'bard': {
-      ctx.fillStyle = '#c060a0';
-      ctx.fillRect(x - 9, y - 4, 18, 18);
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#5a1a4a';
-      ctx.beginPath();
-      ctx.ellipse(x, y - 16, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillRect(x - 5, y - 22, 10, 6);
-      ctx.fillStyle = '#ffd060';
-      ctx.beginPath(); ctx.arc(x + 6, y - 20, 2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#8b4513';
-      ctx.beginPath(); ctx.ellipse(x + 13, y + 2, 6, 8, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillRect(x + 11, y - 10, 2, 12);
-      break;
-    }
-    case 'herald': {
-      ctx.fillStyle = '#c02020';
-      ctx.fillRect(x - 9, y - 4, 18, 18);
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#8a1010';
-      ctx.fillRect(x - 6, y - 20, 12, 4);
-      ctx.fillRect(x - 4, y - 22, 8, 4);
-      ctx.fillStyle = '#c9a227';
-      ctx.beginPath();
-      ctx.moveTo(x + 10, y); ctx.lineTo(x + 20, y - 6); ctx.lineTo(x + 20, y + 6);
-      ctx.closePath(); ctx.fill();
-      break;
-    }
-    case 'cat': {
-      ctx.fillStyle = '#2a2a2a';
-      ctx.beginPath(); ctx.ellipse(x, y + 2, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x + 6, y - 4, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x + 2, y - 8); ctx.lineTo(x + 1, y - 14); ctx.lineTo(x + 6, y - 10);
-      ctx.moveTo(x + 10, y - 8); ctx.lineTo(x + 11, y - 14); ctx.lineTo(x + 6, y - 10);
-      ctx.fill();
-      ctx.fillStyle = '#ffe000';
-      ctx.beginPath(); ctx.arc(x + 4, y - 5, 1.5, 0, Math.PI * 2); ctx.arc(x + 8, y - 5, 1.5, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#2a2a2a';
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(x - 9, y + 2); ctx.quadraticCurveTo(x - 15, y - 2, x - 12, y - 8); ctx.stroke();
-      break;
-    }
-    case 'kids': {
-      ctx.fillStyle = '#5a8ac8';
-      ctx.fillRect(x - 6, y, 12, 12);
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 6, 5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#c9a060';
-      ctx.beginPath(); ctx.arc(x, y - 8, 5, Math.PI, 0); ctx.fill();
+      // Тело
+      ctx.fillStyle = '#606060'; ctx.fillRect(x - 8, py - 6, 16, 18); ctx.strokeRect(x - 8, py - 6, 16, 18);
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 12, 5, 0, Math.PI*2); ctx.fill();
+      // Шлем
+      ctx.fillStyle = '#808080'; ctx.beginPath(); ctx.arc(x, py - 14, 6, Math.PI, 0); ctx.fill();
+      // Копье
+      ctx.fillStyle = '#5a3a20'; ctx.fillRect(x + 10, py - 16, 2, 30);
+      ctx.fillStyle = '#aaa'; ctx.beginPath(); ctx.moveTo(x + 11, py - 24); ctx.lineTo(x + 13, py - 16); ctx.lineTo(x + 9, py - 16); ctx.fill();
       break;
     }
     case 'well': {
-      ctx.fillStyle = '#2a4a8a';
-      ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#7a7a7a';
-      ctx.lineWidth = 5;
-      ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillStyle = '#4ac8ff';
-      ctx.shadowBlur = 12; ctx.shadowColor = '#4ac8ff';
-      ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 0;
+      // Каменный колодец
+      ctx.fillStyle = '#4a4a4a'; ctx.beginPath(); ctx.arc(x, y, 18, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#1a1a1a'; ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.fill();
+      // Вода
+      ctx.fillStyle = '#2a8ac8'; ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fill();
+      // Крыша
+      ctx.fillStyle = '#5a3a20'; ctx.fillRect(x - 16, y - 20, 2, 20); ctx.fillRect(x + 14, y - 20, 2, 20);
+      ctx.fillStyle = '#6a4a2a'; ctx.beginPath(); ctx.moveTo(x - 20, y - 20); ctx.lineTo(x + 20, y - 20); ctx.lineTo(x, y - 34); ctx.fill(); ctx.stroke();
+      break;
+    }
+    case 'cat': {
+      // Тело
+      ctx.fillStyle = '#1a1a1a'; ctx.beginPath(); ctx.ellipse(x, py + 2, 8, 6, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Голова
+      ctx.beginPath(); ctx.arc(x + 6, py - 4, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Уши
+      ctx.beginPath(); ctx.moveTo(x + 3, py - 8); ctx.lineTo(x + 2, py - 12); ctx.lineTo(x + 6, py - 9); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x + 9, py - 8); ctx.lineTo(x + 10, py - 12); ctx.lineTo(x + 6, py - 9); ctx.fill();
+      // Глаза
+      ctx.fillStyle = '#e0ff00'; ctx.beginPath(); ctx.arc(x + 5, py - 4, 1.5, 0, Math.PI*2); ctx.arc(x + 8, py - 4, 1.5, 0, Math.PI*2); ctx.fill();
+      // Хвост
+      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(x - 7, py + 2); ctx.quadraticCurveTo(x - 14, py - 2, x - 10, py - 10); ctx.stroke();
       break;
     }
     case 'questBoard': {
-      ctx.fillStyle = '#5a3a20';
-      ctx.fillRect(x - 14, y - 18, 3, 36);
-      ctx.fillRect(x + 11, y - 18, 3, 36);
-      ctx.fillStyle = '#8a5a2a';
-      ctx.fillRect(x - 14, y - 18, 28, 22);
-      ctx.fillStyle = '#f0ead0';
-      ctx.fillRect(x - 11, y - 16, 8, 10);
-      ctx.fillRect(x + 1, y - 14, 9, 8);
-      ctx.fillRect(x - 6, y - 4, 10, 6);
+      // Столбы
+      ctx.fillStyle = '#3a2010'; ctx.fillRect(x - 14, py - 20, 4, 40); ctx.fillRect(x + 10, py - 20, 4, 40);
+      // Доска
+      ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x - 16, py - 24, 32, 20); ctx.strokeRect(x - 16, py - 24, 32, 20);
+      // Бумажки
+      ctx.fillStyle = '#f0eadd'; ctx.fillRect(x - 12, py - 22, 8, 10); ctx.fillRect(x + 4, py - 20, 10, 12);
       break;
     }
     default: {
-      ctx.fillStyle = '#c9a227';
-      ctx.fillRect(x - 9, y - 4, 18, 18);
-      ctx.fillStyle = '#ffcc99';
-      ctx.beginPath(); ctx.arc(x, y - 12, 6, 0, Math.PI * 2); ctx.fill();
+      // Универсальный NPC
+      ctx.fillStyle = '#c9a227'; ctx.fillRect(x - 8, py - 6, 16, 18); ctx.strokeRect(x - 8, py - 6, 16, 18);
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 12, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     }
   }
 }
