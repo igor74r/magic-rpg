@@ -139,25 +139,20 @@ function render() {
 
   const p = ow.player; nearNpc = null;
   
-  // СТАТИЧНЫЕ ОБЪЕКТЫ (Доска)
   for (const obj of ow.statics || []) {
     const sx = obj.x - cam.x, sy = obj.y - cam.y;
     if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
-    
     const dist = Math.hypot(obj.x - p.x, obj.y - p.y);
     if (dist < obj.interactionRadius && !ow.combat) {
-      nearNpc = obj; // Подсвечиваем как интерактивный объект
+      nearNpc = obj; 
       ctx.fillStyle = 'rgba(255, 215, 0, 0.2)'; ctx.beginPath(); ctx.arc(sx, sy, 28, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
     }
-
     ctx.font = '34px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(obj.emoji, sx, sy);
-    // Название объекта (без блуждания)
     ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
     ctx.strokeText(obj.name, sx, sy - 28); ctx.fillStyle = '#d4c8a8'; ctx.fillText(obj.name, sx, sy - 28);
   }
 
-  // ЖИВЫЕ NPC
   for (const npc of ow.npcs || []) {
     const sx = npc.x - cam.x, sy = npc.y - cam.y;
     if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
@@ -208,7 +203,9 @@ function render() {
   const px = p.x - cam.x, py = p.y - cam.y;
   ctx.font = '38px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(CLASSES[state.game.player.class].emoji, px, py);
   const bw = 50; ctx.fillStyle = '#0a0612'; ctx.fillRect(px - bw / 2, py - 30, bw, 4); ctx.fillRect(px - bw / 2, py - 24, bw, 3);
-  ctx.fillStyle = '#d63030'; ctx.fillRect(px - bw / 2, py - 30, bw * (p.hp / p.maxHp), 4); ctx.fillStyle = '#3060d6'; ctx.fillRect(px - bw / 2, py - 24, bw * (p.mp / p.maxMp), 3);
+  ctx.fillStyle = '#d63030'; ctx.fillRect(px - bw / 2, py - 30, bw * (p.hp / p.maxHp), 4); 
+  ctx.fillStyle = p.class === 'warrior' ? '#ff6020' : '#3060d6'; // Оранжевая ярость у воина
+  ctx.fillRect(px - bw / 2, py - 24, bw * (p.mp / p.maxMp), 3);
 
   for (const part of ow.particles || []) {
     const sx = part.x - cam.x, sy = part.y - cam.y;
@@ -247,7 +244,12 @@ function render() {
   ctx.strokeStyle = 'rgba(201, 162, 39, 0.6)'; ctx.lineWidth = 1.5; ctx.strokeRect(hudX, hudY, 190, 74);
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = 'bold 14px Georgia';
   ctx.fillStyle = '#ff6060'; ctx.fillText(`❤️ HP: ${p.hp} / ${p.maxHp}`, hudX + 10, hudY + 18);
-  ctx.fillStyle = '#60a0ff'; ctx.fillText(`💙 MP: ${p.mp} / ${p.maxMp}`, hudX + 10, hudY + 38);
+  
+  // Меняем цвет и название для Воина
+  const mpLabel = p.class === 'warrior' ? '🔥 Ярость' : '💙 MP';
+  ctx.fillStyle = p.class === 'warrior' ? '#ff9060' : '#60a0ff'; 
+  ctx.fillText(`${mpLabel}: ${p.mp} / ${p.maxMp}`, hudX + 10, hudY + 38);
+  
   ctx.font = '13px Georgia'; ctx.fillStyle = '#ffd060'; ctx.fillText(`⚔️ Урон: ${stats.atk}`, hudX + 10, hudY + 58);
   ctx.fillStyle = '#60ff60'; ctx.fillText(`🛡️ Броня: ${stats.def}`, hudX + 105, hudY + 58);
   ctx.restore();
@@ -353,12 +355,44 @@ function renderCombatPanel() {
   const playerEffects = renderEffectBadges(p.effects); const enemyEffects = renderEffectBadges(c.enemy.effects);
   const hotkeyHint = subPanel ? `<div style="margin-top:4px;font-size:11px;color:#6a5a3a;">[1]–[9] — выбрать · [Esc] — отмена</div>` : `<div style="margin-top:4px;font-size:11px;color:#6a5a3a;">[1] Атака · [2] Магия · [3] Предмет · [4] Побег · [5] Блок · [6] Способность · [Пробел] — быстрая атака · [Esc] — выйти</div>`;
   document.getElementById('combat-panel-info').innerHTML = `⚔️ <b style="color:${nameColor};">${prefix}${def.name}</b> — ${c.enemy.hp}/${c.enemy.maxHp} HP${enemyEffects}${riftLine} · Ход: ${c.turn === 'player' ? '<span style="color:#60ff60;">ваш</span>' : '<span style="color:#ff6060;">врага</span>'}${specialLine}${blockLine}${modLine}${chargeLine}<br><small style="color:#a89060;">Вы${playerEffects} · ${ow.log.slice(-2).map(l => l.msg).join(' · ')}</small>` + hotkeyHint;
+  
   const actions = document.getElementById('combat-panel-actions');
   if (c.turn !== 'player') { actions.innerHTML = `<button disabled style="grid-column:1/-1;">Ход противника...</button>`; return; }
-  if (subPanel === 'spells') { const btns = p.spells.map((id, i) => { const sp = SPELLS[id]; return `<button onclick="GameAPI.owCast('${id}')" ${p.mp < sp.cost ? 'disabled' : ''} style="font-size:13px;">[${i + 1}] ${sp.icon} ${sp.name} (${sp.cost})</button>`; }).join(''); actions.innerHTML = btns + `<button onclick="GameAPI.owCloseSub()" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`; return; }
-  if (subPanel === 'items') { const items = p.inventory.filter(it => ITEMS[it.id].type === 'consumable'); const btns = items.map((it, i) => { const item = ITEMS[it.id]; return `<button onclick="GameAPI.owUseItem('${it.id}')" style="font-size:13px;">[${i + 1}] ${item.icon} ${item.name} ×${it.qty}</button>`; }).join(''); actions.innerHTML = (btns || `<p style="color:#a89060;grid-column:1/-1;text-align:center;">Нет предметов</p>`) + `<button onclick="GameAPI.owCloseSub()" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`; return; }
-  if (subPanel === 'abilities') { const abilities = cls.abilities || []; const btns = abilities.filter(a => !a.passive).map((a, i) => { const cd = p.cooldowns?.[a.id] || 0; const noMp = p.mp < (a.cost || 0); const can = cd === 0 && !noMp; const label = cd > 0 ? `⌛ ${cd}` : (noMp ? 'мало MP' : `MP ${a.cost || 0}`); return `<button onclick="GameAPI.owUseAbility('${a.id}')" ${can ? '' : 'disabled'} style="font-size:13px;" title="${a.desc}">[${i + 1}] ${a.icon} ${a.name} <small style="color:#a89060;">(${label})</small></button>`; }).join(''); actions.innerHTML = btns + `<button onclick="GameAPI.owCloseSub()" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`; return; }
-  actions.innerHTML = `<button onclick="GameAPI.owAttack()">[1] ⚔️ Атака</button><button onclick="GameAPI.owOpenSpells()" ${p.spells.length === 0 ? 'disabled' : ''}>[2] ✨ Магия</button><button onclick="GameAPI.owOpenItems()" ${p.inventory.filter(i => ITEMS[i.id].type === 'consumable').length === 0 ? 'disabled' : ''}>[3] 🎒 Предмет</button><button onclick="GameAPI.owFlee()">[4] 🏃 Побег</button><button onclick="GameAPI.owBlock()" style="background:linear-gradient(180deg,#2a5a8b,#1a3a6a);border-color:#60a0ff;">[5] 🛡️ Блок</button><button onclick="GameAPI.owOpenAbilities()" style="background:linear-gradient(180deg,#5a2a7a,#3a1a4a);border-color:#b060ff;">[6] ✨ Способность</button>`;
+  
+  if (subPanel === 'spells') { 
+    const btns = p.spells.map((id, i) => { 
+      const sp = SPELLS[id]; 
+      let disabled = p.mp < sp.cost;
+      if (id === 'sacrifice') disabled = p.hp <= p.maxHp * sp.selfDamagePct;
+      return `<button onclick="GameAPI.owCast('${id}')" ${disabled ? 'disabled' : ''} style="font-size:13px;">[${i + 1}] ${sp.icon} ${sp.name} ${sp.cost > 0 ? `(${sp.cost})` : '(0)'}</button>`; 
+    }).join(''); 
+    actions.innerHTML = btns + `<button onclick="GameAPI.owCloseSub()" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`; 
+    return; 
+  }
+  
+  if (subPanel === 'items') { 
+    const items = p.inventory.filter(it => ITEMS[it.id].type === 'consumable'); 
+    const btns = items.map((it, i) => { const item = ITEMS[it.id]; return `<button onclick="GameAPI.owUseItem('${it.id}')" style="font-size:13px;">[${i + 1}] ${item.icon} ${item.name} ×${it.qty}</button>`; }).join(''); 
+    actions.innerHTML = (btns || `<p style="color:#a89060;grid-column:1/-1;text-align:center;">Нет предметов</p>`) + `<button onclick="GameAPI.owCloseSub()" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`; 
+    return; 
+  }
+  
+  if (subPanel === 'abilities') { 
+    const abilities = cls.abilities || []; 
+    const btns = abilities.filter(a => !a.passive).map((a, i) => { const cd = p.cooldowns?.[a.id] || 0; const noMp = p.mp < (a.cost || 0); const can = cd === 0 && !noMp; const label = cd > 0 ? `⌛ ${cd}` : (noMp ? 'мало' : `${a.cost || 0}`); return `<button onclick="GameAPI.owUseAbility('${a.id}')" ${can ? '' : 'disabled'} style="font-size:13px;" title="${a.desc}">[${i + 1}] ${a.icon} ${a.name} <small style="color:#a89060;">(${label})</small></button>`; }).join(''); 
+    actions.innerHTML = btns + `<button onclick="GameAPI.owCloseSub()" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`; 
+    return; 
+  }
+
+  // СКРЫВАЕМ КНОПКУ МАГИИ ДЛЯ ВОИНА
+  const hideMagic = p.class === 'warrior';
+  actions.innerHTML = `
+    <button onclick="GameAPI.owAttack()">[1] ⚔️ Атака</button>
+    ${!hideMagic ? `<button onclick="GameAPI.owOpenSpells()" ${p.spells.length === 0 ? 'disabled' : ''}>[2] ✨ Магия</button>` : ''}
+    <button onclick="GameAPI.owOpenItems()" ${p.inventory.filter(i => ITEMS[i.id].type === 'consumable').length === 0 ? 'disabled' : ''}>[3] 🎒 Предмет</button>
+    <button onclick="GameAPI.owFlee()">[4] 🏃 Побег</button>
+    <button onclick="GameAPI.owBlock()" style="background:linear-gradient(180deg,#2a5a8b,#1a3a6a);border-color:#60a0ff;">[5] 🛡️ Блок</button>
+    <button onclick="GameAPI.owOpenAbilities()" style="background:linear-gradient(180deg,#5a2a7a,#3a1a4a);border-color:#b060ff;">[6] ✨ Способность</button>`;
 }
 
 export function owOpenSpells() { subPanel = 'spells'; renderCombatPanel(); }

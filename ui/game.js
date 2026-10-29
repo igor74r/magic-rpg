@@ -30,10 +30,15 @@ export function renderHeader() {
   const p = state.game.player; const points = p.statPoints || 0;
   const statBlock = points > 0 ? `<div class="stat-points-panel"><span class="stat-points-label">🎯 Очков характеристик: ${points}</span><div class="stat-buttons"><button onclick="GameAPI.spendStat('str')">+1 СИЛ</button><button onclick="GameAPI.spendStat('int')">+1 ИНТ</button><button onclick="GameAPI.spendStat('wis')">+1 МДР</button><button onclick="GameAPI.spendStat('con')">+1 ТЕЛ</button></div></div>` : '';
   const effectsHtml = renderActiveEffectsInline(p.effects); const endgameHtml = renderEndgameHint(p);
+  
+  // Для воина показываем Ярость, для остальных MP
+  const mpLabel = p.class === 'warrior' ? '🔥 Ярость' : 'MP';
+  const mpClass = p.class === 'warrior' ? 'bar-hp' : 'bar-mp'; // Оранжевый цвет для ярости
+  
   document.getElementById('game-header').innerHTML = `
     <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;"><div><span style="color:#c9a227;font-size:18px;">${CLASSES[p.class].emoji} ${p.name}</span> <span style="color:#a89060;">— ${CLASSES[p.class].name}, Ур. ${p.level}</span></div><div><span style="color:#ffd060;">💰 ${p.gold}</span></div></div>
     <div class="bar"><div class="bar-fill bar-hp" style="width:${p.hp/p.maxHp*100}%"></div><div class="bar-text">HP ${p.hp}/${p.maxHp}</div></div>
-    <div class="bar"><div class="bar-fill bar-mp" style="width:${p.mp/p.maxMp*100}%"></div><div class="bar-text">MP ${p.mp}/${p.maxMp}</div></div>
+    <div class="bar"><div class="bar-fill ${mpClass}" style="width:${p.mp/p.maxMp*100}%"></div><div class="bar-text">${mpLabel} ${p.mp}/${p.maxMp}</div></div>
     <div class="bar"><div class="bar-fill bar-exp" style="width:${p.exp/p.expNext*100}%"></div><div class="bar-text">EXP ${p.exp}/${p.expNext}</div></div>
     <div style="text-align:center;font-size:11px;color:#a89060;margin-bottom:2px;">До следующего уровня: ${p.expNext - p.exp} EXP</div>
     <div style="margin-top:8px;font-size:13px;color:#a89060;text-align:center;">СИЛ ${p.str} · ИНТ ${p.int} · МДР ${p.wis} · ТЕЛ ${p.con} · ⚔️ ${totalKills()} убийств</div>
@@ -60,6 +65,13 @@ export function switchTab(tab) { state.currentTab = tab; document.querySelectorA
 
 function renderTab(tab) {
   const el = document.getElementById('tab-content');
+  
+  // СКРЫВАЕМ ВКЛАДКУ МАГИИ ДЛЯ ВОИНА
+  if (tab === 'spells' && state.game.player.class === 'warrior') {
+    el.innerHTML = `<p style="color:#a89060;text-align:center;padding:15px;">Воин не умеет колдовать. Используйте способности!</p>`;
+    return;
+  }
+
   if (tab === 'locations') el.innerHTML = renderLocationsHTML();
   else if (tab === 'inventory') el.innerHTML = renderInventoryHTML();
   else if (tab === 'spells') el.innerHTML = renderSpellsHTML();
@@ -87,7 +99,6 @@ function renderLocationsHTML() {
   return `<h3>Действия</h3><div class="actions" style="margin-bottom:15px;">${actions.join('')}</div><div class="divider"></div><h3>Путешествие</h3><div class="location-list">${travelBtns}</div>`;
 }
 
-// НОВЫЕ ДИАЛОГИ И NPC
 function getGreeting(npcId) { const npc = NPCS[npcId]; if (!npc || !npc.greetings) return '...'; return npc.greetings[Math.floor(Math.random() * npc.greetings.length)]; }
 
 export function openBlacksmith() {
@@ -107,7 +118,7 @@ export function openBlacksmith() {
 
 export function openHealer() {
   const npc = NPCS.healer; const p = state.game.player; const cost = npc.cost; const healthy = p.hp >= p.maxHp && p.mp >= p.maxMp; const canPay = p.gold >= cost;
-  document.getElementById('tab-content').innerHTML = `<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('healer')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><div class="npc-stats"><div>HP: <b style="color:${p.hp < p.maxHp ? '#ff6060' : '#60ff60'};">${p.hp}/${p.maxHp}</b></div><div>MP: <b style="color:${p.mp < p.maxMp ? '#60a0ff' : '#60ff60'};">${p.mp}/${p.maxMp}</b></div></div>${healthy ? `<div style="color:#60ff60;text-align:center;padding:15px;">✨ Вы полностью здоровы</div>` : `<button onclick="GameAPI.healAtHealer()" ${canPay ? '' : 'disabled'} class="sell-btn" style="width:100%;padding:14px;">💚 Полное исцеление за ${cost}💰</button>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`;
+  document.getElementById('tab-content').innerHTML = `<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('healer')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><div class="npc-stats"><div>HP: <b style="color:${p.hp < p.maxHp ? '#ff6060' : '#60ff60'};">${p.hp}/${p.maxHp}</b></div><div>${p.class === 'warrior' ? '🔥 Ярость' : 'MP'}: <b style="color:${p.mp < p.maxMp ? '#60a0ff' : '#60ff60'};">${p.mp}/${p.maxMp}</b></div></div>${healthy ? `<div style="color:#60ff60;text-align:center;padding:15px;">✨ Вы полностью здоровы</div>` : `<button onclick="GameAPI.healAtHealer()" ${canPay ? '' : 'disabled'} class="sell-btn" style="width:100%;padding:14px;">💚 Полное исцеление за ${cost}💰</button>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`;
   showScreen('screen-game');
 }
 
@@ -138,7 +149,6 @@ export function openWell() {
   showScreen('screen-game');
 }
 
-// НОВЫЕ NPC
 export function openBard() {
   const p = state.game.player; const hasBuff = p.buffs?.some(b => b.id === 'bardBuff');
   document.getElementById('tab-content').innerHTML = `<div class="npc-header"><div class="npc-emoji">🎵</div><div><h3 style="margin:0;">Бард Лютик</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('bard')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div>${hasBuff ? `<p style="text-align:center; padding: 20px; color: #ffd060;">🎵 Музыка барда вдохновляет вас (+10% опыта).</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Песня барда дает +10% к опыту на 3 боя.</p><button onclick="GameAPI.payBard()" ${p.gold < 15 ? 'disabled' : ''} class="sell-btn" style="padding: 15px 30px;">Заплатить 15💰</button></div>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`;
@@ -183,7 +193,6 @@ export function openQuestBoard() {
   showScreen('screen-game');
 }
 
-// Взаимодействия с новыми NPC
 export function payBardUI() {
   const p = state.game.player; if (p.gold < 15) return; p.gold -= 15;
   if (!p.buffs) p.buffs = []; p.buffs.push({ id: 'bardBuff', duration: 3 });
@@ -205,7 +214,6 @@ export function closeNpcAndResumeUI() { import('./overworld.js').then(m => { m.c
 export function takeElderBlessingUI() { const p = state.game.player; if (!p.effects) p.effects = []; p.effects.push({ id: 'elderBlessing', duration: 10 }); saveGame(); openElder(); toast('✨ Вы получили благословение (+20% опыта)'); }
 export function useWellUI() { const p = state.game.player; p.hp = p.maxHp; p.mp = p.maxMp; if (!p.stats) p.stats = {}; p.stats.lastWellUse = Date.now(); saveGame(); openWell(); toast('💧 Вы полностью исцелены!'); }
 
-// ОСТАЛЬНЫЕ ФУНКЦИИ (Инвентарь, Магазин, Таланты, Тултипы - без изменений)
 function itemHeader(inst, item) { const rar = inst.rarity ? RARITIES[inst.rarity] : null; const color = rar ? rar.color : '#c9a227'; const label = rar && inst.rarity !== 'common' ? ` [${rar.name}]` : ''; const forge = inst.forgeLevel ? ` <span style="color:#ffd060;">+${inst.forgeLevel}</span>` : ''; return `<div class="item-name" style="color:${color};">${item.icon} ${item.name}${label}${forge}</div>`; }
 function itemBonus(inst, item) { const b = inst.bonus || item.bonus; if (!b) return ''; const parts = []; if (b.attack) parts.push(`+${b.attack} атака`); if (b.magic) parts.push(`+${b.magic} магия`); if (b.defense) parts.push(`+${b.defense} защита`); return parts.length ? ` (${parts.join(', ')})` : ''; }
 const RARITY_ORDER = { common: 0, rare: 1, epic: 2, legendary: 3 };
@@ -255,7 +263,7 @@ function renderSpellsHTML() {
   else html += `<p style="color:#a89060;text-align:center;padding:15px;">Вы не знаете заклинаний</p>`;
   if (abilities.length) {
     html += `<h3 style="margin-top:15px;">🌟 Способности класса <span style="color:#a89060;font-size:13px;font-weight:normal;">(в бою — [6])</span></h3><div class="item-list">`;
-    html += abilities.map(a => { const passive = !!a.passive; const cd = cooldowns[a.id] || 0; const noMp = !passive && p.mp < (a.cost || 0); let statusHtml = ''; if (passive) statusHtml = `<span class="ability-status passive">🔒 пассив</span>`; else if (cd > 0) statusHtml = `<span class="ability-status cooldown">⌛ ${cd} ${cd === 1 ? 'ход' : 'хода'}</span>`; else if (noMp) statusHtml = `<span class="ability-status nomana">⚠️ мало MP</span>`; else statusHtml = `<span class="ability-status ready">✅ Готова</span>`; const meta = passive ? 'пассивная' : `${a.cost || 0} MP · кулдаун ${a.cooldown} х.`; return `<div class="item ability-item"><div class="item-info"><div class="item-name">${a.icon} ${a.name}</div><div class="item-desc">${a.desc} · ${meta}</div></div>${statusHtml}</div>`; }).join('');
+    html += abilities.map(a => { const passive = !!a.passive; const cd = cooldowns[a.id] || 0; const noMp = !passive && p.mp < (a.cost || 0); let statusHtml = ''; if (passive) statusHtml = `<span class="ability-status passive">🔒 пассив</span>`; else if (cd > 0) statusHtml = `<span class="ability-status cooldown">⌛ ${cd} ${cd === 1 ? 'ход' : 'хода'}</span>`; else if (noMp) statusHtml = `<span class="ability-status nomana">⚠️ мало ${p.class === 'warrior' ? 'Ярости' : 'MP'}</span>`; else statusHtml = `<span class="ability-status ready">✅ Готова</span>`; const meta = passive ? 'пассивная' : `${a.cost || 0} ${p.class === 'warrior' ? 'Ярости' : 'MP'} · кулдаун ${a.cooldown} х.`; return `<div class="item ability-item"><div class="item-info"><div class="item-name">${a.icon} ${a.name}</div><div class="item-desc">${a.desc} · ${meta}</div></div>${statusHtml}</div>`; }).join('');
     html += `</div>`;
   }
   return html;

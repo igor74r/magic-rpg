@@ -44,5 +44,10 @@ export function getEffStats() {
   const talentBonus = getTalentBonus(p);
   def = Math.floor(def * talentBonus.defMult);
 
+  // 🧙 ШТРАФ МАГА: Физический урон урезан вдвое
+  if (p.class === 'mage') {
+    atk = Math.floor(atk * 0.5);
+  }
+
   return { atk, mag, def };
 }

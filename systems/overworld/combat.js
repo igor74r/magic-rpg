@@ -15,7 +15,7 @@ import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
 import { getRiftMult } from '../rift.js';
-import { updateQuestProgress } from '../dailyQuests.js'; // <--- ДОБАВЛЕНО ДЛЯ КВЕСТОВ
+import { updateQuestProgress } from '../dailyQuests.js';
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
 import { MODIFIERS, ELITE_ATK_MULT, getDropChance, getRespawnMs } from './spawn.js';
@@ -107,6 +107,14 @@ export function combatAttack() {
   e.hp -= dmg;
   ow.floatingNumbers.push({ x: e.x, y: e.y - 20, text: (isCrit ? '!' : '-') + dmg, type: isCrit ? 'crit' : 'damage', life: 1.2 });
   pushLog(`Вы нанесли ${dmg} урона (${enemyDisplayName(e)})${isCrit ? ' КРИТ!' : ''}`, 'damage');
+  
+  // ⚔️ ВОИН: Генерация Ярости от удара
+  if (p.class === 'warrior') {
+    p.mp = Math.min(p.maxMp, p.mp + 15);
+    ow.player.mp = p.mp;
+    pushLog(`🔥 Ярость: +15 (${p.mp}/${p.maxMp})`, 'info');
+  }
+
   playSound(isCrit ? 'crit' : 'hit');
   if (e.hp <= 0) { e.hp = 0; return combatVictory(); }
   checkBossPhase(e);
@@ -119,9 +127,31 @@ export function combatAttack() {
 export function combatCastSpell(spellId) {
   const ow = state.overworld;
   if (!ow || !ow.combat || ow.combat.turn !== 'player') return;
-  const sp = SPELLS[spellId];
+  
   const p = state.game.player;
+  const sp = SPELLS[spellId];
   if (!sp) return;
+
+  // Воины не умеют колдовать!
+  if (p.class === 'warrior') { pushLog('Воин не умеет колдовать!', 'info'); return; }
+
+  // ✨ ЖРЕЦ: Спец-заклинание «Жертва»
+  if (spellId === 'sacrifice') {
+    const hpCost = Math.ceil(p.maxHp * sp.selfDamagePct);
+    if (p.hp <= hpCost) { pushLog('Недостаточно HP для Жертвы!', 'info'); return; }
+    p.hp -= hpCost;
+    p.mp = Math.min(p.maxMp, p.mp + sp.restoreMp);
+    ow.player.hp = p.hp;
+    ow.player.mp = p.mp;
+    ow.floatingNumbers.push({ x: ow.player.x, y: ow.player.y - 20, text: '-' + hpCost, type: 'damage', life: 1.2 });
+    ow.floatingNumbers.push({ x: ow.player.x + 15, y: ow.player.y - 30, text: '+' + sp.restoreMp + ' MP', type: 'heal', life: 1.2 });
+    pushLog(`🩸 Жертва: потрачено ${hpCost} HP, восстановлено ${sp.restoreMp} MP`, 'heal');
+    playSound('heal');
+    ow.combat.turn = 'enemy';
+    setTimeout(enemyCombatTurn, 700);
+    return;
+  }
+
   const freeMana = p.effects?.some(ef => ef.id === 'manaShield');
   if (!freeMana && p.mp < sp.cost) { pushLog('Мало маны', 'info'); return; }
   if (!freeMana) { p.mp -= sp.cost; ow.player.mp = p.mp; }
@@ -147,6 +177,9 @@ export function combatCastSpell(spellId) {
     playSound('heal');
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 6);
   }
+  if (sp.effect) { applyEffect(e, sp.effect); pushLog(`☠️ Наложен эффект: ${sp.effect}`, 'damage'); }
+  if (sp.selfEffect) { applyEffect(p, sp.selfEffect); pushLog(`🛡️ Эффект на вас: ${sp.selfEffect}`, 'success'); }
+
   tickEnemyEffects();
   if (ow.combat && e.hp <= 0) { e.hp = 0; return combatVictory(); }
   ow.combat.turn = 'enemy';
@@ -162,7 +195,11 @@ export function combatUseAbility(abilityId) {
   if (!ability || ability.passive) return;
   const cd = p.cooldowns?.[abilityId] || 0;
   if (cd > 0) { pushLog(`${ability.name}: перезарядка (${cd})`, 'info'); return; }
-  if (p.mp < (ability.cost || 0)) { pushLog('Мало маны', 'info'); return; }
+  
+  if (p.mp < (ability.cost || 0)) { 
+    pushLog(p.class === 'warrior' ? 'Недостаточно Ярости!' : 'Мало маны', 'info'); 
+    return; 
+  }
 
   if (ability.cost) p.mp -= ability.cost;
   ow.player.mp = p.mp;
@@ -439,6 +476,14 @@ function enemyCombatTurn() {
   spawnParticles(ow.player.x, ow.player.y, 'hurt', 6);
   ow.combat.blocking = false;
   playSound('hurt');
+
+  // ⚔️ ВОИН: Генерация Ярости от получения урона
+  if (p.hp > 0 && p.class === 'warrior') {
+    p.mp = Math.min(p.maxMp, p.mp + 10);
+    ow.player.mp = p.mp;
+    pushLog(`🔥 Ярость: +10 (${p.mp}/${p.maxMp})`, 'info');
+  }
+
   if (p.hp <= 0) { p.hp = 0; return combatDefeat(); }
 
   tickPlayerEffects();
@@ -482,8 +527,6 @@ function combatVictory() {
   }
 
   pushLog(`🏆 Победа! +${exp} опыта, +${gold} золота`, 'success');
-
-  // ОБНОВЛЕНИЕ КВЕСТОВ ЗА УБИЙСТВО
   updateQuestProgress('kill', e.enemyId, 1);
 
   spawnParticles(e.x, e.y, 'smoke', 15);
