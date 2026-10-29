@@ -5,33 +5,97 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Осколки Кристалла Маны</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+<!-- ================== ГЛАВНОЕ МЕНЮ ================== -->
 <div id="screen-main" class="screen active">
-  <div class="center-flex">
-    <h1>Осколки Кристалла Маны</h1>
-    <p class="subtitle">Тёмное фэнтези · Магия · RPG</p>
-    <div class="slots-grid" id="slots-grid"></div>
-    <button onclick="GameAPI.openSettings()" style="margin-top:20px;min-width:200px;">⚙️ Настройки</button>
-  </div>
-</div>
-<div id="screen-settings" class="screen">
-  <div class="game-container" style="max-width:500px;">
-    <h1>⚙️ Настройки</h1>
-    <div class="panel">
-      <div class="settings-row"><label>🔊 Громкость</label><input type="range" id="set-volume" min="0" max="100" style="width:180px;"></div>
-      <div class="settings-row"><label>🔉 Звук</label>
-        <select id="set-sound"><option value="on">Вкл</option><option value="off">Выкл</option></select>
-      </div>
-      <div class="settings-row"><label>⚔️ Сложность</label>
-        <select id="set-difficulty"><option value="easy">Лёгкая</option><option value="normal">Обычная</option><option value="hard">Сложная</option></select>
-      </div>
+  <div class="main-menu">
+    <div class="logo-block">
+      <div class="logo-gem">💎</div>
+      <h1 class="game-title">Осколки<br><span>Кристалла Маны</span></h1>
+      <p class="subtitle">Тёмное фэнтези · Магия · RPG</p>
     </div>
-    <button onclick="GameAPI.backFromSettings()" style="margin-top:15px;align-self:center;">← Назад</button>
+
+    <div class="slots-area">
+      <div class="slots-grid" id="slots-grid"></div>
+    </div>
+
+    <div class="main-menu-buttons">
+      <button onclick="GameAPI.openSettings()" class="mm-btn">⚙️ Настройки</button>
+      <button onclick="GameAPI.openAchievementsMenu()" class="mm-btn">🏆 Достижения</button>
+      <button onclick="GameAPI.openHelp()" class="mm-btn">❓ Как играть</button>
+    </div>
+
+    <div class="menu-footer">
+      <span>v0.11 · Осколки Кристалла Маны</span>
+    </div>
   </div>
 </div>
+
+<!-- ================== НАСТРОЙКИ ================== -->
+<div id="screen-settings" class="screen">
+  <div class="game-container" style="max-width:660px;">
+    <h1>⚙️ Настройки</h1>
+    <div class="settings-tabs">
+      <div class="settings-tab active" data-tab="sound" onclick="GameAPI.switchSettingsTab('sound')">🔊 Звук</div>
+      <div class="settings-tab" data-tab="game" onclick="GameAPI.switchSettingsTab('game')">🎮 Игра</div>
+      <div class="settings-tab" data-tab="data" onclick="GameAPI.switchSettingsTab('data')">💾 Данные</div>
+    </div>
+    <div class="panel" id="settings-content"></div>
+    <button onclick="GameAPI.backFromSettings()" class="settings-back-btn">← Назад</button>
+  </div>
+</div>
+
+<!-- ================== ПОМОЩЬ ================== -->
+<div id="screen-help" class="screen">
+  <div class="game-container" style="max-width:760px;">
+    <h1>❓ Как играть</h1>
+    <div class="panel help-panel">
+      <h3>🎯 Цель</h3>
+      <p>Соберите <b>три осколка Кристалла Маны</b>. Победите мини-боссов в <b>Тёмном лесу</b>, <b>Руинах</b> и <b>Пещере теней</b>. После сбора всех осколков откроется эндгейм — <b>Бесконечный Разлом</b> и режим <b>NG+</b>.</p>
+      <div class="divider"></div>
+      <h3>🎮 Управление</h3>
+      <div class="help-keys">
+        <div class="help-key-row"><kbd>WASD</kbd><span>или</span><kbd>Стрелки</kbd><span>Движение</span></div>
+        <div class="help-key-row"><kbd>Esc</kbd><span>Пауза / выход из боя</span></div>
+        <div class="help-key-row"><kbd>Пробел</kbd><span>или</span><kbd>1</kbd><span>Атака</span></div>
+        <div class="help-key-row"><kbd>2</kbd><span>Магия (только Маг и Жрец)</span></div>
+        <div class="help-key-row"><kbd>3</kbd><span>Использовать предмет</span></div>
+        <div class="help-key-row"><kbd>4</kbd><span>Побег (шанс 60%)</span></div>
+        <div class="help-key-row"><kbd>5</kbd><span>Блок (урон ×0.5)</span></div>
+        <div class="help-key-row"><kbd>6</kbd><span>Способность класса</span></div>
+      </div>
+      <div class="divider"></div>
+      <h3>⚔️ Классы</h3>
+      <p><b>⚔️ Воин</b> — не знает заклинаний, но копит <b>Ярость</b> от ударов и полученного урона. Тратит её на мощные способности.</p>
+      <p><b>🧙 Маг</b> — слаб физически (урон от оружия вдвое ниже), но его заклинания сокрушительны. Полностью зависит от маны.</p>
+      <p><b>✨ Жрец</b> — лечит, снимает дебаффы, а заклинание «Жертва» обменивает HP на ману. Уникальная пассивка «Воскрешение» — раз за бой спасает от смерти.</p>
+      <div class="divider"></div>
+      <h3>💡 Советы новичкам</h3>
+      <ul>
+        <li>Следи за индикатором особой атаки врага (⚠️ в панели боя) — когда «следующий ход», лучше ставить блок.</li>
+        <li>В деревне есть кузнец (улучшает экипировку), алхимик (крафтит зелья), лекарь (лечит за золото).</li>
+        <li>Не забывай про ежедневный сундук в деревне — 100 золота + случайное зелье раз в сутки.</li>
+        <li>Достижения дают золото. Заглядывай в «🏆 Достижения» в игре.</li>
+        <li>В бою следи за значками эффектов — яд/ожог/кровотечение тикают урон каждый ход.</li>
+      </ul>
+    </div>
+    <button onclick="GameAPI.showScreen('screen-main')" class="settings-back-btn">← Назад</button>
+  </div>
+</div>
+
+<!-- ================== ДОСТИЖЕНИЯ (просмотр) ================== -->
+<div id="screen-achievements-menu" class="screen">
+  <div class="game-container" style="max-width:760px;">
+    <h1>🏆 Достижения</h1>
+    <div class="panel" id="menu-achievements-content"></div>
+    <button onclick="GameAPI.showScreen('screen-main')" class="settings-back-btn">← Назад</button>
+  </div>
+</div>
+
+<!-- ================== ВЫБОР КЛАССА ================== -->
 <div id="screen-char" class="screen">
   <div class="game-container" style="align-items:center;">
     <h1>Выбор класса</h1>
@@ -44,6 +108,8 @@
     <button onclick="GameAPI.showScreen('screen-main');GameAPI.updateMainMenu();" style="margin-top:15px;">← Назад</button>
   </div>
 </div>
+
+<!-- ================== ИГРА ================== -->
 <div id="screen-game" class="screen">
   <div class="game-container">
     <div class="panel" id="game-header"></div>
@@ -64,6 +130,8 @@
     </div>
   </div>
 </div>
+
+<!-- ================== OVERWORLD ================== -->
 <div id="screen-overworld" class="screen">
   <div class="game-container" style="max-width:840px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;">
@@ -72,13 +140,10 @@
     </div>
     <div style="position:relative;">
       <canvas id="overworld-canvas" width="800" height="500" style="border:2px solid #5a4a3a;border-radius:8px;max-width:100%;height:auto;display:block;background:#1a2e1a;"></canvas>
-      
       <div id="combat-panel">
         <div id="combat-panel-info"></div>
         <div class="actions" id="combat-panel-actions"></div>
       </div>
-
-      <!-- ПАНЕЛЬ ДИАЛОГОВ NPC -->
       <div id="npc-panel" style="display:none; background:rgba(10,6,18,0.94); border:2px solid #c9a227; border-top:none; border-radius:0 0 8px 8px; padding:12px;">
         <div id="npc-panel-info" style="color:#d4c8a8; font-size:14px; margin-bottom:8px;"></div>
         <div class="actions" id="npc-panel-actions"></div>
@@ -89,6 +154,8 @@
     </p>
   </div>
 </div>
+
+<!-- ================== СМЕРТЬ ================== -->
 <div id="screen-death" class="screen">
   <div class="center-flex">
     <h1 style="color:#8b1a1a;font-size:60px;text-shadow:0 0 30px rgba(139,26,26,0.6);">💀 Вы пали</h1>
@@ -102,6 +169,8 @@
     </div>
   </div>
 </div>
+
+<!-- ================== ПОБЕДА ================== -->
 <div id="screen-victory" class="screen">
   <div class="center-flex">
     <h1 style="font-size:50px;">🏆 Победа!</h1>
@@ -114,6 +183,7 @@
     </div>
   </div>
 </div>
+
 <script type="module" src="main.js"></script>
 </body>
 </html>

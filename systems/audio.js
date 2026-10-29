@@ -2,7 +2,8 @@ import { state } from './state.js';
 
 let ctx = null;
 let masterGain = null;
-let bgmGain = null;
+let musicGain = null;
+let sfxGain = null;
 let bgmState = { current: null };
 let lastStepTime = 0;
 
@@ -15,31 +16,42 @@ const BGM_TRACKS = {
 let currentBgmAudio = null;
 let currentBgmSource = null;
 
+function getMusicVolume() {
+  const v = (state.settings?.musicVolume ?? 60) / 100;
+  return v * 0.6;
+}
+
+function getSfxVolume() {
+  const v = (state.settings?.sfxVolume ?? 80) / 100;
+  return v * 0.7;
+}
+
 export function initAudio() {
   if (ctx) return;
   try {
     ctx = new (window.AudioContext || window.webkitAudioContext)();
+    
     masterGain = ctx.createGain();
-    masterGain.gain.value = getVolume();
+    masterGain.gain.value = state.settings?.soundEnabled !== false ? 1.0 : 0;
     masterGain.connect(ctx.destination);
     
-    bgmGain = ctx.createGain();
-    bgmGain.gain.value = 0.5; 
-    bgmGain.connect(masterGain);
+    musicGain = ctx.createGain();
+    musicGain.gain.value = getMusicVolume();
+    musicGain.connect(masterGain);
+    
+    sfxGain = ctx.createGain();
+    sfxGain.gain.value = getSfxVolume();
+    sfxGain.connect(masterGain);
   } catch (e) {
     console.warn('Web Audio не поддерживается:', e);
   }
 }
 
-function getVolume() {
-  const v = (state.settings?.volume ?? 50) / 100;
-  const enabled = state.settings?.soundEnabled !== false;
-  return enabled ? v * 0.5 : 0;
-}
-
 export function updateVolume() {
-  if (!masterGain || !ctx) return;
-  masterGain.gain.setTargetAtTime(getVolume(), ctx.currentTime, 0.05);
+  if (!ctx) return;
+  if (masterGain) masterGain.gain.setTargetAtTime(state.settings?.soundEnabled !== false ? 1.0 : 0, ctx.currentTime, 0.05);
+  if (musicGain) musicGain.gain.setTargetAtTime(getMusicVolume(), ctx.currentTime, 0.05);
+  if (sfxGain) sfxGain.gain.setTargetAtTime(getSfxVolume(), ctx.currentTime, 0.05);
 }
 
 export function resumeContext() {
@@ -47,6 +59,7 @@ export function resumeContext() {
 }
 
 // ---------- СИНТЕЗАТОР ЗВУКОВ ----------
+
 function noiseBuffer(duration) {
   const sr = ctx.sampleRate;
   const len = Math.floor(sr * duration);
@@ -57,7 +70,7 @@ function noiseBuffer(duration) {
 }
 
 function playTone({ freq, freqEnd, duration, type = 'sine', vol = 0.3, delay = 0 }) {
-  if (!ctx) return;
+  if (!ctx || !sfxGain) return;
   const t0 = ctx.currentTime + delay;
   const osc = ctx.createOscillator();
   const g = ctx.createGain();
@@ -67,13 +80,13 @@ function playTone({ freq, freqEnd, duration, type = 'sine', vol = 0.3, delay = 0
   g.gain.setValueAtTime(0, t0);
   g.gain.linearRampToValueAtTime(vol, t0 + 0.01);
   g.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
-  osc.connect(g).connect(masterGain);
+  osc.connect(g).connect(sfxGain);
   osc.start(t0);
   osc.stop(t0 + duration + 0.02);
 }
 
 function playNoise({ duration, vol = 0.3, filterFreq = 2000, filterEnd, delay = 0 }) {
-  if (!ctx) return;
+  if (!ctx || !sfxGain) return;
   const t0 = ctx.currentTime + delay;
   const src = ctx.createBufferSource();
   src.buffer = noiseBuffer(duration);
@@ -85,7 +98,7 @@ function playNoise({ duration, vol = 0.3, filterFreq = 2000, filterEnd, delay = 
   const g = ctx.createGain();
   g.gain.setValueAtTime(vol, t0);
   g.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
-  src.connect(filter).connect(g).connect(masterGain);
+  src.connect(filter).connect(g).connect(sfxGain);
   src.start(t0);
   src.stop(t0 + duration + 0.02);
 }
@@ -154,6 +167,7 @@ export function playSound(name) {
 }
 
 // ---------- ФОНОВАЯ МУЗЫКА ----------
+
 export function playBGM(type) {
   if (!ctx) return;
   if (ctx.state === 'suspended') ctx.resume().catch(() => {});
@@ -170,12 +184,11 @@ export function playBGM(type) {
   
   try {
     currentBgmSource = ctx.createMediaElementSource(currentBgmAudio);
-    currentBgmSource.connect(bgmGain);
+    currentBgmSource.connect(musicGain);
   } catch (e) {
     console.warn('Не удалось подключить аудио к контексту.', e);
   }
 
-  // Настройка громкости: бой - 30%, остальное - 100%
   if (type === 'combat') {
     currentBgmAudio.volume = 0.3; 
   } else {

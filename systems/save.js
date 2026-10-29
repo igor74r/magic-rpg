@@ -4,7 +4,7 @@ const SLOT_PREFIX = 'magic-rpg-save-';
 const LEGACY_KEY = 'magic-rpg-save';
 const SETTINGS_KEY = 'magic-rpg-settings';
 const SAVE_VERSION = 9;
-const SETTINGS_VERSION = 2;
+const SETTINGS_VERSION = 3;
 const MAX_SLOT = 3;
 
 let lastSaveTime = null;
@@ -124,10 +124,40 @@ export function getSlotInfo(slot) {
 
 export function getMaxSlot() { return MAX_SLOT; }
 
-export function loadSettings() {
-  const data = localStorage.getItem(SETTINGS_KEY);
-  if (data) { try { state.settings = { ...state.settings, ...JSON.parse(data) }; } catch (e) {} }
-  if (state.settings.settingsVersion === undefined) state.settings.settingsVersion = SETTINGS_VERSION;
+// ---------- НАСТРОЙКИ ----------
+
+export function migrateSettings(s) {
+  if (!s || typeof s !== 'object') s = {};
+  
+  if (typeof s.musicVolume !== 'number') s.musicVolume = typeof s.volume === 'number' ? s.volume : 60;
+  if (typeof s.sfxVolume !== 'number') s.sfxVolume = typeof s.volume === 'number' ? s.volume : 80;
+  if (typeof s.autoSave !== 'boolean') s.autoSave = true;
+  if (typeof s.showHotkeys !== 'boolean') s.showHotkeys = true;
+  if (typeof s.showFps !== 'boolean') s.showFps = false;
+  if (typeof s.difficulty !== 'string') s.difficulty = 'normal';
+  if (typeof s.soundEnabled !== 'boolean') s.soundEnabled = true;
+  
+  delete s.volume;
+  s.settingsVersion = SETTINGS_VERSION;
+  return s;
 }
 
-export function saveSettings() { state.settings.settingsVersion = SETTINGS_VERSION; localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings)); }
+export function loadSettings() {
+  const data = localStorage.getItem(SETTINGS_KEY);
+  if (data) {
+    try {
+      const parsed = JSON.parse(data);
+      state.settings = migrateSettings({ ...state.settings, ...parsed });
+    } catch (e) {
+      state.settings = migrateSettings(state.settings);
+    }
+  } else {
+    state.settings = migrateSettings(state.settings);
+  }
+  saveSettings();
+}
+
+export function saveSettings() {
+  state.settings.settingsVersion = SETTINGS_VERSION;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+}

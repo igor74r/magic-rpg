@@ -882,3 +882,205 @@ input[type="text"] { width: 100%; }
   background: linear-gradient(90deg, #7a00ff, #ff00c8);
   box-shadow: 0 0 12px rgba(255, 0, 200, 0.6);
 }
+/* ============ ГЛАВНОЕ МЕНЮ ============ */
+.main-menu {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+}
+.logo-block {
+  text-align: center;
+  animation: logoFloat 4s ease-in-out infinite;
+}
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.logo-gem {
+  font-size: 80px;
+  line-height: 1;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 25px rgba(201,162,39,0.8)) drop-shadow(0 0 50px rgba(160,96,255,0.4));
+  animation: gemPulse 3s ease-in-out infinite;
+}
+@keyframes gemPulse {
+  0%, 100% { filter: drop-shadow(0 0 25px rgba(201,162,39,0.8)) drop-shadow(0 0 50px rgba(160,96,255,0.4)); }
+  50%      { filter: drop-shadow(0 0 40px rgba(201,162,39,1)) drop-shadow(0 0 80px rgba(160,96,255,0.7)); }
+}
+.game-title {
+  font-family: 'Georgia', serif;
+  font-size: 48px;
+  color: #fff;
+  text-align: center;
+  line-height: 1.05;
+  font-weight: bold;
+  text-shadow: 0 0 20px rgba(201,162,39,0.7), 0 0 40px rgba(201,162,39,0.4), 0 4px 8px #000;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.game-title span {
+  color: #c9a227;
+  font-size: 0.7em;
+  letter-spacing: 4px;
+}
+.slots-area {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.main-menu-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+.mm-btn {
+  min-width: 200px;
+  padding: 14px 24px;
+  font-size: 15px;
+  background: linear-gradient(180deg, rgba(58,37,96,0.9), rgba(26,15,46,0.95));
+  border: 2px solid rgba(201,162,39,0.5);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 20px rgba(201,162,39,0.1);
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+.mm-btn:hover {
+  border-color: #c9a227;
+  box-shadow: 0 0 25px rgba(201,162,39,0.6), inset 0 0 20px rgba(201,162,39,0.2);
+  transform: translateY(-2px);
+}
+.menu-footer {
+  margin-top: 20px;
+  color: #6a5a3a;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+}
+
+/* ============ НАСТРОЙКИ (ТАБЫ) ============ */
+.settings-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.settings-tab {
+  padding: 10px 22px;
+  background: rgba(26,15,46,0.7);
+  border: 2px solid #5a4a3a;
+  border-radius: 8px;
+  color: #a89060;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.settings-tab:hover {
+  border-color: #c9a227;
+  color: #d4c8a8;
+}
+.settings-tab.active {
+  background: rgba(58,37,96,0.9);
+  border-color: #c9a227;
+  color: #ffd060;
+  box-shadow: 0 0 12px rgba(201,162,39,0.4);
+}
+.settings-back-btn {
+  margin-top: 20px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 200px;
+}
+#settings-content .settings-row {
+  display: grid;
+  grid-template-columns: 180px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+#settings-content .settings-row:last-child {
+  border-bottom: none;
+}
+#settings-content .settings-row label {
+  color: #d4c8a8;
+  font-size: 14px;
+}
+#settings-content .settings-row input[type="range"] {
+  width: 100%;
+}
+#settings-content .settings-row select {
+  padding: 8px 12px;
+  font-size: 14px;
+  background: #0a0612;
+  border: 1px solid #5a4a3a;
+  color: #d4c8a8;
+  border-radius: 4px;
+  font-family: 'Georgia', serif;
+}
+#settings-content .settings-row span {
+  color: #c9a227;
+  font-weight: bold;
+  font-size: 13px;
+  min-width: 44px;
+  text-align: right;
+}
+
+/* ============ ЭКРАН ПОМОЩИ ============ */
+.help-panel {
+  line-height: 1.7;
+  font-size: 14px;
+}
+.help-panel h3 {
+  color: #c9a227;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+.help-panel p {
+  color: #d4c8a8;
+  margin-bottom: 10px;
+}
+.help-panel b {
+  color: #ffd060;
+}
+.help-panel ul {
+  padding-left: 20px;
+  color: #d4c8a8;
+}
+.help-panel ul li {
+  margin-bottom: 6px;
+}
+.help-keys {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(10,6,18,0.5);
+  border-radius: 6px;
+}
+.help-key-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: #d4c8a8;
+  font-size: 13px;
+}
+.help-key-row kbd {
+  background: linear-gradient(180deg, #3a2560, #1a0f2e);
+  border: 1px solid #c9a227;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #ffd060;
+  min-width: 28px;
+  text-align: center;
+}

@@ -1005,7 +1005,7 @@ function startAutosave() {
   if (autosaveTimer) return;
   autosaveTimer = setInterval(() => {
     const ow = state.overworld;
-    if (ow && ow.active && !ow.combat && !ow.defeated && !paused) { saveGame(); autosaveAt = performance.now(); }
+    if (ow && ow.active && !ow.combat && !ow.defeated && !paused && state.settings?.autoSave !== false) { saveGame(); autosaveAt = performance.now(); }
   }, 30000);
 }
 
@@ -1282,6 +1282,23 @@ function render() {
 
   const stats = getEffStats();
   drawHud(ctx, p, stats, state.game.player.class);
+
+  if (state.settings?.showFps) {
+    if (!window._fpsState) window._fpsState = { frames: 0, lastTime: performance.now(), value: 0 };
+    window._fpsState.frames++;
+    const nowT = performance.now();
+    if (nowT - window._fpsState.lastTime >= 1000) {
+      window._fpsState.value = window._fpsState.frames;
+      window._fpsState.frames = 0;
+      window._fpsState.lastTime = nowT;
+    }
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillStyle = '#00ff00';
+    ctx.fillText(`FPS: ${window._fpsState.value}`, VIEW_W - 160, VIEW_H - 12);
+  }
+
   ctx.restore();
 
   drawMinimap(ctx, ow);
@@ -1378,7 +1395,8 @@ function renderCombatPanel() {
   const chargeLine = c.playerChargeNext ? ` · <span style="color:#ffd060;">⚡ рывок готов</span>` : ''; const riftLine = ow.rifMode ? ` · <span style="color:#b060ff;font-weight:bold;">🌀 Этаж ${ow.rifFloor}</span>` : '';
   const renderEffectBadges = (effects) => { if (!effects || !effects.length) return ''; return '<div style="display:inline-flex;gap:4px;margin-left:6px;vertical-align:middle;">' + effects.map(e => { const d = EFFECTS_DATA[e.id]; if (!d) return ''; return `<span class="fx-badge" style="border-color:${d.color};color:${d.color};" title="${d.name} (${e.duration})">${d.icon}${e.duration}</span>`; }).join('') + '</div>'; };
   const playerEffects = renderEffectBadges(p.effects); const enemyEffects = renderEffectBadges(c.enemy.effects);
-  const hotkeyHint = subPanel ? `<div style="margin-top:4px;font-size:11px;color:#6a5a3a;">[1]–[9] — выбрать · [Esc] — отмена</div>` : `<div style="margin-top:4px;font-size:11px;color:#6a5a3a;">[1] Атака · [2] Магия · [3] Предмет · [4] Побег · [5] Блок · [6] Способность · [Пробел] — быстрая атака · [Esc] — выйти</div>`;
+  const showHK = state.settings?.showHotkeys !== false;
+  const hotkeyHint = !showHK ? '' : (subPanel ? `<div style="margin-top:4px;font-size:11px;color:#6a5a3a;">[1]–[9] — выбрать · [Esc] — отмена</div>` : `<div style="margin-top:4px;font-size:11px;color:#6a5a3a;">[1] Атака · [2] Магия · [3] Предмет · [4] Побег · [5] Блок · [6] Способность · [Пробел] — быстрая атака · [Esc] — выйти</div>`);
   document.getElementById('combat-panel-info').innerHTML = `⚔️ <b style="color:${nameColor};">${prefix}${def.name}</b> — ${c.enemy.hp}/${c.enemy.maxHp} HP${enemyEffects}${riftLine} · Ход: ${c.turn === 'player' ? '<span style="color:#60ff60;">ваш</span>' : '<span style="color:#ff6060;">врага</span>'}${specialLine}${blockLine}${modLine}${chargeLine}<br><small style="color:#a89060;">Вы${playerEffects} · ${ow.log.slice(-2).map(l => l.msg).join(' · ')}</small>` + hotkeyHint;
   
   const actions = document.getElementById('combat-panel-actions');

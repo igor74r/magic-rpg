@@ -3,7 +3,9 @@ import { on } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
 import {
   updateMainMenu, openSettings, backFromSettings, saveAndMenu,
-  loadSlot, newGameSlot, deleteSlot, renderSlots
+  loadSlot, newGameSlot, deleteSlot, renderSlots,
+  switchSettingsTab, applySettings, resetAllSettings, deleteAllSaves,
+  openAchievementsMenu, openHelp
 } from './ui/menu.js';
 import { selectClass, confirmClassSelection } from './ui/character.js';
 import {
@@ -167,7 +169,11 @@ function interactNpc(npcId) {
 }
 
 window.GameAPI = {
-  openSettings, backFromSettings, saveAndMenu, updateMainMenu,
+  updateMainMenu,
+  openSettings, switchSettingsTab, applySettings, backFromSettings,
+  resetAllSettings, deleteAllSaves,
+  openAchievementsMenu, openHelp,
+  saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
   selectClass, confirmClassSelection,
   switchTab, travelTo, useItemOutside,
