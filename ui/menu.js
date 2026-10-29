@@ -136,11 +136,28 @@ function renderSettingsTab(tab) {
     `;
   } else if (tab === 'data') {
     content.innerHTML = `
-      <p style="color:#a89060;margin-bottom:20px;line-height:1.7;font-size:14px;">Эти действия <b style="color:#ff6060;">необратимы</b>. Используй с осторожностью.</p>
-      <button onclick="GameAPI.deleteAllSaves()" style="width:100%;border-color:#8b1a1a;background:linear-gradient(180deg,#5a1a1a,#2a0a0a);">
+      <p style="color:#a89060;margin-bottom:16px;line-height:1.7;font-size:13px;">
+        <b style="color:#60ff60;">💾 Бэкап:</b> скачайте сейв в файл — на случай очистки кэша или переноса на другое устройство.
+      </p>
+      <button onclick="GameAPI.exportSave()" style="width:100%;border-color:#60ff60;background:linear-gradient(180deg,#2a5a3a,#1a3a2a);margin-bottom:10px;">
+        💾 Экспортировать сейв (файл .json)
+      </button>
+      <label style="display:block;width:100%;margin-bottom:16px;">
+        <input type="file" id="import-save-input" accept=".json" style="display:none;" onchange="GameAPI.importSave(event)">
+        <button onclick="document.getElementById('import-save-input').click()" style="width:100%;border-color:#60a0ff;background:linear-gradient(180deg,#1a3a6a,#0a1a3a);">
+          📂 Импортировать сейв
+        </button>
+      </label>
+
+      <div class="divider"></div>
+
+      <p style="color:#a89060;margin-bottom:16px;line-height:1.7;font-size:13px;">
+        <b style="color:#ff6060;">⚠️ Опасные действия:</b> необратимы. Используйте с осторожностью.
+      </p>
+      <button onclick="GameAPI.deleteAllSaves()" style="width:100%;border-color:#8b1a1a;background:linear-gradient(180deg,#5a1a1a,#2a0a0a);margin-bottom:10px;">
         🗑️ Удалить ВСЕ сохранения (все 3 слота)
       </button>
-      <button onclick="GameAPI.resetAllSettings()" style="width:100%;margin-top:12px;">
+      <button onclick="GameAPI.resetAllSettings()" style="width:100%;">
         🔄 Сбросить настройки на стандартные
       </button>
     `;
@@ -314,4 +331,55 @@ export function saveAndMenu() {
   stopBGM();
   showScreen('screen-main');
   updateMainMenu();
+}
+
+// ============ ЭКСПОРТ / ИМПОРТ ============
+
+export function exportSave() {
+  if (!state.game) { toast('Нет активной игры для экспорта. Загрузите слот.'); return; }
+  const slot = state.currentSlot || 1;
+  const data = localStorage.getItem(`magic-rpg-save-${slot}`);
+  if (!data) { toast('Слот пустой'); return; }
+
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const pName = (state.game.player?.name || 'hero').replace(/[^a-zа-яё0-9]/gi, '_');
+  a.href = url;
+  a.download = `magic-rpg-${pName}-slot${slot}-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('💾 Сейв скачан');
+}
+
+export function importSave(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.player || !data.player.name) {
+        toast('❌ Неверный формат файла');
+        event.target.value = '';
+        return;
+      }
+      const slot = state.currentSlot || 1;
+      const pName = data.player.name;
+      const pLvl = data.player.level || 1;
+      if (!confirm(`Импортировать сейв «${pName}» (Ур. ${pLvl}) в слот ${slot}?\n\nТекущий слот будет перезаписан.`)) {
+        event.target.value = '';
+        return;
+      }
+      localStorage.setItem(`magic-rpg-save-${slot}`, JSON.stringify(data));
+      toast('✅ Сейв импортирован! Перезагрузка...');
+      setTimeout(() => location.reload(), 900);
+    } catch (err) {
+      toast('❌ Ошибка чтения файла');
+      event.target.value = '';
+    }
+  };
+  reader.readAsText(file);
 }

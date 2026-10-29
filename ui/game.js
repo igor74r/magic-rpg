@@ -154,8 +154,52 @@ export function openMerchant() {
 }
 
 export function openElder() {
-  const p = state.game.player; const hasBlessing = p.effects?.some(e => e.id === 'elderBlessing');
-  document.getElementById('tab-content').innerHTML = `<div class="npc-header"><div class="npc-emoji">👴</div><div><h3 style="margin:0;">Старейшина Эдвин</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('elder')}»</p></div></div>${hasBlessing ? `<p style="text-align:center; padding: 20px; color: #60ff60;">✨ Вы уже получили благословение старейшины.</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Благословение дает +20% к получаемому опыту на 10 боев.</p><button onclick="GameAPI.takeElderBlessing()" class="sell-btn" style="padding: 15px 30px;">Принять благословение</button></div>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`;
+  const p = state.game.player;
+  const hasBlessing = p.effects?.some(e => e.id === 'elderBlessing');
+  const isFirstMeet = !p.stats?.metElder;
+  const shardsCount = Object.values(state.game.shards || {}).filter(Boolean).length;
+
+  let dialogue = '';
+  if (isFirstMeet) {
+    dialogue = `
+      <div style="background:rgba(10,6,18,0.6);padding:16px;border-left:3px solid #c9a227;border-radius:6px;margin-bottom:15px;">
+        <p style="color:#d4c8a8;font-style:italic;line-height:1.7;">
+          «Слушай меня внимательно, странник.<br><br>
+          Кристалл Маны расколот. Три осколка разбросаны по землям:<br>
+          <b style="color:#60ff60;">🌲 в Тёмном лесу</b>,<br>
+          <b style="color:#60a0ff;">🏛️ в Руинах павшего храма</b>,<br>
+          <b style="color:#b060ff;">🕳️ в Пещере теней</b>.<br><br>
+          Победи их стражей — и верни осколки. Иначе тьма поглотит всё.<br>
+          Прими моё благословение — оно укрепит твой дух.»
+        </p>
+      </div>`;
+  } else if (shardsCount === 3) {
+    dialogue = `<p style="text-align:center;padding:15px;color:#60ff60;">✨ Осколки собраны! Разлом открыт — иди в портал.</p>`;
+  } else if (shardsCount > 0) {
+    dialogue = `<p style="text-align:center;padding:15px;color:#ffd060;">Осколков собрано: <b>${shardsCount}/3</b>. Продолжай путь.</p>`;
+  }
+
+  document.getElementById('tab-content').innerHTML = `
+    <div class="npc-header">
+      <div class="npc-emoji">👴</div>
+      <div><h3 style="margin:0;">Старейшина Эдвин</h3>
+      <p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('elder')}»</p></div>
+    </div>
+    ${dialogue}
+    ${hasBlessing
+      ? `<p style="text-align:center;padding:20px;color:#60ff60;">✨ Вы уже получили благословение старейшины.</p>`
+      : `<div style="text-align:center;margin:20px 0;">
+          <p style="margin-bottom:15px;">Благословение дает +20% к получаемому опыту на 10 боев.</p>
+          <button onclick="GameAPI.takeElderBlessing()" class="sell-btn" style="padding:15px 30px;">Принять благословение</button>
+        </div>`}
+    <button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>
+  `;
+
+  if (isFirstMeet) {
+    if (!p.stats) p.stats = {};
+    p.stats.metElder = true;
+    saveGame();
+  }
   showScreen('screen-game');
 }
 

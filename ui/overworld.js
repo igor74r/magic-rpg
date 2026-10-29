@@ -52,6 +52,26 @@ export function initOverworld() {
   closePauseMenu(); startAutosave();
   if (!rafId) { lastTs = performance.now(); rafId = requestAnimationFrame(tick); }
   renderCombatPanel(); renderNpcPanel();
+  initMobileDpad();
+}
+
+function initMobileDpad() {
+  const dpad = document.getElementById('mobile-dpad');
+  if (!dpad) return;
+  if (dpad.dataset.bound) return;
+  if (!window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 900) return;
+  dpad.style.display = 'block';
+  dpad.dataset.bound = '1';
+  dpad.querySelectorAll('.dpad-btn').forEach(btn => {
+    const key = btn.dataset.key;
+    const setKey = (val) => { if (state.overworld) state.overworld.keys[key] = val; };
+    btn.addEventListener('touchstart', (e) => { e.preventDefault(); setKey(true); }, { passive: false });
+    btn.addEventListener('touchend', (e) => { e.preventDefault(); setKey(false); }, { passive: false });
+    btn.addEventListener('touchcancel', (e) => { e.preventDefault(); setKey(false); }, { passive: false });
+    btn.addEventListener('mousedown', (e) => { e.preventDefault(); setKey(true); });
+    btn.addEventListener('mouseup', () => setKey(false));
+    btn.addEventListener('mouseleave', () => setKey(false));
+  });
 }
 
 function startAutosave() {
@@ -229,7 +249,6 @@ function render() {
   ctx.save();
   if (ow.shake && ow.shake.t > 0) ctx.translate((Math.random() * 2 - 1) * ow.shake.mag, (Math.random() * 2 - 1) * ow.shake.mag);
   
-  // ⬇️ Фон и границы карты (убирает черные полосы)
   ctx.fillStyle = theme.colors[0] || '#2a4a2a'; 
   ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
 
@@ -290,7 +309,6 @@ function render() {
     ctx.strokeText(npc.name, sx, sy - 24); ctx.fillStyle = '#d4c8a8'; ctx.fillText(npc.name, sx, sy - 24);
   }
 
-  // ⬇️ Отрисовка случайных событий
   for (const ev of ow.events || []) {
     const sx = ev.x - cam.x, sy = ev.y - cam.y;
     if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
@@ -414,7 +432,6 @@ function renderNpcPanel() {
   lastNpcKey = key;
   panel.style.display = 'block';
 
-  // ⬇️ Разный текст и стиль для событий и NPC
   const isEvent = !!nearNpc.isEvent;
   const infoText = isEvent
     ? `<b style="color:#ffd060;">✨ ${nearNpc.name}</b> — вы нашли что-то интересное.`

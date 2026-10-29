@@ -1,5 +1,5 @@
 export const SPELLS = {
-  "fireball":     { name: "Огненный шар",   icon: "🔥", cost: 15, desc: "Наносит 35 урона огнём.", damage: 35, effect: "burn" },
+  "fireball":     { name: "Огненный шар",   icon: "🔥", cost: 15, desc: "Наносит 25 урона огнём.", damage: 25, effect: "burn" },
   "ice-bolt":     { name: "Ледяная стрела", icon: "❄️", cost: 12, desc: "Наносит 25 урона льдом.", damage: 25 },
   "heal":         { name: "Исцеление",      icon: "💚", cost: 20, desc: "Восстанавливает 60 здоровья.", heal: 60 },
   "holy-light":   { name: "Святой свет",    icon: "☀️", cost: 18, desc: "Наносит 25 урона светом.", damage: 25 },

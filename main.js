@@ -7,7 +7,8 @@ import {
   updateMainMenu, openSettings, backFromSettings, saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
   switchSettingsTab, applySettings, resetAllSettings, deleteAllSaves,
-  openAchievementsMenu, openHelp
+  openAchievementsMenu, openHelp,
+  exportSave, importSave
 } from './ui/menu.js';
 import { selectClass, confirmClassSelection } from './ui/character.js';
 import {
@@ -38,11 +39,18 @@ import { showScreen, toast, logTo } from './ui/screens.js';
 import {
   initAudio, playSound, playBGM, updateVolume, resumeContext
 } from './systems/audio.js';
+import {
+  speak as speakVoice, stop as stopVoice,
+  isVoiceSupported, initVoices
+} from './systems/voice.js';
+
+const ALWAYS_SHOW_PROLOGUE = false;
 
 on('toast', toast);
 on('log', ({ channel, msg, cls }) => logTo('game-log', msg, cls));
 
 on('game:started', () => {
+  stopVoice();
   const log = document.getElementById('game-log');
   if (log) log.innerHTML = '';
   showScreen('screen-game');
@@ -104,13 +112,16 @@ document.addEventListener('click', (e) => {
     audioBooted = true;
     initAudio();
     resumeContext();
+    initVoices();
   }
   resumeContext();
   const btn = e.target.closest('button');
   if (btn && !btn.closest('#combat-panel') && !btn.closest('#npc-panel') && !btn.closest('.stat-buttons')) playSound('click');
 });
 
-document.addEventListener('visibilitychange', () => { if (document.hidden) hideTooltip(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hideTooltip(); stopVoice(); }
+});
 window.addEventListener('scroll', () => hideTooltip(), true);
 
 function respawnInVillage() {
@@ -148,7 +159,7 @@ function enterRift() {
     toast('Сначала соберите все 3 осколка');
     return;
   }
-  const locId = getRandomRiftLocation(null, 1);
+  const locId = getRandomRiftLocation(1);
   enterOverworld(locId, { rifMode: true, rifFloor: 1 });
 }
 
@@ -172,7 +183,6 @@ function interactNpc(npcId) {
   else if (npcId === 'questBoard') openQuestBoard();
 }
 
-// ⬇️ НОВОЕ: обработчик случайных событий
 function handleWorldEvent(eventId) {
   const ow = state.overworld;
   if (!ow) return;
@@ -226,6 +236,120 @@ function handleWorldEvent(eventId) {
   import('./ui/overworld.js').then(m => m.closeDialogAndResume());
 }
 
+function skipPrologue() {
+  stopVoice();
+  localStorage.setItem('magic-rpg-prologue-seen', '1');
+  showScreen('screen-main');
+  updateMainMenu();
+}
+
+// ==== ОЗВУЧКА ПРОЛОГА (MP3 + TTS фолбэк) ====
+let prologueAudio = null;
+
+function getPrologueText(screen) {
+  if (!screen) return '';
+  const parts = [];
+  screen.querySelectorAll('h1, h2, h3, p, li').forEach(el => {
+    if (el.closest('button')) return;
+    const t = (el.textContent || '').trim();
+    if (t) parts.push(t);
+  });
+  return parts.join('. ');
+}
+
+function resetPrologueBtn(btn) {
+  btn.textContent = '🔊 Озвучить пролог';
+}
+
+function playTtsPrologue(screen, btn) {
+  if (!isVoiceSupported()) {
+    btn.textContent = '🔇 Голос недоступен';
+    return;
+  }
+  if (window.speechSynthesis.speaking) {
+    stopVoice();
+    resetPrologueBtn(btn);
+    return;
+  }
+  const text = getPrologueText(screen);
+  const ok = speakVoice(text, { rate: 0.9, pitch: 0.85, volume: 1 });
+  if (ok) {
+    btn.textContent = '⏹ Остановить';
+    const check = setInterval(() => {
+      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+        clearInterval(check);
+        resetPrologueBtn(btn);
+      }
+    }, 400);
+  } else {
+    btn.textContent = '🔇 Голос недоступен';
+  }
+}
+
+function setupPrologueVoice() {
+  const screen = document.getElementById('screen-prologue');
+  if (!screen) return;
+
+  // Если кнопка уже создана, не дублируем
+  if (document.getElementById('prologue-voice-btn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'prologue-voice-btn';
+  btn.type = 'button';
+  btn.className = 'btn secondary';
+  btn.textContent = '🔊 Озвучить пролог';
+  btn.style.cssText = 'display:block; margin: 14px auto 8px auto; padding: 10px 18px;';
+  screen.appendChild(btn);
+
+  // Инициализация аудиофайла
+  prologueAudio = new Audio('audio/prologue.mp3');
+  prologueAudio.preload = 'auto';
+  prologueAudio.volume = 1;
+  
+  // Слушатели событий для аудио
+  prologueAudio.addEventListener('ended', () => {
+    console.log('[prologue] mp3 закончился');
+    resetPrologueBtn(btn);
+  });
+  
+  prologueAudio.addEventListener('error', (e) => {
+    console.warn('[prologue] Ошибка загрузки mp3:', prologueAudio.error);
+  });
+
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+
+    // Остановка, если что-то играет прямо сейчас
+    if (prologueAudio && !prologueAudio.paused) {
+      prologueAudio.pause();
+      prologueAudio.currentTime = 0;
+      resetPrologueBtn(btn);
+      return;
+    }
+    if (window.speechSynthesis && window.speechSynthesis.speaking) {
+      stopVoice();
+      resetPrologueBtn(btn);
+      return;
+    }
+
+    // Пытаемся проиграть MP3
+    if (prologueAudio) {
+      try {
+        prologueAudio.currentTime = 0;
+        await prologueAudio.play();
+        console.log('[prologue] успешно играем prologue.mp3');
+        btn.textContent = '⏹ Остановить';
+        return;
+      } catch (err) {
+        console.warn('[prologue] MP3 не удалось воспроизвести (' + err.name + '), переключаемся на TTS.');
+      }
+    }
+
+    // Если файла нет — читаем встроенным голосом
+    playTtsPrologue(screen, btn);
+  });
+}
+
 window.GameAPI = {
   updateMainMenu,
   openSettings, switchSettingsTab, applySettings, backFromSettings,
@@ -268,9 +392,52 @@ window.GameAPI = {
   startNGPlus,
   enterRift,
   showScreen,
+  skipPrologue,
+  exportSave,
+  importSave,
+  stopVoice,
+  resetPrologue: () => {
+    localStorage.removeItem('magic-rpg-prologue-seen');
+    console.log('[boot] prologue flag cleared, reloading…');
+    location.reload();
+  },
+  voiceInfo: () => {
+    if (!window.speechSynthesis) return 'Web Speech API не поддерживается';
+    const voices = window.speechSynthesis.getVoices();
+    console.table(voices.map(v => ({ name: v.name, lang: v.lang, default: v.default })));
+    return { count: voices.length, speaking: window.speechSynthesis.speaking };
+  },
 };
 
 migrateLegacySave();
 loadSettings();
-updateMainMenu();
-window.addEventListener('beforeunload', () => { if (state.game) saveGame(); });
+
+const prologueSeen = localStorage.getItem('magic-rpg-prologue-seen');
+const hasAnySave = !!(localStorage.getItem('magic-rpg-save-1') || localStorage.getItem('magic-rpg-save-2') || localStorage.getItem('magic-rpg-save-3'));
+const prologueEl = document.getElementById('screen-prologue');
+
+const showPrologue = ALWAYS_SHOW_PROLOGUE || (!prologueSeen && !hasAnySave);
+
+console.log('[boot] prologue decision:', {
+  prologueSeen: !!prologueSeen,
+  hasAnySave,
+  hasPrologueScreen: !!prologueEl,
+  willShowPrologue: showPrologue,
+});
+
+if (showPrologue && prologueEl) {
+  showScreen('screen-prologue');
+  setupPrologueVoice();
+} else {
+  if (showPrologue && !prologueEl) {
+    console.warn('[boot] хочу показать пролог, но #screen-prologue не найден в index.html');
+  }
+  showScreen('screen-main');
+  updateMainMenu();
+}
+
+window.addEventListener('beforeunload', () => {
+  stopVoice();
+  if (prologueAudio) { try { prologueAudio.pause(); } catch {} }
+  if (state.game) saveGame();
+});
