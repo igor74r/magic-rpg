@@ -132,10 +132,8 @@ export function combatCastSpell(spellId) {
   const sp = SPELLS[spellId];
   if (!sp) return;
 
-  // Воины не умеют колдовать!
   if (p.class === 'warrior') { pushLog('Воин не умеет колдовать!', 'info'); return; }
 
-  // ✨ ЖРЕЦ: Спец-заклинание «Жертва»
   if (spellId === 'sacrifice') {
     const hpCost = Math.ceil(p.maxHp * sp.selfDamagePct);
     if (p.hp <= hpCost) { pushLog('Недостаточно HP для Жертвы!', 'info'); return; }
@@ -515,11 +513,14 @@ function combatVictory() {
   const gold = Math.round(def.gold * (e.elite ? 2 : 1) * ng.goldMult * riftM.goldMult);
   
   const hasElderBlessing = p.effects?.some(ef => ef.id === 'elderBlessing');
+  let savedBlessingDuration = 0; // <--- ФИКС: Выносим переменную наружу
+  
   let exp = Math.round(def.exp * (e.elite ? 1.5 : 1) * ng.expMult * riftM.expMult);
   if (hasElderBlessing) {
     exp = Math.round(exp * 1.2);
     const b = p.effects.find(ef => ef.id === 'elderBlessing');
     b.duration -= 1;
+    savedBlessingDuration = b.duration; // <--- СОХРАНЯЕМ ЗНАЧЕНИЕ
     if (b.duration <= 0) {
       p.effects = p.effects.filter(ef => ef.id !== 'elderBlessing');
       pushLog(`✨ Благословение старейшины закончилось.`, 'info');
@@ -584,8 +585,10 @@ function combatVictory() {
   e.respawnAt = performance.now() + getRespawnMs();
   e.effects = [];
   clearPlayerEffects();
-  if (hasElderBlessing && p.effects.length === 0) {
-      p.effects.push({ id: 'elderBlessing', duration: b ? b.duration : 1 });
+  
+  // <--- ФИКС: Восстанавливаем бафф с сохраненным значением
+  if (hasElderBlessing && savedBlessingDuration > 0) {
+      p.effects.push({ id: 'elderBlessing', duration: savedBlessingDuration });
   }
 
   endCombat();
