@@ -1,0 +1,214 @@
+/* css/theme.css — слой «Осколки: витраж» поверх style.css.
+   Меняет палитру, форму и типографику, не трогая layout. */
+
+:root {
+  --bg-0: #05080e;
+  --bg-1: #080d15;
+  --bg-2: #0b1420;
+  --panel: rgba(8, 14, 22, 0.9);
+  --line: rgba(124, 231, 255, 0.18);
+  --line-hot: rgba(124, 231, 255, 0.55);
+  --ink: #dfe9f5;
+  --ink-dim: #8fa3b8;
+  --ink-faint: #5f7285;
+  --accent: #7ce7ff;
+  --accent-2: #b28dff;
+  --gold: #ffcf6e;
+  --danger: #ff4a5c;
+  --ok: #5ef0b0;
+  --font-display: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-ui: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --cut: 10px;
+}
+
+html,
+body {
+  background: var(--bg-0);
+  color: var(--ink);
+  font-family: var(--font-ui);
+}
+
+body {
+  background-image:
+    radial-gradient(1100px 560px at 12% -8%, rgba(124, 231, 255, 0.11), transparent 62%),
+    radial-gradient(900px 520px at 92% 0%, rgba(178, 141, 255, 0.09), transparent 58%),
+    linear-gradient(180deg, #05080e 0%, #070c13 46%, #04070c 100%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  color: var(--accent);
+  letter-spacing: 0.4px;
+  text-shadow: 0 0 18px rgba(124, 231, 255, 0.18);
+}
+
+.subtitle { color: var(--ink-dim); }
+
+/* ---------- общие поверхности ---------- */
+.panel,
+.game-container {
+  background: linear-gradient(180deg, rgba(10, 18, 28, 0.94), rgba(6, 11, 18, 0.94));
+  border: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), inset 0 0 40px rgba(124, 231, 255, 0.03);
+}
+
+button {
+  font-family: var(--font-ui);
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(18, 30, 44, 0.96), rgba(9, 16, 26, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 0;
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+button:hover {
+  color: #fff;
+  border-color: var(--line-hot);
+  box-shadow: inset 0 0 22px rgba(124, 231, 255, 0.16), 0 0 16px rgba(124, 231, 255, 0.12);
+}
+
+/* ---------- главное меню ---------- */
+.game-title { color: #fff; text-shadow: 0 0 28px rgba(124, 231, 255, 0.35); }
+.game-title span { color: var(--accent); }
+.logo-gem { filter: drop-shadow(0 0 26px rgba(124, 231, 255, 0.65)); }
+.mm-btn { min-width: 280px; }
+.menu-footer { color: var(--ink-faint); letter-spacing: 0.16em; font-size: 11px; }
+.slots-grid > * {
+  background: linear-gradient(180deg, rgba(12, 20, 32, 0.9), rgba(7, 12, 20, 0.9));
+  border: 1px solid var(--line);
+  border-radius: 0;
+}
+.class-card {
+  background: linear-gradient(180deg, rgba(12, 20, 32, 0.9), rgba(7, 12, 20, 0.9));
+  border: 1px solid var(--line);
+  border-radius: 0;
+}
+.class-card.selected,
+.class-card:hover {
+  border-color: var(--line-hot);
+  box-shadow: inset 0 0 30px rgba(124, 231, 255, 0.1), 0 0 22px rgba(124, 231, 255, 0.12);
+}
+
+/* ---------- дашборд ---------- */
+.dashboard-sidebar {
+  background: linear-gradient(180deg, rgba(5, 10, 17, 0.98), rgba(8, 14, 22, 0.94));
+  border-right: 1px solid var(--line);
+}
+.sidebar-title {
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 10px;
+}
+.tab {
+  color: var(--ink-dim);
+  border-left: 2px solid transparent;
+  border-radius: 0;
+}
+.tab:hover { background: rgba(124, 231, 255, 0.05); color: var(--ink); }
+.tab.active {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(124, 231, 255, 0.16), transparent 70%);
+  border-left-color: var(--accent);
+}
+.dashboard-main { background: transparent; }
+.dashboard-header { border-bottom: 1px solid var(--line); background: transparent; }
+.location-banner {
+  background: rgba(8, 14, 22, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--ink-dim);
+}
+.dashboard-content { background: transparent; }
+.dashboard-log {
+  background: rgba(4, 8, 13, 0.78);
+  border-left: 1px solid var(--line);
+}
+.log-header {
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  border-bottom: 1px solid var(--line);
+}
+.log-body { color: var(--ink-dim); font-size: 12px; }
+.save-menu-btn { margin-top: 8px; }
+
+/* ---------- настройки ---------- */
+.settings-tab {
+  color: var(--ink-dim);
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+}
+.settings-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.settings-back-btn { margin-top: 14px; }
+
+/* ---------- overworld ---------- */
+#overworld-canvas {
+  border: 1px solid var(--line-hot) !important;
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  box-shadow: 0 0 46px rgba(124, 231, 255, 0.12), inset 0 0 60px rgba(0, 0, 0, 0.5);
+}
+#combat-panel {
+  background: linear-gradient(180deg, rgba(6, 11, 18, 0.97), rgba(3, 6, 11, 0.97));
+  border: 1px solid var(--line-hot);
+  border-radius: 0;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+#combat-panel-info { color: var(--ink); font-family: var(--font-ui); }
+#combat-panel-actions button,
+#npc-panel-actions button {
+  min-width: 150px;
+  font-size: 11px;
+}
+#npc-panel {
+  background: rgba(5, 10, 16, 0.97);
+  border: 1px solid var(--line);
+  border-top: none;
+  border-radius: 0;
+}
+#npc-panel-info { color: var(--ink-dim); }
+.dpad-btn {
+  background: rgba(8, 14, 22, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--accent);
+}
+.map-tooltip {
+  background: rgba(5, 10, 16, 0.97);
+  border: 1px solid var(--line-hot);
+  border-radius: 0;
+  color: var(--ink);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+.map-tt-name { color: var(--accent); }
+.map-tt-row { color: var(--ink-dim); }
+.pause-overlay { background: rgba(2, 5, 9, 0.72); backdrop-filter: blur(3px); }
+.pause-panel {
+  background: linear-gradient(180deg, rgba(10, 18, 28, 0.98), rgba(5, 10, 16, 0.98));
+  border: 1px solid var(--line-hot);
+  border-radius: 0;
+  box-shadow: 0 0 60px rgba(124, 231, 255, 0.12);
+}
+
+/* ---------- уведомления ---------- */
+.toast {
+  background: rgba(5, 10, 16, 0.96);
+  border: 1px solid var(--line-hot);
+  border-radius: 0;
+  color: var(--ink);
+  font-family: var(--font-ui);
+}
+.error-toast {
+  background: rgba(30, 6, 10, 0.96);
+  border: 1px solid var(--danger);
+  border-radius: 0;
+  color: #ffd7dc;
+}

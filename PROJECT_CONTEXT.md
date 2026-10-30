@@ -33,7 +33,8 @@
 magic-rpg/
 ├── index.html                 # все экраны (11), inline onclick → window.GameAPI
 ├── main.js                    # entrypoint: wiring, boot, GameAPI, глобальные ошибки, пролог
-├── css/style.css              # весь UI одним файлом (~526 строк, 3 media query, 7 keyframes)
+├── css/style.css              # каркас UI (~526 строк, 3 media query, 7 keyframes)
+├── css/theme.css              # слой «Витраж»: палитра, форма, типографика (перекрывает style.css)
 ├── audio/                     # village / explore / combat / prologue .mp3 (~14.7 МБ)
 ├── data/                      # статические данные (10 модулей, без логики)
 │   ├── classes.js             # 3 класса, стартовые статы/заклинания/предметы, способности
@@ -66,7 +67,8 @@ magic-rpg/
 │   ├── menu.js, screens.js, character.js, village.js
 │   ├── overworld.js           # оркестратор overworld: ввод, секреты, NPC-панель, pause
 │   └── overworld/
-│       ├── models.js          # отрисовка спрайтов (~515 строк)
+│       ├── models.js          # фасад отрисовки + EFFECTS_DATA/MODIFIERS_LABEL
+│       ├── sprites.js         # пиксельные спрайты: маски, палитры, кэш, герои/враги/NPC/объекты
 │       ├── combat-panel.js     # под-панели боя (заклинания/предметы/способности)
 │       ├── effects.js         # темы, погода, туман, молнии, частицы
 │       └── render.js          # canvas-цикл, рендер, HUD, миникарта, pause, автосейв, тултипы
@@ -174,7 +176,7 @@ CI (`.github/workflows/ci.yml`, job `verify`, ubuntu-latest + Node 24): `find �
 - **Ошибки:** глобальные `window.onerror`/`unhandledrejection` в `main.js` → красный toast; `emit` изолирует падения listener'ов; деструктивные действия подтверждаются `confirm()`.
 - **Логирование:** `console.log/warn/error` с тегом в квадратных скобках (`[boot]`, `[events]`, `[prologue]`, `[global error]`, `[secrets]`); игровые сообщения — через `emit('log', { channel, msg, cls })` и `emit('toast', msg)`, а не напрямую в DOM.
 - **Сохранения:** обратная совместимость через `migrateGame` (version 1→9) и `migrateSettings` (version 3); при добавлении полей в сейв — новая ветка миграции и инкремент `SAVE_VERSION`.
-- **CSS:** один файл, плоские семантические классы (`.dashboard-*`, `.mm-btn`, `.settings-*`), без CSS-модулей и препроцессоров; тёмная палитра с золотым акцентом `#c9a227`.
+- **CSS:** два слоя: `style.css` — каркас и layout, `theme.css` — палитра, форма и типографика (подключается после и перекрывает); плоские семантические классы (`.dashboard-*`, `.mm-btn`, `.settings-*`), без CSS-модулей и препроцессоров; палитра «витраж» — индиго/циан, золото только для лута и акцентов.
 - **Язык:** интерфейс, комментарии, логи и коммиты — русские.
 
 ## 10. Состояние репозитория (git)
@@ -242,3 +244,13 @@ CI (`.github/workflows/ci.yml`, job `verify`, ubuntu-latest + Node 24): `find �
 Проверено: `node --check` — 52/52, `check-imports` — OK, `check-gameapi` — OK, `smoke-load` — 12/12, `smoke-boot` — 12/12; CI прогон #1 (`d3f1ba1`) — success; Pages deployment #18 — success.
 
 Не проверено: реальный браузер и canvas, мобильный D-Pad, звук/озвучка.
+
+## 15. Редизайн «Витраж» (30.10.2026)
+
+- `ui/overworld/sprites.js` — новый пиксельный рендер: маски (герой 12×16, волк 14×10, дракон 16×12 и др.), палитры ролей, кэш offscreen-canvas, аксессуары классов (меч/посох), тени и покачивание.
+- `ui/overworld/models.js` — стал фасадом (556 → 43 строки), сохранил `EFFECTS_DATA`/`MODIFIERS_LABEL` для `combat-panel.js`.
+- `ui/overworld/effects.js` — все 12 `THEMES` перекрашены в холодный «мана-спектр» (индиго/циан вместо коричнево-золотого).
+- `ui/overworld/render.js` — `imageSmoothingEnabled = false`, новый `drawHud` (срезанная панель, пипсы трёх осколков, погодная строка), события карты рисуются спрайтами вместо emoji.
+- `css/theme.css` — слой темы: панели, кнопки со срезанными углами, типографика, бой/NPC/тултипы/пауза; подключён после `style.css`.
+- `index.html` — версия `v0.13 · Витраж`, подключён `theme.css`.
+- Проверки: `node --check` 53/53, `check-imports`, `check-gameapi`, `smoke-load`, `smoke-boot` — зелёные. Визуально в браузере не проверялось (браузера в окружении нет).

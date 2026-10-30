@@ -36,10 +36,10 @@ node scripts/smoke-boot.mjs         # boot main.js, overworld, бой (12 про
 ```
 index.html          все экраны, inline onclick → window.GameAPI
 main.js             entrypoint: wiring, boot, GameAPI, глобальные ошибки
-css/style.css       весь UI
+css/                style.css (каркас) + theme.css (палитра «Витраж»)
 data/               классы, предметы, заклинания, враги, локации, NPC, таланты, достижения
 systems/            игровая логика (state, save, бой, прогрессия, overworld-подсистемы)
-ui/                 DOM/Canvas-слой; ui/game.js — фасад, ui/overworld/ — рендер и эффекты
+ui/                 DOM/Canvas-слой; ui/game.js — фасад, ui/overworld/ — спрайты, рендер и эффекты
 audio/              музыка и звуки (MP3)
 scripts/            проверки для CI
 ```

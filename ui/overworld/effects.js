@@ -13,18 +13,18 @@ let lightning = { timer: 0, flash: 0 };
 let bloomCanvas = null, bloomCtx = null;
 
 export const THEMES = {
-  default:   { colors: { 0: '#1a2e1a', 1: '#3a2a1a', 2: '#0f170f', 3: '#101a2e', 4: '#2a2a2a' }, vignette: 0.6, shadow: 'rgba(0,0,0,0.5)', fog: 0.85, weather: 'none', tint: 'rgba(40, 60, 40, 0.15)' },
-  village:   { colors: { 0: '#2a3a2a', 1: '#4a3a2a', 2: '#3a2a1a', 3: '#2a4a6a', 4: '#4a4a3a' }, vignette: 0.3, shadow: 'rgba(0,0,0,0.3)', fog: 0.6, weather: 'none', tint: 'rgba(255, 200, 100, 0.05)' },
-  forest:    { colors: { 0: '#0f1a0f', 1: '#2a1a0a', 2: '#050a05', 3: '#0a2a3a', 4: '#1a1a0a' }, vignette: 0.7, shadow: 'rgba(0,0,0,0.6)', fog: 0.9, weather: 'rain', tint: 'rgba(0, 60, 0, 0.2)' },
-  ruins:     { colors: { 0: '#2a2a2a', 1: '#3a3a3a', 2: '#1a1a1a', 3: '#2a3a4a', 4: '#4a4a4a' }, vignette: 0.6, shadow: 'rgba(0,0,0,0.5)', fog: 0.85, weather: 'none', tint: 'rgba(60, 60, 60, 0.1)' },
-  shadow:    { colors: { 0: '#0a000a', 1: '#1a0a1a', 2: '#050005', 3: '#2a0a3a', 4: '#1a0a1a' }, vignette: 0.9, shadow: 'rgba(0,0,0,0.9)', fog: 0.98, weather: 'ash', tint: 'rgba(60, 0, 60, 0.2)' },
-  swamp:     { colors: { 0: '#1a2a0a', 1: '#2a1a0a', 2: '#0a1a0a', 3: '#1a2a3a', 4: '#1a1a1a' }, vignette: 0.8, shadow: 'rgba(0,0,0,0.7)', fog: 0.9, weather: 'rain', tint: 'rgba(40, 50, 0, 0.2)' },
-  graveyard: { colors: { 0: '#0a0a1a', 1: '#2a2a3a', 2: '#05050a', 3: '#1a1a2a', 4: '#3a3a3a' }, vignette: 0.85, shadow: 'rgba(0,0,0,0.8)', fog: 0.95, weather: 'none', tint: 'rgba(30, 30, 70, 0.2)' },
-  volcano:   { colors: { 0: '#1a0a00', 1: '#2a1a00', 2: '#0a0000', 3: '#8a2a00', 4: '#1a0a0a' }, vignette: 0.7, shadow: 'rgba(0,0,0,0.6)', fog: 0.85, weather: 'embers', tint: 'rgba(100, 30, 0, 0.2)' },
-  ice:       { colors: { 0: '#1a2a4a', 1: '#3a4a6a', 2: '#0a1a2a', 3: '#4a8aaa', 4: '#6a8a9a' }, vignette: 0.6, shadow: 'rgba(0,0,0,0.4)', fog: 0.8, weather: 'snow', tint: 'rgba(0, 60, 120, 0.15)' },
-  desert:    { colors: { 0: '#5a4a2a', 1: '#6a5a3a', 2: '#3a2a1a', 3: '#2a5a7a', 4: '#3a3a2a' }, vignette: 0.5, shadow: 'rgba(0,0,0,0.35)', fog: 0.7, weather: 'none', tint: 'rgba(200, 150, 50, 0.15)' },
-  library:   { colors: { 0: '#1a0a2a', 1: '#3a1a4a', 2: '#0a001a', 3: '#4a1a7a', 4: '#2a1a3a' }, vignette: 0.8, shadow: 'rgba(0,0,0,0.7)', fog: 0.9, weather: 'none', tint: 'rgba(80, 0, 120, 0.2)' },
-  dragon:    { colors: { 0: '#1a0a00', 1: '#2a0a00', 2: '#0a0000', 3: '#8a1a00', 4: '#2a0a0a' }, vignette: 0.85, shadow: 'rgba(0,0,0,0.8)', fog: 0.9, weather: 'embers', tint: 'rgba(120, 0, 0, 0.25)' }
+  default:   { colors: { 0: '#0c1a1c', 1: '#22323a', 2: '#071014', 3: '#0c2230', 4: '#22303a' }, vignette: 0.7, shadow: 'rgba(0,0,0,0.55)', fog: 0.88, weather: 'none', tint: 'rgba(30, 90, 100, 0.16)' },
+  village:   { colors: { 0: '#1b2f2c', 1: '#3a4a3f', 2: '#2a2420', 3: '#1b3a4a', 4: '#3d4a45' }, vignette: 0.35, shadow: 'rgba(0,0,0,0.35)', fog: 0.55, weather: 'none', tint: 'rgba(140, 230, 210, 0.06)' },
+  forest:    { colors: { 0: '#08140f', 1: '#18241a', 2: '#040a08', 3: '#0a2230', 4: '#141f19' }, vignette: 0.75, shadow: 'rgba(0,0,0,0.6)', fog: 0.9, weather: 'rain', tint: 'rgba(20, 80, 60, 0.2)' },
+  ruins:     { colors: { 0: '#1c2028', 1: '#2e3440', 2: '#10141c', 3: '#1c2c3c', 4: '#3a404a' }, vignette: 0.68, shadow: 'rgba(0,0,0,0.55)', fog: 0.85, weather: 'none', tint: 'rgba(70, 90, 120, 0.12)' },
+  shadow:    { colors: { 0: '#08040e', 1: '#181028', 2: '#040208', 3: '#22103a', 4: '#14101c' }, vignette: 0.95, shadow: 'rgba(0,0,0,0.9)', fog: 0.98, weather: 'ash', tint: 'rgba(90, 40, 120, 0.22)' },
+  swamp:     { colors: { 0: '#101a12', 1: '#20281a', 2: '#0a120c', 3: '#16303a', 4: '#1a2018' }, vignette: 0.85, shadow: 'rgba(0,0,0,0.7)', fog: 0.92, weather: 'rain', tint: 'rgba(50, 80, 40, 0.2)' },
+  graveyard: { colors: { 0: '#0a0c18', 1: '#262a3e', 2: '#05060e', 3: '#161a2e', 4: '#2e3244' }, vignette: 0.9, shadow: 'rgba(0,0,0,0.8)', fog: 0.95, weather: 'none', tint: 'rgba(50, 50, 110, 0.22)' },
+  volcano:   { colors: { 0: '#140806', 1: '#2a140c', 2: '#080202', 3: '#8a2a00', 4: '#1a0e0a' }, vignette: 0.75, shadow: 'rgba(0,0,0,0.6)', fog: 0.85, weather: 'embers', tint: 'rgba(140, 40, 0, 0.22)' },
+  ice:       { colors: { 0: '#16283c', 1: '#33465e', 2: '#081420', 3: '#4a8aaa', 4: '#5a7288' }, vignette: 0.6, shadow: 'rgba(0,0,0,0.4)', fog: 0.8, weather: 'snow', tint: 'rgba(40, 100, 160, 0.18)' },
+  desert:    { colors: { 0: '#3a3226', 1: '#4a4032', 2: '#241e16', 3: '#22506a', 4: '#332e26' }, vignette: 0.55, shadow: 'rgba(0,0,0,0.35)', fog: 0.7, weather: 'none', tint: 'rgba(190, 140, 60, 0.14)' },
+  library:   { colors: { 0: '#120e24', 1: '#2a2050', 2: '#07040f', 3: '#3a1a6a', 4: '#1e1834' }, vignette: 0.85, shadow: 'rgba(0,0,0,0.7)', fog: 0.9, weather: 'none', tint: 'rgba(90, 40, 160, 0.22)' },
+  dragon:    { colors: { 0: '#140808', 1: '#2a0e0e', 2: '#080202', 3: '#8a1a00', 4: '#241012' }, vignette: 0.9, shadow: 'rgba(0,0,0,0.8)', fog: 0.9, weather: 'embers', tint: 'rgba(150, 20, 10, 0.24)' }
 };
 
 

@@ -187,7 +187,7 @@ function tick(ts) {
 
 function drawTile(ctx, type, x, y, size, themeName, colors) {
   const half = size / 2;
-  ctx.fillStyle = colors[type] || '#2a4a2a';
+  ctx.fillStyle = colors[type] || '#1a4a3e';
   ctx.fillRect(x, y, size, size);
 
   if (type === 0 || type === 1) {
@@ -206,17 +206,17 @@ function drawTile(ctx, type, x, y, size, themeName, colors) {
     ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(x + 20, y + 15, 2, 2);
   } else if (type === 2) {
     if (themeName === 'village') {
-      ctx.fillStyle = '#3a2a1a'; ctx.fillRect(x + 6, y + 16, size - 12, size - 12);
-      ctx.fillStyle = '#5a2a1a'; ctx.beginPath(); ctx.moveTo(x, y + 18); ctx.lineTo(x + half, y - 2); ctx.lineTo(x + size, y + 18); ctx.fill();
+      ctx.fillStyle = '#2a3440'; ctx.fillRect(x + 6, y + 16, size - 12, size - 12);
+      ctx.fillStyle = '#3a2a3a'; ctx.beginPath(); ctx.moveTo(x, y + 18); ctx.lineTo(x + half, y - 2); ctx.lineTo(x + size, y + 18); ctx.fill();
       ctx.fillStyle = '#ffcc00'; ctx.fillRect(x + 18, y + 26, 8, 8);
       ctx.fillStyle = '#2a1a0a'; ctx.fillRect(x + 22, y + 26, 1, 8); ctx.fillRect(x + 18, y + 30, 8, 1);
     } else {
       const wind = Math.sin(worldTime * 1.5 + x * 0.02) * 2;
-      ctx.fillStyle = '#2a1a0a'; ctx.fillRect(x + half - 4, y + 32, 8, 16);
+      ctx.fillStyle = '#241a12'; ctx.fillRect(x + half - 4, y + 32, 8, 16);
       ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.arc(x + half, y + 28, 18, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#0f2a0f'; ctx.beginPath(); ctx.arc(x + half + wind, y + 24, 16, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#1a3a1a'; ctx.beginPath(); ctx.arc(x + half - 4 + wind, y + 20, 12, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#2a4a2a'; ctx.beginPath(); ctx.arc(x + half + 2 + wind, y + 18, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0b2a24'; ctx.beginPath(); ctx.arc(x + half + wind, y + 24, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#123a30'; ctx.beginPath(); ctx.arc(x + half - 4 + wind, y + 20, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#1a4a3e'; ctx.beginPath(); ctx.arc(x + half + 2 + wind, y + 18, 10, 0, Math.PI * 2); ctx.fill();
     }
   } else if (type === 3) {
     const isLava = (themeName === 'volcano' || themeName === 'dragon');
@@ -246,52 +246,17 @@ function drawTile(ctx, type, x, y, size, themeName, colors) {
       ctx.restore();
     }
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.beginPath(); ctx.ellipse(x + 20, y + 34, 16, 8, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#4a4a4a'; ctx.beginPath(); ctx.moveTo(x + 8, y + 32); ctx.lineTo(x + 18, y + 10); ctx.lineTo(x + 40, y + 14); ctx.lineTo(x + 36, y + 36); ctx.fill();
-    ctx.fillStyle = '#6a6a6a'; ctx.beginPath(); ctx.moveTo(x + 18, y + 10); ctx.lineTo(x + 40, y + 14); ctx.lineTo(x + 30, y + 18); ctx.fill();
+    ctx.fillStyle = '#3e4a5a'; ctx.beginPath(); ctx.moveTo(x + 8, y + 32); ctx.lineTo(x + 18, y + 10); ctx.lineTo(x + 40, y + 14); ctx.lineTo(x + 36, y + 36); ctx.fill();
+    ctx.fillStyle = '#5a6a7a'; ctx.beginPath(); ctx.moveTo(x + 18, y + 10); ctx.lineTo(x + 40, y + 14); ctx.lineTo(x + 30, y + 18); ctx.fill();
     ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x + 26, y + 16); ctx.lineTo(x + 22, y + 26); ctx.lineTo(x + 28, y + 32); ctx.stroke();
   }
 }
 
-function drawHud(ctx, p, stats, pClass) {
-  const hudX = 12, hudY = 12;
-  ctx.fillStyle = 'rgba(10, 6, 18, 0.85)';
-  ctx.beginPath();
-  if (ctx.roundRect) ctx.roundRect(hudX, hudY, 200, 80, 8); else ctx.rect(hudX, hudY, 200, 80);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(201, 162, 39, 0.6)'; ctx.lineWidth = 2; ctx.stroke();
-
-  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.font = 'bold 12px Montserrat, sans-serif';
-
-  const hpPct = p.hp / p.maxHp;
-  const isLowHp = hpPct < 0.25;
-  const hpPulse = isLowHp ? 0.75 + 0.25 * Math.sin(performance.now() / 200) : 1;
-  
-  ctx.fillStyle = '#333'; ctx.fillRect(hudX + 10, hudY + 15, 180, 12);
-  ctx.fillStyle = isLowHp ? `rgba(220, 40, 40, ${hpPulse})` : '#ff4444'; 
-  ctx.fillRect(hudX + 10, hudY + 15, 180 * hpPct, 12);
-  ctx.fillStyle = '#fff'; ctx.fillText(`HP ${p.hp}/${p.maxHp}`, hudX + 15, hudY + 21);
-
-  const mpPct = p.mp / p.maxMp;
-  const mpColor = pClass === 'warrior' ? '#d000ff' : '#00c3ff';
-  ctx.fillStyle = '#333'; ctx.fillRect(hudX + 10, hudY + 35, 180, 12);
-  ctx.fillStyle = mpColor; ctx.fillRect(hudX + 10, hudY + 35, 180 * mpPct, 12);
-  ctx.fillStyle = '#fff'; ctx.fillText(`${pClass === 'warrior' ? 'Ярость' : 'MP'} ${p.mp}/${p.maxMp}`, hudX + 15, hudY + 41);
-
-  ctx.fillStyle = '#ffd060'; ctx.fillText(`⚔️ Урон: ${stats.atk}`, hudX + 10, hudY + 65);
-  ctx.fillStyle = '#60ff60'; ctx.fillText(`🛡️ Броня: ${stats.def}`, hudX + 115, hudY + 65);
-
-  const theme = getTheme(state.overworld?.locationId);
-  let iconY = hudY + 90;
-  ctx.font = '11px Georgia';
-  if (theme.weather === 'snow') { ctx.fillStyle = '#a0d0ff'; ctx.fillText('❄️ Замедление −15%', hudX + 10, iconY); }
-  else if (theme.weather === 'rain') { ctx.fillStyle = '#a0b0ff'; ctx.fillText('🌧️ Защита +50% (в бою)', hudX + 10, iconY); }
-  else if (state.overworld?.locationId === 'shadow') { ctx.fillStyle = '#c090ff'; ctx.fillText('🌑 Атака +30% (в бою)', hudX + 10, iconY); }
-}
 
 function render() {
   const canvas = document.getElementById('overworld-canvas'); if (!canvas) return;
   const ctx = canvas.getContext('2d'); const ow = state.overworld; const cam = ow.camera; const theme = getTheme(ow.theme);
+  ctx.imageSmoothingEnabled = false;
 
   const player = state.game.player;
   const isLowHp = player.hp / player.maxHp < 0.25;
@@ -420,7 +385,7 @@ function render() {
     }
     const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 400);
     ctx.fillStyle = `rgba(255, 215, 0, ${0.1 + pulse * 0.15})`; ctx.beginPath(); ctx.arc(sx, sy, 24 + pulse * 4, 0, Math.PI * 2); ctx.fill();
-    ctx.font = '28px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(ev.emoji, sx, sy);
+    drawStatic(ctx, ev, sx, sy, theme.shadow);
     ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
     ctx.strokeText(ev.name, sx, sy - 24); ctx.fillStyle = '#ffd060'; ctx.fillText(ev.name, sx, sy - 24);
   }
@@ -798,3 +763,81 @@ export function start() { if (!rafId) { lastTs = performance.now(); rafId = requ
 export function isPaused() { return paused; }
 export function setPaused(v) { paused = v; }
 export function setLastNpcKey(k) { lastNpcKey = k; }
+
+// HUD в стиле «осколков»: срезанные углы, тонкие бары, пипсы осколков
+function drawHud(ctx, p, stats, pClass) {
+  const x = 12, y = 12, w = 216, h = 92, cut = 10;
+  ctx.save();
+
+  ctx.beginPath();
+  ctx.moveTo(x + cut, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + h - cut);
+  ctx.lineTo(x + w - cut, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + cut);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(5, 10, 16, 0.86)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(124, 231, 255, 0.5)';
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(124, 231, 255, 0.12)';
+  ctx.strokeRect(x + 4, y + 4, w - 8, h - 8);
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 9px "Segoe UI", sans-serif';
+
+  const bar = (bx, by, bw, bh, pct, color, label, value) => {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.fillStyle = color;
+    ctx.fillRect(bx, by, Math.max(0, Math.min(1, pct)) * bw, bh);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
+    ctx.fillStyle = 'rgba(223, 233, 245, 0.92)';
+    ctx.fillText(`${label}  ${value}`, bx + 5, by + bh / 2 + 0.5);
+  };
+
+  const hpPct = p.hp / Math.max(1, p.maxHp);
+  const isLow = hpPct < 0.25;
+  const pulse = isLow ? 0.65 + 0.35 * Math.abs(Math.sin(performance.now() / 220)) : 1;
+  bar(x + 10, y + 12, w - 20, 11, hpPct, isLow ? `rgba(255, 74, 92, ${pulse})` : '#ff4a5c', 'HP', `${p.hp}/${p.maxHp}`);
+
+  const mpColor = pClass === 'warrior' ? '#b28dff' : '#7ce7ff';
+  const mpLabel = pClass === 'warrior' ? 'ЯРОСТЬ' : 'МАНА';
+  bar(x + 10, y + 28, w - 20, 10, p.mp / Math.max(1, p.maxMp), mpColor, mpLabel, `${p.mp}/${p.maxMp}`);
+
+  ctx.font = 'bold 10px "Segoe UI", sans-serif';
+  ctx.fillStyle = '#ffcf6e'; ctx.fillText(`АТК ${stats.atk}`, x + 12, y + 52);
+  ctx.fillStyle = '#5ef0b0'; ctx.fillText(`ЗАЩ ${stats.def}`, x + 92, y + 52);
+
+  const shards = state.game?.shards || {};
+  const keys = ['forest', 'ruins', 'shadow'];
+  const labels = ['ЛЕС', 'РУИНЫ', 'ТЕНЬ'];
+  keys.forEach((key, i) => {
+    const sx = x + 12 + i * 36, sy = y + 70;
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = shards[key] ? '#7ce7ff' : 'rgba(124, 231, 255, 0.12)';
+    ctx.fillRect(-4, -4, 8, 8);
+    ctx.strokeStyle = 'rgba(124, 231, 255, 0.55)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-4, -4, 8, 8);
+    ctx.restore();
+    ctx.fillStyle = shards[key] ? 'rgba(223, 233, 245, 0.9)' : 'rgba(143, 163, 184, 0.55)';
+    ctx.font = '8px "Segoe UI", sans-serif';
+    ctx.fillText(labels[i], sx + 8, sy + 1);
+  });
+
+  const theme = getTheme(state.overworld?.locationId);
+  let note = '';
+  if (theme.weather === 'snow') note = 'СНЕГ: ЗАМЕДЛЕНИЕ −15%';
+  else if (theme.weather === 'rain') note = 'ДОЖДЬ: ЗАЩИТА +50% В БОЮ';
+  else if (state.overworld?.locationId === 'shadow') note = 'ТЕНЬ: АТАКА +30% В БОЮ';
+  if (note) {
+    ctx.font = '9px "Segoe UI", sans-serif';
+    ctx.fillStyle = 'rgba(124, 231, 255, 0.8)';
+    ctx.fillText(note, x + 12, y + h + 10);
+  }
+  ctx.restore();
+}
