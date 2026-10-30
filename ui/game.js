@@ -287,6 +287,8 @@ export function useWellUI() {
   toast('💧 Вы полностью исцелены!'); 
 }
 
+// ============ НОВЫЙ РЕНДЕР ИНВЕНТАРЯ ============
+
 function itemHeader(inst, item) { const rar = inst.rarity ? RARITIES[inst.rarity] : null; const color = rar ? rar.color : '#c9a227'; const label = rar && inst.rarity !== 'common' ? ` [${rar.name}]` : ''; const forge = inst.forgeLevel ? ` <span style="color:#ffd060;">+${inst.forgeLevel}</span>` : ''; return `<div class="item-name" style="color:${color};">${item.icon} ${item.name}${label}${forge}</div>`; }
 function itemBonus(inst, item) { const b = inst.bonus || item.bonus; if (!b) return ''; const parts = []; if (b.attack) parts.push(`+${b.attack} атака`); if (b.magic) parts.push(`+${b.magic} магия`); if (b.defense) parts.push(`+${b.defense} защита`); return parts.length ? ` (${parts.join(', ')})` : ''; }
 const RARITY_ORDER = { common: 0, rare: 1, epic: 2, legendary: 3 };
@@ -294,11 +296,19 @@ function getItemValue(inst) { const item = ITEMS[inst.id]; if (!item) return 0; 
 function filterAndSort(entries) { let list = entries; if (invFilter !== 'all') list = list.filter(({ inst }) => ITEMS[inst.id]?.type === invFilter); if (invSort === 'rarity') list = list.slice().sort((a, b) => { const ra = RARITY_ORDER[a.inst.rarity || 'common'] ?? 0; const rb = RARITY_ORDER[b.inst.rarity || 'common'] ?? 0; return rb - ra; }); else if (invSort === 'price') list = list.slice().sort((a, b) => getItemValue(b.inst) - getItemValue(a.inst)); return list; }
 export function setInvFilter(f) { invFilter = f; if (state.currentTab === 'inventory') { const el = document.getElementById('tab-content'); if (el) el.innerHTML = renderInventoryHTML(); } }
 export function setInvSort(s) { invSort = s; if (state.currentTab === 'inventory') { const el = document.getElementById('tab-content'); if (el) el.innerHTML = renderInventoryHTML(); } }
-function filterBarHTML() { const f = (key, label) => `<button class="inv-filter-btn ${invFilter === key ? 'active' : ''}" onclick="GameAPI.setInvFilter('${key}')">${label}</button>`; const s = (key, label) => `<button class="inv-filter-btn ${invSort === key ? 'active' : ''}" onclick="GameAPI.setInvSort('${key}')">${label}</button>`; return `<div class="inv-controls"><div class="inv-filter-row">${f('all', 'Все')}${f('weapon', '⚔️ Оружие')}${f('armor', '🥋 Броня')}${f('consumable', '🧪 Расходники')}${f('material', '🌿 Материалы')}${f('scroll', '📜 Свитки')}${f('quest', '💎 Квесты')}</div><div class="inv-filter-row"><span style="color:#a89060;font-size:12px;align-self:center;">Сортировка:</span>${s('default', 'По умолчанию')}${s('rarity', 'По редкости ↓')}${s('price', 'По цене ↓')}</div></div>`; }
+
+function filterBarHTML() { 
+  const f = (key, label) => `<button class="inv-filter-btn ${invFilter === key ? 'active' : ''}" onclick="GameAPI.setInvFilter('${key}')">${label}</button>`; 
+  const s = (key, label) => `<button class="inv-filter-btn ${invSort === key ? 'active' : ''}" onclick="GameAPI.setInvSort('${key}')">${label}</button>`; 
+  return `<div class="inv-controls">
+    <div class="inv-filter-row">${f('all', 'Все')}${f('weapon', '⚔️ Оружие')}${f('armor', '🥋 Броня')}${f('consumable', '🧪 Расходники')}${f('material', '🌿 Материалы')}${f('scroll', '📜 Свитки')}${f('quest', '💎 Квесты')}</div>
+    <div class="inv-filter-row"><span style="color:#a89060;font-size:12px;align-self:center;">Сортировка:</span>${s('default', 'По умолчанию')}${s('rarity', 'По редкости ↓')}${s('price', 'По цене ↓')}</div>
+  </div>`; 
+}
+
 function itemScore(inst) { if (!inst) return 0; const obj = typeof inst === 'string' ? { id: inst, qty: 1 } : inst; const item = ITEMS[obj.id]; if (!item) return 0; const b = obj.bonus || item.bonus || {}; let score = (b.attack || 0) + (b.magic || 0) + (b.defense || 0); const forge = obj.forgeLevel || 0; score += FORGE_BONUS[forge] || 0; return score; }
 function hasBetterFor(slot, inv, eq) { const eqInst = eq[slot]; const eqScore = itemScore(eqInst); for (const it of inv) { const item = ITEMS[it.id]; if (!item || item.type !== slot) continue; if (itemScore(it) > eqScore) return true; } return false; }
 
-// ⬇️ НОВОЕ: подсчёт мусора
 function getJunkCount() {
   const p = state.game.player;
   const inv = p.inventory;
@@ -317,47 +327,129 @@ function getJunkCount() {
   return count;
 }
 
+function renderPaperdoll(p) {
+  const eq = p.equipped;
+  const clsEmoji = CLASSES[p.class].emoji;
+  
+  const renderEqSlot = (slot, label, iconDefault) => {
+    const inst = eq[slot];
+    if (!inst) {
+      return `<div class="eq-slot-wrapper">
+        <div class="eq-icon">${iconDefault}</div>
+        <div class="eq-info"><span class="eq-name empty">${label} (пусто)</span></div>
+      </div>`;
+    }
+    const obj = typeof inst === 'string' ? { id: inst, qty: 1 } : inst;
+    const item = ITEMS[obj.id];
+    const rar = obj.rarity ? RARITIES[obj.rarity] : null;
+    const color = rar ? rar.color : '#c9a227';
+    const lvl = obj.forgeLevel || 0;
+    
+    return `<div class="eq-slot-wrapper" onmouseover="GameAPI.showEqTooltip(event, '${slot}')" onmouseout="GameAPI.hideTooltip()">
+      <div class="eq-icon filled" style="border-color:${color}; color:${color};">${item.icon}</div>
+      <div class="eq-info">
+        <span class="eq-name" style="color:${color};">${item.name} ${lvl > 0 ? `<span style="color:#ffd060;">+${lvl}</span>` : ''}</span>
+        <span class="eq-desc">${itemBonus(obj, item)}</span>
+      </div>
+      <button class="eq-action-btn" onclick="GameAPI.unequip('${slot}')" title="Снять">✖</button>
+    </div>`;
+  };
+
+  return `<div class="paperdoll-panel">
+    <div class="paperdoll-bg"></div>
+    <div class="paperdoll-silhouette">${clsEmoji}</div>
+    <div class="eq-slots-container">
+      ${renderEqSlot('weapon', 'Оружие', '🗡️')}
+      ${renderEqSlot('armor', 'Броня', '🥋')}
+    </div>
+  </div>`;
+}
+
 function renderInventoryHTML() {
-  const rawInv = state.game.player.inventory; const eq = state.game.player.equipped; let html = '';
-  const canUpgradeWeapon = hasBetterFor('weapon', rawInv, eq); const canUpgradeArmor = hasBetterFor('armor', rawInv, eq);
+  const p = state.game.player;
+  const rawInv = p.inventory;
+  const eq = p.equipped;
+  
+  const canUpgradeWeapon = hasBetterFor('weapon', rawInv, eq);
+  const canUpgradeArmor = hasBetterFor('armor', rawInv, eq);
   const junkCount = getJunkCount();
 
+  let topActions = '';
   if (canUpgradeWeapon || canUpgradeArmor || junkCount > 0) {
-    html += `<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px;flex-wrap:wrap;">`;
+    topActions += `<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px;flex-wrap:wrap;">`;
     if (canUpgradeWeapon || canUpgradeArmor) {
-      html += `<button onclick="GameAPI.equipBest()" class="equip-best-btn">⚡ Экипировать лучшее</button>`;
+      topActions += `<button onclick="GameAPI.equipBest()" class="equip-best-btn">⚡ Экипировать лучшее</button>`;
     }
     if (junkCount > 0) {
-      html += `<button onclick="GameAPI.sellJunk()" style="background:linear-gradient(180deg,#5a4a1a,#2a1a0a);border-color:#a89060;padding:8px 16px;font-size:13px;">💰 Продать мусор (${junkCount})</button>`;
+      topActions += `<button onclick="GameAPI.sellJunk()" style="background:linear-gradient(180deg,#5a4a1a,#2a1a0a);border-color:#a89060;padding:8px 16px;font-size:13px;">💰 Продать мусор (${junkCount})</button>`;
     }
-    html += `</div>`;
+    topActions += `</div>`;
   }
 
-  if (eq.weapon || eq.armor) {
-    html += `<h3>Экипировано</h3><div class="item-list" style="margin-bottom:12px;">`;
-    for (const slot of ['weapon', 'armor']) {
-      const inst = eq[slot]; if (!inst) continue; const instObj = typeof inst === 'string' ? { id: inst, qty: 1 } : inst; const item = ITEMS[instObj.id]; if (!item) continue;
-      const rar = instObj.rarity ? RARITIES[instObj.rarity] : null; const borderStyle = `border-color:${rar ? rar.color : '#c9a227'};`;
-      const better = hasBetterFor(slot, rawInv, eq); const extraClass = better ? ' slot-upgrade' : ''; const betterBadge = better ? `<div class="item-desc" style="color:#60ff60;font-weight:bold;">↑ Есть предмет лучше в инвентаре</div>` : '';
-      html += `<div class="item${extraClass}" style="${borderStyle}" onmouseover="GameAPI.showEqTooltip(event, '${slot}')" onmouseout="GameAPI.hideTooltip()"><div class="item-info">${itemHeader(instObj, item)}<div class="item-desc">${item.desc}${itemBonus(instObj, item)}</div>${betterBadge}</div><button onclick="GameAPI.unequip('${slot}')" style="font-size:12px;padding:6px 12px;">Снять</button></div>`;
+  const entries = rawInv.map((inst, idx) => ({ inst, idx }));
+  const visible = filterAndSort(entries);
+
+  // Генерируем сетку слотов (минимум 35 ячеек для красоты)
+  const minSlots = 35;
+  let gridHtml = '';
+  
+  for (let i = 0; i < Math.max(minSlots, visible.length); i++) {
+    if (i < visible.length) {
+      const { inst: it, idx } = visible[i];
+      const item = ITEMS[it.id];
+      if (!item) continue;
+      const rar = it.rarity || 'common';
+      const qtyText = it.qty > 1 ? `<span class="slot-qty">${it.qty}</span>` : '';
+      
+      gridHtml += `<div class="inv-slot has-item ${rar}" 
+        onmouseover="GameAPI.showInvTooltip(event, ${idx})" 
+        onmouseout="GameAPI.hideTooltip()"
+        onclick="GameAPI.invSlotClick(${idx})"
+        title="${item.name}">
+        <span class="slot-icon">${item.icon}</span>
+        ${qtyText}
+      </div>`;
+    } else {
+      gridHtml += `<div class="inv-slot empty"></div>`;
     }
-    html += `</div>`;
   }
-  if (!rawInv.length) { html += `<p style="color:#a89060;text-align:center;padding:15px;">Инвентарь пуст</p>`; return html; }
-  html += `<h3>Предметы</h3>` + filterBarHTML();
-  const entries = rawInv.map((inst, idx) => ({ inst, idx })); const visible = filterAndSort(entries);
-  if (!visible.length) { html += `<p style="color:#a89060;text-align:center;padding:15px;">Нет предметов в этой категории</p>`; return html; }
-  html += `<div class="item-list">`;
-  for (const { inst: it, idx } of visible) {
-    const item = ITEMS[it.id]; if (!item) continue; const rar = it.rarity ? RARITIES[it.rarity] : null; const borderStyle = rar && it.rarity !== 'common' ? `border-color:${rar.color};` : ''; const qtyText = it.qty > 1 ? ' ×' + it.qty : ''; const buttons = [];
-    if (item.type === 'consumable') buttons.push(`<button onclick="GameAPI.useItemOutside('${it.id}')" style="font-size:12px;padding:6px 12px;">Использовать</button>`);
-    else if (item.type === 'scroll') { const learned = state.game.player.spells.includes(item.spellId); if (learned) buttons.push(`<span style="color:#60ff60;font-size:12px;padding:6px 12px;">✅ Изучено</span>`); else buttons.push(`<button onclick="GameAPI.useItemOutside('${it.id}')" style="font-size:12px;padding:6px 12px;">📖 Изучить</button>`); }
-    else if (item.type === 'weapon' || item.type === 'armor') buttons.push(`<button onclick="GameAPI.equipByIndex(${idx})" style="font-size:12px;padding:6px 12px;">Экипировать</button>`);
-    if (item.type !== 'quest' && item.type !== 'scroll') { const price = getSellPrice(it); if (price > 0) buttons.push(`<button onclick="GameAPI.sellByIndex(${idx})" class="sell-btn" style="font-size:12px;padding:6px 12px;">💰 ${price}</button>`); }
-    html += `<div class="item" style="${borderStyle}" onmouseover="GameAPI.showInvTooltip(event, ${idx})" onmouseout="GameAPI.hideTooltip()"><div class="item-info">${itemHeader(it, item).replace('</div>', qtyText + '</div>')}<div class="item-desc">${item.desc}${itemBonus(it, item)}</div></div><div class="item-actions">${buttons.join('')}</div></div>`;
+
+  return `
+    <div class="inv-layout">
+      ${renderPaperdoll(p)}
+      
+      <div class="backpack-panel">
+        ${topActions}
+        <h3 style="margin-top:0;">🎒 Рюкзак</h3>
+        ${filterBarHTML()}
+        <div class="inv-grid">
+          ${gridHtml}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Универсальный обработчик клика по слоту в рюкзаке
+export function invSlotClick(idx) {
+  const p = state.game.player;
+  const inst = p.inventory[idx];
+  if (!inst) return;
+  const item = ITEMS[inst.id];
+  if (!item) return;
+
+  if (item.type === 'weapon' || item.type === 'armor') {
+    equipItemByIndex(idx);
+    toast(`Экипировано: ${item.name}`);
+    saveGame();
+    renderGame();
+  } else if (item.type === 'consumable') {
+    useItemOutside(inst.id);
+  } else if (item.type === 'scroll') {
+    useItemOutside(inst.id);
+  } else {
+    toast('Этот предмет нельзя использовать.');
   }
-  html += `</div>`;
-  return html;
 }
 
 function renderSpellsHTML() {
@@ -377,7 +469,6 @@ function renderQuestsHTML() { const done = Object.values(state.game.shards).filt
 function renderAchievementsHTML() { const unlocked = state.game.player.achievements || []; const total = ACHIEVEMENTS.length; const got = unlocked.length; const items = ACHIEVEMENTS.map(a => { const done = unlocked.includes(a.id); let progressText = ''; if (!done && a.progress && a.target !== undefined) { let cur = 0; try { cur = a.progress(state.game); } catch (e) { cur = 0; } cur = Math.min(cur, a.target); progressText = ` <span style="color:#60ff60;">(${cur}/${a.target})</span>`; } return `<div class="achievement ${done ? 'done' : ''}"><div class="achievement-icon">${done ? a.icon : '🔒'}</div><div class="achievement-body"><div class="achievement-name">${done ? a.name : '???'}</div><div class="achievement-desc">${a.desc}${progressText}</div><div class="achievement-reward">${done ? `✅ Получено (+${a.reward}💰)` : `🎁 ${a.reward}💰`}</div></div></div>`; }).join(''); const pct = total > 0 ? Math.round((got / total) * 100) : 0; return `<h3>🏆 Достижения: ${got}/${total} <span style="color:#a89060;font-size:14px;">(${pct}%)</span></h3><div class="achievement-list">${items}</div>`; }
 function renderStatisticsHTML() { const p = state.game.player; const s = p.stats || {}; const kills = s.kills || {}; const totalKillsVal = Object.values(kills).reduce((a, b) => a + b, 0); const deaths = s.deaths || 0; const goldEarned = s.goldEarned || 0; const chestsOpened = s.chestsOpened || 0; const playtimeSec = p.playtimeSec || 0; const eliteKills = s.eliteKills || 0; const bossKills = s.bossKills || 0; const riftBest = p.riftBest || 0; const ngPlus = p.ngPlus || 0; const achievementsCount = (p.achievements || []).length; const hours = Math.floor(playtimeSec / 3600); const minutes = Math.floor((playtimeSec % 3600) / 60); const playtimeStr = hours > 0 ? `${hours}ч ${minutes}м` : `${minutes}м`; const killRows = Object.entries(kills).filter(([id, n]) => n > 0 && ENEMIES[id]).sort((a, b) => b[1] - a[1]).map(([id, n]) => `<div class="stat-row"><span>${ENEMIES[id].emoji} ${ENEMIES[id].name}</span><span class="stat-val">${n}</span></div>`).join(''); return `<h3>📊 Статистика</h3><div class="stats-grid"><div class="stat-card"><div class="stat-label">⚔️ Убийств</div><div class="stat-value">${totalKillsVal}</div></div><div class="stat-card"><div class="stat-label">💀 Смертей</div><div class="stat-value">${deaths}</div></div><div class="stat-card"><div class="stat-label">💰 Золота</div><div class="stat-value">${goldEarned}</div></div><div class="stat-card"><div class="stat-label">📦 Сундуков</div><div class="stat-value">${chestsOpened}</div></div><div class="stat-card"><div class="stat-label">★ Элитных</div><div class="stat-value">${eliteKills}</div></div><div class="stat-card"><div class="stat-label">☠️ Боссов</div><div class="stat-value">${bossKills}</div></div><div class="stat-card"><div class="stat-label">🏆 Достижений</div><div class="stat-value">${achievementsCount}/${ACHIEVEMENTS.length}</div></div><div class="stat-card"><div class="stat-label">🌀 Разлом</div><div class="stat-value">${riftBest}</div></div><div class="stat-card"><div class="stat-label">🔄 NG+</div><div class="stat-value">${ngPlus}</div></div><div class="stat-card"><div class="stat-label">⏱️ Время</div><div class="stat-value">${playtimeStr}</div></div></div>${killRows ? `<h3 style="margin-top:15px;">Детали по врагам</h3><div class="kill-list">${killRows}</div>` : ''}`; }
 
-// ⬇️ НОВОЕ: бестиарий
 function renderBestiaryHTML() {
   const kills = state.game.player.stats?.kills || {};
   const totalKilled = Object.values(kills).reduce((a, b) => a + b, 0);
@@ -463,7 +554,6 @@ export function equipBestUI() { const changed = equipBest(); if (changed) { toas
 export function unequipItemUI(slot) { unequipItemBySlot(slot); saveGame(); renderGame(); }
 export function sellItemByIndexUI(idx) { const ok = sellItemByIndex(idx); if (ok) renderGame(); }
 
-// ⬇️ НОВОЕ: продажа мусора
 export function sellJunkUI() {
   const p = state.game.player;
   const inv = p.inventory;

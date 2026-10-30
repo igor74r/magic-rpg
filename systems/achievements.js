@@ -20,6 +20,8 @@ export function checkAchievements() {
     if (a.reward) p.gold = (p.gold || 0) + a.reward;
     emit('log', { channel: 'game', msg: `🏆 Достижение: «${a.name}»${a.reward ? ` (+${a.reward}💰)` : ''}`, cls: 'success' });
     emit('toast', `🏆 ${a.name}! +${a.reward}💰`);
+    // ⬇️ НОВОЕ: событие для всплывающих карточек из ui/overworld.js
+    emit('achievement', { id: a.id, name: a.name, desc: a.desc, icon: a.icon, reward: a.reward });
     playSound('levelup');
     any = true;
   }

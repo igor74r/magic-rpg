@@ -212,6 +212,130 @@ export function drawEnemyByType(ctx, e, x, y, shadowColor) {
     ctx.beginPath(); ctx.arc(x - 4, ey - size*0.9*scale, 2, 0, Math.PI*2); ctx.arc(x + 4, ey - size*0.9*scale, 2, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
 
+  // ⬇️ НОВЫЕ ВРАГИ ⬇️
+  
+  } else if (id === 'dark-knight') {
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(x - size*0.8, ey - size*0.5, size*1.6, size*1.2); ctx.stroke();
+    // Шлем
+    ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(x, ey - size*0.8, size*0.6, Math.PI, 0); ctx.fill(); ctx.stroke();
+    // Рога
+    ctx.beginPath(); ctx.moveTo(x - size*0.6, ey - size*0.9); ctx.lineTo(x - size*1, ey - size*1.5); ctx.lineTo(x - size*0.4, ey - size*1.1); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + size*0.6, ey - size*0.9); ctx.lineTo(x + size*1, ey - size*1.5); ctx.lineTo(x + size*0.4, ey - size*1.1); ctx.fill();
+    // Глаза
+    ctx.fillStyle = '#ff2020'; ctx.fillRect(x - 4, ey - size*0.8, 3, 2); ctx.fillRect(x + 1, ey - size*0.8, 3, 2);
+    // Меч
+    ctx.fillStyle = '#888'; ctx.fillRect(x + size, ey - size*0.5, 3, size*1.5);
+    ctx.fillStyle = '#500'; ctx.fillRect(x + size - 2, ey + size, 7, 3);
+
+  } else if (id === 'shadow-mage') {
+    ctx.fillStyle = '#2a0a3a'; ctx.beginPath(); ctx.moveTo(x - size, ey + size); ctx.lineTo(x + size, ey + size); ctx.lineTo(x + size*0.5, ey - size*0.5); ctx.lineTo(x - size*0.5, ey - size*0.5); ctx.fill(); ctx.stroke();
+    // Капюшон
+    ctx.fillStyle = '#0a0010'; ctx.beginPath(); ctx.arc(x, ey - size*0.6, size*0.6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Глаза
+    ctx.fillStyle = '#b060ff'; ctx.shadowBlur = 10; ctx.shadowColor = '#b060ff';
+    ctx.beginPath(); ctx.arc(x - 3, ey - size*0.6, 1.5, 0, Math.PI*2); ctx.arc(x + 3, ey - size*0.6, 1.5, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0;
+    // Посох
+    ctx.fillStyle = '#1a0a2a'; ctx.fillRect(x + size*0.8, ey - size, 2, size*1.5);
+    ctx.fillStyle = '#b060ff'; ctx.beginPath(); ctx.arc(x + size*0.8 + 1, ey - size, 3, 0, Math.PI*2); ctx.fill();
+
+  } else if (id === 'grave-king' || id === 'sand-king' || id === 'ice-queen') {
+    const isGrave = id === 'grave-king';
+    const isSand = id === 'sand-king';
+    const isIce = id === 'ice-queen';
+    const bodyColor = isGrave ? '#2a2a2a' : isSand ? '#c0a060' : '#a0d0ff';
+    ctx.fillStyle = bodyColor;
+    // Плащ
+    ctx.beginPath(); ctx.moveTo(x - size*1.2, ey + size*1.2); ctx.lineTo(x + size*1.2, ey + size*1.2); ctx.lineTo(x + size*0.8, ey - size*0.5); ctx.lineTo(x - size*0.8, ey - size*0.5); ctx.fill(); ctx.stroke();
+    // Голова
+    ctx.fillStyle = isGrave ? '#e0dcd0' : '#ffcc99'; ctx.beginPath(); ctx.arc(x, ey - size*0.8, size*0.5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    if (isGrave) { ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(x - 3, ey - size*0.9, 2, 0, Math.PI*2); ctx.arc(x + 3, ey - size*0.9, 2, 0, Math.PI*2); ctx.fill(); }
+    // Корона
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath(); ctx.moveTo(x - size*0.5, ey - size*1.2); ctx.lineTo(x - size*0.3, ey - size*1.6); ctx.lineTo(x, ey - size*1.3); ctx.lineTo(x + size*0.3, ey - size*1.6); ctx.lineTo(x + size*0.5, ey - size*1.2); ctx.fill(); ctx.stroke();
+    if (isIce) { ctx.fillStyle = '#00ffff'; ctx.beginPath(); ctx.arc(x, ey - size*1.5, 2, 0, Math.PI*2); ctx.fill(); }
+    // Скипетр/Оружие
+    ctx.fillStyle = isGrave ? '#500' : isSand ? '#d4af37' : '#00ffff';
+    ctx.fillRect(x + size*0.9, ey - size, 3, size*1.5);
+
+  } else if (id === 'magma-golem' || id === 'ice-elemental') {
+    const isMagma = id === 'magma-golem';
+    ctx.fillStyle = isMagma ? '#2a1a1a' : '#4a6a8a';
+    ctx.beginPath(); ctx.arc(x, ey, size, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Кристаллы/Лава
+    ctx.fillStyle = isMagma ? '#ff4000' : '#a0f0ff';
+    ctx.shadowBlur = 10; ctx.shadowColor = ctx.fillStyle;
+    if (isMagma) {
+      ctx.beginPath(); ctx.moveTo(x - 5, ey + 5); ctx.lineTo(x, ey - 15); ctx.lineTo(x + 5, ey + 5); ctx.fill();
+    } else {
+      ctx.beginPath(); ctx.moveTo(x - 8, ey); ctx.lineTo(x - 4, ey - 12); ctx.lineTo(x, ey); ctx.lineTo(x + 4, ey - 12); ctx.lineTo(x + 8, ey); ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    // Глаза
+    ctx.fillStyle = isMagma ? '#ffd060' : '#fff';
+    ctx.beginPath(); ctx.arc(x - 4, ey - 2, 2, 0, Math.PI*2); ctx.arc(x + 4, ey - 2, 2, 0, Math.PI*2); ctx.fill();
+
+  } else if (id === 'flame-lord') {
+    ctx.fillStyle = '#8a1a00'; ctx.beginPath(); ctx.arc(x, ey, size*1.2, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Огненная аура
+    ctx.fillStyle = '#ff4000'; ctx.shadowBlur = 15; ctx.shadowColor = '#ff8000';
+    ctx.beginPath(); ctx.arc(x, ey, size*1.5, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0;
+    // Рога
+    ctx.fillStyle = '#1a0000';
+    ctx.beginPath(); ctx.moveTo(x - 6, ey - size); ctx.lineTo(x - 12, ey - size*2); ctx.lineTo(x - 2, ey - size*1.2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + 6, ey - size); ctx.lineTo(x + 12, ey - size*2); ctx.lineTo(x + 2, ey - size*1.2); ctx.fill();
+    // Глаза
+    ctx.fillStyle = '#ff0'; ctx.beginPath(); ctx.arc(x - 5, ey - 2, 3, 0, Math.PI*2); ctx.arc(x + 5, ey - 2, 3, 0, Math.PI*2); ctx.fill();
+
+  } else if (id === 'sand-worm') {
+    ctx.fillStyle = '#b09050';
+    for (let i = -2; i <= 2; i++) {
+      ctx.beginPath(); ctx.arc(x + i*8, ey + Math.sin(performance.now()/200 + i)*4, size*0.6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    }
+    // Пасть
+    ctx.fillStyle = '#500'; ctx.beginPath(); ctx.arc(x + size*1.5, ey, size*0.5, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(x + size*1.2, ey - 4); ctx.lineTo(x + size*1.6, ey - 2); ctx.lineTo(x + size*1.2, ey); ctx.fill();
+
+  } else if (id === 'flying-tome' || id === 'book-guardian') {
+    const isTome = id === 'flying-tome';
+    ctx.fillStyle = isTome ? '#400' : '#2a4a2a';
+    ctx.fillRect(x - size, ey - size*0.5, size*2, size*1.5); ctx.stroke();
+    // Страницы
+    ctx.fillStyle = '#e0d0a0';
+    ctx.fillRect(x - size*0.8, ey - size*0.3, size*1.6, size*1.1);
+    // Крылья/Руки
+    if (isTome) {
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(x - size, ey - size*0.5); ctx.lineTo(x - size*2, ey - size); ctx.lineTo(x - size*1.2, ey); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x + size, ey - size*0.5); ctx.lineTo(x + size*2, ey - size); ctx.lineTo(x + size*1.2, ey); ctx.fill();
+    } else {
+      ctx.fillStyle = '#2a4a2a'; ctx.fillRect(x - size*1.5, ey, 4, size*0.8); ctx.fillRect(x + size*1.5 - 4, ey, 4, size*0.8);
+    }
+    // Глаза
+    ctx.fillStyle = '#ff0'; ctx.beginPath(); ctx.arc(x - 4, ey, 2, 0, Math.PI*2); ctx.arc(x + 4, ey, 2, 0, Math.PI*2); ctx.fill();
+
+  } else if (id === 'archmage') {
+    // Мантия
+    ctx.fillStyle = '#1a2a5a'; ctx.beginPath(); ctx.moveTo(x - size, ey + size); ctx.lineTo(x + size, ey + size); ctx.lineTo(x + size*0.6, ey - size*0.5); ctx.lineTo(x - size*0.6, ey - size*0.5); ctx.fill(); ctx.stroke();
+    // Шляпа
+    ctx.fillStyle = '#0a1a3a'; ctx.beginPath(); ctx.moveTo(x - size, ey - size*0.6); ctx.lineTo(x + size, ey - size*0.6); ctx.lineTo(x, ey - size*2); ctx.fill();
+    // Борода
+    ctx.fillStyle = '#e0e0e0'; ctx.beginPath(); ctx.moveTo(x - 5, ey - size*0.6); ctx.lineTo(x + 5, ey - size*0.6); ctx.lineTo(x, ey + 5); ctx.fill();
+    // Посох
+    ctx.fillStyle = '#5a3a20'; ctx.fillRect(x + size, ey - size, 2, size*1.5);
+    ctx.fillStyle = '#60a0ff'; ctx.shadowBlur = 10; ctx.shadowColor = '#60a0ff';
+    ctx.beginPath(); ctx.arc(x + size + 1, ey - size, 4, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0;
+
+  } else if (id === 'dragon-guardian') {
+    // Тело дракона в доспехах
+    ctx.fillStyle = '#2a3a4a'; ctx.beginPath(); ctx.ellipse(x, ey + size*0.2, size, size*0.8, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Щит
+    ctx.fillStyle = '#606060'; ctx.beginPath(); ctx.arc(x - size, ey, size*0.8, -Math.PI/2, Math.PI/2); ctx.fill(); ctx.stroke();
+    // Голова
+    ctx.fillStyle = '#4a5a6a'; ctx.beginPath(); ctx.arc(x + size*0.5, ey - size*0.6, size*0.5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Гребень
+    ctx.fillStyle = '#ff4000'; ctx.beginPath(); ctx.moveTo(x + size*0.5, ey - size*0.9); ctx.lineTo(x + size*0.8, ey - size*1.4); ctx.lineTo(x + size*0.2, ey - size*0.9); ctx.fill();
+    // Глаз
+    ctx.fillStyle = '#ff0'; ctx.beginPath(); ctx.arc(x + size*0.7, ey - size*0.6, 2, 0, Math.PI*2); ctx.fill();
+
   } else {
     // Стандартный враг (если не найден ID)
     ctx.fillStyle = isBoss ? '#b060ff' : isElite ? '#ffa500' : '#d63030';
@@ -259,13 +383,47 @@ export function drawStatic(ctx, obj, x, y, shadowColor) {
       ctx.fillStyle = '#888'; ctx.fillRect(x + 4, py - 10, 6, 4);
       break;
     }
+    
     case 'healer': {
-      // Палатка
-      ctx.fillStyle = '#e8f0e8'; ctx.beginPath(); ctx.moveTo(x - 14, py + 12); ctx.lineTo(x + 14, py + 12); ctx.lineTo(x, py - 16); ctx.fill(); ctx.stroke();
-      // Крест
-      ctx.fillStyle = '#40c040'; ctx.fillRect(x - 2, py - 6, 4, 10); ctx.fillRect(x - 5, py - 2, 10, 4);
+      // Роба лекаря (светло-зеленая)
+      ctx.fillStyle = '#e8f0e8';
+      ctx.beginPath();
+      ctx.moveTo(x - 10, py + 14);
+      ctx.lineTo(x + 10, py + 14);
+      ctx.lineTo(x + 7, py - 6);
+      ctx.lineTo(x - 7, py - 6);
+      ctx.fill(); ctx.stroke();
+      
+      // Зеленая отделка пояса
+      ctx.fillStyle = '#40c040';
+      ctx.fillRect(x - 8, py + 4, 16, 2);
+
+      // Голова
+      ctx.fillStyle = '#ffcc99';
+      ctx.beginPath(); ctx.arc(x, py - 12, 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      
+      // Капюшон (светло-зеленый)
+      ctx.fillStyle = '#a0d0a0';
+      ctx.beginPath(); ctx.arc(x, py - 14, 7, Math.PI, 0); ctx.fill(); ctx.stroke();
+
+      // Крест на груди
+      ctx.fillStyle = '#40c040';
+      ctx.fillRect(x - 2, py - 4, 4, 8);
+      ctx.fillRect(x - 4, py - 2, 8, 4);
+
+      // Посох
+      ctx.fillStyle = '#5a3a20';
+      ctx.fillRect(x + 10, py - 8, 2, 22);
+
+      // Светящийся шар исцеления на посохе
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#60ff60';
+      ctx.fillStyle = '#a0ffa0';
+      ctx.beginPath(); ctx.arc(x + 11, py - 10, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
       break;
     }
+
     case 'merchant': {
       // Ящик
       ctx.fillStyle = '#6a4a2a'; ctx.fillRect(x - 10, py + 2, 20, 10); ctx.strokeRect(x - 10, py + 2, 20, 10);
@@ -323,6 +481,72 @@ export function drawStatic(ctx, obj, x, y, shadowColor) {
       ctx.fillStyle = '#f0eadd'; ctx.fillRect(x - 12, py - 22, 8, 10); ctx.fillRect(x + 4, py - 20, 10, 12);
       break;
     }
+    
+    // ⬇️ НОВЫЕ NPC ⬇️
+
+    case 'elder': {
+      // Мантия
+      ctx.fillStyle = '#4a3a6a'; ctx.beginPath(); ctx.moveTo(x - 12, py + 14); ctx.lineTo(x + 12, py + 14); ctx.lineTo(x + 8, py - 8); ctx.lineTo(x - 8, py - 8); ctx.fill(); ctx.stroke();
+      // Борода
+      ctx.fillStyle = '#e0e0e0'; ctx.beginPath(); ctx.moveTo(x - 6, py - 10); ctx.lineTo(x + 6, py - 10); ctx.lineTo(x, py + 8); ctx.fill();
+      // Голова
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 12, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Посох
+      ctx.fillStyle = '#5a3a20'; ctx.fillRect(x + 14, py - 16, 2, 30);
+      ctx.fillStyle = '#60a0ff'; ctx.shadowBlur = 8; ctx.shadowColor = '#60a0ff'; ctx.beginPath(); ctx.arc(x + 15, py - 16, 3, 0, Math.PI*2); ctx.fill(); ctx.shadowBlur = 0;
+      break;
+    }
+    case 'alchemist': {
+      // Котёл
+      ctx.fillStyle = '#2a2a2a'; ctx.beginPath(); ctx.arc(x - 8, py + 8, 10, 0, Math.PI); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#60ff60'; ctx.beginPath(); ctx.arc(x - 8, py + 8, 7, 0, Math.PI); ctx.fill();
+      // Алхимик
+      ctx.fillStyle = '#3a2a1a'; ctx.fillRect(x + 4, py - 4, 10, 14);
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x + 9, py - 10, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Колпак
+      ctx.fillStyle = '#6a0a0a'; ctx.beginPath(); ctx.moveTo(x + 4, py - 12); ctx.lineTo(x + 14, py - 12); ctx.lineTo(x + 9, py - 24); ctx.fill();
+      // Колба
+      ctx.fillStyle = '#a0f0ff'; ctx.beginPath(); ctx.arc(x - 2, py - 6, 3, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      break;
+    }
+    case 'bard': {
+      // Яркая одежда
+      ctx.fillStyle = '#a020a0'; ctx.fillRect(x - 6, py - 6, 12, 16); ctx.strokeRect(x - 6, py - 6, 12, 16);
+      ctx.fillStyle = '#ffd060'; ctx.fillRect(x - 6, py + 2, 12, 2);
+      // Голова
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 12, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Шляпа с пером
+      ctx.fillStyle = '#2a1a0a'; ctx.fillRect(x - 8, py - 18, 16, 3);
+      ctx.fillStyle = '#ff4040'; ctx.beginPath(); ctx.moveTo(x + 4, py - 18); ctx.lineTo(x + 10, py - 24); ctx.lineTo(x + 6, py - 18); ctx.fill();
+      // Лютня
+      ctx.fillStyle = '#8b4513'; ctx.beginPath(); ctx.ellipse(x - 12, py + 2, 6, 8, -0.4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#d0d0d0'; ctx.fillRect(x - 10, py - 6, 1, 10);
+      break;
+    }
+    case 'herald': {
+      // Одежда
+      ctx.fillStyle = '#c9a227'; ctx.fillRect(x - 6, py - 6, 12, 16); ctx.strokeRect(x - 6, py - 6, 12, 16);
+      // Голова
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x, py - 12, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Шляпа
+      ctx.fillStyle = '#4a1a1a'; ctx.beginPath(); ctx.arc(x, py - 14, 6, Math.PI, 0); ctx.fill();
+      // Рупор
+      ctx.fillStyle = '#ffd060'; ctx.beginPath(); ctx.moveTo(x + 10, py - 8); ctx.lineTo(x + 18, py - 14); ctx.lineTo(x + 18, py - 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffd060'; ctx.beginPath(); ctx.moveTo(x + 18, py - 14); ctx.lineTo(x + 26, py - 18); ctx.lineTo(x + 26, py + 2); ctx.lineTo(x + 18, py - 2); ctx.fill();
+      // Свиток
+      ctx.fillStyle = '#f0eadd'; ctx.fillRect(x - 14, py + 2, 6, 8);
+      break;
+    }
+    case 'kids': {
+      // Ребёнок 1
+      ctx.fillStyle = '#3060a0'; ctx.fillRect(x - 10, py + 2, 8, 10); ctx.strokeRect(x - 10, py + 2, 8, 10);
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x - 6, py - 2, 4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Ребёнок 2
+      ctx.fillStyle = '#a03030'; ctx.fillRect(x + 4, py + 4, 7, 8); ctx.strokeRect(x + 4, py + 4, 7, 8);
+      ctx.fillStyle = '#ffcc99'; ctx.beginPath(); ctx.arc(x + 7, py, 3.5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      break;
+    }
+
     default: {
       // Универсальный NPC
       ctx.fillStyle = '#c9a227'; ctx.fillRect(x - 8, py - 6, 16, 18); ctx.strokeRect(x - 8, py - 6, 16, 18);

@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { saveGame } from './save.js';
 import { emit } from './events.js';
+import { addExp } from './progression.js';
 
 const POOL = [
   { id: 'q-kill-any', type: 'kill', text: 'Убей 10 врагов', target: 'any', max: 10, gold: 100, exp: 50 },
@@ -20,7 +21,6 @@ export function getDailyQuests() {
   const dayMs = 24 * 60 * 60 * 1000;
 
   if (now - lastDate > dayMs || p.dailyQuests.list.length === 0) {
-    // Генерируем новые
     const shuffled = [...POOL].sort(() => 0.5 - Math.random());
     p.dailyQuests.list = shuffled.slice(0, 3).map(q => ({ ...q, current: 0, completed: false, claimed: false }));
     p.dailyQuests.date = now;
@@ -57,9 +57,14 @@ export function claimQuestReward(questId) {
 
   q.claimed = true;
   p.gold += q.gold;
-  // (Опыт добавляется через emit или напрямую, чтобы не было цикла с progression.js)
-  // Для простоты добавим золото, а опыт выдадим через имитацию
-  emit('toast', `📜 Награда получена: ${q.gold}💰`);
+
+  // ⬇️ НОВОЕ: реальное начисление опыта
+  if (q.exp) addExp(q.exp);
+
+  const parts = [`+${q.gold}💰`];
+  if (q.exp) parts.push(`+${q.exp} EXP`);
+  emit('toast', `📜 Награда: ${parts.join(', ')}`);
+  emit('log', { channel: 'game', msg: `📜 Квест «${q.text}» — ${parts.join(', ')}`, cls: 'success' });
   saveGame();
   return true;
 }
