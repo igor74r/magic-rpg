@@ -3,7 +3,6 @@ import {
   tryMovePlayer, updateOverworld, exitOverworld,
   combatFlee
 } from '../systems/overworld.js';
-import { getEffStats } from '../systems/stats.js';
 import { saveGame } from '../systems/save.js';
 import { addItem } from '../systems/inventory.js';
 import { saveAndMenu } from './menu.js';

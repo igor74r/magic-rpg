@@ -1,7 +1,7 @@
 import { state } from '../systems/state.js';
 import { showScreen, toast } from './screens.js';
 import {
-  loadGameData, saveSettings, deleteSave, getSlotInfo, getMaxSlot, getMaxSlot as _getMax
+  loadGameData, saveSettings, deleteSave, getSlotInfo, getMaxSlot, saveGame
 } from '../systems/save.js';
 import { renderClassSelection } from './character.js';
 import { emit } from '../systems/events.js';
@@ -10,7 +10,6 @@ import { CLASSES } from '../data/classes.js';
 import { LOCATIONS } from '../data/locations.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
 import { ENEMIES } from '../data/enemies.js';
-import { saveGame } from '../systems/save.js';
 
 let currentSettingsTab = 'sound';
 
