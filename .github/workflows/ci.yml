@@ -28,3 +28,6 @@ jobs:
 
       - name: Run module smoke test
         run: node scripts/smoke-load.mjs
+
+      - name: Run boot smoke test
+        run: node scripts/smoke-boot.mjs
