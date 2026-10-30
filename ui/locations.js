@@ -1,6 +1,6 @@
 // ui/locations.js
 // Вкладка «Локации» — карта мира: деревня в центре, вокруг — локации.
-// Управление мышкой: клик по точке — переход. Стрелки оставлены для антуража.
+// По карте можно ходить (WASD/стрелки), выбирать точку и входить в неё.
 import { state } from '../systems/state.js';
 import { LOCATIONS } from '../data/locations.js';
 import { canOpenDaily, timeUntilDaily, formatRemaining } from './village.js';
@@ -45,7 +45,6 @@ function panelHtml(id) {
       actions.push(`<button onclick="GameAPI.enterRift()" ${riftReady ? '' : 'disabled'}>Разлом${best > 0 ? ` · рекорд ${best}` : ''}</button>`);
     }
   } else {
-    // Если локация не текущая, кнопка "Перейти" всё ещё нужна для тех, кто хочет сначала прочитать описание
     actions.push(`<button onclick="GameAPI.mapTravel('${id}')">Перейти сюда</button>`);
   }
   return `
@@ -81,15 +80,8 @@ function selectNode(id) {
   renderPanel(id);
 }
 
-// ===== ИЗМЕНЕНО: клик сразу перемещает, если это другая локация =====
 export function mapSelect(id) {
-  if (!LOCATIONS[id]) return;
-  
-  if (id !== state.game.location) {
-    mapTravel(id);
-  } else {
-    selectNode(id);
-  }
+  selectNode(id);
 }
 
 export function mapTravel(id) {
@@ -188,13 +180,11 @@ function initWorldMap() {
 export function renderLocations() {
   const nodes = ringNodes();
   const links = nodes.map((n) => `<line x1="50" y1="50" x2="${n.x.toFixed(2)}" y2="${n.y.toFixed(2)}" />`).join('');
-  
   const nodesHtml = nodes.map((n) => {
     const loc = LOCATIONS[n.id];
     return `<div class="wnode${n.id === state.game.location ? ' current' : ''}" data-loc="${n.id}" data-x="${n.x}" data-y="${n.y}"
       style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}">
-      <span class="wnode-icon">${loc.emoji}</span>
-      <span class="wnode-name">${loc.name}</span>
+      <span class="wnode-orb"></span><span class="wnode-name">${loc.name}</span>
     </div>`;
   }).join('');
 
@@ -207,13 +197,12 @@ export function renderLocations() {
       <div class="map-orbit map-orbit-inner"></div>
       <div class="wnode village${state.game.location === 'village' ? ' current' : ''}" data-loc="village" data-x="50" data-y="50" style="left:50%;top:50%"
         onclick="GameAPI.mapSelect('village')" title="Деревня Аврора">
-        <span class="wnode-icon">🏘️</span>
-        <span class="wnode-name">Деревня Аврора</span>
+        <span class="wnode-orb"></span><span class="wnode-name">Деревня Аврора</span>
       </div>
       ${nodesHtml}
       <div class="map-avatar" id="map-avatar"><i></i></div>
     </div>
-    <div class="map-hint">Клик по точке — переход · WASD / стрелки — идти · E — войти</div>
+    <div class="map-hint">WASD / стрелки — идти · E — войти · клик по точке — выбрать</div>
     <div class="map-panel" id="map-panel"></div>`;
 }
 
