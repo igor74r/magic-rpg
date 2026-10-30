@@ -212,3 +212,175 @@ button:hover {
   border-radius: 0;
   color: #ffd7dc;
 }
+
+/* ---------- карта локаций ---------- */
+.world-map {
+  position: relative;
+  height: clamp(380px, 56vh, 560px);
+  margin: 4px 0 10px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(58% 58% at 50% 50%, rgba(124, 231, 255, 0.09), transparent 70%),
+    radial-gradient(120% 90% at 50% 120%, rgba(178, 141, 255, 0.1), transparent 62%),
+    repeating-linear-gradient(0deg, rgba(124, 231, 255, 0.04) 0 1px, transparent 1px 42px),
+    repeating-linear-gradient(90deg, rgba(124, 231, 255, 0.04) 0 1px, transparent 1px 42px),
+    #050a11;
+  overflow: hidden;
+}
+
+.map-links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.map-links line {
+  stroke: rgba(124, 231, 255, 0.22);
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 66%;
+  height: 60%;
+  transform: translate(-50%, -50%);
+  border: 1px dashed rgba(124, 231, 255, 0.12);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.map-orbit-inner {
+  width: 34%;
+  height: 31%;
+  border-style: solid;
+  opacity: 0.5;
+}
+
+.wnode {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.wnode-orb {
+  width: 13px;
+  height: 13px;
+  transform: rotate(45deg);
+  background: rgba(124, 231, 255, 0.18);
+  border: 1px solid rgba(124, 231, 255, 0.55);
+  box-shadow: 0 0 12px rgba(124, 231, 255, 0.25);
+  transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.wnode:hover .wnode-orb,
+.wnode.selected .wnode-orb {
+  background: rgba(124, 231, 255, 0.55);
+  box-shadow: 0 0 20px rgba(124, 231, 255, 0.6);
+  transform: rotate(45deg) scale(1.15);
+}
+
+.wnode.village .wnode-orb {
+  width: 26px;
+  height: 26px;
+  background: radial-gradient(circle, rgba(124, 231, 255, 0.6), rgba(124, 231, 255, 0.08));
+  border-color: var(--accent);
+  box-shadow: 0 0 28px rgba(124, 231, 255, 0.5);
+}
+
+.wnode-name {
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px #000, 0 0 10px #000;
+  pointer-events: none;
+}
+
+.wnode.village .wnode-name { color: var(--ink); font-size: 12px; }
+.wnode.current .wnode-name { color: var(--accent); }
+.wnode.selected .wnode-name { color: #fff; }
+
+.map-avatar {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  pointer-events: none;
+  transition: left 0.06s linear, top 0.06s linear;
+}
+
+.map-avatar i {
+  display: block;
+  width: 13px;
+  height: 13px;
+  transform: rotate(45deg);
+  background: #fff;
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 18px rgba(124, 231, 255, 0.9), 0 0 4px #fff;
+}
+
+.map-hint {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 12px;
+}
+
+.map-panel {
+  border: 1px solid var(--line);
+  background: rgba(6, 12, 18, 0.78);
+  padding: 14px 16px;
+}
+
+.map-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.map-panel h3 {
+  margin: 0 0 4px;
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.map-panel p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+  max-width: 520px;
+  line-height: 1.5;
+}
+
+.map-here {
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+
+.map-panel-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .world-map { height: 420px; }
+  .wnode-name { font-size: 9px; }
+  .wnode.village .wnode-name { font-size: 10px; }
+}

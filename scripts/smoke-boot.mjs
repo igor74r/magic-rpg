@@ -217,6 +217,18 @@ try {
   check('GameAPI.invSlotClick вызывается', false, String(e && e.message));
 }
 
+// Карта локаций: 11 узлов, выбор работает
+try {
+  api.switchTab('locations');
+  const html = byId('tab-content').innerHTML;
+  const nodes = (html.match(/class="wnode(?=[\s"])/g) || []).length;
+  check('карта: 11 узлов локаций', nodes === 11, `${nodes} узлов`);
+  api.mapSelect('forest');
+  check('карта: выбор узла', true);
+} catch (e) {
+  check('карта локаций', false, String(e && e.message));
+}
+
 // NPC-диалоги
 try {
   const npcActions = [
