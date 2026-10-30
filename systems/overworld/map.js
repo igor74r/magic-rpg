@@ -1,3 +1,5 @@
+import { getTileDanger } from './hazards.js';
+
 export const TILE = 48;
 
 export function seededRandom(seed) {
@@ -10,100 +12,309 @@ export function seededRandom(seed) {
 
 export function hashString(str) {
   let h = 0;
-  for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+
   return Math.abs(h);
 }
 
 export function generateVillageMap(cols, rows) {
-  const grid = [];
-  for (let y = 0; y < rows; y++) {
-    grid[y] = [];
-    for (let x = 0; x < cols; x++) grid[y][x] = 0; // 0 - трава
-  }
-  
-  const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
-  
-  // Широкие дороги (3 клетки в ширину)
-  for (let x = 0; x < cols; x++) {
-    grid[cy][x] = 1;
-    if (cy - 1 >= 0) grid[cy - 1][x] = 1;
-    if (cy + 1 < rows) grid[cy + 1][x] = 1;
-  }
-  for (let y = 0; y < rows; y++) {
-    grid[y][cx] = 1;
-    if (cx - 1 >= 0) grid[y][cx - 1] = 1;
-    if (cx + 1 < cols) grid[y][cx + 1] = 1;
-  }
-  
-  // РОВНО 6 ДОМОВ (1x1) ВДОЛЬ ДОРОГИ
-  const houses = [
-    [11, 8],  // Левый верх (для Кузнеца)
-    [19, 8],  // Правый верх (для Лекаря)
-    [11, 16], // Левый низ (для Алхимика)
-    [19, 16], // Правый низ (для Торговца)
-    [17, 5],  // Сверху (для Старейшины)
-    [17, 20]  // Снизу (для Стражника)
+  const grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+  const putRect = (x, y, width, height, tile) => {
+    for (let yy = y; yy < y + height; yy++) {
+      for (let xx = x; xx < x + width; xx++) {
+        if (grid[yy] && grid[yy][xx] !== undefined) {
+          grid[yy][xx] = tile;
+        }
+      }
+    }
+  };
+
+  const road = (x1, y1, x2, y2, width = 1) => {
+    const dx = Math.sign(x2 - x1);
+    const dy = Math.sign(y2 - y1);
+    let x = x1;
+    let y = y1;
+
+    for (let step = 0; step < cols + rows + 5; step++) {
+      for (
+        let ox = -Math.floor(width / 2);
+        ox <= Math.floor(width / 2);
+        ox++
+      ) {
+        for (
+          let oy = -Math.floor(width / 2);
+          oy <= Math.floor(width / 2);
+          oy++
+        ) {
+          if (grid[y + oy] && grid[y + oy][x + ox] !== undefined) {
+            grid[y + oy][x + ox] = 1;
+          }
+        }
+      }
+
+      if (x === x2 && y === y2) break;
+
+      if (x !== x2) x += dx;
+      else if (y !== y2) y += dy;
+    }
+  };
+
+  // Центральная площадь и главные улицы.
+  const cx = Math.floor(cols / 2);
+  const cy = Math.floor(rows / 2);
+
+  putRect(cx - 1, 0, 3, rows, 1);
+  putRect(0, cy - 1, cols, 3, 1);
+  putRect(cx - 4, cy - 3, 9, 7, 1);
+
+  // Улицы к ремесленным кварталам и жилым домам.
+  road(11, 8, 29, 8, 2);
+  road(11, 23, 29, 23, 2);
+  road(11, 8, 11, 23, 2);
+  road(29, 8, 29, 23, 2);
+  road(cx, 5, cx, cy - 3, 2);
+  road(cx, cy + 4, cx, 27, 2);
+  road(5, cy, 11, cy, 2);
+  road(29, cy, 35, cy, 2);
+
+  // Главные здания: кузница, лечебный дом, ратуша,
+  // караулка, алхимическая лавка и торговые ряды.
+  // 2 — непроходимые стены и здания.
+  // 4 — деревья и плотные клумбы.
+  putRect(7, 5, 4, 3, 2);
+  putRect(28, 5, 4, 3, 2);
+  putRect(18, 2, 5, 3, 2);
+  putRect(18, 28, 5, 3, 2);
+  putRect(7, 24, 4, 3, 2);
+  putRect(28, 24, 4, 3, 2);
+  putRect(3, 13, 4, 5, 2);
+  putRect(33, 13, 4, 5, 2);
+
+  // Небольшие постройки на окраинах.
+  putRect(3, 3, 3, 2, 2);
+  putRect(34, 3, 3, 2, 2);
+  putRect(3, 27, 3, 2, 2);
+  putRect(34, 27, 3, 2, 2);
+
+  // Проходы к входам домов.
+  road(11, 8, 12, 8, 1);
+  road(27, 8, 29, 8, 1);
+  road(11, 23, 12, 23, 1);
+  road(27, 23, 29, 23, 1);
+  road(cx, 5, cx, 6, 1);
+  road(cx, 27, cx, 28, 1);
+
+  // Сады, изгороди и зелёные зоны по краям.
+  const gardens = [
+    [1, 1, 2, 5],
+    [1, 8, 2, 3],
+    [1, 22, 2, 5],
+    [37, 1, 2, 5],
+    [37, 8, 2, 3],
+    [37, 22, 2, 5],
+    [13, 2, 3, 2],
+    [24, 2, 3, 2],
+    [13, 28, 3, 2],
+    [24, 28, 3, 2]
   ];
-  
-  for (const [hx, hy] of houses) {
-    if (grid[hy] && grid[hy][hx] !== undefined) {
-      grid[hy][hx] = 2;
+
+  for (const [x, y, width, height] of gardens) {
+    putRect(x, y, width, height, 4);
+  }
+
+  // NPC и точки взаимодействия должны стоять на проходимых клетках.
+  const clearCells = [
+    [20, 16],
+    [18, 13],
+    [16, 13],
+    [24, 13],
+    [11, 8],
+    [29, 8],
+    [11, 23],
+    [29, 23],
+    [20, 5],
+    [20, 27],
+    [18, 18],
+    [23, 18],
+    [20, 20]
+  ];
+
+  for (const [x, y] of clearCells) {
+    if (grid[y] && grid[y][x] !== undefined) {
+      grid[y][x] = 1;
     }
   }
-  
+
   return grid;
 }
 
 export function generateMap(locationId, cols, rows) {
-  if (locationId === 'village') return generateVillageMap(cols, rows);
-  
+  if (locationId === 'village') {
+    return generateVillageMap(cols, rows);
+  }
+
   const rng = seededRandom(hashString(locationId));
   const grid = [];
-  for (let y = 0; y < rows; y++) { grid[y] = []; for (let x = 0; x < cols; x++) grid[y][x] = 0; }
+
+  for (let y = 0; y < rows; y++) {
+    grid[y] = [];
+
+    for (let x = 0; x < cols; x++) {
+      grid[y][x] = 0;
+    }
+  }
+
+  // Каменные образования и препятствия.
   for (let i = 0; i < 3; i++) {
-    const cx = Math.floor(rng() * cols), cy = Math.floor(rng() * rows), r = 2 + Math.floor(rng() * 3);
-    for (let y = Math.max(0, cy - r); y < Math.min(rows, cy + r); y++)
-      for (let x = Math.max(0, cx - r); x < Math.min(cols, cx + r); x++)
-        if (Math.hypot(x - cx, y - cy) <= r && rng() > 0.2) grid[y][x] = 3;
+    const cx = Math.floor(rng() * cols);
+    const cy = Math.floor(rng() * rows);
+    const radius = 2 + Math.floor(rng() * 3);
+
+    for (
+      let y = Math.max(0, cy - radius);
+      y < Math.min(rows, cy + radius);
+      y++
+    ) {
+      for (
+        let x = Math.max(0, cx - radius);
+        x < Math.min(cols, cx + radius);
+        x++
+      ) {
+        if (Math.hypot(x - cx, y - cy) <= radius && rng() > 0.2) {
+          grid[y][x] = 3;
+        }
+      }
+    }
   }
+
+  // Камни, руины и плотные участки.
   for (let i = 0; i < 8; i++) {
-    const cx = Math.floor(rng() * cols), cy = Math.floor(rng() * rows), r = 1 + Math.floor(rng() * 2);
-    for (let y = Math.max(0, cy - r); y < Math.min(rows, cy + r); y++)
-      for (let x = Math.max(0, cx - r); x < Math.min(cols, cx + r); x++)
-        if (Math.hypot(x - cx, y - cy) <= r && rng() > 0.3) grid[y][x] = 2;
+    const cx = Math.floor(rng() * cols);
+    const cy = Math.floor(rng() * rows);
+    const radius = 1 + Math.floor(rng() * 2);
+
+    for (
+      let y = Math.max(0, cy - radius);
+      y < Math.min(rows, cy + radius);
+      y++
+    ) {
+      for (
+        let x = Math.max(0, cx - radius);
+        x < Math.min(cols, cx + radius);
+        x++
+      ) {
+        if (Math.hypot(x - cx, y - cy) <= radius && rng() > 0.3) {
+          grid[y][x] = 2;
+        }
+      }
+    }
   }
-  for (let i = 0; i < 24; i++) { const x = Math.floor(rng() * cols), y = Math.floor(rng() * rows); if (grid[y][x] === 0) grid[y][x] = 4; }
-  const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
-  for (let x = 0; x < cols; x++) if (grid[cy][x] === 0 || grid[cy][x] === 4) grid[cy][x] = 1;
-  for (let y = 0; y < rows; y++) if (grid[y][cx] === 0 || grid[y][cx] === 4) grid[y][cx] = 1;
-  for (let y = cy - 2; y <= cy + 2; y++)
-    for (let x = cx - 2; x <= cx + 2; x++)
-      if (y >= 0 && y < rows && x >= 0 && x < cols) grid[y][x] = 1;
+
+  // Декоративные препятствия.
+  for (let i = 0; i < 24; i++) {
+    const x = Math.floor(rng() * cols);
+    const y = Math.floor(rng() * rows);
+
+    if (grid[y][x] === 0) {
+      grid[y][x] = 4;
+    }
+  }
+
+  // Центральные дороги и безопасная зона появления героя.
+  const cx = Math.floor(cols / 2);
+  const cy = Math.floor(rows / 2);
+
+  for (let x = 0; x < cols; x++) {
+    if (grid[cy][x] === 0 || grid[cy][x] === 4) {
+      grid[cy][x] = 1;
+    }
+  }
+
+  for (let y = 0; y < rows; y++) {
+    if (grid[y][cx] === 0 || grid[y][cx] === 4) {
+      grid[y][cx] = 1;
+    }
+  }
+
+  for (let y = cy - 2; y <= cy + 2; y++) {
+    for (let x = cx - 2; x <= cx + 2; x++) {
+      if (y >= 0 && y < rows && x >= 0 && x < cols) {
+        grid[y][x] = 1;
+      }
+    }
+  }
+
   return grid;
 }
 
-export function isBlocked(map, x, y) {
-  if (x < 0 || x >= map[0].length || y < 0 || y >= map.length) return true;
-  const t = map[y][x];
-  return t === 2 || t === 3 || t === 4;
-}
-
-export function isWalkable(map, cols, rows, px, py) {
-  const x = Math.floor(px / TILE), y = Math.floor(py / TILE);
-  if (x < 0 || x >= cols || y < 0 || y >= rows) return false;
-  return !isBlocked(map, x, y);
-}
-
-export function findFreeCell(map, cols, rows, avoidList, minDistFromPlayer, playerPos) {
-  for (let attempt = 0; attempt < 300; attempt++) {
-    const x = Math.floor(Math.random() * cols), y = Math.floor(Math.random() * rows);
-    if (isBlocked(map, x, y)) continue;
-    const px = x * TILE + TILE / 2, py = y * TILE + TILE / 2;
-    if (playerPos && Math.hypot(px - playerPos.x, py - playerPos.y) < minDistFromPlayer) continue;
-    let overlap = false;
-    for (const o of avoidList) { if (o.dead) continue; if (Math.hypot(px - o.x, py - o.y) < 80) { overlap = true; break; } }
-    if (overlap) continue;
-    return { x, y };
+export function isBlocked(map, x, y, locationId = null) {
+  if (!Array.isArray(map) || !map.length || !Array.isArray(map[0]) || x < 0 || x >= map[0].length || y < 0 || y >= map.length) {
+    return true;
   }
+
+  const tile = map[y][x];
+  if (tile === 2 || tile === 4) return true;
+
+  // Tile 3 is normally a stone formation. It becomes walkable only in regions
+  // where the same surface is defined as a liquid or environmental hazard.
+  return tile === 3 && !getTileDanger(tile, locationId);
+}
+
+export function isWalkable(map, cols, rows, px, py, locationId = null) {
+  const x = Math.floor(px / TILE);
+  const y = Math.floor(py / TILE);
+
+  if (x < 0 || x >= cols || y < 0 || y >= rows) {
+    return false;
+  }
+
+  return !isBlocked(map, x, y, locationId);
+}
+
+export function findFreeCell(
+  map,
+  cols,
+  rows,
+  avoidList,
+  minDistFromPlayer,
+  playerPos
+) {
+  for (let attempt = 0; attempt < 300; attempt++) {
+    const x = Math.floor(Math.random() * cols);
+    const y = Math.floor(Math.random() * rows);
+
+    if (isBlocked(map, x, y)) continue;
+
+    const px = x * TILE + TILE / 2;
+    const py = y * TILE + TILE / 2;
+
+    if (
+      playerPos &&
+      Math.hypot(px - playerPos.x, py - playerPos.y) < minDistFromPlayer
+    ) {
+      continue;
+    }
+
+    let overlap = false;
+
+    for (const obj of avoidList) {
+      if (obj.dead) continue;
+
+      if (Math.hypot(px - obj.x, py - obj.y) < 80) {
+        overlap = true;
+        break;
+      }
+    }
+
+    if (!overlap) {
+      return { x, y };
+    }
+  }
+
   return null;
 }

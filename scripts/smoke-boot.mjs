@@ -6,6 +6,8 @@
 // Ничего в браузере и localStorage не трогает — всё замокано.
 
 const ROOT = new URL('..', import.meta.url);
+const { LOCATIONS } = await import(new URL('data/locations.js', ROOT).href);
+const { STORY } = await import(new URL('data/story.js', ROOT).href);
 
 // ---------- заглушки Canvas ----------
 const gradient = { addColorStop() {} };
@@ -196,15 +198,22 @@ try {
   const moved = state.overworld.player.x !== before.x || state.overworld.player.y !== before.y;
   check('движение WASD', moved);
 } catch (e) {
-  check('overworld/движение', false, String(e && e.message));
+  check('overworld/движение', false, String(e && (e.stack || e.message)));
 }
 
 // Вкладки дашборда
 try {
-  for (const tab of ['locations', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary']) {
+  for (const tab of ['locations', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
     api.switchTab(tab);
   }
   check('вкладки дашборда рендерятся', true);
+  check('хроники мира рендерятся', byId('tab-content').innerHTML.includes('chronicles-page'));
+  api.switchTab('talents');
+  const talentHtml = byId('tab-content').innerHTML;
+  check('дерево талантов можно перемещать мышью и касанием', talentHtml.includes('passive-tree-viewport') && talentHtml.includes('passiveTreePointerDown'));
+  api.switchTab('inventory');
+  const inventoryHtml = byId('tab-content').innerHTML;
+  check('инвентарь рендерит 12 слотов экипировки и категории', inventoryHtml.includes('rpg-inventory-layout') && inventoryHtml.includes('Голова') && inventoryHtml.includes('Палец 2') && inventoryHtml.includes('Руны') && (inventoryHtml.match(/class="gear-slot /g) || []).length === 12);
 } catch (e) {
   check('вкладки дашборда рендерятся', false, String(e && e.message));
 }
@@ -217,12 +226,12 @@ try {
   check('GameAPI.invSlotClick вызывается', false, String(e && e.message));
 }
 
-// Карта локаций: 11 узлов, выбор работает
+// Карта локаций: все доступные узлы должны отображаться, выбор работает
 try {
   api.switchTab('locations');
   const html = byId('tab-content').innerHTML;
   const nodes = (html.match(/class="wnode(?=[\s"])/g) || []).length;
-  check('карта: 11 узлов локаций', nodes === 11, `${nodes} узлов`);
+  check('карта: все локации отображаются', nodes === Object.keys(LOCATIONS).length, `${nodes}/${Object.keys(LOCATIONS).length} узлов`);
   api.mapSelect('forest');
   check('карта: выбор узла', true);
 } catch (e) {
@@ -245,13 +254,20 @@ try {
 // Бой: деревня безопасна, поэтому переходим в лес
 try {
   api.exitOverworld?.();
-  state.game.location = 'forest';
+  state.game.location = 'briar-hollow';
   api.enterOverworld();
   frame(2);
 
   const ow = state.overworld;
-  const enemy = ow.enemies.find((e) => !e.dead);
-  if (!enemy) throw new Error('враги не заспавнились');
+  const firstMission = STORY.acts[0].missions[0];
+  api.openElder();
+  api.acceptElderQuest();
+  check('Старейшина выдаёт принятое сюжетное поручение', state.game.player.activeCampaignMission === firstMission.id);
+  const enemy = ow.enemies.find((e) => !e.dead && e.enemyId === firstMission.enemyId);
+  if (!enemy) throw new Error('враг первого поручения не заспавнился');
+  const actEnemyIds = LOCATIONS['briar-hollow'].enemies;
+  const spawnedIds = new Set(ow.enemies.map(e => e.enemyId));
+  check('все враги акта, включая босса, появляются на карте', actEnemyIds.every(id => spawnedIds.has(id)));
 
   enemy.x = ow.player.x;
   enemy.y = ow.player.y;
@@ -279,6 +295,15 @@ try {
     }
   }
   check('бой завершается победой', !state.overworld.combat, state.overworld.combat ? 'бой не закрылся' : '');
+  const campaignMission = STORY.acts.flatMap(act => act.missions).find(mission => mission.id === firstMission.id);
+  check('убийство учитывается в принятом поручении правильного региона', !!campaignMission && state.game.player.campaignKills?.[campaignMission.id] === 1);
+  state.game.player.campaignKills[firstMission.id] = firstMission.count;
+  const goldBeforeTurnIn = state.game.player.gold;
+  api.openElder();
+  api.turnInElderQuest();
+  check('Эдвин принимает выполненное поручение и выдаёт награду', state.game.player.campaignClaimed?.[firstMission.id] === true && state.game.player.gold > goldBeforeTurnIn && state.game.player.activeCampaignMission === null);
+  api.openElder();
+  check('после сдачи Эдвин предлагает следующее поручение', byId('npc-dialog-content').innerHTML.includes(STORY.acts[0].missions[1].title));
 } catch (e) {
   check('бой', false, String(e && e.message));
 }
@@ -287,6 +312,8 @@ try {
 try {
   api.saveAndMenu();
   check('сохранение в слот 1', storage.has('magic-rpg-save-1'));
+  api.startNGPlus();
+  check('NG+ начинает кампанию заново', Object.keys(state.game.player.campaignKills || {}).length === 0 && Object.keys(state.game.player.campaignClaimed || {}).length === 0 && state.game.player.activeCampaignMission === null && state.game.player.dex === (state.game.player.class === 'mage' ? 8 : state.game.player.class === 'archer' ? 18 : 6));
 } catch (e) {
   check('сохранение в слот 1', false, String(e && e.message));
 }

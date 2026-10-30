@@ -51,8 +51,12 @@ export function startNGPlus() {
     level: 1, exp: 0, expNext: 100,
     hp: newMaxHp, maxHp: newMaxHp,
     mp: p.class === 'warrior' ? 0 : newMaxMp, maxMp: newMaxMp,   // ⬅️ Воин — с 0 Ярости
-    str: s.str, int: s.int, wis: s.wis, con: s.con,
+    str: s.str, int: s.int, wis: s.wis, con: s.con, dex: s.dex || 10,
     statPoints: 0,
+    campaignKills: {},
+    campaignClaimed: {},
+    campaignShards: {},
+    activeCampaignMission: null,
     spells: [...cls.startingSpells],
     cooldowns: {},
     effects: [],

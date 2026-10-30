@@ -5,6 +5,8 @@ import { saveGame } from '../../systems/save.js';
 import { LOCATIONS } from '../../data/locations.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic } from './models.js';
+import { drawAtlasTile, drawAtlasProp } from './tile-atlas.js';
+import { getTileDanger } from '../../systems/overworld/hazards.js';
 import { renderCombatPanel } from './combat-panel.js';
 import {
   VIEW_W, VIEW_H, getTheme, MOD_LABEL,
@@ -30,21 +32,6 @@ function edgeSpawn() {
   return { x: Math.random() * VIEW_W, y: VIEW_H - Math.random() * band };
 }
 
-// ==================== ОПАСНЫЕ ТАЙЛЫ ====================
-function getTileDanger(tileType, locId) {
-  if (tileType === undefined || tileType === null) return null;
-  if ((locId === 'volcano' || locId === 'dragon') && tileType === 3) {
-    return { type: 'lava', dmg: 1, every: 90, color: '#ff4010', name: '🔥 Лава' };
-  }
-  if (locId === 'swamp' && tileType === 3) {
-    return { type: 'poison', dmg: 1, every: 180, color: '#60a060', name: '☠️ Болото' };
-  }
-  if (locId === 'ruins' && tileType === 4) {
-    return { type: 'spike', dmg: 2, every: 0, color: '#a06060', name: '⚠️ Шипы' };
-  }
-  return null;
-}
-
 export function startAutosave() {
   if (autosaveTimer) return;
   autosaveTimer = setInterval(() => {
@@ -61,7 +48,7 @@ function tick(ts) {
 
       const ow = state.overworld;
       const p = state.game.player;
-      const theme = getTheme(ow.locationId);
+      const theme = getTheme(ow.theme || ow.locationId);
 
       // Погодные эффекты в бою
       if (ow.combat) {
@@ -69,7 +56,7 @@ function tick(ts) {
           p.effects = (p.effects || []).filter(e => e._weatherEffect !== true);
           p.effects.push({ id: 'defBuff', duration: 999, _weatherEffect: true });
           _weatherEffectApplied = 'def';
-        } else if (ow.locationId === 'shadow' && _weatherEffectApplied !== 'atk') {
+        } else if (['shadow', 'void-crater'].includes(ow.locationId) && _weatherEffectApplied !== 'atk') {
           p.effects = (p.effects || []).filter(e => e._weatherEffect !== true);
           p.effects.push({ id: 'atkBuff', duration: 999, _weatherEffect: true });
           _weatherEffectApplied = 'atk';
@@ -186,6 +173,30 @@ function tick(ts) {
 }
 
 function drawTile(ctx, type, x, y, size, themeName, colors) {
+  if (drawAtlasTile(ctx, type, x, y, size, themeName)) {
+    const hazard = getTileDanger(type, themeName);
+    if (hazard) {
+      const pulse = 0.35 + 0.45 * Math.abs(Math.sin(performance.now() / 400 + x * 0.01 + y * 0.01));
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = hazard.type === 'lava'
+        ? `rgba(255, 85, 0, ${pulse})`
+        : hazard.type === 'poison'
+          ? `rgba(100, 220, 80, ${pulse * 0.6})`
+          : `rgba(210, 55, 55, ${pulse * 0.45})`;
+      ctx.fillRect(x, y, size, size);
+      if (hazard.type === 'spike') {
+        ctx.strokeStyle = `rgba(255, 170, 150, ${pulse})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x + 10, y + 13); ctx.lineTo(x + 18, y + 28); ctx.lineTo(x + 26, y + 13);
+        ctx.moveTo(x + 25, y + 27); ctx.lineTo(x + 33, y + 39);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+    return;
+  }
   const half = size / 2;
   ctx.fillStyle = colors[type] || '#1a4a3e';
   ctx.fillRect(x, y, size, size);
@@ -219,15 +230,17 @@ function drawTile(ctx, type, x, y, size, themeName, colors) {
       ctx.fillStyle = '#1a4a3e'; ctx.beginPath(); ctx.arc(x + half + 2 + wind, y + 18, 10, 0, Math.PI * 2); ctx.fill();
     }
   } else if (type === 3) {
-    const isLava = (themeName === 'volcano' || themeName === 'dragon');
-    const isPoison = (themeName === 'swamp');
-    
-    if (isLava || isPoison) {
+    const isLava = ['volcano', 'dragon', 'obsidian-fields'].includes(themeName);
+    const isPoison = ['swamp', 'briar-hollow'].includes(themeName);
+    const isTrapWater = ['ruins', 'sunken-necropolis'].includes(themeName);
+
+    if (isLava || isPoison || isTrapWater) {
       const pulse = 0.4 + 0.6 * Math.abs(Math.sin(performance.now() / 400 + x * 0.01 + y * 0.01));
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       if (isLava) ctx.fillStyle = `rgba(255, 80, 0, ${0.3 + pulse * 0.3})`;
-      else ctx.fillStyle = `rgba(100, 200, 80, ${0.15 + pulse * 0.15})`;
+      else if (isPoison) ctx.fillStyle = `rgba(100, 200, 80, ${0.15 + pulse * 0.15})`;
+      else ctx.fillStyle = `rgba(200, 55, 55, ${0.12 + pulse * 0.2})`;
       ctx.fillRect(x, y, size, size);
       ctx.restore();
     }
@@ -337,10 +350,12 @@ function render() {
     if (c.opened) continue;
     const sx = c.x - cam.x, sy = c.y - cam.y;
     if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
-    ctx.fillStyle = theme.shadow; ctx.beginPath(); ctx.ellipse(sx, sy + 8, 14, 6, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#3a2010'; ctx.fillRect(sx - 14, sy - 4, 28, 16); ctx.strokeRect(sx - 14, sy - 4, 28, 16);
-    ctx.fillStyle = '#5a3a20'; ctx.beginPath(); ctx.arc(sx, sy - 4, 14, Math.PI, 0); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#ffcc00'; ctx.fillRect(sx - 3, sy + 2, 6, 6);
+    ctx.fillStyle = theme.shadow; ctx.beginPath(); ctx.ellipse(sx, sy + 8, 17, 7, 0, 0, Math.PI * 2); ctx.fill();
+    if (!drawAtlasProp(ctx, 0, sx - 24, sy - 24, 48, 48)) {
+      ctx.fillStyle = '#3a2010'; ctx.fillRect(sx - 14, sy - 4, 28, 16); ctx.strokeRect(sx - 14, sy - 4, 28, 16);
+      ctx.fillStyle = '#5a3a20'; ctx.beginPath(); ctx.arc(sx, sy - 4, 14, Math.PI, 0); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffcc00'; ctx.fillRect(sx - 3, sy + 2, 6, 6);
+    }
     ctx.shadowBlur = 10; ctx.shadowColor = '#ffcc00'; ctx.fillStyle = 'rgba(255, 204, 0, 0.4)'; ctx.beginPath(); ctx.arc(sx, sy, 16, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
   }
 

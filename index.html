@@ -7,6 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/rpg-overhaul.css" id="rpg-overhaul-css">
 </head>
 <body>
 
@@ -52,7 +53,7 @@
     </div>
 
     <div class="menu-footer">
-      <span>v0.14 · Карта</span>
+      <span>v0.19 · Глобальное издание</span>
     </div>
   </div>
 </div>
@@ -84,7 +85,7 @@
         <div class="help-key-row"><kbd>WASD</kbd><span>или</span><kbd>Стрелки</kbd><span>Движение</span></div>
         <div class="help-key-row"><kbd>Esc</kbd><span>Пауза / выход из боя</span></div>
         <div class="help-key-row"><kbd>Пробел</kbd><span>или</span><kbd>1</kbd><span>Атака</span></div>
-        <div class="help-key-row"><kbd>2</kbd><span>Магия (только Маг и Жрец)</span></div>
+        <div class="help-key-row"><kbd>2</kbd><span>Магия (Маг и Лучник)</span></div>
         <div class="help-key-row"><kbd>3</kbd><span>Использовать предмет</span></div>
         <div class="help-key-row"><kbd>4</kbd><span>Побег (шанс 60%)</span></div>
         <div class="help-key-row"><kbd>5</kbd><span>Блок (урон ×0.5)</span></div>
@@ -94,7 +95,7 @@
       <h3>⚔️ Классы</h3>
       <p><b>⚔️ Воин</b> — не знает заклинаний, но копит <b>Ярость</b> от ударов и полученного урона. Тратит её на мощные способности.</p>
       <p><b>🧙 Маг</b> — слаб физически (урон от оружия вдвое ниже), но его заклинания сокрушительны. Полностью зависит от маны.</p>
-      <p><b>✨ Жрец</b> — лечит, снимает дебаффы, а заклинание «Жертва» обменивает HP на ману. Уникальная пассивка «Воскрешение» — раз за бой спасает от смерти.</p>
+      <p><b>🏹 Лучник</b> — ловкий боец дальнего боя с высоким шансом уклонения и критического удара. Накапливает <b>Концентрацию</b> обычными атаками, использует ядовитые стрелы и способности «Прицельный выстрел», «Уклонение» и «Отравленный наконечник».</p>
     </div>
     <button onclick="GameAPI.showScreen('screen-main')" class="settings-back-btn">← Назад</button>
   </div>
@@ -139,6 +140,7 @@
       <div class="tab" data-tab="talents" onclick="GameAPI.switchTab('talents')"><span class="tab-icon">🌳</span> <span class="tab-text">Таланты</span></div>
       <div class="tab" data-tab="bestiary" onclick="GameAPI.switchTab('bestiary')"><span class="tab-icon">📖</span> <span class="tab-text">Бестиарий</span></div>
       
+      <div class="tab" data-tab="chronicles" onclick="GameAPI.switchTab('chronicles')"><span class="tab-icon">📚</span> <span class="tab-text">Хроники</span></div>
       <div class="sidebar-bottom">
         <button onclick="GameAPI.saveAndMenu()" class="save-menu-btn">💾 Сохранить и в меню</button>
       </div>

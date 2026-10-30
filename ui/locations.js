@@ -11,23 +11,59 @@ import { enterOverworld } from '../systems/overworld.js';
 
 const MAP_SPEED_X = 26;
 const MAP_SPEED_Y = 20;
-const NODE_RADIUS = 33;
-const NODE_RADIUS_Y = 30;
+const MAP_CLUSTER_RADIUS_MIN = 18;
+const MAP_CLUSTER_RADIUS_MAX = 28;
+const MAP_NODE_MIN_DISTANCE = 9.5;
 
 let selected = null;
 let keysBound = false;
+let worldLayout = null;
 const map = { raf: 0, keys: new Set(), x: 50, y: 50, nodes: [] };
 
+export function createWorldMapLayout(ids, random = Math.random) {
+  const source = Array.isArray(ids) ? ids.filter(id => id && id !== 'village') : [];
+  const shuffled = source.slice();
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.max(0, Math.min(i, Math.floor(random() * (i + 1))));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  const nodes = [];
+  for (const id of shuffled) {
+    let point = null;
+    for (let attempt = 0; attempt < 500; attempt++) {
+      const angle = random() * Math.PI * 2;
+      const radius = MAP_CLUSTER_RADIUS_MIN +
+        random() * (MAP_CLUSTER_RADIUS_MAX - MAP_CLUSTER_RADIUS_MIN);
+      const candidate = {
+        id,
+        x: 50 + Math.cos(angle) * radius,
+        y: 50 + Math.sin(angle) * radius * 0.86
+      };
+      if (nodes.every(node =>
+        Math.hypot(node.x - candidate.x, (node.y - candidate.y) * 1.12) >= MAP_NODE_MIN_DISTANCE
+      )) {
+        point = candidate;
+        break;
+      }
+    }
+
+    if (!point) {
+      const angle = (nodes.length / Math.max(1, source.length)) * Math.PI * 2;
+      point = {
+        id,
+        x: 50 + Math.cos(angle) * MAP_CLUSTER_RADIUS_MAX,
+        y: 50 + Math.sin(angle) * MAP_CLUSTER_RADIUS_MAX * 0.86
+      };
+    }
+    nodes.push(point);
+  }
+  return nodes;
+}
+
 function ringNodes() {
-  const ids = Object.keys(LOCATIONS).filter((id) => id !== 'village');
-  return ids.map((id, i) => {
-    const angle = (-90 + (360 / ids.length) * i) * Math.PI / 180;
-    return {
-      id,
-      x: 50 + NODE_RADIUS * Math.cos(angle),
-      y: 50 + NODE_RADIUS_Y * Math.sin(angle),
-    };
-  });
+  if (!worldLayout) worldLayout = createWorldMapLayout(Object.keys(LOCATIONS));
+  return worldLayout.map(node => ({ ...node }));
 }
 
 function panelHtml(id) {
@@ -192,9 +228,9 @@ export function renderLocations() {
   const nodesHtml = nodes.map((n) => {
     const loc = LOCATIONS[n.id];
     return `<div class="wnode${n.id === state.game.location ? ' current' : ''}" data-loc="${n.id}" data-x="${n.x}" data-y="${n.y}"
-      style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}">
+      style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}" aria-label="${loc.name}">
       <span class="wnode-icon">${loc.emoji}</span>
-      <span class="wnode-name">${loc.name}</span>
+      <span class="wnode-name" aria-hidden="true">${loc.name}</span>
     </div>`;
   }).join('');
 

@@ -21,12 +21,12 @@ import {
   setInvFilter, setInvSort, invSlotClick,
   openBlacksmith, openHealer, openAlchemist, backToVillage,
   openMerchant, openElder, openWell, closeNpcAndResumeUI,
-  takeElderBlessingUI, useWellUI,
+  takeElderBlessingUI, useWellUI, acceptElderQuestUI, turnInElderQuestUI,
   openBard, openGuard, openCat, openKids, openHerald, openQuestBoard,
   payBardUI, petCatUI, claimQuestUI,
   upgradeEquipmentUI, healAtHealerUI, craftRecipeUI,
-  showShopTooltip, equipBestUI, sellJunkUI,
-  allocatePassiveUI
+  showShopTooltip, equipBestUI, sellJunkUI, socketRuneUI,
+  allocatePassiveUI, passiveTreePointerDown, passiveTreePointerMove, passiveTreePointerUp
 } from './ui/game.js';
 import {
   initOverworld, owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
@@ -206,9 +206,9 @@ function handleWorldEvent(eventId) {
     toastMsg = `⛩️ ${buffNames[buff]}!`;
   } else if (ev.eventType === 'mimic') {
     if (Math.random() < 0.5) {
-      p.gold = (p.gold || 0) + 100;
-      logMsg = `🎁 Сундук: +100💰`;
-      toastMsg = `🎁 +100💰!`;
+      p.gold = (p.gold || 0) + 12;
+      logMsg = `🎁 Сундук: +12💰`;
+      toastMsg = `🎁 +12💰!`;
     } else {
       p.hp = Math.max(1, p.hp - 20);
       ow.player.hp = p.hp;
@@ -216,10 +216,10 @@ function handleWorldEvent(eventId) {
       toastMsg = `🎁 Мимик! −20 HP`;
     }
   } else if (ev.eventType === 'crystal') {
-    p.gold = (p.gold || 0) + 50;
+    p.gold = (p.gold || 0) + 8;
     addExp(30);
-    logMsg = `💎 Кристалл маны: +50💰, +30 EXP`;
-    toastMsg = `💎 +50💰, +30 EXP`;
+    logMsg = `💎 Кристалл маны: +8💰, +30 EXP`;
+    toastMsg = `💎 +8💰, +30 EXP`;
   } else if (ev.eventType === 'traveler') {
     const items = ['health-potion', 'mana-potion', 'herb-life', 'herb-moon'];
     const itemId = items[Math.floor(Math.random() * items.length)];
@@ -372,6 +372,8 @@ window.GameAPI = {
   openMerchant, openElder, openWell,
   closeNpcAndResume: closeNpcAndResumeUI,
   takeElderBlessing: takeElderBlessingUI,
+  acceptElderQuest: acceptElderQuestUI,
+  turnInElderQuest: turnInElderQuestUI,
   useWell: useWellUI,
   payBard: payBardUI,
   petCat: petCatUI,
@@ -382,7 +384,9 @@ window.GameAPI = {
   craftRecipe: craftRecipeUI,
   showShopTooltip,
   equipBest: equipBestUI,
+  socketRune: socketRuneUI,
   allocatePassive: allocatePassiveUI,
+  passiveTreePointerDown, passiveTreePointerMove, passiveTreePointerUp,
   startNGPlus,
   enterRift,
   showScreen,

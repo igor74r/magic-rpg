@@ -12,25 +12,51 @@ export function getExpNext(level) {
 export function addExp(amount) {
   const p = state.game.player;
   if (p.level >= MAX_LEVEL) return;
-  
+
   p.exp += amount;
+
   while (p.level < MAX_LEVEL && p.exp >= p.expNext) {
     p.exp -= p.expNext;
     p.level++;
     p.expNext = getExpNext(p.level);
-    
-    // Базовый прирост статов за уровень
-    p.maxHp += 10; p.maxMp += 5;
-    p.str += 1; p.int += 1; p.wis += 1; p.con += 1;
-    
-    p.statPoints = (p.statPoints || 0) + 1;
-    p.passivePoints = (p.passivePoints || 0) + 1; // Очко для Древа
-    
-    p.hp = p.maxHp; 
-    if (p.class !== 'warrior' && p.class !== 'assassin') p.mp = p.maxMp;
 
-    emit('log', { channel: 'game', msg: `⬆️ Уровень ${p.level}! +1 очко характеристик, +1 очко навыков.`, cls: 'success' });
-    emit('toast', `Уровень ${p.level}! Доступны новые очки.`);
+    // Прирост специализируется под выбранный класс.
+    if (p.class === 'warrior') {
+      p.maxHp += 14;
+      p.maxMp += 5;
+      p.str += 2;
+      p.con += 1;
+      p.dex += 1;
+    } else if (p.class === 'mage') {
+      p.maxHp += 8;
+      p.maxMp += 13;
+      p.int += 2;
+      p.wis += 1;
+      p.con += 1;
+    } else if (p.class === 'archer') {
+      p.maxHp += 10;
+      p.maxMp += 7;
+      p.dex += 2;
+      p.str += 1;
+      p.con += 1;
+    }
+
+    p.statPoints = (p.statPoints || 0) + 1;
+    p.passivePoints = (p.passivePoints || 0) + 1;
+
+    p.hp = p.maxHp;
+
+    if (p.class === 'mage') {
+      p.mp = p.maxMp;
+    }
+
+    emit('log', {
+      channel: 'game',
+      msg: `⬆️ Уровень ${p.level}! +1 очко характеристик и +1 очко пассивного древа.`,
+      cls: 'success'
+    });
+
+    emit('toast', `Уровень ${p.level}! Новое очко древа доступно.`);
     playSound('levelup');
   }
 }

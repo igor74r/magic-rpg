@@ -7,5 +7,10 @@ export const SPELLS = {
   "poison-cloud": { name: "Ядовитый туман", icon: "☠️", cost: 20, desc: "15 урона + отравление.", damage: 15, effect: "poison" },
   "poison-arrow": { name: "Ядовитая стрела", icon: "🏹", cost: 10, desc: "Наносит урон и травит.", damage: 15, effect: "poison" },
   "shield":       { name: "Щит",            icon: "🛡️", cost: 15, desc: "+50% защиты на 2 хода.", selfEffect: "defBuff" },
-  "sacrifice":    { name: "Жертва",         icon: "🩸", cost: 0, desc: "Тратит 20% HP, но восстанавливает 50 MP.", selfDamagePct: 0.2, restoreMp: 50 }
+  "sacrifice":    { name: "Жертва",         icon: "🩸", cost: 0, desc: "Тратит 20% HP, но восстанавливает 50 MP.", selfDamagePct: 0.2, restoreMp: 50 },
+  "arcane-surge": { name: "Арканный импульс", icon: "✨", cost: 30, desc: "Наносит 55 чистого магического урона.", damage: 55 },
+  "frost-nova":   { name: "Ледяная nova", icon: "❄️", cost: 26, desc: "Наносит 34 урона и оглушает цель.", damage: 34, effect: "stun" },
+  "radiant-aegis": { name: "Эгида рассвета", icon: "🌟", cost: 24, desc: "Укрепляет защиту на 2 хода.", selfEffect: "defBuff" },
+  "shadow-lance": { name: "Копьё тени", icon: "🗡️", cost: 36, desc: "Наносит 68 урона и вызывает кровотечение.", damage: 68, effect: "bleed" },
+  "renewal":      { name: "Возобновление", icon: "🌿", cost: 32, desc: "Восстанавливает 95 здоровья.", heal: 95 }
 };

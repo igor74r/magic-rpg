@@ -4,6 +4,14 @@ import { ITEMS, RARITIES } from '../data/items.js';
 import { countItem } from '../systems/inventory.js';
 import { saveGame } from '../systems/save.js';
 import { showScreen, toast } from './screens.js';
+import { STORY } from '../data/story.js';
+import { LOCATIONS } from '../data/locations.js';
+import { addItem } from '../systems/inventory.js';
+import { addExp } from '../systems/progression.js';
+import {
+  getActiveCampaignMission, getNextCampaignMission, getMissionProgress,
+  getMissionReward, acceptCampaignMission, claimCampaignMission
+} from '../systems/campaign.js';
 
 function showNpcUI(html) {
   if (state.overworld && state.overworld.active) {
@@ -55,24 +63,99 @@ export function openElder() {
   const hasBlessing = p.effects?.some(e => e.id === 'elderBlessing');
   const isFirstMeet = !p.stats?.metElder;
   const shardsCount = Object.values(state.game.shards || {}).filter(Boolean).length;
+  const active = getActiveCampaignMission(p);
+  const next = active || getNextCampaignMission(p);
 
   let dialogue = '';
   if (isFirstMeet) {
-    dialogue = `<div style="background:rgba(10,6,18,0.6);padding:16px;border-left:3px solid #c9a227;border-radius:6px;margin-bottom:15px;"><p style="color:#d4c8a8;font-style:italic;line-height:1.7;">«Слушай меня внимательно, странник.<br><br>Кристалл Маны расколот. Три осколка разбросаны по землям:<br><b style="color:#60ff60;">🌲 в Тёмном лесу</b>,<br><b style="color:#60a0ff;">🏛️ в Руинах павшего храма</b>,<br><b style="color:#b060ff;">🕳️ в Пещере теней</b>.<br><br>Победи их стражей — и верни осколки. Иначе тьма поглотит всё.»</p></div>`;
+    dialogue = `<div class="elder-lore"><p>«Я думал, что осколки — единственная беда. Но трещина Кристалла разбудила пять древних печатей. Их следы ведут в земли, которых нет на старых картах.</p><p>В чаще корни помнят звёзды. Под водой лежит город свидетелей. В обсидиане спит кузница клятв. Лёд хранит признание королевы. А за гранью мира ждёт тот, кого называют Немым.</p><p>Я буду поручать тебе дела по одному. Выполни их и возвращайся ко мне: за каждым ответом откроется следующая часть правды».</p></div>`;
   } else if (shardsCount === 3) {
-    dialogue = `<p style="text-align:center;padding:15px;color:#60ff60;">✨ Осколки собраны! Разлом открыт — иди в портал.</p>`;
+    dialogue = `<p class="elder-notice">💎 Все три осколка найдены. Но печати ещё требуют внимания — заверши поручения, чтобы узнать истинную причину Раскола.</p>`;
   } else if (shardsCount > 0) {
-    dialogue = `<p style="text-align:center;padding:15px;color:#ffd060;">Осколков собрано: <b>${shardsCount}/3</b>. Продолжай путь.</p>`;
+    dialogue = `<p class="elder-notice">Осколков Кристалла собрано: <b>${shardsCount}/3</b>. Их история переплетена с пятью печатями.</p>`;
+  }
+
+  let missionBlock = '';
+  if (next) {
+    const { act, mission } = next;
+    const progress = getMissionProgress(p, mission);
+    const missionLocationId = mission.locationId || act.locationId;
+    const location = LOCATIONS[missionLocationId]?.name || missionLocationId;
+    const reward = getMissionReward(mission);
+    const status = active
+      ? progress.complete
+        ? '<b class="elder-quest-ready">Поручение завершено. Эдвин ждёт твоего возвращения.</b>'
+        : '<b class="elder-quest-active">Поручение принято. Продолжай путь.</b>'
+      : '<b class="elder-quest-new">Новое поручение доступно.</b>';
+
+    const action = active
+      ? progress.complete
+        ? '<button onclick="GameAPI.turnInElderQuest()" class="sell-btn elder-quest-action">Сдать поручение и получить награду</button>'
+        : ''
+      : '<button onclick="GameAPI.acceptElderQuest()" class="sell-btn elder-quest-action">Принять поручение</button>';
+
+    missionBlock = `
+      <section class="elder-quest-card">
+        <small>${act.subtitle} · ${act.number} акт</small>
+        <h3>${mission.title}</h3>
+        <p>${mission.desc}</p>
+        <div class="elder-quest-meta">📍 Регион: <b>${location}</b></div>
+        <div class="elder-quest-objective">${status}<span>${mission.objective}</span></div>
+        <div class="campaign-progress"><i style="width:${Math.min(100, progress.current / progress.required * 100)}%"></i></div>
+        <div class="elder-quest-count">${progress.current} / ${progress.required}</div>
+        <div class="elder-quest-reward">Награда: 💰 ${reward.gold} · ✨ ${reward.exp} EXP · ${ITEMS[reward.itemId]?.icon || '📦'} ${ITEMS[reward.itemId]?.name || reward.itemId}</div>
+        ${action}
+      </section>`;
+  } else {
+    missionBlock = `<section class="elder-quest-card elder-campaign-finished"><h3>Пять печатей восстановлены</h3><p>«Ты узнал, почему Кристалл раскололся. Теперь Аврора должна решить, как жить без страха перед общей силой. Я больше не стану хранить эту правду в одиночку».</p></section>`;
   }
 
   showNpcUI(`
     <div class="npc-header"><div class="npc-emoji">👴</div><div><h3 style="margin:0;">Старейшина Эдвин</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('elder')}»</p></div></div>
     ${dialogue}
-    ${hasBlessing ? `<p style="text-align:center;padding:20px;color:#60ff60;">✨ Вы уже получили благословение старейшины.</p>` : `<div style="text-align:center;margin:20px 0;"><p style="margin-bottom:15px;">Благословение дает +20% к получаемому опыту на 10 боев.</p><button onclick="GameAPI.takeElderBlessing()" class="sell-btn" style="padding:15px 30px;">Принять благословение</button></div>`}
+    ${missionBlock}
+    ${hasBlessing ? '<p class="elder-notice">✨ Благословение старейшины уже действует.</p>' : '<div class="elder-blessing"><p>Благословение даёт +20% к получаемому опыту на 10 боёв.</p><button onclick="GameAPI.takeElderBlessing()" class="sell-btn">Принять благословение</button></div>'}
     <button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>
   `);
 
-  if (isFirstMeet) { if (!p.stats) p.stats = {}; p.stats.metElder = true; saveGame(); }
+  if (isFirstMeet) {
+    if (!p.stats) p.stats = {};
+    p.stats.metElder = true;
+    saveGame();
+  }
+}
+
+export function acceptElderQuestUI() {
+  const p = state.game?.player;
+  if (!p) return;
+  const next = getNextCampaignMission(p);
+  if (!next || !acceptCampaignMission(p, next.mission.id)) {
+    toast('Сейчас нет доступного нового поручения.');
+    return;
+  }
+  saveGame();
+  openElder();
+  toast(`📜 Принято поручение: ${next.mission.title}`);
+}
+
+export function turnInElderQuestUI() {
+  const p = state.game?.player;
+  if (!p) return;
+  const completed = claimCampaignMission(p);
+  if (!completed) {
+    toast('Поручение ещё не выполнено.');
+    return;
+  }
+
+  const reward = getMissionReward(completed.mission);
+  p.gold = (p.gold || 0) + reward.gold;
+  addExp(reward.exp);
+  if (reward.itemId) addItem(reward.itemId, 1);
+  if (!p.stats) p.stats = {};
+  p.stats.goldEarned = (p.stats.goldEarned || 0) + reward.gold;
+  saveGame();
+  openElder();
+  toast(`Награда получена: +${reward.gold} золота, +${reward.exp} опыта.`);
 }
 
 export function openWell() {

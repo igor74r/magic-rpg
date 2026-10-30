@@ -30,18 +30,38 @@ export function getRespawnMs() { const d = state.settings.difficulty; return d =
 export function getEliteChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.15 : d === 'hard' ? 0.35 : 0.20; }
 export function getDropChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.70 : d === 'hard' ? 0.30 : 0.50; }
 
+export function createSpawnRoster(enemyIds, count, random = Math.random) {
+  const roster = Array.isArray(enemyIds) ? enemyIds.filter(Boolean) : [];
+  const total = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
+  if (!roster.length || total === 0) return [];
+
+  // Fisher–Yates first guarantees every act enemy (including its boss) is represented.
+  for (let i = roster.length - 1; i > 0; i--) {
+    const raw = Math.floor(random() * (i + 1));
+    const j = Math.max(0, Math.min(i, raw));
+    [roster[i], roster[j]] = [roster[j], roster[i]];
+  }
+
+  const result = roster.slice(0, total);
+  while (result.length < total) {
+    result.push(roster[Math.floor(random() * roster.length)]);
+  }
+  return result;
+}
+
 export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}) {
   if (loc.safe) return [];
   const ng = getNGPlusMult();
   const riftM = opts.rifMode ? getRiftMult(opts.rifFloor || 1) : { hpMult: 1 };
   const enemies = [];
   const count = Math.min(Math.max(loc.enemies.length, 4), 7);
+  const spawnRoster = createSpawnRoster(loc.enemies, count);
   const eliteChance = getEliteChance();
 
   for (let i = 0; i < count; i++) {
     const pos = findFreeCell(map, cols, rows, enemies, 220, playerPos);
     if (!pos) continue;
-    const enemyId = loc.enemies[Math.floor(Math.random() * loc.enemies.length)];
+    const enemyId = spawnRoster[i];
     const def = ENEMIES[enemyId];
     if (!def) continue;
     const isBoss = !!def.boss;

@@ -134,7 +134,7 @@ function openSecret(sw) {
     emit('log', { channel: 'game', msg: '👁️ Из тьмы вышел страж.', cls: 'danger' });
   } else {
     // Лут — золото и зелья
-    const gold = 30 + Math.floor(Math.random() * 50);
+    const gold = 5 + Math.floor(Math.random() * 9);
     p.gold = (p.gold || 0) + gold;
     addItem('health-potion', 1);
     addItem('mana-potion', 1);
@@ -153,7 +153,7 @@ export function initOverworld() {
     if (canvas) { canvas.addEventListener('mousemove', onCanvasMouseMove); canvas.addEventListener('mouseleave', hideMapTooltip); }
   }
   setSubPanel(null); setLastNpcKey(''); setPaused(false);
-  initWeather(state.overworld ? state.overworld.locationId : 'default');
+  initWeather(state.overworld ? (state.overworld.theme || state.overworld.locationId) : 'default');
 
   // Генерируем секреты для текущей локации
   if (state.overworld) {

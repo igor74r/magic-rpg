@@ -1,121 +1,251 @@
 import { findTalentById, getClassTalents } from '../data/talents.js';
+import { getPassiveTree } from '../data/passives.js';
+import { state } from './state.js';
 import { saveGame } from './save.js';
 import { emit } from './events.js';
 
-export function getTalentBonus(player) {
-  const bonus = {
-    dmgMult: 1, healMult: 1, spellMult: 1, defMult: 1,
-    critChance: 0, critMult: 1.5, lifesteal: 0,
-    manaRegen: 0, hpRegen: 0, abilityCdDelta: 0,
-    meteorMult: 1, prayerMult: 1, resurrectPct: 0.3
-  };
-  if (!player || !Array.isArray(player.talents)) return bonus;
+const BONUS_DEFAULTS = {
+  dmgMult: 1,
+  healMult: 1,
+  spellMult: 1,
+  defMult: 1,
+  critChance: 0,
+  critMult: 1.5,
+  lifesteal: 0,
+  manaRegen: 0,
+  hpRegen: 0,
+  abilityCdDelta: 0,
+  meteorMult: 1,
+  prayerMult: 1,
+  resurrectPct: 0.3,
+  dodgeChance: 0,
+  blockChance: 0,
+  blockPower: 0,
+  armorPen: 0,
+  atkFlat: 0,
+  magFlat: 0,
+  defFlat: 0,
+  dexFlat: 0
+};
 
-  for (const id of player.talents) {
-    const t = findTalentById(player.class, id);
-    if (!t || !t.effects) continue;
-    const e = t.effects;
-    if (e.dmgMult)     bonus.dmgMult *= e.dmgMult;
-    if (e.healMult)    bonus.healMult *= e.healMult;
-    if (e.spellMult)   bonus.spellMult *= e.spellMult;
-    if (e.defMult)     bonus.defMult *= e.defMult;
-    if (e.critChance)  bonus.critChance += e.critChance;
-    if (e.critMult)    bonus.critMult = Math.max(bonus.critMult, e.critMult);
-    if (e.lifesteal)   bonus.lifesteal += e.lifesteal;
-    if (e.manaRegen)   bonus.manaRegen += e.manaRegen;
-    if (e.hpRegen)     bonus.hpRegen += e.hpRegen;
-    if (e.abilityCdDelta) bonus.abilityCdDelta += e.abilityCdDelta;
-    if (e.meteorMult)  bonus.meteorMult *= e.meteorMult;
-    if (e.prayerMult)  bonus.prayerMult *= e.prayerMult;
-    if (e.resurrectPct) bonus.resurrectPct = Math.max(bonus.resurrectPct, e.resurrectPct);
+function addEffects(bonus, effects = {}) {
+  for (const key of ['dmgMult', 'healMult', 'spellMult', 'defMult', 'meteorMult', 'prayerMult']) {
+    if (effects[key]) bonus[key] *= effects[key];
   }
+
+  for (const key of [
+    'critChance', 'lifesteal', 'manaRegen', 'hpRegen',
+    'abilityCdDelta', 'dodgeChance', 'blockChance', 'armorPen',
+    'atkFlat', 'magFlat', 'defFlat', 'dexFlat'
+  ]) {
+    if (effects[key]) bonus[key] += effects[key];
+  }
+
+  if (effects.critMult) {
+    bonus.critMult = Math.max(bonus.critMult, effects.critMult);
+  }
+
+  if (effects.blockPower) {
+    bonus.blockPower += effects.blockPower;
+  }
+
+  if (effects.resurrectPct) {
+    bonus.resurrectPct = Math.max(bonus.resurrectPct, effects.resurrectPct);
+  }
+}
+
+export function getTalentBonus(player) {
+  const bonus = { ...BONUS_DEFAULTS };
+  if (!player) return bonus;
+
+  // Старые классовые таланты остаются действительными в уже существующих сейвах.
+  if (Array.isArray(player.talents)) {
+    for (const id of player.talents) {
+      const talent = findTalentById(player.class, id);
+      if (talent?.effects) addEffects(bonus, talent.effects);
+    }
+  }
+
+  // Новое древо пассивок — отдельное для каждого из трёх классов.
+  const tree = getPassiveTree(player.class);
+
+  if (Array.isArray(player.passives)) {
+    for (const id of player.passives) {
+      const node = tree.nodes[id];
+      if (node?.effects) addEffects(bonus, node.effects);
+    }
+  }
+
   return bonus;
 }
 
+export function canAllocatePassive(player, nodeId) {
+  if (!player || !nodeId || nodeId === 'start') return false;
+
+  const tree = getPassiveTree(player.class);
+  const node = tree.nodes[nodeId];
+  if (!node) return false;
+
+  const allocated = Array.isArray(player.passives)
+    ? player.passives
+    : ['start'];
+
+  if (allocated.includes(nodeId)) return false;
+  if ((player.passivePoints || 0) <= 0) return false;
+  if ((player.level || 1) < (node.levelReq || 1)) return false;
+
+  return node.conn.some(parentId => allocated.includes(parentId));
+}
+
+export function allocatePassive(player, nodeId) {
+  if (!canAllocatePassive(player, nodeId)) return false;
+
+  const tree = getPassiveTree(player.class);
+  const node = tree.nodes[nodeId];
+
+  if (!Array.isArray(player.passives)) {
+    player.passives = ['start'];
+  }
+
+  if (!player.passives.includes('start')) {
+    player.passives.unshift('start');
+  }
+
+  player.passives.push(nodeId);
+  player.passivePoints = Math.max(0, (player.passivePoints || 0) - 1);
+
+  if (state.game?.player === player) {
+    saveGame();
+  }
+
+  emit('toast', `✦ Изучено: ${node.name}`);
+  emit('log', {
+    channel: 'game',
+    msg: `✦ Новая пассивка: «${node.name}» — ${node.desc}`,
+    cls: 'success'
+  });
+
+  return true;
+}
+
+export function getAvailablePassives(player) {
+  if (!player) return [];
+
+  return Object.values(getPassiveTree(player.class).nodes)
+    .filter(node => canAllocatePassive(player, node.id));
+}
+
+// Совместимый интерфейс прежней системы талантов.
 export function canTakeTalent(player, talent) {
   if (!player || !talent) return false;
   if (!Array.isArray(player.talents)) player.talents = [];
   if (player.talents.includes(talent.id)) return false;
   if ((player.level || 1) < talent.tier) return false;
+
   const tierTaken = player.talents.some(id => {
-    const t = findTalentById(player.class, id);
-    return t && t.tier === talent.tier;
+    const taken = findTalentById(player.class, id);
+    return taken && taken.tier === talent.tier;
   });
-  if (tierTaken) return false;
-  return true;
+
+  return !tierTaken;
 }
 
 export function takeTalent(player, talentId) {
-  const talent = findTalentById(player.class, talentId);
+  const talent = findTalentById(player?.class, talentId);
   if (!talent || !canTakeTalent(player, talent)) return false;
 
-  if (!Array.isArray(player.talents)) player.talents = [];
   player.talents.push(talentId);
 
-  const e = talent.effects || {};
-  if (e.hpMult) {
-    player.maxHp = Math.round(player.maxHp * e.hpMult);
-    player.hp = Math.min(player.maxHp, Math.round(player.hp * e.hpMult));
-  }
-  if (e.mpMult) {
-    player.maxMp = Math.round(player.maxMp * e.mpMult);
-    player.mp = Math.min(player.maxMp, Math.round(player.mp * e.mpMult));
+  const effects = talent.effects || {};
+
+  if (effects.hpMult) {
+    player.maxHp = Math.round(player.maxHp * effects.hpMult);
+    player.hp = Math.min(player.maxHp, Math.round(player.hp * effects.hpMult));
   }
 
-  saveGame();
-  emit('toast', `🌳 Талант: ${talent.name}`);
-  emit('log', { channel: 'game', msg: `🌳 Выбран талант: «${talent.name}»`, cls: 'success' });
+  if (effects.mpMult) {
+    player.maxMp = Math.round(player.maxMp * effects.mpMult);
+    player.mp = Math.min(player.maxMp, Math.round(player.mp * effects.mpMult));
+  }
+
+  if (state.game?.player === player) saveGame();
+
+  emit('toast', `✦ Талант: ${talent.name}`);
+  emit('log', {
+    channel: 'game',
+    msg: `✦ Выбран талант: «${talent.name}»`,
+    cls: 'success'
+  });
+
   return true;
 }
 
 export function getAvailableTalents(player) {
   if (!player) return [];
-  const cls = getClassTalents(player.class);
-  return cls.filter(t => canTakeTalent(player, t));
+  return getClassTalents(player.class)
+    .filter(talent => canTakeTalent(player, talent));
 }
 
 export function getTakenTalents(player) {
   if (!player || !Array.isArray(player.talents)) return [];
-  return player.talents.map(id => findTalentById(player.class, id)).filter(Boolean);
+  return player.talents
+    .map(id => findTalentById(player.class, id))
+    .filter(Boolean);
 }
 
 export function getNextTierLevel(player) {
   if (!player) return null;
-  const cls = getClassTalents(player.class);
-  const tiers = [...new Set(cls.map(t => t.tier))].sort((a, b) => a - b);
+
+  const tiers = [...new Set(
+    getClassTalents(player.class).map(talent => talent.tier)
+  )].sort((a, b) => a - b);
+
   for (const tier of tiers) {
-    const hasTaken = player.talents?.some(id => {
-      const t = findTalentById(player.class, id);
-      return t && t.tier === tier;
-    });
-    if (!hasTaken) return tier;
+    const taken = player.talents?.some(id =>
+      findTalentById(player.class, id)?.tier === tier
+    );
+
+    if (!taken) return tier;
   }
+
   return null;
 }
 
-// ⬅️ E4: сброс талантов
 export function resetTalents(player) {
   if (!player) return { ok: false, msg: 'Нет игрока' };
-  const cost = 500;
-  if ((player.gold || 0) < cost) return { ok: false, msg: `Нужно ${cost}💰` };
-  if (!Array.isArray(player.talents) || player.talents.length === 0) return { ok: false, msg: 'Нет взятых талантов' };
 
-  let hpMult = 1, mpMult = 1;
-  for (const id of player.talents) {
-    const t = findTalentById(player.class, id);
-    if (t?.effects?.hpMult) hpMult *= t.effects.hpMult;
-    if (t?.effects?.mpMult) mpMult *= t.effects.mpMult;
+  const cost = 500;
+
+  if ((player.gold || 0) < cost) {
+    return { ok: false, msg: `Нужно ${cost}💰` };
+  }
+
+  const oldTalents = Array.isArray(player.talents)
+    ? player.talents
+    : [];
+
+  if (!oldTalents.length) {
+    return { ok: false, msg: 'Нет взятых классовых талантов' };
+  }
+
+  let hpMult = 1;
+  let mpMult = 1;
+
+  for (const id of oldTalents) {
+    const effects = findTalentById(player.class, id)?.effects || {};
+    if (effects.hpMult) hpMult *= effects.hpMult;
+    if (effects.mpMult) mpMult *= effects.mpMult;
   }
 
   player.gold -= cost;
-  player.maxHp = Math.round(player.maxHp / hpMult);
+  player.maxHp = Math.max(1, Math.round(player.maxHp / hpMult));
   player.hp = Math.min(player.hp, player.maxHp);
-  player.maxMp = Math.round(player.maxMp / mpMult);
+  player.maxMp = Math.max(0, Math.round(player.maxMp / mpMult));
   player.mp = Math.min(player.mp, player.maxMp);
   player.talents = [];
 
-  saveGame();
-  emit('toast', `🌳 Таланты сброшены (−${cost}💰)`);
-  emit('log', { channel: 'game', msg: '🌳 Все таланты сброшены — можно выбрать заново', cls: 'info' });
+  if (state.game?.player === player) saveGame();
+
+  emit('toast', `Таланты сброшены (−${cost}💰)`);
   return { ok: true };
 }

@@ -25,8 +25,8 @@ export function tryMovePlayer(dx, dy) {
   const speed = 3.2, p = ow.player, r = 12;
   let moved = false;
   const nx = p.x + dx * speed, ny = p.y + dy * speed;
-  if (isWalkable(ow.map, ow.cols, ow.rows, nx - r, p.y) && isWalkable(ow.map, ow.cols, ow.rows, nx + r, p.y)) { p.x = nx; moved = true; }
-  if (isWalkable(ow.map, ow.cols, ow.rows, p.x, ny - r) && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny + r)) { p.y = ny; moved = true; }
+  if (isWalkable(ow.map, ow.cols, ow.rows, nx - r, p.y, ow.locationId) && isWalkable(ow.map, ow.cols, ow.rows, nx + r, p.y, ow.locationId)) { p.x = nx; moved = true; }
+  if (isWalkable(ow.map, ow.cols, ow.rows, p.x, ny - r, ow.locationId) && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny + r, ow.locationId)) { p.y = ny; moved = true; }
   p.x = Math.max(TILE / 2, Math.min(ow.cols * TILE - TILE / 2, p.x));
   p.y = Math.max(TILE / 2, Math.min(ow.rows * TILE - TILE / 2, p.y));
   if (moved) playSound('step');

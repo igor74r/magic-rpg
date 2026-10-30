@@ -24,13 +24,26 @@ export const THEMES = {
   ice:       { colors: { 0: '#16283c', 1: '#33465e', 2: '#081420', 3: '#4a8aaa', 4: '#5a7288' }, vignette: 0.6, shadow: 'rgba(0,0,0,0.4)', fog: 0.8, weather: 'snow', tint: 'rgba(40, 100, 160, 0.18)' },
   desert:    { colors: { 0: '#3a3226', 1: '#4a4032', 2: '#241e16', 3: '#22506a', 4: '#332e26' }, vignette: 0.55, shadow: 'rgba(0,0,0,0.35)', fog: 0.7, weather: 'none', tint: 'rgba(190, 140, 60, 0.14)' },
   library:   { colors: { 0: '#120e24', 1: '#2a2050', 2: '#07040f', 3: '#3a1a6a', 4: '#1e1834' }, vignette: 0.85, shadow: 'rgba(0,0,0,0.7)', fog: 0.9, weather: 'none', tint: 'rgba(90, 40, 160, 0.22)' },
-  dragon:    { colors: { 0: '#140808', 1: '#2a0e0e', 2: '#080202', 3: '#8a1a00', 4: '#241012' }, vignette: 0.9, shadow: 'rgba(0,0,0,0.8)', fog: 0.9, weather: 'embers', tint: 'rgba(150, 20, 10, 0.24)' }
+  dragon:    { colors: { 0: '#140808', 1: '#2a0e0e', 2: '#080202', 3: '#8a1a00', 4: '#241012' }, vignette: 0.9, shadow: 'rgba(0,0,0,0.8)', fog: 0.9, weather: 'embers', tint: 'rgba(150, 20, 10, 0.24)' },
+  'briar-hollow': { colors: { 0: '#14251a', 1: '#344b32', 2: '#09140d', 3: '#536b42', 4: '#263b2a' }, vignette: 0.78, shadow: 'rgba(0,0,0,0.62)', fog: 0.93, weather: 'rain', tint: 'rgba(74, 112, 48, 0.22)' },
+  'sunken-necropolis': { colors: { 0: '#17202c', 1: '#4a4a58', 2: '#090d16', 3: '#244d5a', 4: '#303545' }, vignette: 0.94, shadow: 'rgba(0,0,0,0.82)', fog: 0.97, weather: 'ash', tint: 'rgba(54, 85, 115, 0.25)' },
+  'obsidian-fields': { colors: { 0: '#321b18', 1: '#665044', 2: '#160a0a', 3: '#a63812', 4: '#332523' }, vignette: 0.86, shadow: 'rgba(0,0,0,0.76)', fog: 0.86, weather: 'embers', tint: 'rgba(198, 62, 22, 0.25)' },
+  'frost-citadel': { colors: { 0: '#c1d5df', 1: '#e0edf2', 2: '#35495a', 3: '#78b6d4', 4: '#8faebf' }, vignette: 0.68, shadow: 'rgba(12, 30, 48, 0.62)', fog: 0.88, weather: 'snow', tint: 'rgba(126, 190, 224, 0.24)' },
+  'void-crater': { colors: { 0: '#1d132d', 1: '#39264f', 2: '#070510', 3: '#56366f', 4: '#292039' }, vignette: 0.98, shadow: 'rgba(0,0,0,0.9)', fog: 0.99, weather: 'ash', tint: 'rgba(102, 48, 148, 0.28)' }
 };
 
 
 export const MOD_LABEL = { poisonous: '☣️ ядовитый', armored: '🛡️ бронированный', swift: '💨 стремительный', vampiric: '🧛 вампирский', regenerating: '💚 регенерирующий', berserk: '💢 берсерк' };
 
 export function getTheme(name) { return THEMES[name] || THEMES.default; }
+
+function getCurrentBiome() {
+  return state.overworld?.theme || state.overworld?.locationId || 'default';
+}
+
+export function getCurrentTheme() {
+  return getTheme(getCurrentBiome());
+}
 
 
 export function initWeather(themeName) {
@@ -46,7 +59,7 @@ export function initWeather(themeName) {
     });
   }
 
-  if (['forest', 'swamp'].includes(themeName)) {
+  if (['forest', 'swamp', 'briar-hollow'].includes(themeName)) {
     for (let i = 0; i < 12; i++) {
       fireflies.push({
         x: Math.random() * VIEW_W, y: Math.random() * VIEW_H,
@@ -77,7 +90,7 @@ export function initWeather(themeName) {
 }
 
 export function updateWeather(dt) {
-  const theme = getTheme(state.overworld.locationId);
+  const theme = getCurrentTheme();
   if (theme.weather === 'none') return;
   for (let p of weatherParticles) {
     if (theme.weather === 'rain') {
@@ -95,7 +108,8 @@ export function updateWeather(dt) {
 }
 
 export function updateFireflies(dt, worldTime) {
-  if (!['forest', 'swamp'].includes(state.overworld.locationId)) return;
+  const biome = state.overworld?.theme || state.overworld?.locationId;
+  if (!['forest', 'swamp', 'briar-hollow'].includes(biome)) return;
   const dayPhase = (worldTime % 120) / 120;
   const isNight = dayPhase >= 0.5 && dayPhase < 0.8;
 
@@ -116,7 +130,7 @@ export function updateFog(dt) {
 }
 
 export function updateLightning(dt) {
-  const theme = getTheme(state.overworld.locationId);
+  const theme = getCurrentTheme();
   if (theme.weather !== 'rain') { lightning.flash = 0; return; }
   
   lightning.timer -= dt * 0.016;
@@ -130,7 +144,7 @@ export function updateLightning(dt) {
 export function getLightningFlash() { return lightning.flash; }
 
 export function drawWeather(ctx) {
-  const theme = getTheme(state.overworld.locationId);
+  const theme = getCurrentTheme();
   if (theme.weather === 'none') return;
   ctx.save();
   if (theme.weather === 'rain') {
@@ -150,7 +164,7 @@ export function drawWeather(ctx) {
 }
 
 export function drawFireflies(ctx, worldTime) {
-  if (!['forest', 'swamp'].includes(state.overworld.locationId)) return;
+  if (!['forest', 'swamp', 'briar-hollow'].includes(getCurrentBiome())) return;
   const dayPhase = (worldTime % 120) / 120;
   const isNight = dayPhase >= 0.5 && dayPhase < 0.8;
   if (!isNight) return;
@@ -167,7 +181,7 @@ export function drawFireflies(ctx, worldTime) {
 }
 
 export function drawFogLayers(ctx) {
-  const theme = getTheme(state.overworld.locationId);
+  const theme = getCurrentTheme();
   const baseAlpha = theme.fog > 0.85 ? 1.5 : 0.8;
   
   ctx.save();

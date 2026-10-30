@@ -1,0 +1,448 @@
+/* Дополнительный локальный стиль обновлённой RPG.
+   Не подключает внешние ресурсы. */
+
+/* ---------- Компактная левая панель ---------- */
+
+.dashboard-layout {
+  grid-template-columns: 184px minmax(0, 1fr) 300px;
+}
+
+.dashboard-sidebar {
+  padding: 14px 8px;
+  gap: 5px;
+  background:
+    linear-gradient(180deg, rgba(38,27,16,.98), rgba(13,9,6,.98));
+  border-right: 1px solid rgba(201,162,39,.28);
+}
+
+.dashboard-sidebar .tab {
+  min-height: 38px;
+  padding: 8px 10px;
+  gap: 9px;
+  font-size: 12px;
+  border-left-width: 2px;
+}
+
+.dashboard-sidebar .tab-icon {
+  width: 21px;
+  min-width: 21px;
+  text-align: center;
+  font-size: 17px;
+}
+
+.sidebar-title {
+  margin-bottom: 5px;
+  font-size: 10px;
+}
+
+.dashboard-sidebar .save-menu-btn {
+  padding: 9px 6px;
+  font-size: 11px;
+}
+
+.bar-focus {
+  background: linear-gradient(
+    180deg,
+    #b6d77b,
+    #53883a 60%,
+    #253f1d
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(230,255,200,.3),
+    0 0 9px rgba(120,190,80,.25);
+}
+
+.rpg-header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.rpg-identity {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.rpg-player-name {
+  color: #e2c36d;
+  font-size: 18px;
+  text-shadow: 0 0 10px rgba(201,162,39,.18);
+}
+
+.rpg-player-class {
+  color: #a89060;
+  font-size: 12px;
+}
+
+.rpg-gold {
+  color: #ffd060;
+  font-weight: 700;
+}
+
+.header-exp-caption {
+  margin-bottom: 2px;
+  color: #a89060;
+  font-size: 11px;
+  text-align: center;
+}
+
+.rpg-endgame-area {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.header-combat-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 5px 10px;
+  padding: 7px 8px;
+  margin-top: 5px;
+  border: 1px solid rgba(201,162,39,.22);
+  border-radius: 4px;
+  background: rgba(0,0,0,.18);
+  color: #b6a17d;
+  font-size: 11px;
+}
+
+.header-passive-points {
+  color: #8fe18a;
+}
+
+.effects-inline {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.effects-inline-label {
+  margin-right: 4px;
+  color: #a89060;
+  font-size: 11px;
+}
+
+/* ---------- Карточки классов ---------- */
+
+.class-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse at 50% 0%,
+      rgba(201,162,39,.13),
+      transparent 62%
+    ),
+    linear-gradient(180deg, #2b2117, #130d09 85%);
+  border: 1px solid rgba(201,162,39,.38);
+  box-shadow:
+    inset 0 0 24px rgba(0,0,0,.45),
+    0 8px 18px rgba(0,0,0,.25);
+}
+
+.class-card.selected {
+  border-color: #e0bd58;
+  box-shadow:
+    0 0 20px rgba(224,189,88,.24),
+    inset 0 0 28px rgba(224,189,88,.08);
+}
+
+.class-model-frame {
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  height: 118px;
+  margin: -4px -4px 8px;
+  border-bottom: 1px solid rgba(201,162,39,.18);
+  background:
+    radial-gradient(
+      ellipse at 50% 85%,
+      rgba(201,162,39,.12),
+      transparent 68%
+    );
+}
+
+.class-model-frame canvas {
+  width: 100px;
+  height: 112px;
+  image-rendering: pixelated;
+}
+
+.class-card h3 {
+  margin: 5px 0;
+  color: #e9cc7e;
+  text-align: center;
+}
+
+.class-role {
+  margin: 4px 0 8px;
+  color: #b99959;
+  font-size: 11px;
+  text-align: center;
+  line-height: 1.45;
+}
+
+.class-description {
+  min-height: 68px;
+  color: #d8ccb5;
+  line-height: 1.55;
+  font-size: 12px;
+}
+
+.class-base-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px 8px;
+  margin-top: 10px;
+  padding: 9px;
+  border: 1px solid rgba(201,162,39,.18);
+  border-radius: 4px;
+  background: rgba(0,0,0,.2);
+  color: #c6b894;
+  font-size: 11px;
+}
+.class-base-stats b { color:#e9ce86; font-weight:700; }
+.class-card:hover { transform:translateY(-2px); border-color:rgba(224,189,88,.65); }
+
+/* ---------- Древо пассивных навыков ---------- */
+.passive-tree-expanded {
+  position:relative; min-height:620px; margin:14px 0; overflow:hidden;
+  border:1px solid rgba(201,162,39,.22); border-radius:8px;
+  background:radial-gradient(circle at 50% 50%,rgba(111,83,42,.17),transparent 55%),linear-gradient(180deg,rgba(20,15,10,.96),rgba(8,7,6,.98));
+}
+.passive-lines { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+.passive-lines line { stroke:rgba(163,139,91,.35); stroke-width:.7; vector-effect:non-scaling-stroke; }
+.passive-lines line.active { stroke:#d7b85d; stroke-width:1.5; filter:drop-shadow(0 0 2px rgba(230,190,80,.55)); }
+.passive-node {
+  position:absolute; z-index:2; width:68px; min-height:54px; padding:5px 3px;
+  transform:translate(-50%,-50%); border:1px solid rgba(177,145,82,.65); border-radius:7px;
+  background:linear-gradient(180deg,#332719,#15100b); color:#d7c49a;
+  cursor:default; text-align:center; box-shadow:0 3px 8px rgba(0,0,0,.45);
+}
+.passive-node .node-icon { display:block; font-size:18px; line-height:1.2; }
+.passive-node .node-name { display:block; margin-top:3px; font-size:9px; line-height:1.2; }
+.passive-node.available { border-color:#84b86a; color:#d9f0c1; cursor:pointer; box-shadow:0 0 12px rgba(115,190,91,.22); }
+.passive-node.allocated { border-color:#e4c46b; color:#ffe6a0; background:linear-gradient(180deg,#5a4522,#241a0c); }
+.passive-node.keystone { width:82px; min-height:66px; border-width:2px; border-color:#b88c44; }
+.passive-node.start { width:76px; min-height:62px; border-color:#f0d47b; background:linear-gradient(180deg,#725326,#33220d); }
+.passive-node:disabled { opacity:.55; }
+.passive-legend, .passive-heading { color:#c6b894; font-size:12px; line-height:1.6; }
+.passive-legend { display:flex; flex-wrap:wrap; gap:8px 16px; margin:8px 0 16px; }
+.passive-detail-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px; }
+.passive-detail { padding:10px; border:1px solid rgba(177,145,82,.22); border-radius:6px; background:rgba(0,0,0,.16); }
+.passive-detail b { color:#e6cf8e; }
+.passive-detail small { display:block; margin-top:3px; color:#a89060; }
+.passive-detail p { margin:6px 0; color:#c6b894; font-size:12px; }
+.passive-detail span { color:#8fc279; font-size:11px; }
+
+/* ---------- Кампания из пяти актов ---------- */
+.campaign-header { margin-bottom:16px; color:#d8ccb5; }
+.campaign-header h2, .campaign-act h3 { color:#e7ce8d; }
+.campaign-act { margin:14px 0; padding:16px; border:1px solid rgba(201,162,39,.25); border-radius:7px; background:linear-gradient(145deg,rgba(37,27,17,.9),rgba(13,10,8,.96)); }
+.campaign-act.locked { opacity:.62; }
+.campaign-act.completed { border-color:rgba(134,183,100,.55); }
+.campaign-act-heading { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+.campaign-act-kicker { color:#b89a5c; font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+.campaign-act-heading p { color:#bdb096; font-size:12px; line-height:1.55; }
+.campaign-act-progress { min-width:66px; text-align:center; color:#e9ce86; }
+.campaign-act-progress b { display:block; font-size:20px; }
+.campaign-act-progress span { font-size:10px; color:#a89060; }
+.campaign-missions { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:9px; }
+.campaign-mission { padding:11px; border:1px solid rgba(177,145,82,.2); border-radius:5px; background:rgba(0,0,0,.2); }
+.campaign-mission.current { border-color:rgba(132,184,106,.7); }
+.campaign-mission.done { border-color:rgba(134,183,100,.45); }
+.campaign-mission.locked { opacity:.62; }
+.campaign-mission-top, .campaign-objective { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.campaign-mission-number { color:#e4c46b; font-weight:700; }
+.campaign-mission h4 { margin:8px 0 5px; color:#e2c77f; }
+.campaign-mission p { color:#c2b69d; font-size:11px; line-height:1.5; }
+.campaign-objective { color:#cdbb8c; font-size:11px; }
+.campaign-objective b { white-space:nowrap; }
+.campaign-progress { height:5px; margin:8px 0; overflow:hidden; border-radius:4px; background:#17110b; }
+.campaign-progress i { display:block; height:100%; background:linear-gradient(90deg,#718f4a,#c6a74d); }
+.campaign-mission small { color:#9e8b67; font-size:10px; }
+.campaign-status { font-size:9px; }
+.campaign-status.complete { color:#91c47b; }
+.campaign-status.active { color:#e2c46c; }
+.campaign-status.locked { color:#968a78; }
+.campaign-outro { margin:12px 0 0; padding:10px; color:#e0ca91; border-left:2px solid #c9a227; background:rgba(201,162,39,.08); }
+
+/* ---------- Хроники и адаптивность ---------- */
+.chronicles-page { display:grid; gap:14px; color:#ded1b6; }
+.chronicles-hero { display:flex; align-items:center; gap:14px; padding:16px; border:1px solid rgba(201,162,39,.3); border-radius:8px; background:linear-gradient(120deg,rgba(56,40,22,.9),rgba(14,11,8,.95)); }
+.chronicles-emblem { width:48px; height:48px; flex:0 0 48px; display:grid; place-items:center; border:1px solid #c9a227; border-radius:50%; color:#f2d47c; font-size:24px; }
+.chronicles-eyebrow, .chronicle-chapter-kicker { color:#c7a65d; font:700 10px/1.4 monospace; letter-spacing:.14em; }
+.chronicles-hero h2, .chronicle-chapter h3 { color:#e8d39a; }
+.chronicles-hero p, .chronicles-note, .chronicle-summary { color:#bcae91; line-height:1.6; }
+.chronicles-note { padding:10px 13px; border-left:3px solid #c9a227; background:rgba(201,162,39,.07); }
+.chronicle-chapter, .chronicle-faction, .chronicle-side-story { padding:14px; border:1px solid rgba(177,145,82,.22); border-radius:7px; background:rgba(18,13,9,.72); }
+.chronicle-entry-grid, .chronicle-side-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.chronicle-entry { padding:11px; border:1px solid rgba(177,145,82,.16); border-radius:5px; background:rgba(0,0,0,.14); }
+.chronicle-entry h4, .chronicle-faction h4, .chronicle-side-story h4 { color:#e1c77f; margin:0 0 6px; }
+.chronicle-entry p, .chronicle-faction p, .chronicle-side-story p { color:#c2b69d; font-size:12px; line-height:1.6; margin:0; }
+.chronicle-faction-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.chronicle-faction-symbol { font-size:24px; margin-bottom:6px; }
+.chronicle-faction small, .chronicle-side-story span { display:block; margin-bottom:7px; color:#a89060; font-size:10px; }
+.chronicles-section-title { color:#e3ca88; }
+
+@media (max-width:900px) {
+  .dashboard-layout { grid-template-columns:150px minmax(0,1fr); }
+  .dashboard-log { display:none; }
+  .chronicle-faction-grid { grid-template-columns:1fr; }
+}
+@media (max-width:650px) {
+  .dashboard-layout { grid-template-columns:1fr; }
+  .dashboard-sidebar { display:flex; flex-direction:row; overflow-x:auto; }
+  .dashboard-sidebar .tab { flex:0 0 auto; }
+  .passive-tree-expanded { min-height:480px; }
+  .passive-node { width:54px; min-height:48px; }
+  .passive-node.keystone { width:64px; min-height:58px; }
+  .passive-node .node-name { font-size:8px; }
+  .campaign-act-heading { display:block; }
+  .campaign-missions, .chronicle-entry-grid, .chronicle-side-grid { grid-template-columns:1fr; }
+  .chronicles-hero { align-items:flex-start; padding:12px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+}
+/* ---------- Глобальная экипировка и сумка ---------- */
+.rpg-inventory-layout {
+  display:grid; grid-template-columns:minmax(220px,275px) minmax(0,1fr);
+  align-items:start; gap:16px;
+}
+.rpg-paperdoll { display:block; min-width:0; padding:12px; }
+.paperdoll-hero {
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  gap:4px; padding:12px 8px; margin-bottom:10px;
+  border:1px solid rgba(201,162,39,.25); border-radius:6px;
+  background:radial-gradient(ellipse at 50% 30%,rgba(201,162,39,.16),transparent 75%);
+}
+.paperdoll-hero .paperdoll-silhouette { font-size:54px; line-height:1.1; filter:drop-shadow(0 0 12px rgba(201,162,39,.25)); }
+.paperdoll-hero b { color:#e7cf91; font-size:13px; }
+.paperdoll-hero small { color:#a89060; font-size:10px; }
+.equipment-slots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+.gear-slot {
+  position:relative; min-width:0; min-height:74px; padding:8px 6px 7px;
+  display:grid; grid-template-columns:32px minmax(0,1fr); grid-template-rows:auto auto auto;
+  align-items:center; gap:2px 6px;
+  border:1px solid var(--gear-color,rgba(177,145,82,.45)); border-radius:5px;
+  background:linear-gradient(145deg,rgba(48,35,22,.92),rgba(12,9,7,.92));
+}
+.gear-slot.empty { opacity:.52; border-style:dashed; }
+.gear-slot-icon { grid-row:1 / 4; text-align:center; font-size:23px; }
+.gear-slot-label { color:#a89060; font-size:9px; text-transform:uppercase; letter-spacing:.06em; }
+.gear-slot-name { min-width:0; overflow-wrap:anywhere; color:var(--gear-color,#d8c18a); font-size:10px; line-height:1.25; }
+.gear-slot-sockets { min-height:10px; color:#85c3d3; font-size:9px; }
+.gear-slot-remove {
+  position:absolute; top:2px; right:3px; padding:0 4px; min-width:18px; min-height:18px;
+  border:0; background:transparent; color:#b98a6d; font-size:14px;
+}
+.paperdoll-set-bonus { margin-top:10px; color:#9e8a68; font-size:10px; line-height:1.45; text-align:center; }
+.rpg-backpack { min-width:0; }
+.inv-top-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-bottom:10px; }
+.inv-sell-junk { padding:8px 12px; border-color:#917245; background:linear-gradient(180deg,#5a421c,#25180d); font-size:11px; }
+.inv-title-row { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+.inv-title-row h3 { margin:0; color:#e4c778; }
+.inv-title-row small { display:block; margin-top:3px; color:#a89060; font-size:10px; }
+.inv-wallet { color:#ffd060; font-weight:700; white-space:nowrap; }
+.inv-sort-label { align-self:center; color:#a89060; font-size:11px; }
+.rpg-inv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(54px,1fr)); gap:7px; }
+.rpg-inv-grid button.inv-slot {
+  position:relative; width:100%; min-width:0; min-height:58px; aspect-ratio:1;
+  display:grid; place-items:center; padding:2px; cursor:pointer;
+}
+.rpg-inv-grid .inv-slot .slot-icon { font-size:27px; }
+.rpg-inv-grid .inv-slot .slot-qty { position:absolute; right:3px; bottom:2px; }
+.slot-socket { position:absolute; top:2px; left:4px; color:#8ed5e3; font-size:11px; }
+.inv-hint { margin-top:10px; color:#958364; font-size:10px; line-height:1.5; }
+.compare-up { color:#81d47d; font-size:11px; }
+.compare-down { color:#e17d70; font-size:11px; }
+.tooltip-sockets { margin-top:7px; color:#87cddb; font-size:11px; }
+.rune-socket-overlay {
+  position:fixed; inset:0; z-index:10050; display:grid; place-items:center;
+  padding:18px; background:rgba(0,0,0,.78); backdrop-filter:blur(4px);
+}
+.rune-socket-dialog {
+  width:min(440px,100%); max-height:80vh; overflow:auto; padding:18px;
+  border:1px solid #c9a227; border-radius:8px;
+  background:linear-gradient(155deg,#332416,#100b08); color:#ded0b2;
+  box-shadow:0 18px 50px rgba(0,0,0,.6);
+}
+.rune-socket-dialog h3 { margin-top:0; color:#e8ce86; }
+.rune-socket-options { display:grid; gap:7px; margin-top:12px; }
+.rune-socket-options button {
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  padding:10px; border:1px solid rgba(201,162,39,.35); background:rgba(0,0,0,.24);
+  text-align:left;
+}
+.rune-socket-options small { color:#80c9d8; white-space:nowrap; }
+.rune-socket-cancel { width:100%; margin-top:12px; }
+
+/* ---------- Панорамируемое дерево талантов ---------- */
+.passive-tree-viewport {
+  position:relative; height:570px; min-height:430px; margin:14px 0;
+  overflow:hidden; touch-action:none; user-select:none; cursor:grab;
+  border:1px solid rgba(201,162,39,.3); border-radius:8px;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(111,83,42,.16),transparent 48%),
+    linear-gradient(180deg,rgba(20,15,10,.96),rgba(8,7,6,.98));
+}
+.passive-tree-viewport.dragging { cursor:grabbing; }
+.passive-tree-viewport .passive-tree-expanded {
+  position:absolute; left:0; top:0; width:1200px; height:900px;
+  min-height:0; margin:0; overflow:visible; border:0; border-radius:0;
+  background:transparent; will-change:transform;
+}
+.passive-tree-viewport .passive-lines { position:absolute; inset:0; width:100%; height:100%; }
+.passive-tree-viewport .passive-node { cursor:pointer; }
+.passive-tree-viewport .passive-node:disabled { cursor:default; }
+
+/* ---------- Сюжетные поручения Эдвина ---------- */
+.elder-lore {
+  margin:12px 0; padding:13px 15px; border-left:3px solid #c9a227; border-radius:5px;
+  background:rgba(10,6,18,.55); color:#d4c8a8; font-style:italic; line-height:1.6;
+}
+.elder-lore p { margin:0 0 9px; }
+.elder-lore p:last-child { margin-bottom:0; }
+.elder-notice { padding:11px; color:#e2c77f; text-align:center; background:rgba(201,162,39,.08); border-radius:5px; }
+.elder-quest-card {
+  margin:12px 0; padding:14px; border:1px solid rgba(201,162,39,.45);
+  border-radius:7px; background:linear-gradient(145deg,rgba(45,31,17,.9),rgba(13,10,8,.96));
+}
+.elder-quest-card > small { color:#b89a5c; font-size:10px; letter-spacing:.07em; }
+.elder-quest-card h3 { margin:7px 0; color:#e9cf8a; }
+.elder-quest-card p { color:#c8baa0; font-size:12px; line-height:1.55; }
+.elder-quest-meta, .elder-quest-reward { margin:8px 0; color:#bda77a; font-size:11px; }
+.elder-quest-objective { display:grid; gap:5px; margin-top:10px; color:#d9c99e; font-size:12px; }
+.elder-quest-ready { color:#90d783; }
+.elder-quest-active { color:#e3c36e; }
+.elder-quest-new { color:#83c4df; }
+.elder-quest-count { text-align:right; color:#e4ce8b; font-size:11px; }
+.elder-quest-action { width:100%; margin-top:10px; padding:11px; }
+.elder-blessing { margin:12px 0; padding:10px; text-align:center; border:1px solid rgba(201,162,39,.2); border-radius:5px; color:#a89060; font-size:11px; }
+.campaign-status.ready { color:#88d7a3; }
+.campaign-status.available { color:#87c6e2; }
+.campaign-mission.current { box-shadow:0 0 12px rgba(201,162,39,.1); }
+.campaign-header > div:first-child > p:last-child { color:#bdb096; line-height:1.6; }
+.campaign-current-objective > p + p { color:#e0c779; font-size:12px; }
+
+@media (max-width:950px) {
+  .rpg-inventory-layout { grid-template-columns:1fr; }
+  .equipment-slots { grid-template-columns:repeat(4,minmax(0,1fr)); }
+}
+@media (max-width:650px) {
+  .equipment-slots { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .passive-tree-viewport { height:470px; }
+  .rpg-inv-grid { grid-template-columns:repeat(auto-fill,minmax(48px,1fr)); }
+}

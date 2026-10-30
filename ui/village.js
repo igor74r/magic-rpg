@@ -39,7 +39,7 @@ export function openDailyChest() {
   const p = state.game.player;
   if (!p.stats) p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 };
 
-  p.gold = (p.gold || 0) + 100;
+  p.gold = (p.gold || 0) + 8;
   p.stats.dailyChestAt = Date.now();
   p.stats.dailyChestsOpened = (p.stats.dailyChestsOpened || 0) + 1;
 
@@ -48,8 +48,8 @@ export function openDailyChest() {
   addItem(id, 1);
 
   playSound('chest');
-  emit('log', { channel: 'game', msg: `🎁 Ежедневный сундук: +100💰, ${ITEMS[id].name}`, cls: 'success' });
-  emit('toast', `🎁 +100💰 и ${ITEMS[id].name}`);
+  emit('log', { channel: 'game', msg: `🎁 Ежедневный сундук: +8💰, ${ITEMS[id].name}`, cls: 'success' });
+  emit('toast', `🎁 +8💰 и ${ITEMS[id].name}`);
 
   saveGame();
   checkAchievements();

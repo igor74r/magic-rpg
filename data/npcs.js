@@ -3,12 +3,12 @@ export const NPCS = {
     id: 'blacksmith', name: 'Кузнец Борин', emoji: '⚒️',
     greetings: ['Клинок тупой? Принеси, наточу.', 'Быстро и недёшево.', 'Эх, раньше сталь была лучше...'],
     maxLevel: 3,
-    upgrades: [{ cost: 100, forgeBonus: 2 }, { cost: 300, forgeBonus: 4 }, { cost: 700, forgeBonus: 7 }]
+    upgrades: [{ cost: 30, forgeBonus: 2 }, { cost: 75, forgeBonus: 4 }, { cost: 140, forgeBonus: 7 }]
   },
   healer: {
     id: 'healer', name: 'Лекарь Мирра', emoji: '💚',
     greetings: ['Раны глубоки, но свет сильнее.', 'Полное исцеление — 50 золота.', 'Не умирай, странник.'],
-    cost: 50
+    cost: 8
   },
   alchemist: {
     id: 'alchemist', name: 'Алхимик Сайрус', emoji: '⚗️',
@@ -23,7 +23,14 @@ export const NPCS = {
   merchant: {
     id: 'merchant', name: 'Странствующий торговец', emoji: '🛒',
     greetings: ['Товар редкий, цена честная!', 'Смотри, не проходи мимо!', 'Золотишко водится?'],
-    stock: ["health-potion", "mana-potion", "strong-health-potion", "strong-mana-potion", "antidote", "strength-elixir", "mana-elixir", "scroll-lightning", "scroll-shield"]
+    stock: [
+      "health-potion", "mana-potion", "strong-health-potion", "strong-mana-potion", "antidote",
+      "strength-elixir", "mana-elixir", "scroll-lightning", "scroll-shield", "restorative-potion",
+      "rootbound-hood", "cinder-visor", "duelist-grips", "gravebinder-gloves",
+      "windstep-boots", "glacier-greaves", "amulet-first-light", "pendant-last-oath",
+      "ring-wolf-eye", "ring-quiet-tide",
+      "rune-root", "rune-ember", "rune-tide", "rune-frost", "rune-void"
+    ]
   },
   elder: {
     id: 'elder', name: 'Старейшина Эдвин', emoji: '👴',
@@ -37,7 +44,7 @@ export const NPCS = {
   bard: {
     id: 'bard', name: 'Бард Лютик', emoji: '🎵',
     greetings: ['Спою тебе о героях!', 'Скидка для смельчаков!', 'Монетку — и песня твоя!'],
-    cost: 15
+    cost: 4
   },
   guard: {
     id: 'guard', name: 'Стражник', emoji: '🛡️',
