@@ -162,13 +162,14 @@
 
 <!-- ================== OVERWORLD ================== -->
 <div id="screen-overworld" class="screen">
-  <div class="game-container" style="max-width:840px;">
+  <div class="game-container" style="max-width:1000px; width: 100%;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;">
       <h2 id="overworld-title" style="margin:0;">Локация</h2>
       <button onclick="GameAPI.exitOverworld()">← Выйти</button>
     </div>
     <div style="position:relative;">
-      <canvas id="overworld-canvas" width="800" height="500" style="border:2px solid #5a4a3a;border-radius:8px;max-width:100%;height:auto;display:block;background:#1a2e1a;"></canvas>
+      <canvas id="overworld-canvas" width="800" height="500" style="border:2px solid #5a4a3a;border-radius:8px;width:100%;height:auto;display:block;background:#1a2e1a;image-rendering:pixelated;"></canvas>
+      
       <div id="combat-panel">
         <div id="combat-panel-info"></div>
         <div class="actions" id="combat-panel-actions"></div>
