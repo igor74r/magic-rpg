@@ -25,7 +25,8 @@ import {
   openBard, openGuard, openCat, openKids, openHerald, openQuestBoard,
   payBardUI, petCatUI, claimQuestUI,
   upgradeEquipmentUI, healAtHealerUI, craftRecipeUI,
-  showShopTooltip, equipBestUI, takeTalentUI, resetTalentsUI, sellJunkUI
+  showShopTooltip, equipBestUI, sellJunkUI,
+  allocatePassiveUI
 } from './ui/game.js';
 import {
   initOverworld, owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
@@ -291,7 +292,6 @@ function setupPrologueVoice() {
   const screen = document.getElementById('screen-prologue');
   if (!screen) return;
 
-  // Если кнопка уже создана, не дублируем
   if (document.getElementById('prologue-voice-btn')) return;
 
   const btn = document.createElement('button');
@@ -302,14 +302,11 @@ function setupPrologueVoice() {
   btn.style.cssText = 'display:block; margin: 14px auto 8px auto; padding: 10px 18px;';
   screen.appendChild(btn);
 
-  // Инициализация аудиофайла
   prologueAudio = new Audio('audio/prologue.mp3');
   prologueAudio.preload = 'auto';
   prologueAudio.volume = 1;
   
-  // Слушатели событий для аудио
   prologueAudio.addEventListener('ended', () => {
-    console.log('[prologue] mp3 закончился');
     resetPrologueBtn(btn);
   });
   
@@ -320,7 +317,6 @@ function setupPrologueVoice() {
   btn.addEventListener('click', async (e) => {
     e.stopPropagation();
 
-    // Остановка, если что-то играет прямо сейчас
     if (prologueAudio && !prologueAudio.paused) {
       prologueAudio.pause();
       prologueAudio.currentTime = 0;
@@ -333,20 +329,16 @@ function setupPrologueVoice() {
       return;
     }
 
-    // Пытаемся проиграть MP3
     if (prologueAudio) {
       try {
         prologueAudio.currentTime = 0;
         await prologueAudio.play();
-        console.log('[prologue] успешно играем prologue.mp3');
         btn.textContent = '⏹ Остановить';
         return;
       } catch (err) {
-        console.warn('[prologue] MP3 не удалось воспроизвести (' + err.name + '), переключаемся на TTS.');
+        console.warn('[prologue] MP3 не удалось воспроизвести, переключаемся на TTS.');
       }
     }
-
-    // Если файла нет — читаем встроенным голосом
     playTtsPrologue(screen, btn);
   });
 }
@@ -390,8 +382,7 @@ window.GameAPI = {
   craftRecipe: craftRecipeUI,
   showShopTooltip,
   equipBest: equipBestUI,
-  takeTalent: takeTalentUI,
-  resetTalents: resetTalentsUI,
+  allocatePassive: allocatePassiveUI,
   startNGPlus,
   enterRift,
   showScreen,
@@ -401,7 +392,6 @@ window.GameAPI = {
   stopVoice,
   resetPrologue: () => {
     localStorage.removeItem('magic-rpg-prologue-seen');
-    console.log('[boot] prologue flag cleared, reloading…');
     location.reload();
   },
   voiceInfo: () => {
@@ -421,20 +411,10 @@ const prologueEl = document.getElementById('screen-prologue');
 
 const showPrologue = ALWAYS_SHOW_PROLOGUE || (!prologueSeen && !hasAnySave);
 
-console.log('[boot] prologue decision:', {
-  prologueSeen: !!prologueSeen,
-  hasAnySave,
-  hasPrologueScreen: !!prologueEl,
-  willShowPrologue: showPrologue,
-});
-
 if (showPrologue && prologueEl) {
   showScreen('screen-prologue');
   setupPrologueVoice();
 } else {
-  if (showPrologue && !prologueEl) {
-    console.warn('[boot] хочу показать пролог, но #screen-prologue не найден в index.html');
-  }
   showScreen('screen-main');
   updateMainMenu();
 }

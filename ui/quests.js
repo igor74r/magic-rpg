@@ -27,8 +27,16 @@ export function openQuestBoard() {
       </div>
     </div>`;
   }).join('');
-  document.getElementById('tab-content').innerHTML = `<div class="npc-header"><div class="npc-emoji">📋</div><div><h3 style="margin:0;">Доска объявлений</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«Ежедневные задания обновляются каждый день.»</p></div></div><div class="item-list" style="margin-top:15px;">${html}</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`;
-  showScreen('screen-game');
+  
+  const content = `<div class="npc-header"><div class="npc-emoji">📋</div><div><h3 style="margin:0;">Доска объявлений</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«Ежедневные задания обновляются каждый день.»</p></div></div><div class="item-list" style="margin-top:15px;">${html}</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`;
+
+  if (state.overworld && state.overworld.active) {
+    document.getElementById('npc-dialog-content').innerHTML = content;
+    document.getElementById('npc-dialog-modal').style.display = 'flex';
+  } else {
+    document.getElementById('tab-content').innerHTML = content;
+    showScreen('screen-game');
+  }
 }
 
 export function renderQuests() { const done = Object.values(state.game.shards).filter(Boolean).length; const items = STORY.quests.map(q => { const c = state.game.quests[q.id]; return `<div class="item" style="${c ? 'border-color:#60ff60;' : ''}"><div class="item-info"><div class="item-name">${c ? '✅' : '⏳'} ${q.name}</div><div class="item-desc">${q.desc}</div></div></div>`; }).join(''); return `<h3>Осколки Кристалла: ${done}/3</h3><div class="item-list">${items}</div>`; }
@@ -82,36 +90,6 @@ export function renderBestiary() {
   return `<h3>📖 Бестиарий <span style="color:#a89060;font-size:14px;">(${known}/${totalEnemies})</span></h3>
     <p style="color:#a89060;font-size:13px;margin-bottom:12px;">Всего убито врагов: <b style="color:#ffd060;">${totalKilled}</b></p>
     <div class="item-list">${cards}</div>`;
-}
-
-export function renderTalents() {
-  const p = state.game.player;
-  const allTalents = getClassTalents(p.class);
-  const taken = getTakenTalents(p);
-  const available = getAvailableTalents(p);
-  const nextTier = getNextTierLevel(p);
-  let html = '';
-
-  if (available.length) {
-    html += `<h3>🌳 Доступные таланты <span style="color:#60ff60;font-size:14px;">(${available.length})</span></h3><p style="color:#a89060;font-size:12px;margin-bottom:10px;">Выбери один из двух.</p><div class="talents-grid">`;
-    html += available.map(t => `<div class="talent-card"><div class="talent-icon">${t.icon}</div><div class="talent-name">${t.name}</div><div class="talent-tier">Уровень ${t.tier}</div><div class="talent-desc">${t.desc}</div><button onclick="GameAPI.takeTalent('${t.id}')" class="talent-btn">Выбрать</button></div>`).join('');
-    html += `</div>`;
-  } else if (nextTier) {
-    html += `<div class="talent-next-hint">🌳 Следующий выбор таланта откроется на <b>${nextTier} уровне</b><br><small style="color:#a89060;">Сейчас у тебя ${p.level} уровень</small></div>`;
-  } else {
-    html += `<div class="talent-next-hint">🌟 Все таланты взяты!</div>`;
-  }
-
-  if (taken.length) {
-    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;flex-wrap:wrap;gap:10px;">
-      <h3 style="margin:0;">Взятые таланты (${taken.length}/${allTalents.length / 2})</h3>
-      <button onclick="GameAPI.resetTalents()" style="padding:8px 16px;font-size:13px;background:linear-gradient(180deg,#5a1a1a,#2a0a0a);border-color:#ff6060;">🔄 Сбросить (500💰)</button>
-    </div>
-    <div class="talents-grid">`;
-    html += taken.map(t => `<div class="talent-card taken"><div class="talent-icon">${t.icon}</div><div class="talent-name">${t.name}</div><div class="talent-tier">Уровень ${t.tier}</div><div class="talent-desc">${t.desc}</div><div class="talent-badge">✅ Взят</div></div>`).join('');
-    html += `</div>`;
-  }
-  return html;
 }
 
 export function claimQuestUI(id) {

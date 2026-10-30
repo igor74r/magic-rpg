@@ -1090,3 +1090,211 @@ input[type="text"]:focus, select:focus { outline: none; border-color: var(--gold
   .inv-filter-btn { font-size: 11px; padding: 5px 10px; }
   .actions { grid-template-columns: 1fr; }
 }
+/* Passive Tree (PoE Style) */
+.passive-tree {
+  position: relative;
+  width: 100%;
+  height: 450px;
+  background: radial-gradient(circle at center, #1a1005 0%, #050201 100%);
+  border: 2px solid #5a4410;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 15px;
+}
+.passive-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+.passive-lines line {
+  stroke: #33220f;
+  stroke-width: 2;
+  transition: stroke 0.3s;
+}
+.passive-lines line.active {
+  stroke: #c9a227;
+  filter: drop-shadow(0 0 5px #c9a227);
+}
+.passive-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 46px;
+  height: 46px;
+  background: #0a0604;
+  border: 2px solid #5a4410;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+}
+.passive-node .node-name {
+  font-size: 9px;
+  color: #6a5a3a;
+  text-align: center;
+  font-weight: bold;
+  pointer-events: none;
+  line-height: 1.1;
+}
+.passive-node.start {
+  width: 60px;
+  height: 60px;
+  border-color: #ffcf6e;
+  background: #2a1a0e;
+  box-shadow: 0 0 20px rgba(255, 207, 110, 0.3);
+}
+.passive-node.start .node-name { color: #ffcf6e; font-size: 11px; }
+.passive-node.notable {
+  width: 56px;
+  height: 56px;
+  border-color: #8a2a2a;
+  border-radius: 8px;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.passive-node.notable .node-name {
+  transform: rotate(-45deg);
+  color: #ff8080;
+}
+.passive-node.available {
+  border-color: #60ff60;
+  box-shadow: 0 0 15px rgba(96, 255, 96, 0.4);
+  animation: pulseNode 2s infinite;
+}
+.passive-node.available .node-name { color: #60ff60; }
+.passive-node.available:hover {
+  background: #2a4a1e;
+  transform: translate(-50%, -50%) scale(1.15);
+}
+.passive-node.notable.available:hover {
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.15);
+}
+.passive-node.allocated {
+  border-color: #c9a227;
+  background: #3a2818;
+  box-shadow: 0 0 15px rgba(201, 162, 39, 0.5);
+}
+.passive-node.allocated .node-name { color: #c9a227; }
+@keyframes pulseNode {
+  0%, 100% { box-shadow: 0 0 10px rgba(96, 255, 96, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(96, 255, 96, 0.8); }
+}
+
+/* NPC Modal */
+.npc-modal {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000; backdrop-filter: blur(4px);
+}
+.npc-modal-content {
+  background: linear-gradient(180deg, #1f140a, #0a0604);
+  border: 2px solid #d4af37; border-radius: 8px;
+  width: 90%; max-width: 600px; padding: 20px; position: relative;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+}
+.npc-modal-close {
+  position: absolute; top: 10px; right: 10px;
+  background: transparent; border: none; color: #ff4040;
+  font-size: 20px; cursor: pointer;
+}
+/* Passive Tree (PoE Style) */
+.passive-tree {
+  position: relative;
+  width: 100%;
+  height: 450px;
+  background: radial-gradient(circle at center, #1a1005 0%, #050201 100%);
+  border: 2px solid #5a4410;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 15px;
+}
+.passive-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+.passive-lines line {
+  stroke: #33220f;
+  stroke-width: 2;
+  transition: stroke 0.3s;
+}
+.passive-lines line.active {
+  stroke: #c9a227;
+  filter: drop-shadow(0 0 5px #c9a227);
+}
+.passive-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  background: #0a0604;
+  border: 2px solid #5a4410;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+}
+.passive-node .node-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.passive-node .node-name {
+  font-size: 8px;
+  color: #6a5a3a;
+  text-align: center;
+  font-weight: bold;
+  pointer-events: none;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+.passive-node.start {
+  width: 64px;
+  height: 64px;
+  border-color: #ffcf6e;
+  background: #2a1a0e;
+  box-shadow: 0 0 20px rgba(255, 207, 110, 0.3);
+}
+.passive-node.start .node-name { color: #ffcf6e; font-size: 10px; }
+.passive-node.start .node-icon { font-size: 24px; }
+.passive-node.notable {
+  width: 60px;
+  height: 60px;
+  border-color: #8a2a2a;
+  border-radius: 8px;
+}
+.passive-node.notable .node-name { color: #ff8080; font-size: 9px; }
+.passive-node.notable .node-icon { font-size: 20px; }
+.passive-node.available {
+  border-color: #60ff60;
+  box-shadow: 0 0 15px rgba(96, 255, 96, 0.4);
+  animation: pulseNode 2s infinite;
+}
+.passive-node.available .node-name { color: #60ff60; }
+.passive-node.available:hover {
+  background: #2a4a1e;
+  transform: translate(-50%, -50%) scale(1.15);
+}
+.passive-node.allocated {
+  border-color: #c9a227;
+  background: #3a2818;
+  box-shadow: 0 0 15px rgba(201, 162, 39, 0.5);
+}
+.passive-node.allocated .node-name { color: #c9a227; }
+@keyframes pulseNode {
+  0%, 100% { box-shadow: 0 0 10px rgba(96, 255, 96, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(96, 255, 96, 0.8); }
+}

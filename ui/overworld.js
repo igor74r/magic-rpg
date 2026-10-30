@@ -257,7 +257,13 @@ function onKeyUp(e) {
   state.overworld.keys[k] = false;
 }
 
-export function closeDialogAndResume() { setPaused(false); setLastNpcKey(''); renderNpcPanel(); }
+export function closeDialogAndResume() { 
+  setPaused(false); 
+  setLastNpcKey(''); 
+  renderNpcPanel(); 
+  const modal = document.getElementById('npc-dialog-modal');
+  if (modal) modal.style.display = 'none';
+}
 
 // ==================== УВЕДОМЛЕНИЯ О ДОСТИЖЕНИЯХ ====================
 let _achCount = 0;

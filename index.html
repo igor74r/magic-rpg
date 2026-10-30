@@ -147,7 +147,6 @@
     <!-- ЦЕНТРАЛЬНАЯ ПАНЕЛЬ (КОНТЕНТ) -->
     <main class="dashboard-main">
       <header class="dashboard-header" id="game-header"></header>
-      <div id="location-info" class="location-banner"></div>
       <div class="dashboard-content" id="tab-content"></div>
     </main>
 
@@ -177,8 +176,14 @@
       <div id="npc-panel" style="display:none; background:rgba(10,6,18,0.94); border:2px solid #c9a227; border-top:none; border-radius:0 0 8px 8px; padding:12px;">
         <div id="npc-panel-info" style="color:#d4c8a8; font-size:14px; margin-bottom:8px;"></div>
         <div class="actions" id="npc-panel-actions"></div>
+            <!-- Модальное окно NPC -->
+      <div id="npc-dialog-modal" class="npc-modal" style="display:none;">
+        <div class="npc-modal-content">
+          <button class="npc-modal-close" onclick="GameAPI.closeNpcAndResume()">✖</button>
+          <div id="npc-dialog-content"></div>
+        </div>
       </div>
-
+	  
       <!-- Мобильный D-Pad -->
       <div id="mobile-dpad" style="display:none;position:absolute;bottom:20px;left:20px;z-index:100;user-select:none;">
         <div style="display:grid;grid-template-columns:repeat(3,60px);grid-template-rows:repeat(3,60px);gap:4px;">

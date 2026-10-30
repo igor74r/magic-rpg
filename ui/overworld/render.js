@@ -766,78 +766,82 @@ export function setLastNpcKey(k) { lastNpcKey = k; }
 
 // HUD в стиле «осколков»: срезанные углы, тонкие бары, пипсы осколков
 function drawHud(ctx, p, stats, pClass) {
-  const x = 12, y = 12, w = 216, h = 92, cut = 10;
-  ctx.save();
-
-  ctx.beginPath();
-  ctx.moveTo(x + cut, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w, y + h - cut);
-  ctx.lineTo(x + w - cut, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + cut);
-  ctx.closePath();
-  ctx.fillStyle = 'rgba(5, 10, 16, 0.86)';
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(124, 231, 255, 0.5)';
-  ctx.lineWidth = 1.2;
-  ctx.stroke();
-  ctx.strokeStyle = 'rgba(124, 231, 255, 0.12)';
+  const x = 12, y = 12, w = 250, h = 100;
+  
+  ctx.fillStyle = 'rgba(15, 8, 4, 0.92)';
+  ctx.fillRect(x, y, w, h);
+  
+  ctx.strokeStyle = '#c9a227';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, w, h);
+  ctx.strokeStyle = 'rgba(201, 162, 39, 0.3)';
+  ctx.lineWidth = 1;
   ctx.strokeRect(x + 4, y + 4, w - 8, h - 8);
 
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  ctx.font = 'bold 9px "Segoe UI", sans-serif';
+  ctx.fillStyle = '#c9a227';
+  ctx.fillRect(x, y, 6, 6);
+  ctx.fillRect(x + w - 6, y, 6, 6);
+  ctx.fillRect(x, y + h - 6, 6, 6);
+  ctx.fillRect(x + w - 6, y + h - 6, 6, 6);
 
-  const bar = (bx, by, bw, bh, pct, color, label, value) => {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-    ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = color;
-    ctx.fillRect(bx, by, Math.max(0, Math.min(1, pct)) * bw, bh);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
-    ctx.fillStyle = 'rgba(223, 233, 245, 0.92)';
-    ctx.fillText(`${label}  ${value}`, bx + 5, by + bh / 2 + 0.5);
-  };
-
-  const hpPct = p.hp / Math.max(1, p.maxHp);
-  const isLow = hpPct < 0.25;
-  const pulse = isLow ? 0.65 + 0.35 * Math.abs(Math.sin(performance.now() / 220)) : 1;
-  bar(x + 10, y + 12, w - 20, 11, hpPct, isLow ? `rgba(255, 74, 92, ${pulse})` : '#ff4a5c', 'HP', `${p.hp}/${p.maxHp}`);
-
-  const mpColor = pClass === 'warrior' ? '#b28dff' : '#7ce7ff';
-  const mpLabel = pClass === 'warrior' ? 'ЯРОСТЬ' : 'МАНА';
-  bar(x + 10, y + 28, w - 20, 10, p.mp / Math.max(1, p.maxMp), mpColor, mpLabel, `${p.mp}/${p.maxMp}`);
-
+  const hpPct = Math.max(0, p.hp / p.maxHp);
+  ctx.fillStyle = '#1a0505';
+  ctx.fillRect(x + 10, y + 15, w - 20, 14);
+  ctx.fillStyle = '#b02020';
+  ctx.fillRect(x + 10, y + 15, (w - 20) * hpPct, 14);
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.fillRect(x + 10, y + 15, (w - 20) * hpPct, 4);
+  
+  ctx.fillStyle = '#fff';
   ctx.font = 'bold 10px "Segoe UI", sans-serif';
-  ctx.fillStyle = '#ffcf6e'; ctx.fillText(`АТК ${stats.atk}`, x + 12, y + 52);
-  ctx.fillStyle = '#5ef0b0'; ctx.fillText(`ЗАЩ ${stats.def}`, x + 92, y + 52);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`HP ${p.hp}/${p.maxHp}`, x + w/2, y + 22);
+
+  const isRage = (pClass === 'warrior');
+  const mpPct = Math.max(0, p.mp / p.maxMp);
+  ctx.fillStyle = isRage ? '#1a051a' : '#05051a';
+  ctx.fillRect(x + 10, y + 35, w - 20, 12);
+  ctx.fillStyle = isRage ? '#b020b0' : '#3060d0';
+  ctx.fillRect(x + 10, y + 35, (w - 20) * mpPct, 12);
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.fillRect(x + 10, y + 35, (w - 20) * mpPct, 3);
+  
+  ctx.fillStyle = '#fff';
+  ctx.fillText(`${isRage ? 'ЯРОСТЬ' : 'МАНА'} ${p.mp}/${p.maxMp}`, x + w/2, y + 41);
+
+  // === ИСПРАВЛЕННЫЙ БЛОК СТАТОВ (чтобы не было наложения) ===
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ffcf6e';
+  ctx.font = 'bold 11px "Segoe UI", sans-serif';
+  const level = p.level || 1;
+  const atk = stats.atk || 0;
+  const def = stats.def || 0;
+  
+  ctx.fillText(`УР. ${level}`, x + 10, y + 62);
+  
+  ctx.fillStyle = '#dfe9f5';
+  ctx.fillText(`⚔️ ${atk}`, x + 70, y + 62);
+  ctx.fillText(`🛡️ ${def}`, x + 130, y + 62);
+  ctx.fillText(`✨ ${stats.mag || 0}`, x + 180, y + 62);
 
   const shards = state.game?.shards || {};
-  const keys = ['forest', 'ruins', 'shadow'];
-  const labels = ['ЛЕС', 'РУИНЫ', 'ТЕНЬ'];
-  keys.forEach((key, i) => {
-    const sx = x + 12 + i * 36, sy = y + 70;
-    ctx.save();
-    ctx.translate(sx, sy);
-    ctx.rotate(Math.PI / 4);
-    ctx.fillStyle = shards[key] ? '#7ce7ff' : 'rgba(124, 231, 255, 0.12)';
-    ctx.fillRect(-4, -4, 8, 8);
-    ctx.strokeStyle = 'rgba(124, 231, 255, 0.55)';
+  const shardKeys = ['forest', 'ruins', 'shadow'];
+  const shardLabels = ['ЛЕС', 'РУИНЫ', 'ТЕНЬ'];
+  
+  ctx.textAlign = 'left';
+  shardKeys.forEach((key, i) => {
+    const sx = x + 12 + i * 75, sy = y + 80;
+    ctx.fillStyle = shards[key] ? '#c9a227' : '#333';
+    ctx.beginPath();
+    ctx.moveTo(sx, sy - 5); ctx.lineTo(sx + 5, sy); ctx.lineTo(sx, sy + 5); ctx.lineTo(sx - 5, sy);
+    ctx.fill();
+    ctx.strokeStyle = shards[key] ? '#fff' : '#666';
     ctx.lineWidth = 1;
-    ctx.strokeRect(-4, -4, 8, 8);
-    ctx.restore();
-    ctx.fillStyle = shards[key] ? 'rgba(223, 233, 245, 0.9)' : 'rgba(143, 163, 184, 0.55)';
-    ctx.font = '8px "Segoe UI", sans-serif';
-    ctx.fillText(labels[i], sx + 8, sy + 1);
-  });
+    ctx.stroke();
 
-  const theme = getTheme(state.overworld?.locationId);
-  let note = '';
-  if (theme.weather === 'snow') note = 'СНЕГ: ЗАМЕДЛЕНИЕ −15%';
-  else if (theme.weather === 'rain') note = 'ДОЖДЬ: ЗАЩИТА +50% В БОЮ';
-  else if (state.overworld?.locationId === 'shadow') note = 'ТЕНЬ: АТАКА +30% В БОЮ';
-  if (note) {
+    ctx.fillStyle = shards[key] ? '#dfe9f5' : '#666';
     ctx.font = '9px "Segoe UI", sans-serif';
-    ctx.fillStyle = 'rgba(124, 231, 255, 0.8)';
-    ctx.fillText(note, x + 12, y + h + 10);
-  }
-  ctx.restore();
+    ctx.fillText(shardLabels[i], sx + 10, sy);
+  });
 }

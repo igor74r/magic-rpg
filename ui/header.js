@@ -7,7 +7,8 @@ import { toast } from './screens.js';
 import { renderLocations } from './locations.js';
 import { renderInventory } from './inventory.js';
 import { renderSpells } from './spells.js';
-import { renderQuests, renderAchievements, renderStatistics, renderBestiary, renderTalents } from './quests.js';
+import { renderQuests, renderAchievements, renderStatistics, renderBestiary } from './quests.js';
+import { renderPassives } from './passives.js';
 
 export function renderGame() { if (!state.game) return; renderHeader(); renderLocation(); renderTab(state.currentTab); }
 function totalKills() { const kills = state.game.player.stats?.kills || {}; return Object.values(kills).reduce((s, v) => s + v, 0); }
@@ -61,7 +62,13 @@ function renderActiveEffectsInline(effects) {
 
 const STAT_NAMES = { str: 'Силе', int: 'Интеллекту', wis: 'Мудрости', con: 'Телосложению' };
 export function spendStat(stat) { const p = state.game.player; if (!p.statPoints || p.statPoints <= 0 || !(stat in STAT_NAMES)) return; p[stat] += 1; p.statPoints -= 1; if (stat === 'con') p.maxHp += 10; if (stat === 'int') p.maxMp += 5; saveGame(); renderHeader(); toast(`+1 к ${STAT_NAMES[stat]}`); }
-function renderLocation() { const loc = LOCATIONS[state.game.location]; document.getElementById('location-info').innerHTML = `<h2>${loc.emoji} ${loc.name}</h2><p style="color:#a89060;margin-top:5px;font-size:14px;">${loc.desc}</p>`; }
+
+// Заголовок локации теперь пустой
+function renderLocation() { 
+  const el = document.getElementById('location-info');
+  if (el) el.innerHTML = '';
+}
+
 export function switchTab(tab) { state.currentTab = tab; document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab)); renderTab(tab); }
 
 function renderTab(tab) {
@@ -78,6 +85,6 @@ function renderTab(tab) {
   else if (tab === 'quests') el.innerHTML = renderQuests();
   else if (tab === 'achievements') el.innerHTML = renderAchievements();
   else if (tab === 'statistics') el.innerHTML = renderStatistics();
-  else if (tab === 'talents') el.innerHTML = renderTalents();
+  else if (tab === 'talents') el.innerHTML = renderPassives();
   else if (tab === 'bestiary') el.innerHTML = renderBestiary();
 }
