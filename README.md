@@ -12,8 +12,7 @@
 python -m http.server 8000
 # открыть http://localhost:8000
 ```
-
-Только через HTTP: ES-модули не работают при открытии `index.html` как `file://`.
+.
 
 
 ## Технологии
