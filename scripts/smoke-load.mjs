@@ -57,7 +57,7 @@ const { getTileDanger } = mods[21];
 const { getCurrentTheme, THEMES } = mods[22];
 const { isBlocked, isWalkable } = mods[23];
 const { createSpawnRoster } = mods[24];
-const { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress } = mods[25];
+const { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened } = mods[25];
 
 const results = [];
 const check = (name, cond) => results.push(`${cond ? 'PASS' : 'FAIL'} ${name}`);
@@ -165,6 +165,7 @@ check('legacy saves receive safe exploration defaults', !!migratedV10.player.exp
 recordLocationVisit(explorationPlayer, 'forest', 3000);
 updateDungeonProgress(explorationPlayer, 'forest', { floor: 2, checkpoint: 'crypt-hall', chestId: 'chest-01' });
 check('dungeon floor, checkpoint and opened chests survive exploration normalization', getDungeonProgress(explorationPlayer, 'forest')?.floor === 2 && getDungeonProgress(explorationPlayer, 'forest')?.checkpoint === 'crypt-hall' && getDungeonProgress(explorationPlayer, 'forest')?.openedChests.includes('chest-01'));
+check('opened dungeon chest can be restored after re-entry', isDungeonChestOpened(explorationPlayer, 'forest', 'chest-01') && !isDungeonChestOpened(explorationPlayer, 'forest', 'chest-02'));
 
 state.game = { player: { inventory: [], spells: [], hp: 100, maxHp: 500, mp: 0, maxMp: 300 } };
 addItem('scroll-frost-nova', 2);
