@@ -1,10 +1,11 @@
 import { state } from '../state.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { ITEMS, RARITIES } from '../../data/items.js';
+import { rollDungeonChestLoot } from '../../data/dungeon-treasures.js';
 import { addItem } from '../inventory.js';
 import { checkAchievements } from '../achievements.js';
 import { saveGame } from '../save.js';
-import { updateDungeonProgress, isDungeonBossDefeated, isDungeonEliteDefeated } from '../exploration.js';
+import { updateDungeonProgress, isDungeonChestOpened, isDungeonBossDefeated, isDungeonEliteDefeated } from '../exploration.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
@@ -159,13 +160,18 @@ export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null, 
 }
 
 export function openChest(chest) {
-  chest.opened = true;
+  if (!chest || chest.opened) return false;
   const ow = state.overworld;
+  if (chest.id && ow?.locationId && isDungeonChestOpened(state.game?.player, ow.locationId, chest.id)) {
+    chest.opened = true;
+    return false;
+  }
+  chest.opened = true;
   if (chest.id && ow?.locationId) updateDungeonProgress(state.game?.player, ow.locationId, { chestId: chest.id });
   const p = state.game.player;
-  const pool = ['health-potion', 'mana-potion', 'iron-sword', 'apprentice-staff', 'leather-armor'];
-  const id = pool[Math.floor(Math.random() * pool.length)];
-  const created = addItem(id);
+  const loot = rollDungeonChestLoot(ow?.locationId);
+  const id = loot.itemId;
+  const created = addItem(id, 1, { rarity: loot.rarity });
   const inst = created[0];
   let msg = `📦 Сундук: ${ITEMS[id].name}`;
   if (inst && inst.rarity && inst.rarity !== 'common') msg = `📦 Сундук: ${RARITIES[inst.rarity].name} ${ITEMS[id].name}`;
