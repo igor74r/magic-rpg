@@ -287,7 +287,8 @@ export const ENEMIES = {
     drops: ['root-fiber', 'rune-root'],
     lore: 'Древний защитник святилища. Его кора хранит приказы первого ордена.',
     tactics: 'Медленный, но стойкий противник; опасен оглушающими ударами корней.',
-    special: { type: 'double', every: 3, name: 'Корневой захват', effect: 'stun' }
+    special: { type: 'double', every: 3, name: 'Корневой захват', effect: 'stun' },
+    phases: [{ atHp: 0.5, atkMult: 1.25, msg: 'Страж пробуждает древние корни!', specialEvery: 2 }]
   },
 
   'drowned-scribe': {
@@ -297,7 +298,8 @@ export const ENEMIES = {
     drops: ['grave-salt', 'rune-tide'],
     lore: 'Писец некрополя, который продолжает переписывать имена даже после смерти.',
     tactics: 'Проклинает героя и истощает его силы; не позволяйте затянуть бой.',
-    special: { type: 'drain', every: 3, name: 'Чернила забвения', effect: 'poison' }
+    special: { type: 'drain', every: 3, name: 'Чернила забвения', effect: 'poison' },
+    phases: [{ atHp: 0.5, atkMult: 1.2, msg: 'Писец раскрывает запретную страницу!', specialEvery: 2 }]
   },
 
   'ashbound-renegade': {
@@ -307,7 +309,8 @@ export const ENEMIES = {
     drops: ['ember-core', 'rune-ember'],
     lore: 'Бывший кузнец пяти орденов, связавший себя с огнём после предательства.',
     tactics: 'Чередует быстрые атаки и огненный выпад; держите запас лечения.',
-    special: { type: 'snipe', every: 3, mult: 1.9, name: 'Клеймо раскола', effect: 'burn' }
+    special: { type: 'snipe', every: 3, mult: 1.9, name: 'Клеймо раскола', effect: 'burn' },
+    phases: [{ atHp: 0.5, atkMult: 1.3, msg: 'Отступник обращает свою ярость в пламя!', specialEvery: 2 }]
   },
 
   'mirror-revenant': {
@@ -317,7 +320,8 @@ export const ENEMIES = {
     drops: ['frost-essence', 'rune-frost'],
     lore: 'Отражение хранителя, оставшееся в ледяном зале после принесения последней клятвы.',
     tactics: 'Наказывает за затяжные сражения ледяными проклятиями.',
-    special: { type: 'snipe', every: 3, mult: 2, name: 'Осколок отражения', effect: 'stun' }
+    special: { type: 'snipe', every: 3, mult: 2, name: 'Осколок отражения', effect: 'stun' },
+    phases: [{ atHp: 0.5, atkMult: 1.25, msg: 'Зеркальный мститель раскалывает ледяную оболочку!', specialEvery: 2 }]
   },
 
   'riftstalker': {
@@ -327,6 +331,7 @@ export const ENEMIES = {
     drops: ['void-dust', 'rune-void'],
     lore: 'Существо, собранное из воспоминаний тех, кто однажды шагнул за край мира.',
     tactics: 'Быстро сокращает дистанцию и высасывает жизненную силу.',
-    special: { type: 'drain', every: 2, name: 'Касание пустоты', effect: 'bleed' }
+    special: { type: 'drain', every: 2, name: 'Касание пустоты', effect: 'bleed' },
+    phases: [{ atHp: 0.5, atkMult: 1.35, msg: 'Охотник разлома раскрывает истинную форму!', specialEvery: 1 }]
   },
 };
