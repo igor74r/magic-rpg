@@ -42,11 +42,12 @@ function generateSecrets(ow) {
       startedAt: performance.now()
     }));
     for (const secret of restored) {
-      if (!secret.opened || secret.rewardType !== 'chest') continue;
-      const chestId = 'floor-' + floor + '-secret-' + secret.id + '-chest';
-      if (isDungeonChestOpened(state.game?.player, ow.locationId, chestId)) continue;
-      if (!(ow.chests || []).some(chest => chest.id === chestId)) {
-        (ow.chests ||= []).push({ id: chestId, x: secret.ax, y: secret.ay, opened: false, _secret: true });
+      if (secret.opened && secret.rewardType === 'chest') {
+        const chestId = 'floor-' + floor + '-secret-' + secret.id + '-chest';
+        if (!isDungeonChestOpened(state.game?.player, ow.locationId, chestId) &&
+            !(ow.chests || []).some(chest => chest.id === chestId)) {
+          (ow.chests ||= []).push({ id: chestId, x: secret.ax, y: secret.ay, opened: false, _secret: true });
+        }
       }
       if (secret.opened && secret.rewardType === 'elite') {
         const encounterId = `f${floor}-secret-${secret.id}`;
