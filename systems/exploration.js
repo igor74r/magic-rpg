@@ -18,6 +18,7 @@ function normalizeRecord(record) {
       floor: Math.max(1, Math.min(999, Math.floor(Number(dungeon.floor) || 1))),
       checkpoint: typeof dungeon.checkpoint === 'string' && ID_RE.test(dungeon.checkpoint) ? dungeon.checkpoint : null,
       openedChests: cleanIdList(dungeon.openedChests),
+      disarmedTraps: cleanIdList(dungeon.disarmedTraps, 128),
       secretsFound: cleanIdList(dungeon.secretsFound),
       secretFloors: Array.isArray(dungeon.secretFloors) ? [...new Set(dungeon.secretFloors.filter(n => Number.isInteger(n) && n >= 1 && n <= 999))].slice(0, 16) : [],
       secrets: Array.isArray(dungeon.secrets) ? dungeon.secrets.filter(s =>
@@ -86,7 +87,7 @@ export function recordLocationVisit(player, locationId, now = Date.now()) {
     firstVisitedAt: previous?.firstVisitedAt || now,
     lastVisitedAt: now,
     cleared: previous?.cleared === true,
-    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: [] }
+    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], disarmedTraps: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: [] }
   };
   exploration.lastLocationId = locationId;
   const entries = Object.entries(exploration.visited);
@@ -175,6 +176,19 @@ export function claimDungeonFloorReward(player, locationId, floor) {
   return updateDungeonProgress(player, locationId, { floorRewardId: key });
 }
 
+export function isDungeonTrapDisarmed(player, locationId, trapId) {
+  if (typeof trapId !== 'string' || !ID_RE.test(trapId)) return false;
+  return getDungeonProgress(player, locationId)?.disarmedTraps.includes(trapId) === true;
+}
+
+export function disarmDungeonTrap(player, locationId, trapId) {
+  if (!player || typeof locationId !== 'string' || !ID_RE.test(locationId) ||
+      typeof trapId !== 'string' || !ID_RE.test(trapId)) return false;
+  const progress = getDungeonProgress(player, locationId);
+  if (!progress || progress.disarmedTraps.includes(trapId)) return false;
+  return updateDungeonProgress(player, locationId, { disarmedTrapId: trapId });
+}
+
 export function isDungeonChestOpened(player, locationId, chestId) {
   if (typeof chestId !== 'string' || !ID_RE.test(chestId)) return false;
   return getDungeonProgress(player, locationId)?.openedChests.includes(chestId) === true;
@@ -235,6 +249,7 @@ export function updateDungeonProgress(player, locationId, patch = {}) {
     next.claimedEliteRewards = cleanIdList([...next.claimedEliteRewards, patch.eliteId], 128);
   }
   if (typeof patch.floorRewardId === 'string' && /^f[0-9]{1,3}$/.test(patch.floorRewardId)) next.claimedFloorRewards = cleanIdList([...next.claimedFloorRewards, patch.floorRewardId], 128);
+  if (typeof patch.disarmedTrapId === 'string' && ID_RE.test(patch.disarmedTrapId)) next.disarmedTraps = cleanIdList([...next.disarmedTraps, patch.disarmedTrapId], 128);
   if (typeof patch.chestId === 'string' && ID_RE.test(patch.chestId)) next.openedChests = cleanIdList([...next.openedChests, patch.chestId]);
   if (typeof patch.secretId === 'string' && ID_RE.test(patch.secretId)) next.secretsFound = cleanIdList([...next.secretsFound, patch.secretId]);
   player.exploration.visited[locationId].dungeon = next;
