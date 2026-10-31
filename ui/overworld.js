@@ -1,7 +1,7 @@
 import { state } from '../systems/state.js';
 import {
   tryMovePlayer, updateOverworld, exitOverworld,
-  combatFlee
+  combatFlee, transitionDungeonFloor
 } from '../systems/overworld.js';
 import { saveGame } from '../systems/save.js';
 import { addItem } from '../systems/inventory.js';
@@ -316,6 +316,15 @@ on('achievement:unlocked', showAchievementNotification);
 on('achievements:unlocked', showAchievementNotification);
 
 
+
+export function owDungeonNext() {
+  if (transitionDungeonFloor(1)) return true;
+  return false;
+}
+export function owDungeonPrevious() {
+  if (transitionDungeonFloor(-1)) return true;
+  return false;
+}
 
 export function owPauseResume() { closePauseMenu(); }
 export function owPauseSaveVillage() { saveGame(); closePauseMenu(); exitOverworld(); }
