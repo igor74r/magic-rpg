@@ -19,7 +19,7 @@ import {
 } from '../status.js';
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
-import { updateDungeonProgress, claimDungeonEliteReward, claimDungeonFloorReward, claimActRelic, isDungeonBossDefeated } from '../exploration.js';
+import { updateDungeonProgress, defeatDungeonEncounter, claimDungeonEliteReward, claimDungeonFloorReward, claimActRelic, isDungeonBossDefeated } from '../exploration.js';
 import { ACT_RELIC_REWARDS } from '../../data/dungeon-treasures.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
@@ -1310,6 +1310,10 @@ function combatVictory() {
   const enemy = ow.combat.enemy;
   const def = ENEMIES[enemy.enemyId];
   const p = state.game.player;
+
+  if (enemy.persistentEncounterId && ow.locationId) {
+    defeatDungeonEncounter(p, ow.locationId, enemy.persistentEncounterId);
+  }
 
   if (enemy.uniqueElite && !ow.rifMode && ow.locationId) {
     const floor = Math.max(1, Math.floor(Number(ow.dungeonFloor) || 1));
