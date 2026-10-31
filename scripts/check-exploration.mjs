@@ -31,6 +31,9 @@ assert.deepEqual(getDungeonSecrets(player, 'forest', 2), [
   { id: 'f2-s1', tx: 8, ty: 9, ax: 7, ay: 9, rewardType: 'chest' }
 ]);
 assert.deepEqual(getDungeonSecrets(player, 'forest', 1), []);
+assert.equal(saveDungeonSecrets(player, 'forest', 1, [{ id: 'f1-s1', tx: 4, ty: 5, ax: 4, ay: 6, rewardType: 'loot' }]), true);
+assert.equal(getDungeonSecrets(player, 'forest', 1)[0].id, 'f1-s1');
+assert.equal(getDungeonSecrets(player, 'forest', 2)[0].id, 'f2-s1');
 
 assert.equal(updateDungeonProgress(player, 'forest', { floor: -20, checkpoint: '../invalid', chestId: '../bad' }), true);
 assert.equal(getDungeonProgress(player, 'forest').floor, 1);
