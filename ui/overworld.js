@@ -4,7 +4,7 @@ import {
   combatFlee, transitionDungeonFloor
 } from '../systems/overworld.js';
 import { saveGame } from '../systems/save.js';
-import { getDungeonProgress, getDungeonSecrets, saveDungeonSecrets, hasDungeonSecretsGenerated, markDungeonSecretFound, isDungeonChestOpened } from '../systems/exploration.js';
+import { getDungeonProgress, getDungeonSecrets, saveDungeonSecrets, hasDungeonSecretsGenerated, markDungeonSecretFound, isDungeonChestOpened, getDungeonEncounters, saveDungeonEncounter } from '../systems/exploration.js';
 import { addItem } from '../systems/inventory.js';
 import { saveAndMenu } from './menu.js';
 import { LOCATIONS } from '../data/locations.js';
@@ -47,6 +47,20 @@ function generateSecrets(ow) {
       if (isDungeonChestOpened(state.game?.player, ow.locationId, chestId)) continue;
       if (!(ow.chests || []).some(chest => chest.id === chestId)) {
         (ow.chests ||= []).push({ id: chestId, x: secret.ax, y: secret.ay, opened: false, _secret: true });
+      }
+      if (secret.opened && secret.rewardType === 'elite') {
+        const encounterId = `f${floor}-secret-${secret.id}`;
+        const encounter = getDungeonEncounters(state.game?.player, ow.locationId, floor)
+          .find(item => item.id === encounterId && item.status === 'active');
+        if (encounter && !(ow.enemies || []).some(enemy => enemy.persistentEncounterId === encounterId)) {
+          (ow.enemies ||= []).push({
+            id: encounterId, persistentEncounterId: encounterId, encounterKind: 'secret-elite',
+            enemyId: encounter.enemyId, x: encounter.x, y: encounter.y,
+            homeX: encounter.x, homeY: encounter.y, hp: encounter.hp, maxHp: encounter.maxHp,
+            boss: false, elite: true, uniqueElite: false, dead: false, state: 'idle',
+            modifier: null, effects: [], phase: 0, wanderTimer: 0, chaseCooldown: 0
+          });
+        }
       }
     }
     return restored;
@@ -142,16 +156,18 @@ function openSecret(sw) {
     const enemyId = pool[Math.floor(Math.random() * pool.length)];
     const def = ENEMIES[enemyId];
     if (def) {
+      const floor = Math.max(1, Math.floor(Number(ow.dungeonFloor) || 1));
+      const encounterId = `f${floor}-secret-${sw.id}`;
+      const hp = Math.round((def.hp || 30) * 1.5);
       (ow.enemies ||= []).push({
-        x: sw.ax, y: sw.ay,
-        enemyId,
-        hp: Math.round((def.hp || 30) * 1.5),
-        maxHp: Math.round((def.hp || 30) * 1.5),
-        boss: false, elite: true, dead: false,
-        state: 'idle',
-        modifier: null,
-        homeX: sw.ax, homeY: sw.ay,
-        wanderTimer: 0, chaseCooldown: 0
+        id: encounterId, persistentEncounterId: encounterId, encounterKind: 'secret-elite',
+        x: sw.ax, y: sw.ay, enemyId, hp, maxHp: hp,
+        boss: false, elite: true, uniqueElite: false, dead: false,
+        state: 'idle', modifier: null, effects: [], phase: 0,
+        homeX: sw.ax, homeY: sw.ay, wanderTimer: 0, chaseCooldown: 0
+      });
+      saveDungeonEncounter(p, ow.locationId, floor, {
+        id: encounterId, kind: 'secret-elite', enemyId, x: sw.ax, y: sw.ay, hp, maxHp: hp
       });
     }
     emit('toast', '⚠️ Пробуждён древний страж!');
