@@ -3,7 +3,7 @@ import { LOCATIONS } from '../data/locations.js';
 import { on, emit } from './events.js';
 import { getRandomRiftLocation, endRift, recordRiftFloor } from './rift.js';
 import { TILE, generateMap, getDungeonStairCells } from './overworld/map.js';
-import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
+import { spawnEnemies, spawnChests, spawnBossVaultChest, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
 import { recordLocationVisit, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened } from './exploration.js';
@@ -58,6 +58,8 @@ export function enterOverworld(locationId, opts = {}) {
     if (isDungeonChestOpened(state.game?.player, locationId, chest.id)) chest.opened = true;
   });
   prepareChestKeyAccess(chests, countItem('rusty-key') > 0);
+  const bossVault = spawnBossVaultChest(loc, map, cols, rows, enemies, chests, playerPos, locationId, dungeonFloor, state.game?.player);
+  if (bossVault) chests.push(bossVault);
   const npcs = spawnNPCs(loc);
   const statics = spawnStatics(loc);
   const events = spawnEvents(loc, map, cols, rows, playerPos, locationId, [...enemies, ...chests]);
