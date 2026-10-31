@@ -128,6 +128,38 @@ export function allocatePassive(player, nodeId) {
   return true;
 }
 
+export function resetPassives(player) {
+  if (!player) return { ok: false, msg: 'Нет игрока' };
+
+  const allocated = Array.isArray(player.passives)
+    ? player.passives.filter(id => id !== 'start')
+    : [];
+
+  if (allocated.length === 0) {
+    return { ok: false, msg: 'Нет изученных пассивных навыков' };
+  }
+
+  const cost = 500;
+  if ((player.gold || 0) < cost) {
+    return { ok: false, msg: `Нужно ${cost}💰` };
+  }
+
+  player.gold -= cost;
+  player.passivePoints = Math.max(0, player.passivePoints || 0) + allocated.length;
+  player.passives = ['start'];
+
+  if (state.game?.player === player) saveGame();
+
+  emit('toast', `Пассивные навыки сброшены (−${cost}💰), возвращено очков: ${allocated.length}`);
+  emit('log', {
+    channel: 'game',
+    msg: `Древо пассивных навыков сброшено. Возвращено очков: ${allocated.length}.`,
+    cls: 'success'
+  });
+
+  return { ok: true, refunded: allocated.length, cost };
+}
+
 export function getAvailablePassives(player) {
   if (!player) return [];
 
