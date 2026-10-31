@@ -126,7 +126,6 @@ function tryOpenSecret() {
   const ow = state.overworld;
   if (!ow || !ow.secretWalls) return;
   if (ow.combat || ow.defeated) return;
-  if (tryDisarmNearbyTrap()) return;
   const p = ow.player;
   for (const stair of ow.dungeonStairs || []) {
     const sx = stair.x * ow.tile + ow.tile / 2, sy = stair.y * ow.tile + ow.tile / 2;
@@ -290,6 +289,7 @@ function onKeyDown(e) {
   // Открытие секретной стены по E
   if (k === 'e' && !state.overworld.combat) {
     e.preventDefault();
+    if (tryDisarmNearbyTrap()) return;
     tryOpenSecret();
     return;
   }
