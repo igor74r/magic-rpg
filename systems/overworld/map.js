@@ -282,13 +282,15 @@ export function findFreeCell(
   rows,
   avoidList,
   minDistFromPlayer,
-  playerPos
+  playerPos,
+  locationId = null,
+  random = Math.random
 ) {
   for (let attempt = 0; attempt < 300; attempt++) {
-    const x = Math.floor(Math.random() * cols);
-    const y = Math.floor(Math.random() * rows);
+    const x = Math.floor(random() * cols);
+    const y = Math.floor(random() * rows);
 
-    if (isBlocked(map, x, y)) continue;
+    if (isBlocked(map, x, y, locationId)) continue;
 
     const px = x * TILE + TILE / 2;
     const py = y * TILE + TILE / 2;
