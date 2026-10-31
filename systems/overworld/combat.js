@@ -1406,10 +1406,9 @@ function combatVictory() {
     p.stats.bossKills = (p.stats.bossKills || 0) + 1;
   }
 
-  const dropChance =
-    (enemy.elite || enemy.boss)
-      ? 1
-      : getDropChance();
+  // Normal enemies use the difficulty drop rate; elites are generous,
+  // while bosses guarantee only their signature loot without flooding all drops.
+  const dropChance = enemy.boss ? 1 : enemy.elite ? 0.85 : getDropChance();
 
   def.drops.forEach(id => {
     if (Math.random() < dropChance) {
@@ -1457,8 +1456,9 @@ function combatVictory() {
     playSound('chest');
   }
 
-  const herbChance =
-    (enemy.elite || enemy.boss)
+  const herbChance = enemy.boss
+    ? Math.min(1, HERB_DROP_CHANCE_ELITE * 1.25)
+    : enemy.elite
       ? HERB_DROP_CHANCE_ELITE
       : HERB_DROP_CHANCE;
 
