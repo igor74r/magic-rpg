@@ -483,7 +483,7 @@ export function migrateSettings(settings) {
   if (typeof settings.lowHealthEffects !== 'boolean') settings.lowHealthEffects = true;
   if (typeof settings.reducedMotion !== 'boolean') settings.reducedMotion = false;
 
-  if (typeof settings.difficulty !== 'string') {
+  if (!['easy', 'normal', 'hard'].includes(settings.difficulty)) {
     settings.difficulty = 'normal';
   }
 
