@@ -4,7 +4,6 @@ import { ENEMIES } from '../data/enemies.js';
 import { LOCATIONS } from '../data/locations.js';
 import { STORY } from '../data/story.js';
 import { ACT_RELIC_REWARDS, getActNumberForLocation, rollDungeonChestLoot, getDungeonChestType, prepareChestKeyAccess } from '../data/dungeon-treasures.js';
-import { ITEMS as ITEM_DATA } from '../data/items.js';
 
 const expectedRelics = [
   ['briar-hollow', 'elder-treant', 'relic-root-memory'],
@@ -45,7 +44,7 @@ for (const locationId of campaignLocations) {
   assert.ok(['rare', 'epic', 'legendary'].includes(high.rarity));
 }
 assert.equal(getActNumberForLocation('village'), 1);
-assert.equal(ITEM_DATA['rusty-key']?.type, 'quest');
+assert.equal(ITEMS['rusty-key']?.type, 'quest');
 assert.equal(getDungeonChestType('briar-hollow', 1, 0, 3), 'wooden');
 assert.equal(getDungeonChestType('briar-hollow', 1, 1, 3), 'locked');
 assert.equal(getDungeonChestType('briar-hollow', 1, 1, 3), getDungeonChestType('briar-hollow', 1, 1, 3), 'chest types remain stable after re-entry');
@@ -56,6 +55,10 @@ for (const type of ['wooden', 'cursed', 'mimic', 'ancient']) assert.ok(generated
 const legacyFloorChests = [{ type: 'wooden', opened: true }, { type: 'wooden', opened: false }, { type: 'locked', opened: false }];
 assert.equal(prepareChestKeyAccess(legacyFloorChests, false), 1, 'legacy floor receives a key cache if its original first chest was already opened');
 assert.equal(legacyFloorChests[1].keyCache, true);
+assert.equal(legacyFloorChests.filter(chest => chest.keyCache).length, 1, 'exactly one key cache is assigned');
+legacyFloorChests[1].opened = true;
+assert.equal(prepareChestKeyAccess(legacyFloorChests, false), 2, 'key cache is reassigned to a remaining unopened chest');
+assert.equal(legacyFloorChests.filter(chest => chest.keyCache).length, 1, 'stale key cache flags are cleared before reassignment');
 const isolatedLockedChest = [{ type: 'locked', opened: false }];
 assert.equal(prepareChestKeyAccess(isolatedLockedChest, false), 0, 'a locked chest without another key source remains pickable');
 assert.equal(isolatedLockedChest[0].freePick, true);
