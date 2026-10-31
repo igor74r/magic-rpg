@@ -356,6 +356,11 @@ export const ITEMS = {
     price: 35, type: 'rune', runeBonus: { magic: 3, armorPen: 1, critChance: 0.01 }
   },
 
+  'rusty-key': {
+    name: 'Ржавая ключ-кость', icon: '🗝️',
+    desc: 'Старый ключ от запертых сундуков подземелий. Одноразовый.',
+    price: 0, type: 'quest'
+  },
   'root-fiber': {
     name: 'Волокно живого корня', icon: '🌱',
     desc: 'Плотное волокно из Глухой чащи. Используется в ремесле.',
