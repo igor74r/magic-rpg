@@ -13,6 +13,8 @@ for (const [locationId, location] of Object.entries(LOCATIONS)) {
   assert.ok(mapA.every(row => row.length === cols), `${locationId}: column count`);
   const cx = Math.floor(cols / 2);
   const cy = Math.floor(rows / 2);
+  assert.ok(mapA[cy].every(tile => tile === 1), `${locationId}: central horizontal road must be clear`);
+  assert.ok(mapA.every(row => row[cx] === 1), `${locationId}: central vertical road must be clear`);
   assert.equal(isWalkable(mapA, cols, rows, (cx + 0.5) * 48, (cy + 0.5) * 48, locationId), true,
     `${locationId}: central spawn must be walkable`);
 }
