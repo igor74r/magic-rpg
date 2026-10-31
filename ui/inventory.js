@@ -202,7 +202,7 @@ function renderPaperdoll(p) {
         onmouseout="GameAPI.hideTooltip()">
         <span class="gear-slot-icon">${item.icon}</span>
         <span class="gear-slot-label">${label}</span>
-        <span class="gear-slot-name">${(obj.affixes || []).map(affix => affix.name).join(' ')} ${item.name}${obj.forgeLevel ? ` +${obj.forgeLevel}` : ''}</span>
+        <span class="gear-slot-name">${(obj.affixes || []).length ? (obj.affixes || []).map(affix => affix.name).join(' ') + ' ' : ''}${item.name}${obj.forgeLevel ? ` +${obj.forgeLevel}` : ''}</span>
         <span class="gear-slot-sockets">${sockets ? `◈ ${runes}/${sockets}` : ''}</span>
         <button class="gear-slot-remove" onclick="GameAPI.unequip('${slot}')" title="Снять">×</button>
       </div>`;
@@ -425,7 +425,7 @@ export function sellJunkUI() {
     const slots = EQUIPMENT_SLOTS.filter(slot => (SLOT_TYPES[slot] || []).includes(item.type));
     const weakest = Math.min(...slots.map(slot => itemScore(p.equipped?.[slot])));
     if (itemScore(inst) > weakest) continue;
-    const price = getSellPrice(inst);
+    const price = getSellPrice(inst, p);
     if (price > 0) {
       totalGold += price;
       count++;
@@ -503,7 +503,7 @@ function buildTooltipHTML(inst) {
     ? `<div class="tooltip-sockets">Гнёзда: ${(inst.runes || []).length}/${inst.sockets ?? item.sockets ?? 0} ${(inst.runes || []).map(id => ITEMS[id]?.icon || 'ᛉ').join(' ')}</div>`
     : '';
   return `
-    <div class="tooltip-title" style="color:${color}">${item.icon} ${(inst.affixes || []).map(affix => affix.name).join(' ')} ${item.name}${rarityLabel}${inst.forgeLevel ? ` +${inst.forgeLevel}` : ''}</div>
+    <div class="tooltip-title" style="color:${color}">${item.icon} ${(inst.affixes || []).length ? (inst.affixes || []).map(affix => affix.name).join(' ') + ' ' : ''}${item.name}${rarityLabel}${inst.forgeLevel ? ` +${inst.forgeLevel}` : ''}</div>
     <div class="tooltip-type">${TYPE_LABELS[item.type] || item.type}</div>
     <div class="tooltip-desc">${item.desc}</div>
     ${affixLabel ? `<div class="tooltip-type">Модификаторы: ${affixLabel}</div>` : ''}
