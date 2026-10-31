@@ -52,12 +52,12 @@ assert.notEqual(getDungeonChestType('briar-hollow', 1, 2, 3), getDungeonChestTyp
 const generatedTypes = new Set();
 for (let floor = 1; floor <= 80; floor++) for (let index = 2; index < 8; index++) generatedTypes.add(getDungeonChestType('briar-hollow', floor, index, 8));
 for (const type of ['wooden', 'cursed', 'mimic', 'ancient']) assert.ok(generatedTypes.has(type), `chest generation includes ${type}`);
-const legacyFloorChests = [{ type: 'wooden', opened: true }, { type: 'wooden', opened: false }, { type: 'locked', opened: false }];
+const legacyFloorChests = [{ type: 'wooden', opened: true }, { type: 'wooden', opened: false }, { type: 'locked', opened: false }, { type: 'wooden', opened: false }];
 assert.equal(prepareChestKeyAccess(legacyFloorChests, false), 1, 'legacy floor receives a key cache if its original first chest was already opened');
 assert.equal(legacyFloorChests[1].keyCache, true);
 assert.equal(legacyFloorChests.filter(chest => chest.keyCache).length, 1, 'exactly one key cache is assigned');
 legacyFloorChests[1].opened = true;
-assert.equal(prepareChestKeyAccess(legacyFloorChests, false), 2, 'key cache is reassigned to a remaining unopened chest');
+assert.equal(prepareChestKeyAccess(legacyFloorChests, false), 3, 'key cache is reassigned to a remaining unopened chest');
 assert.equal(legacyFloorChests.filter(chest => chest.keyCache).length, 1, 'stale key cache flags are cleared before reassignment');
 const isolatedLockedChest = [{ type: 'locked', opened: false }];
 assert.equal(prepareChestKeyAccess(isolatedLockedChest, false), 0, 'a locked chest without another key source remains pickable');
