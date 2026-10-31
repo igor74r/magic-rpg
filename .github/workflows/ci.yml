@@ -43,3 +43,6 @@ jobs:
 
       - name: Check passive trees and respec
         run: node scripts/check-passives.mjs
+
+      - name: Check inventory, affixes and crafting
+        run: node scripts/check-inventory-affixes.mjs
