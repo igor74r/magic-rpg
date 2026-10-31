@@ -32,6 +32,21 @@ export function getActNumberForLocation(locationId) {
   return act ? Math.max(1, Math.min(5, Number(act.number) || 1)) : 1;
 }
 
+export function getDungeonChestType(locationId, floor = 1, index = 0, total = 1) {
+  const safeIndex = Math.max(0, Math.floor(Number(index) || 0));
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  if (safeIndex === 0 || safeTotal < 2) return 'wooden';
+  if (safeIndex === 1) return 'locked';
+  const source = `${locationId || 'unknown'}:f${Math.max(1, Math.floor(Number(floor) || 1))}:c${safeIndex}`;
+  let hash = 2166136261;
+  for (let i = 0; i < source.length; i++) hash = Math.imul(hash ^ source.charCodeAt(i), 16777619) >>> 0;
+  const roll = hash % 100;
+  if (roll < 16) return 'cursed';
+  if (roll < 29) return 'mimic';
+  if (roll < 48) return 'ancient';
+  return 'wooden';
+}
+
 export function rollDungeonChestLoot(locationId, random = Math.random) {
   const location = LOCATIONS[locationId];
   const actNumber = getActNumberForLocation(locationId);
