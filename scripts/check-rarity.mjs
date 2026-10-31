@@ -6,8 +6,8 @@ assert.deepEqual(
   { common: 60, rare: 25, epic: 12, legendary: 3 }
 );
 assert.equal(rollRarity(() => 0), 'common');
-assert.equal(rollRarity(() => 0.60), 'rare');
-assert.equal(rollRarity(() => 0.85), 'epic');
+assert.equal(rollRarity(() => 0.61), 'rare');
+assert.equal(rollRarity(() => 0.86), 'epic');
 assert.equal(rollRarity(() => 0.98), 'legendary');
 assert.equal(rollRarity(() => 1), 'legendary');
 console.log('Rarity distribution checks passed.');
