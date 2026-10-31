@@ -175,16 +175,21 @@ export function openChest(chest) {
   const p = state.game?.player;
   if (!p || !ow) return false;
   if (chest.type === 'locked') {
-    if (countItem('rusty-key') < 1) {
+    if (countItem('rusty-key') < 1 && !chest.freePick) {
       if (!chest.lockNotified) {
         chest.lockNotified = true;
         emit('toast', '🔒 Сундук заперт. Нужен ржавый ключ.');
-        pushLog('🔒 Запертый сундук: найдите ржавый ключ в первом сундуке этого этажа.', 'info');
+        pushLog('🔒 Запертый сундук: ключ можно найти в другом сундуке этого этажа.', 'info');
       }
       return false;
     }
-    removeItem('rusty-key', 1);
-    emit('toast', '🗝️ Вы открыли запертый сундук.');
+    if (countItem('rusty-key') > 0) {
+      removeItem('rusty-key', 1);
+      emit('toast', '🗝️ Вы открыли запертый сундук.');
+    } else {
+      emit('toast', '🔓 Вы нашли способ открыть старый замок.');
+      pushLog('🔓 Замок поддался — сундук открыт без ключа.', 'success');
+    }
   }
   chest.opened = true;
   if (chest.id && ow.locationId) updateDungeonProgress(p, ow.locationId, { chestId: chest.id });
