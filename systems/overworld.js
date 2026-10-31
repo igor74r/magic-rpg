@@ -6,7 +6,7 @@ import { TILE, generateMap } from './overworld/map.js';
 import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
-import { recordLocationVisit } from './exploration.js';
+import { recordLocationVisit, getDungeonProgress, updateDungeonProgress } from './exploration.js';
 import { saveGame } from './save.js';
 
 export { TILE } from './overworld/map.js';
@@ -20,6 +20,9 @@ export function enterOverworld(locationId, opts = {}) {
   if (!loc.safe && !loc.enemies?.length) return;
 
   recordLocationVisit(state.game?.player, locationId);
+  const savedDungeon = getDungeonProgress(state.game?.player, locationId);
+  const dungeonFloor = loc.safe ? 1 : Math.max(1, Math.min(999, Math.floor(Number(opts.dungeonFloor ?? savedDungeon?.floor) || 1)));
+  if (!loc.safe) updateDungeonProgress(state.game?.player, locationId, { floor: dungeonFloor });
   const cols = loc.mapCols || 40;
   const rows = loc.mapRows || 30;
   const map = generateMap(locationId, cols, rows);
@@ -43,6 +46,7 @@ export function enterOverworld(locationId, opts = {}) {
     active: true, locationId, theme: loc.theme || 'default',
     safe: !!loc.safe,
     rifMode: !!opts.rifMode, rifFloor: opts.rifFloor || 1,
+    dungeonFloor,
     cols, rows, tile: TILE, map,
     player: {
       x: playerPos.x, y: playerPos.y,
@@ -71,6 +75,29 @@ export function exitOverworld() {
   clearPlayerEffects();
   state.overworld = null;
   emit('overworld:end');
+}
+
+// Обычные подземелья используют отдельную систему этажей; Разлом остаётся независимым.
+export function transitionDungeonFloor(direction = 1) {
+  const ow = state.overworld;
+  if (!ow?.active || ow.safe || ow.rifMode || ow.combat || ow.defeated) return false;
+  const delta = Math.trunc(Number(direction));
+  if (!Number.isFinite(delta) || Math.abs(delta) !== 1) return false;
+  const currentFloor = Math.max(1, Math.floor(Number(ow.dungeonFloor) || 1));
+  const nextFloor = Math.max(1, Math.min(999, currentFloor + delta));
+  if (nextFloor === currentFloor) return false;
+  updateDungeonProgress(state.game?.player, ow.locationId, { floor: nextFloor });
+  saveGame();
+  emit('dungeon:floor-changing', { locationId: ow.locationId, from: currentFloor, to: nextFloor });
+  enterOverworld(ow.locationId, { dungeonFloor: nextFloor });
+  emit('toast', `🏰 Этаж подземелья: ${nextFloor}`);
+  return true;
+}
+
+export function returnToDungeonEntrance() {
+  const ow = state.overworld;
+  if (!ow?.active || ow.safe || ow.rifMode || ow.combat || ow.defeated || (ow.dungeonFloor || 1) <= 1) return false;
+  return transitionDungeonFloor(-1);
 }
 
 export function advanceRiftFloor() {
