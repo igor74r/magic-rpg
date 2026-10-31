@@ -7,6 +7,8 @@ import { saveGame } from '../save.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
+import { DRAGON_SHARDS } from '../../data/rift-canon.js';
+import { canFightDragon } from '../rift-progression.js';
 import { findFreeCell, TILE } from './map.js';
 import { spawnParticles } from './particles.js';
 import { pushLog } from './log.js';
@@ -54,8 +56,13 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
   const ng = getNGPlusMult();
   const riftM = opts.rifMode ? getRiftMult(opts.rifFloor || 1) : { hpMult: 1 };
   const enemies = [];
-  const count = Math.min(Math.max(loc.enemies.length, 4), 7);
-  const spawnRoster = createSpawnRoster(loc.enemies, count);
+  const player = state.game?.player;
+  const availableEnemyIds = loc.enemies.filter(enemyId => {
+    const dragon = DRAGON_SHARDS.find(entry => entry.enemyId === enemyId);
+    return !dragon || canFightDragon(player, dragon.id);
+  });
+  const count = Math.min(Math.max(availableEnemyIds.length, 4), 7);
+  const spawnRoster = createSpawnRoster(availableEnemyIds, count);
   const eliteChance = getEliteChance();
 
   for (let i = 0; i < count; i++) {
