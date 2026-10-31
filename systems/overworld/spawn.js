@@ -3,7 +3,7 @@ import { emit } from '../events.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { LOCATIONS } from '../../data/locations.js';
 import { ITEMS, RARITIES } from '../../data/items.js';
-import { rollDungeonChestLoot, getDungeonChestType } from '../../data/dungeon-treasures.js';
+import { rollDungeonChestLoot, getDungeonChestType, getDungeonBossClearProgress } from '../../data/dungeon-treasures.js';
 import { addItem, countItem, removeItem } from '../inventory.js';
 import { checkAchievements } from '../achievements.js';
 import { saveGame } from '../save.js';
@@ -126,7 +126,8 @@ export function spawnStatics(loc) {
 export function spawnBossVaultChest(loc, map, cols, rows, enemies, chests, playerPos, locationId, dungeonFloor, player) {
   if (!loc || loc.safe || !locationId) return null;
   const bosses = [...new Set((loc.enemies || []).filter(id => ENEMIES[id]?.boss))];
-  if (!bosses.length || !bosses.every(id => isDungeonBossDefeated(player, locationId, dungeonFloor, id))) return null;
+  const defeatedBosses = bosses.filter(id => isDungeonBossDefeated(player, locationId, dungeonFloor, id));
+  if (!getDungeonBossClearProgress(bosses, defeatedBosses).complete) return null;
   const id = `boss-vault-f${Math.max(1, Math.floor(Number(dungeonFloor) || 1))}`;
   if (isDungeonChestOpened(player, locationId, id)) return null;
   const pos = findFreeCell(map, cols, rows, [...enemies, ...chests], 260, playerPos, locationId);
