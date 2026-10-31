@@ -10,6 +10,7 @@ import { recordLocationVisit, getDungeonProgress, updateDungeonProgress } from '
 import { saveGame } from './save.js';
 
 export { TILE } from './overworld/map.js';
+export { transitionDungeonFloor, returnToDungeonEntrance } from './overworld.js';
 export { tryMovePlayer, updateOverworld } from './overworld/ai.js';
 export { triggerShake, combatAttack, combatCastSpell, combatUseAbility, combatUseItem, combatBlock, combatFlee } from './overworld/combat.js';
 export { spawnParticles } from './overworld/particles.js';
