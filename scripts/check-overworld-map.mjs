@@ -42,10 +42,10 @@ assert.deepEqual(fallback, { x: 1, y: 0 },
   'free-cell search must scan the map when random attempts repeatedly hit obstacles');
 
 const avoidsOccupied = findFreeCell(
-  [[0, 0]], 2, 1,
+  [[0, 0, 0]], 3, 1,
   [{ x: 24, y: 24 }], 0, null, 'forest', () => 0
 );
-assert.deepEqual(avoidsOccupied, { x: 1, y: 0 },
+assert.deepEqual(avoidsOccupied, { x: 2, y: 0 },
   'free-cell search must avoid existing spawn objects');
 
 console.log('Overworld map, hazard collision and free-cell checks passed');
