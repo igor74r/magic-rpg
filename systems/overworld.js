@@ -6,10 +6,11 @@ import { TILE, generateMap, getDungeonStairCells } from './overworld/map.js';
 import { spawnEnemies, spawnChests, spawnBossVaultChest, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
-import { recordLocationVisit, getDungeonProgress, getDungeonEncounters, updateDungeonProgress, isDungeonChestOpened } from './exploration.js';
+import { recordLocationVisit, getDungeonProgress, getDungeonEncounters, updateDungeonProgress, isDungeonChestOpened, isDungeonBossDefeated } from './exploration.js';
 import { saveGame } from './save.js';
 import { countItem } from './inventory.js';
-import { prepareChestKeyAccess } from '../data/dungeon-treasures.js';
+import { prepareChestKeyAccess, isDungeonFloorBossGateOpen } from '../data/dungeon-treasures.js';
+import { ENEMIES } from '../data/enemies.js';
 
 export { TILE } from './overworld/map.js';
 export { tryMovePlayer, updateOverworld } from './overworld/ai.js';
@@ -120,6 +121,17 @@ export function transitionDungeonFloor(direction = 1) {
   const delta = Math.trunc(Number(direction));
   if (!Number.isFinite(delta) || Math.abs(delta) !== 1) return false;
   const currentFloor = Math.max(1, Math.floor(Number(ow.dungeonFloor) || 1));
+  if (delta > 0) {
+    const bossIds = [...new Set((LOCATIONS[ow.locationId]?.enemies || [])
+      .filter(enemyId => ENEMIES[enemyId]?.boss))];
+    const defeatedBossIds = bossIds.filter(enemyId =>
+      isDungeonBossDefeated(state.game?.player, ow.locationId, currentFloor, enemyId));
+    if (!isDungeonFloorBossGateOpen(bossIds, defeatedBossIds)) {
+      const remaining = bossIds.length - defeatedBossIds.length;
+      emit('toast', `🔒 Сначала победите босса этажа. Осталось: ${remaining}`);
+      return false;
+    }
+  }
   const nextFloor = Math.max(1, Math.min(999, currentFloor + delta));
   if (nextFloor === currentFloor) return false;
   updateDungeonProgress(state.game?.player, ow.locationId, { floor: nextFloor });
