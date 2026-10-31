@@ -105,8 +105,8 @@ export function updateOverworld(dt) {
       }
       const spd = 0.9 * dt;
       const nx = e.x + e.wanderDx * spd, ny = e.y + e.wanderDy * spd;
-      if (isWalkable(ow.map, ow.cols, ow.rows, nx, e.y)) e.x = nx; else e.wanderDx = -e.wanderDx;
-      if (isWalkable(ow.map, ow.cols, ow.rows, e.x, ny)) e.y = ny; else e.wanderDy = -e.wanderDy;
+      if (isWalkable(ow.map, ow.cols, ow.rows, nx, e.y, ow.locationId)) e.x = nx; else e.wanderDx = -e.wanderDx;
+      if (isWalkable(ow.map, ow.cols, ow.rows, e.x, ny, ow.locationId)) e.y = ny; else e.wanderDy = -e.wanderDy;
     }
   }
 
