@@ -1,11 +1,12 @@
 import { state } from './state.js';
 import { STORY } from '../data/story.js';
+import { ensureRiftProgress } from './rift-progression.js';
 
 const SLOT_PREFIX = 'magic-rpg-save-';
 const LEGACY_KEY = 'magic-rpg-save';
 const SETTINGS_KEY = 'magic-rpg-settings';
 
-const SAVE_VERSION = 13;
+const SAVE_VERSION = 14;
 const SETTINGS_VERSION = 4;
 const MAX_SLOT = 3;
 
@@ -362,6 +363,13 @@ export function migrateGame(game) {
     game.version = 13;
   }
 
+  // Version 14: canonical dragon shards are separate from legacy campaign shards.
+  if (game.version < 14) {
+    ensureRiftProgress(game.player);
+    game.version = 14;
+  }
+
+  ensureRiftProgress(game.player);
   return game;
 }
 
