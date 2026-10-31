@@ -1128,7 +1128,10 @@ function enemyCombatTurn() {
       Math.floor(baseDamage * 0.6)
     );
 
-    actualDamageTaken = damage1 + damage2;
+    actualDamageTaken = Math.min(
+      Math.max(0, p.hp),
+      damage1 + damage2
+    );
     p.hp -= actualDamageTaken;
     ow.player.hp = Math.max(0, p.hp);
 
@@ -1164,7 +1167,7 @@ function enemyCombatTurn() {
       Math.floor(baseDamage * mult)
     );
 
-    actualDamageTaken = damage;
+    actualDamageTaken = Math.min(Math.max(0, p.hp), damage);
     p.hp -= actualDamageTaken;
     ow.player.hp = Math.max(0, p.hp);
 
@@ -1188,11 +1191,11 @@ function enemyCombatTurn() {
   } else if (useSpecial && special.type === 'drain') {
     const damage = baseDamage;
 
-    actualDamageTaken = damage;
+    actualDamageTaken = Math.min(Math.max(0, p.hp), damage);
     p.hp -= actualDamageTaken;
     ow.player.hp = Math.max(0, p.hp);
 
-    enemy.hp = Math.min(enemy.maxHp, enemy.hp + damage);
+    enemy.hp = Math.min(enemy.maxHp, enemy.hp + actualDamageTaken);
 
     ow.floatingNumbers.push({
       x: ow.player.x,
@@ -1220,7 +1223,7 @@ function enemyCombatTurn() {
       pushLog(`☠️ Наложен эффект: ${special.effect}`, 'damage');
     }
   } else {
-    actualDamageTaken = baseDamage;
+    actualDamageTaken = Math.min(Math.max(0, p.hp), baseDamage);
     p.hp -= actualDamageTaken;
     ow.player.hp = Math.max(0, p.hp);
 
