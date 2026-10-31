@@ -1,0 +1,57 @@
+{
+  "name": "Осколки Кристалла Маны — оригинальный набор тайлов",
+  "license": "Original project assets; created for this game",
+  "tileSize": 48,
+  "terrain": {
+    "file": "terrain/atlas.svg",
+    "columns": [
+      "grass",
+      "path",
+      "biome-object",
+      "liquid",
+      "rock"
+    ],
+    "rows": [
+      "village",
+      "forest",
+      "ruins",
+      "shadow",
+      "swamp",
+      "volcano",
+      "ice",
+      "desert"
+    ]
+  },
+  "dungeons": {
+    "file": "dungeons/atlas.svg",
+    "tileSize": 48,
+    "columns": 10,
+    "rows": 4,
+    "usage": "decorative dungeon atlas for future room layouts"
+  },
+  "props": {
+    "file": "props/atlas.svg",
+    "tileSize": 48,
+    "columns": 8,
+    "rows": 4,
+    "usage": "chests, crystals, altars, lanterns, bridges, portals, bones, mushrooms"
+  },
+  "biomeRows": {
+    "village": 0,
+    "forest": 1,
+    "ruins": 2,
+    "shadow": 3,
+    "swamp": 4,
+    "graveyard": 3,
+    "volcano": 5,
+    "dragon": 5,
+    "ice": 6,
+    "desert": 7,
+    "library": 2,
+    "briar-hollow": 1,
+    "sunken-necropolis": 2,
+    "obsidian-fields": 5,
+    "frost-citadel": 6,
+    "void-crater": 3
+  }
+}
