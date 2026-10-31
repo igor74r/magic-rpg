@@ -29,11 +29,11 @@ export function enterOverworld(locationId, opts = {}) {
 
   const playerPos = { x: spawnX * TILE + TILE / 2, y: spawnY * TILE + TILE / 2 };
 
-  const enemies = spawnEnemies(loc, map, cols, rows, playerPos, opts);
-  const chests = spawnChests(loc, map, cols, rows, enemies, playerPos);
+  const enemies = spawnEnemies(loc, map, cols, rows, playerPos, opts, locationId);
+  const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, locationId);
   const npcs = spawnNPCs(loc);
   const statics = spawnStatics(loc);
-  const events = spawnEvents(loc, map, cols, rows, playerPos);
+  const events = spawnEvents(loc, map, cols, rows, playerPos, locationId);
   const camera = initCamera(playerPos, cols, rows);
 
   state.overworld = {
