@@ -35,7 +35,8 @@ function normalizeRecord(record) {
       bossDefeated: dungeon.bossDefeated === true,
       defeatedBosses: cleanIdList(dungeon.defeatedBosses, 128),
       defeatedElites: cleanIdList(dungeon.defeatedElites, 128),
-      claimedEliteRewards: cleanIdList(dungeon.claimedEliteRewards, 128)
+      claimedEliteRewards: cleanIdList(dungeon.claimedEliteRewards, 128),
+      claimedFloorRewards: cleanIdList(dungeon.claimedFloorRewards, 128)
     }
   };
 }
@@ -62,7 +63,7 @@ export function recordLocationVisit(player, locationId, now = Date.now()) {
     firstVisitedAt: previous?.firstVisitedAt || now,
     lastVisitedAt: now,
     cleared: previous?.cleared === true,
-    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [] }
+    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [] }
   };
   exploration.lastLocationId = locationId;
   const entries = Object.entries(exploration.visited);
@@ -142,6 +143,15 @@ export function claimDungeonEliteReward(player, locationId, floor, enemyId) {
   return updateDungeonProgress(player, locationId, { eliteId: key });
 }
 
+export function claimDungeonFloorReward(player, locationId, floor) {
+  if (!player || typeof locationId !== 'string' || !ID_RE.test(locationId)) return false;
+  const progress = getDungeonProgress(player, locationId);
+  if (!progress) return false;
+  const key = `f${Math.max(1, Math.floor(Number(floor) || 1))}`;
+  if (progress.claimedFloorRewards.includes(key)) return false;
+  return updateDungeonProgress(player, locationId, { floorRewardId: key });
+}
+
 export function isDungeonChestOpened(player, locationId, chestId) {
   if (typeof chestId !== 'string' || !ID_RE.test(chestId)) return false;
   return getDungeonProgress(player, locationId)?.openedChests.includes(chestId) === true;
@@ -163,6 +173,7 @@ export function updateDungeonProgress(player, locationId, patch = {}) {
     next.defeatedElites = cleanIdList([...next.defeatedElites, patch.eliteId], 128);
     next.claimedEliteRewards = cleanIdList([...next.claimedEliteRewards, patch.eliteId], 128);
   }
+  if (typeof patch.floorRewardId === 'string' && /^f[0-9]{1,3}$/.test(patch.floorRewardId)) next.claimedFloorRewards = cleanIdList([...next.claimedFloorRewards, patch.floorRewardId], 128);
   if (typeof patch.chestId === 'string' && ID_RE.test(patch.chestId)) next.openedChests = cleanIdList([...next.openedChests, patch.chestId]);
   if (typeof patch.secretId === 'string' && ID_RE.test(patch.secretId)) next.secretsFound = cleanIdList([...next.secretsFound, patch.secretId]);
   player.exploration.visited[locationId].dungeon = next;
