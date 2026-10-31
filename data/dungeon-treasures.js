@@ -32,6 +32,19 @@ export function getActNumberForLocation(locationId) {
   return act ? Math.max(1, Math.min(5, Number(act.number) || 1)) : 1;
 }
 
+// Bosses define the floor's progression gate. Ordinary enemies respawn,
+// so defeating every creature is not a stable or finite floor-clear condition.
+export function getDungeonBossClearProgress(bossIds, defeatedBossIds) {
+  const bosses = [...new Set((Array.isArray(bossIds) ? bossIds : []).filter(id => typeof id === 'string' && /^[a-z0-9-]+$/i.test(id)))];
+  const defeated = new Set((Array.isArray(defeatedBossIds) ? defeatedBossIds : []).filter(id => typeof id === 'string'));
+  const defeatedCount = bosses.filter(id => defeated.has(id)).length;
+  return {
+    total: bosses.length,
+    defeated: defeatedCount,
+    complete: bosses.length > 0 && defeatedCount === bosses.length
+  };
+}
+
 export function getDungeonChestType(locationId, floor = 1, index = 0, total = 1) {
   const safeIndex = Math.max(0, Math.floor(Number(index) || 0));
   const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
