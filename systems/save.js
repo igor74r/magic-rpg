@@ -448,19 +448,15 @@ export function migrateSettings(settings) {
     settings = {};
   }
 
-  if (typeof settings.musicVolume !== 'number') {
-    settings.musicVolume =
-      typeof settings.volume === 'number'
-        ? settings.volume
-        : 60;
+  if (!Number.isFinite(settings.musicVolume)) {
+    settings.musicVolume = Number.isFinite(settings.volume) ? settings.volume : 60;
   }
+  settings.musicVolume = Math.max(0, Math.min(100, settings.musicVolume));
 
-  if (typeof settings.sfxVolume !== 'number') {
-    settings.sfxVolume =
-      typeof settings.volume === 'number'
-        ? settings.volume
-        : 80;
+  if (!Number.isFinite(settings.sfxVolume)) {
+    settings.sfxVolume = Number.isFinite(settings.volume) ? settings.volume : 80;
   }
+  settings.sfxVolume = Math.max(0, Math.min(100, settings.sfxVolume));
 
   if (typeof settings.autoSave !== 'boolean') {
     settings.autoSave = true;
