@@ -811,7 +811,11 @@ export function openPauseMenu() {
   if (document.getElementById('pause-overlay')) return;
   paused = true; hideMapTooltip();
   const div = document.createElement('div'); div.id = 'pause-overlay'; div.className = 'pause-overlay';
-  div.innerHTML = `<div class="pause-panel"><h2>⏸️ Пауза</h2><button onclick="GameAPI.owPauseResume()">▶️ Продолжить</button><button onclick="GameAPI.owPauseSaveVillage()">💾 Сохранить и в деревню</button><button onclick="GameAPI.owPauseExit()">🚪 Сохранить и в меню</button></div>`;
+  const ow = state.overworld;
+  const dungeonActions = ow && !ow.safe && !ow.rifMode
+    ? `<p class="pause-dungeon-floor">🏰 Этаж подземелья: ${ow.dungeonFloor || 1}</p><button onclick="GameAPI.owDungeonNext()">⬇️ Спуститься на следующий этаж</button>${(ow.dungeonFloor || 1) > 1 ? '<button onclick="GameAPI.owDungeonPrevious()">⬆️ Вернуться на предыдущий этаж</button>' : ''}`
+    : '';
+  div.innerHTML = `<div class="pause-panel"><h2>⏸️ Пауза</h2>${dungeonActions}<button onclick="GameAPI.owPauseResume()">▶️ Продолжить</button><button onclick="GameAPI.owPauseSaveVillage()">💾 Сохранить и в деревню</button><button onclick="GameAPI.owPauseExit()">🚪 Сохранить и в меню</button></div>`;
   document.body.appendChild(div);
 }
 
