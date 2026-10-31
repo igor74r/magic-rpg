@@ -70,6 +70,11 @@ export function getDungeonProgress(player, locationId) {
   return record ? normalizeRecord(record)?.dungeon : null;
 }
 
+export function isDungeonChestOpened(player, locationId, chestId) {
+  if (typeof chestId !== 'string' || !ID_RE.test(chestId)) return false;
+  return getDungeonProgress(player, locationId)?.openedChests.includes(chestId) === true;
+}
+
 export function updateDungeonProgress(player, locationId, patch = {}) {
   if (!player || !player.exploration?.visited?.[locationId] || !ID_RE.test(locationId)) return false;
   const current = getDungeonProgress(player, locationId);
