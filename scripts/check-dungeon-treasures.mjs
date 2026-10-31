@@ -3,7 +3,7 @@ import { ITEMS } from '../data/items.js';
 import { ENEMIES } from '../data/enemies.js';
 import { LOCATIONS } from '../data/locations.js';
 import { STORY } from '../data/story.js';
-import { ACT_RELIC_REWARDS, getActNumberForLocation, rollDungeonChestLoot, getDungeonChestType, prepareChestKeyAccess } from '../data/dungeon-treasures.js';
+import { ACT_RELIC_REWARDS, getActNumberForLocation, rollDungeonChestLoot, getDungeonChestType, prepareChestKeyAccess, getDungeonBossClearProgress } from '../data/dungeon-treasures.js';
 
 const expectedRelics = [
   ['briar-hollow', 'elder-treant', 'relic-root-memory'],
@@ -13,6 +13,10 @@ const expectedRelics = [
   ['dragon-lair', 'ancient-dragon', 'relic-void-star']
 ];
 assert.equal(Object.keys(ACT_RELIC_REWARDS).length, 5);
+assert.deepEqual(getDungeonBossClearProgress([], []), { total: 0, defeated: 0, complete: false });
+assert.deepEqual(getDungeonBossClearProgress(['boss-a', 'boss-b'], ['boss-a']), { total: 2, defeated: 1, complete: false });
+assert.deepEqual(getDungeonBossClearProgress(['boss-a', 'boss-b', 'boss-a'], ['boss-a', 'boss-b']), { total: 2, defeated: 2, complete: true });
+assert.deepEqual(getDungeonBossClearProgress(['boss-a', '../invalid'], ['boss-a', '../invalid']), { total: 1, defeated: 1, complete: true }, 'invalid identifiers cannot create additional floor objectives');
 for (let i = 0; i < expectedRelics.length; i++) {
   const [locationId, bossId, itemId] = expectedRelics[i];
   const reward = ACT_RELIC_REWARDS[locationId];
