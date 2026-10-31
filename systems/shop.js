@@ -3,26 +3,22 @@ import { ITEMS, RARITIES } from '../data/items.js';
 import { addItem } from './inventory.js';
 import { saveGame } from './save.js';
 import { emit } from './events.js';
+import { getBuyPrice, getSellPrice } from './economy.js';
 
 export function buyItem(id) {
   const item = ITEMS[id];
   const p = state.game.player;
-  if (p.gold < item.price) { emit('toast', 'Недостаточно золота'); return false; }
-  p.gold -= item.price;
+  if (!item || item.type === 'quest') return false;
+  const price = getBuyPrice(id, p);
+  if (p.gold < price) { emit('toast', 'Недостаточно золота'); return false; }
+  p.gold -= price;
   addItem(id, 1, { rarity: 'common' });
   saveGame();
-  emit('toast', `Куплено: ${item.name}`);
+  emit('toast', `Куплено: ${item.name} (${price}💰)`);
   return true;
 }
 
-export function getSellPrice(inst) {
-  const item = ITEMS[inst.id];
-  if (!item || item.type === 'quest') return 0;
-  const mult = inst.rarity ? RARITIES[inst.rarity].multiplier : 1;
-  const qty = inst.qty || 1;
-  const perOne = Math.max(1, Math.floor((item.price || 0) * mult * 0.5));
-  return item.type === 'consumable' ? perOne * qty : perOne;
-}
+export { getSellPrice };
 
 export function sellItemByIndex(idx) {
   const p = state.game.player;
@@ -32,9 +28,11 @@ export function sellItemByIndex(idx) {
   const item = ITEMS[inst.id];
   if (!item || item.type === 'quest') return false;
 
-  const price = getSellPrice(inst);
+  const price = getSellPrice(inst, p);
+  if (price <= 0) return false;
   inv.splice(idx, 1);
   p.gold += price;
+  p.stats.goldEarned = (p.stats.goldEarned || 0) + price;
   saveGame();
   emit('toast', `Продано: ${item.name} (+${price}💰)`);
   return true;
