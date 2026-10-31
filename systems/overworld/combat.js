@@ -19,7 +19,7 @@ import {
 } from '../status.js';
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
-import { updateDungeonProgress } from '../exploration.js';
+import { updateDungeonProgress, claimDungeonEliteReward } from '../exploration.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
@@ -1309,6 +1309,15 @@ function combatVictory() {
   const enemy = ow.combat.enemy;
   const def = ENEMIES[enemy.enemyId];
   const p = state.game.player;
+
+  if (enemy.uniqueElite && !ow.rifMode && ow.locationId) {
+    const floor = Math.max(1, Math.floor(Number(ow.dungeonFloor) || 1));
+    if (!claimDungeonEliteReward(p, ow.locationId, floor, enemy.enemyId)) {
+      enemy.dead = true;
+      endCombat();
+      return;
+    }
+  }
 
   const ng = getNGPlusMult();
 
