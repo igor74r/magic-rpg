@@ -8,6 +8,8 @@ import { STORY } from '../data/story.js';
 import { LOCATIONS } from '../data/locations.js';
 import { addItem } from '../systems/inventory.js';
 import { addExp } from '../systems/progression.js';
+import { DRAGON_SHARDS } from '../data/rift-canon.js';
+import { canOpenRift, ensureRiftProgress } from '../systems/rift-progression.js';
 import {
   getActiveCampaignMission, getNextCampaignMission, getMissionProgress,
   getMissionReward, acceptCampaignMission, claimCampaignMission
@@ -63,6 +65,9 @@ export function openElder() {
   const hasBlessing = p.effects?.some(e => e.id === 'elderBlessing');
   const isFirstMeet = !p.stats?.metElder;
   const shardsCount = Object.values(state.game.shards || {}).filter(Boolean).length;
+  ensureRiftProgress(p);
+  const dragonCount = DRAGON_SHARDS.filter(dragon => p.dragonDefeated[dragon.shardId]).length;
+  const riftOpen = canOpenRift(p);
   const active = getActiveCampaignMission(p);
   const next = active || getNextCampaignMission(p);
 
@@ -74,6 +79,15 @@ export function openElder() {
   } else if (shardsCount > 0) {
     dialogue = `<p class="elder-notice">Осколков Кристалла собрано: <b>${shardsCount}/3</b>. Их история переплетена с пятью печатями.</p>`;
   }
+
+  const dragonProgressBlock = `
+    <section class="elder-quest-card">
+      <small>Эндгейм · три драконьи печати</small>
+      <h3>${riftOpen ? 'Разлом открыт' : `Печати драконов: ${dragonCount}/3`}</h3>
+      <p>${riftOpen
+        ? 'Все три дракона побеждены, а их осколки закреплены в печати. Теперь доступен Разлом.'
+        : DRAGON_SHARDS.filter(dragon => !p.dragonDefeated[dragon.shardId]).map(dragon => `${dragon.name} — уровень ${dragon.requiredLevel}`).join('<br>')}</p>
+    </section>`;
 
   let missionBlock = '';
   if (next) {
@@ -114,6 +128,7 @@ export function openElder() {
     <div class="npc-header"><div class="npc-emoji">👴</div><div><h3 style="margin:0;">Старейшина Эдвин</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('elder')}»</p></div></div>
     ${dialogue}
     ${missionBlock}
+    ${dragonProgressBlock}
     ${hasBlessing ? '<p class="elder-notice">✨ Благословение старейшины уже действует.</p>' : '<div class="elder-blessing"><p>Благословение даёт +20% к получаемому опыту на 10 боёв.</p><button onclick="GameAPI.takeElderBlessing()" class="sell-btn">Принять благословение</button></div>'}
     <button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>
   `);
