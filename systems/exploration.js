@@ -28,7 +28,7 @@ function normalizeRecord(record) {
         Number.isInteger(s.ax) && s.ax >= 0 && s.ax <= 256 &&
         Number.isInteger(s.ay) && s.ay >= 0 && s.ay <= 256 &&
         ['chest', 'elite', 'loot'].includes(s.rewardType)
-      ).slice(0, 8).map(s => ({
+      ).slice(0, 16).map(s => ({
         id: s.id, tx: s.tx, ty: s.ty, ax: s.ax, ay: s.ay,
         rewardType: s.rewardType
       })) : [],
