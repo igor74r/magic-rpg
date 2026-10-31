@@ -1,8 +1,8 @@
 import { state } from '../state.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { ITEMS, RARITIES } from '../../data/items.js';
-import { rollDungeonChestLoot } from '../../data/dungeon-treasures.js';
-import { addItem } from '../inventory.js';
+import { rollDungeonChestLoot, getDungeonChestType } from '../../data/dungeon-treasures.js';
+import { addItem, countItem, removeItem } from '../inventory.js';
 import { checkAchievements } from '../achievements.js';
 import { saveGame } from '../save.js';
 import { updateDungeonProgress, isDungeonChestOpened, isDungeonBossDefeated, isDungeonEliteDefeated } from '../exploration.js';
@@ -121,14 +121,18 @@ export function spawnStatics(loc) {
   }));
 }
 
-export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId = null) {
+export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId = null, dungeonFloor = 1) {
   if (loc.safe) return [];
   const chests = [];
   const chestsCount = loc.chestsCount || 3;
   for (let i = 0; i < chestsCount; i++) {
     const pos = findFreeCell(map, cols, rows, [...enemies, ...chests], 150, playerPos, locationId);
-    if (pos) chests.push({ x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2, opened: false });
+    if (pos) chests.push({
+      x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
+      opened: false, type: getDungeonChestType(locationId, dungeonFloor, i, chestsCount)
+    });
   }
+  if (chests.some(chest => chest.type === 'locked')) chests[0].keyCache = true;
   return chests;
 }
 
@@ -166,16 +170,59 @@ export function openChest(chest) {
     chest.opened = true;
     return false;
   }
+  const p = state.game?.player;
+  if (!p || !ow) return false;
+  if (chest.type === 'locked') {
+    if (countItem('rusty-key') < 1) {
+      if (!chest.lockNotified) {
+        chest.lockNotified = true;
+        emit('toast', '🔒 Сундук заперт. Нужен ржавый ключ.');
+        pushLog('🔒 Запертый сундук: найдите ржавый ключ в первом сундуке этого этажа.', 'info');
+      }
+      return false;
+    }
+    removeItem('rusty-key', 1);
+    emit('toast', '🗝️ Вы открыли запертый сундук.');
+  }
   chest.opened = true;
-  if (chest.id && ow?.locationId) updateDungeonProgress(state.game?.player, ow.locationId, { chestId: chest.id });
-  const p = state.game.player;
-  const loot = rollDungeonChestLoot(ow?.locationId);
+  if (chest.id && ow.locationId) updateDungeonProgress(p, ow.locationId, { chestId: chest.id });
+  const loot = rollDungeonChestLoot(ow.locationId);
+  const rarityOrder = ['common', 'rare', 'epic', 'legendary'];
+  if (chest.type === 'ancient') loot.rarity = rarityOrder[Math.min(3, rarityOrder.indexOf(loot.rarity) + 1)];
   const id = loot.itemId;
   const created = addItem(id, 1, { rarity: loot.rarity });
   const inst = created[0];
   let msg = `📦 Сундук: ${ITEMS[id].name}`;
   if (inst && inst.rarity && inst.rarity !== 'common') msg = `📦 Сундук: ${RARITIES[inst.rarity].name} ${ITEMS[id].name}`;
   pushLog(msg, 'success');
+  if (chest.keyCache) {
+    addItem('rusty-key', 1);
+    pushLog('🗝️ В тайнике лежал ржавый ключ от запертого сундука этого этажа.', 'success');
+  }
+  if (chest.type === 'cursed') {
+    const damage = Math.max(1, Math.round((p.maxHp || p.hp || 100) * 0.08));
+    p.hp = Math.max(1, (p.hp || 1) - damage);
+    ow.player.hp = p.hp;
+    ow.floatingNumbers.push({ x: chest.x, y: chest.y - 34, text: `-${damage}`, type: 'damage', life: 1.5 });
+    pushLog(`☠️ Проклятая ловушка нанесла ${damage} урона!`, 'danger');
+    emit('toast', '☠️ Сундук был проклят!');
+  } else if (chest.type === 'mimic') {
+    const pool = (LOCATIONS[ow.locationId]?.enemies || []).filter(enemyId => ENEMIES[enemyId] && !ENEMIES[enemyId].boss && !ENEMIES[enemyId].uniqueElite);
+    const enemyId = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+    const def = enemyId ? ENEMIES[enemyId] : null;
+    if (def) {
+      const hp = Math.round((def.hp || 30) * 1.35);
+      ow.enemies.push({ id: `mimic-${chest.id || Math.floor(chest.x)}-${Math.floor(chest.y)}`, enemyId, x: chest.x, y: chest.y, homeX: chest.x, homeY: chest.y, hp, maxHp: hp, elite: true, uniqueElite: false, boss: false, modifier: null, effects: [], phase: 0, state: 'chase', wanderTimer: 0, wanderDx: 0, wanderDy: 0, dead: false, respawnAt: 0 });
+      emit('toast', '👁️ Это был мимик! Он нападает!');
+      pushLog('👁️ Сундук оказался мимиком — приготовьтесь к бою!', 'danger');
+    }
+  } else if (chest.type === 'ancient') {
+    const bonusGold = 20 + loot.actNumber * 10;
+    p.gold = (p.gold || 0) + bonusGold;
+    p.stats ||= {};
+    p.stats.goldEarned = (p.stats.goldEarned || 0) + bonusGold;
+    pushLog(`✨ Древняя сокровищница: дополнительно +${bonusGold} золота.`, 'success');
+  }
   ow.floatingNumbers.push({ x: chest.x, y: chest.y - 20, text: '📦', type: 'heal', life: 1.5 });
   spawnParticles(chest.x, chest.y, 'spark', 8);
   playSound('chest');
