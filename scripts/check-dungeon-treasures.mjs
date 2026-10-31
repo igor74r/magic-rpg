@@ -3,7 +3,7 @@ import { ITEMS } from '../data/items.js';
 import { ENEMIES } from '../data/enemies.js';
 import { LOCATIONS } from '../data/locations.js';
 import { STORY } from '../data/story.js';
-import { ACT_RELIC_REWARDS, getActNumberForLocation, rollDungeonChestLoot, getDungeonChestType, prepareChestKeyAccess, getDungeonBossClearProgress } from '../data/dungeon-treasures.js';
+import { ACT_RELIC_REWARDS, getActNumberForLocation, rollDungeonChestLoot, getDungeonChestType, prepareChestKeyAccess, getDungeonBossClearProgress, isDungeonFloorBossGateOpen } from '../data/dungeon-treasures.js';
 
 const expectedRelics = [
   ['briar-hollow', 'elder-treant', 'relic-root-memory'],
@@ -17,6 +17,10 @@ assert.deepEqual(getDungeonBossClearProgress([], []), { total: 0, defeated: 0, c
 assert.deepEqual(getDungeonBossClearProgress(['boss-a', 'boss-b'], ['boss-a']), { total: 2, defeated: 1, complete: false });
 assert.deepEqual(getDungeonBossClearProgress(['boss-a', 'boss-b', 'boss-a'], ['boss-a', 'boss-b']), { total: 2, defeated: 2, complete: true });
 assert.deepEqual(getDungeonBossClearProgress(['boss-a', '../invalid'], ['boss-a', '../invalid']), { total: 1, defeated: 1, complete: true }, 'invalid identifiers cannot create additional floor objectives');
+assert.equal(isDungeonFloorBossGateOpen([], []), true, 'locations without bosses do not become impossible to progress');
+assert.equal(isDungeonFloorBossGateOpen(['boss-a', 'boss-b'], ['boss-a']), false, 'an undefeated boss keeps the next floor locked');
+assert.equal(isDungeonFloorBossGateOpen(['boss-a', 'boss-b'], ['boss-a', 'boss-b']), true, 'all floor bosses unlock the next floor');
+assert.equal(isDungeonFloorBossGateOpen(['boss-a', '../invalid'], ['boss-a']), true, 'invalid boss identifiers cannot create a permanent floor lock');
 for (let i = 0; i < expectedRelics.length; i++) {
   const [locationId, bossId, itemId] = expectedRelics[i];
   const reward = ACT_RELIC_REWARDS[locationId];
