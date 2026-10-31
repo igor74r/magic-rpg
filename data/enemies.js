@@ -324,4 +324,44 @@ export const ENEMIES = {
     tactics: 'Быстро сокращает дистанцию и высасывает жизненную силу.',
     special: { type: 'drain', every: 2, name: 'Касание пустоты', effect: 'bleed' }
   },
+
+  'ashen-herald': {
+    name: 'Пепельный Вестник', emoji: '🐉',
+    hp: 5200, attack: 185, defense: 72, exp: 18000, gold: 12500,
+    drops: ['cinder-visor', 'ember-core'], boss: true,
+    lore: 'Первый дракон-хранитель, чьё пламя удерживает распадающуюся печать.',
+    tactics: 'Чередует широкие огненные атаки с фазами раскалённой брони; уязвим после дыхания.',
+    special: { type: 'snipe', every: 3, mult: 2.5, name: 'Пепельное дыхание', effect: 'burn' },
+    phases: [
+      { atHp: 0.65, atkMult: 1.25, msg: 'Пепельный Вестник раскрывает крылья!', specialEvery: 2 },
+      { atHp: 0.3, atkMult: 1.5, msg: 'Пламя Вестника становится белым!', specialEvery: 1 }
+    ]
+  },
+
+  'icy-grasp': {
+    name: 'Ледяная Хватка', emoji: '🐲',
+    hp: 9200, attack: 265, defense: 108, exp: 32000, gold: 24000,
+    drops: ['glacier-greaves', 'frost-essence'], boss: true,
+    lore: 'Дракон вечной стужи, хранящий память о клятве пятого ордена.',
+    tactics: 'Замедляет темп боя, усиливает защиту и отвечает ледяным залпом после блока.',
+    special: { type: 'snipe', every: 3, mult: 2.7, name: 'Холод безмолвия', effect: 'stun' },
+    phases: [
+      { atHp: 0.65, atkMult: 1.25, msg: 'Ледяная Хватка покрывает арену инеем!', specialEvery: 2 },
+      { atHp: 0.3, atkMult: 1.55, msg: 'Лёд раскалывается под крыльями дракона!', specialEvery: 1 }
+    ]
+  },
+
+  'blood-crown': {
+    name: 'Кровавая Корона', emoji: '🐉',
+    hp: 15500, attack: 355, defense: 142, exp: 52000, gold: 40000,
+    drops: ['pendant-last-oath', 'void-dust'], boss: true,
+    lore: 'Последний дракон, принявший на себя цену трёх печатей и страж сердца Разлома.',
+    tactics: 'Сочетает кровавое истощение и мощные одиночные удары; в последней фазе атакует чаще.',
+    special: { type: 'drain', every: 2, name: 'Кровавый приговор', effect: 'bleed' },
+    phases: [
+      { atHp: 0.7, atkMult: 1.3, msg: 'Кровавая Корона пробуждает древнюю печать!', specialEvery: 2 },
+      { atHp: 0.35, atkMult: 1.6, msg: 'Кровь и пустота сливаются в одно пламя!', specialEvery: 1 }
+    ]
+  },
+
 };
