@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, global-edition ]
   pull_request:
     branches: [ main ]
 
@@ -34,3 +34,9 @@ jobs:
 
       - name: Run boot smoke test
         run: node scripts/smoke-boot.mjs
+
+      - name: Check economy and campaign rewards
+        run: node scripts/check-economy.mjs
+
+      - name: Check item rarity distribution
+        run: node scripts/check-rarity.mjs
