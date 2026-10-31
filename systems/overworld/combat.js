@@ -26,7 +26,8 @@ import { getRiftMult } from '../rift.js';
 import { getActPriceMultiplier } from '../economy.js';
 import { updateQuestProgress } from '../dailyQuests.js';
 import { canCompleteMainQuest, recordCampaignKill, recordCampaignShard } from '../campaign.js';
-import { recordDragonVictoryForEnemy, DRAGON_SHARDS } from '../rift-progression.js';
+import { recordDragonVictoryForEnemy } from '../rift-progression.js';
+import { DRAGON_SHARDS } from '../../data/rift-canon.js';
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
 import {
