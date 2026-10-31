@@ -121,7 +121,7 @@ export function enterCombat(enemy) {
 }
 
 function checkBossPhase(enemy) {
-  if (!enemy.boss || !ENEMIES[enemy.enemyId].phases) return;
+  if ((!enemy.boss && !enemy.uniqueElite) || !ENEMIES[enemy.enemyId].phases) return;
 
   const phases = ENEMIES[enemy.enemyId].phases;
 
