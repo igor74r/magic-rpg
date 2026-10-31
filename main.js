@@ -31,7 +31,7 @@ import {
 import {
   initOverworld, owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
   owAttack, owCast, owUseItem, owBlock, owUseAbility, owFlee,
-  owPauseResume, owPauseSaveVillage, owPauseExit, owDungeonNext, owDungeonPrevious, owDungeonNext, owDungeonPrevious
+  owPauseResume, owPauseSaveVillage, owPauseExit, owDungeonNext, owDungeonPrevious
 } from './ui/overworld.js';
 import { openDailyChest } from './ui/village.js';
 import { exitOverworld, enterOverworld } from './systems/overworld.js';
@@ -361,7 +361,7 @@ window.GameAPI = {
   exitOverworld,
   owAttack, owCast, owUseItem, owBlock, owUseAbility, owFlee,
   owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
-  owPauseResume, owPauseSaveVillage, owPauseExit,
+  owPauseResume, owPauseSaveVillage, owPauseExit, owDungeonNext, owDungeonPrevious,
   showInvTooltip, showEqTooltip, hideTooltip,
   spendStat,
   setInvFilter, setInvSort,
