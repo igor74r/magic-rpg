@@ -6,7 +6,7 @@ import { TILE, generateMap, getDungeonStairCells } from './overworld/map.js';
 import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
-import { recordLocationVisit, getDungeonProgress, updateDungeonProgress } from './exploration.js';
+import { recordLocationVisit, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened } from './exploration.js';
 import { saveGame } from './save.js';
 
 export { TILE } from './overworld/map.js';
@@ -53,7 +53,7 @@ export function enterOverworld(locationId, opts = {}) {
   const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, locationId);
   chests.forEach((chest, index) => {
     chest.id = `floor-${dungeonFloor}-chest-${index + 1}`;
-    if (savedDungeon?.openedChests?.includes(chest.id)) chest.opened = true;
+    if (isDungeonChestOpened(state.game?.player, locationId, chest.id)) chest.opened = true;
   });
   const npcs = spawnNPCs(loc);
   const statics = spawnStatics(loc);
