@@ -466,8 +466,11 @@ export function rollItemAffixes(item, rarity, random = Math.random) {
       ? Math.max(0, Math.min(1 - Number.EPSILON, sample))
       : Math.random();
     const index = Math.floor(normalized * pool.length);
-    const affix = pool[index];
-    if (!selected.some(entry => entry.id === affix.id)) selected.push(affix);
+    const candidate = pool[index];
+    const affix = selected.some(entry => entry.id === candidate.id)
+      ? pool.find(entry => !selected.some(chosen => chosen.id === entry.id))
+      : candidate;
+    if (affix) selected.push(affix);
   }
 
   const rarityScale = { common: 1, rare: 1, epic: 1.25, legendary: 1.5 }[rarity] || 1;
