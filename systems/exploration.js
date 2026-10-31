@@ -51,7 +51,20 @@ export function normalizeExploration(value) {
     const record = normalizeRecord(raw);
     if (record) clean[id] = record;
   }
-  return { visited: clean, lastLocationId: typeof source.lastLocationId === 'string' && ID_RE.test(source.lastLocationId) ? source.lastLocationId : null };
+  return {
+    visited: clean,
+    lastLocationId: typeof source.lastLocationId === 'string' && ID_RE.test(source.lastLocationId) ? source.lastLocationId : null,
+    claimedActRelics: cleanIdList(source.claimedActRelics, 5)
+  };
+}
+
+export function claimActRelic(player, actId) {
+  if (!player || typeof actId !== 'string' || !/^act-[1-5]$/.test(actId)) return false;
+  const exploration = normalizeExploration(player.exploration);
+  if (exploration.claimedActRelics.includes(actId)) return false;
+  exploration.claimedActRelics = cleanIdList([...exploration.claimedActRelics, actId], 5);
+  player.exploration = exploration;
+  return true;
 }
 
 export function recordLocationVisit(player, locationId, now = Date.now()) {
