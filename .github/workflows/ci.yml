@@ -44,6 +44,9 @@ jobs:
       - name: Check passive trees and respec
         run: node scripts/check-passives.mjs
 
+      - name: Check class talents and legacy compatibility
+        run: node scripts/check-class-talents.mjs
+
       - name: Check settings migration and defaults
         run: node scripts/check-settings.mjs
 
