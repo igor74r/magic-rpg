@@ -2,7 +2,7 @@ import { state } from './state.js';
 import { LOCATIONS } from '../data/locations.js';
 import { on, emit } from './events.js';
 import { getRandomRiftLocation, endRift, recordRiftFloor } from './rift.js';
-import { TILE, generateMap } from './overworld/map.js';
+import { TILE, generateMap, getDungeonStairCells } from './overworld/map.js';
 import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
@@ -26,6 +26,13 @@ export function enterOverworld(locationId, opts = {}) {
   const cols = loc.mapCols || 40;
   const rows = loc.mapRows || 30;
   const map = generateMap(locationId, cols, rows);
+  const dungeonStairs = loc.safe ? [] : getDungeonStairCells(cols, rows, dungeonFloor);
+  for (const stair of dungeonStairs) {
+    for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
+      const x = stair.x + ox, y = stair.y + oy;
+      if (map[y] && map[y][x] !== undefined) map[y][x] = 1;
+    }
+  }
 
   const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
 
@@ -46,7 +53,7 @@ export function enterOverworld(locationId, opts = {}) {
     active: true, locationId, theme: loc.theme || 'default',
     safe: !!loc.safe,
     rifMode: !!opts.rifMode, rifFloor: opts.rifFloor || 1,
-    dungeonFloor,
+    dungeonFloor, dungeonStairs,
     cols, rows, tile: TILE, map,
     player: {
       x: playerPos.x, y: playerPos.y,
