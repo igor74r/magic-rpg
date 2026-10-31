@@ -57,7 +57,7 @@ const { getTileDanger } = mods[21];
 const { getCurrentTheme, THEMES } = mods[22];
 const { isBlocked, isWalkable } = mods[23];
 const { createSpawnRoster } = mods[24];
-const { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened } = mods[25];
+const { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened, isDungeonEliteDefeated, claimDungeonEliteReward } = mods[25];
 
 const results = [];
 const check = (name, cond) => results.push(`${cond ? 'PASS' : 'FAIL'} ${name}`);
@@ -81,6 +81,7 @@ check('new biomes use dedicated terrain rows and configured themes', ['briar-hol
 check('hazard surfaces are walkable only in their region', isWalkable([[3]], 1, 1, 24, 24, 'obsidian-fields') && isWalkable([[3]], 1, 1, 24, 24, 'sunken-necropolis') && !isWalkable([[3]], 1, 1, 24, 24, 'forest'));
 check('ordinary stone and prop obstacles remain blocked', isBlocked([[3]], 0, 0) && isBlocked([[2]], 0, 0) && isBlocked([[4]], 0, 0));
 check('enemies loaded', Object.keys(ENEMIES).length >= 20);
+check('five named regional elites are explicitly marked unique', ['rootbound-sentinel','drowned-scribe','ashbound-renegade','mirror-revenant','riftstalker'].every(id => ENEMIES[id]?.uniqueElite === true));
 check('achievements loaded', ACHIEVEMENTS.length >= 15);
 check('effects loaded', Object.keys(EFFECTS).length >= 5);
 check('critical chance adds temporary bonuses once and caps at 75%', resolveCriticalChance({ critChance: 0.2 }, 0.05) === 0.25 && resolveCriticalChance({ critChance: 0.7 }, 0.1) === 0.75);
@@ -166,6 +167,7 @@ recordLocationVisit(explorationPlayer, 'forest', 3000);
 updateDungeonProgress(explorationPlayer, 'forest', { floor: 2, checkpoint: 'crypt-hall', chestId: 'chest-01' });
 check('dungeon floor, checkpoint and opened chests survive exploration normalization', getDungeonProgress(explorationPlayer, 'forest')?.floor === 2 && getDungeonProgress(explorationPlayer, 'forest')?.checkpoint === 'crypt-hall' && getDungeonProgress(explorationPlayer, 'forest')?.openedChests.includes('chest-01'));
 check('opened dungeon chest can be restored after re-entry', isDungeonChestOpened(explorationPlayer, 'forest', 'chest-01') && !isDungeonChestOpened(explorationPlayer, 'forest', 'chest-02'));
+check('unique elite defeat and reward claim persist once per region and floor', claimDungeonEliteReward(explorationPlayer, 'forest', 2, 'rootbound-sentinel') && isDungeonEliteDefeated(explorationPlayer, 'forest', 2, 'rootbound-sentinel') && !claimDungeonEliteReward(explorationPlayer, 'forest', 2, 'rootbound-sentinel') && !isDungeonEliteDefeated(explorationPlayer, 'forest', 1, 'rootbound-sentinel'));
 
 state.game = { player: { inventory: [], spells: [], hp: 100, maxHp: 500, mp: 0, maxMp: 300 } };
 addItem('scroll-frost-nova', 2);
