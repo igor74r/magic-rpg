@@ -201,6 +201,9 @@ while (towerReplay && !towerReplay.completed) {
   if (!active || !defeatActiveTowerMob(towerReplay, active.id)) break;
 }
 const towerRepeatClear = completeTowerFloor(towerPlayer, towerReplay);
+check('Tower starts with only the first mob active', towerStartsSequentially);
+check('Tower accepts exactly the active mob in sequence', towerMobSequenceWorks && towerFirstClear?.firstClear);
+check('Tower advances the checkpoint after clearing floor one', towerCheckpointWorks);
 check('Tower activates one mob at a time and checkpoints after all ten are defeated', towerStartsSequentially && towerMobSequenceWorks && towerFirstClear?.firstClear && towerCheckpointWorks);
 check('Tower repeat clears grant exactly 25% of first-clear XP', towerFirstClear?.exp > 0 && towerRepeatClear?.firstClear === false && towerRepeatClear?.exp === Math.round(towerFirstClear.exp * 0.25));
 const towerChestPlayer = { level: 28, tower: { highestCleared: 9, checkpointFloor: 10, clearedFloors: [1,2,3,4,5,6,7,8,9], claimedChests: [] } };
