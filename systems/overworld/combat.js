@@ -185,29 +185,35 @@ export function combatAttack() {
     spawnParticles(enemy.x, enemy.y, 'spark', 8);
   }
 
+  // Сначала наносим урон; лечение от вампиризма не должно происходить
+  // при нулевом уроне и не может превышать реально оставшиеся HP цели.
+  const hpBeforeHit = Math.max(0, enemy.hp);
+  enemy.hp = Math.max(0, enemy.hp - damage);
+  const dealtDamage = hpBeforeHit - enemy.hp;
+
   const lifesteal = Math.min(
     1,
     getLifesteal(p) + talent.lifesteal
   );
 
-  if (lifesteal > 0 && damage > 0) {
-    const heal = Math.floor(damage * lifesteal);
+  if (lifesteal > 0 && dealtDamage > 0) {
+    const heal = Math.floor(dealtDamage * lifesteal);
 
-    p.hp = Math.min(p.maxHp, p.hp + heal);
-    ow.player.hp = p.hp;
+    if (heal > 0) {
+      p.hp = Math.min(p.maxHp, p.hp + heal);
+      ow.player.hp = p.hp;
 
-    ow.floatingNumbers.push({
-      x: ow.player.x,
-      y: ow.player.y - 20,
-      text: '+' + heal,
-      type: 'heal',
-      life: 1.2
-    });
+      ow.floatingNumbers.push({
+        x: ow.player.x,
+        y: ow.player.y - 20,
+        text: '+' + heal,
+        type: 'heal',
+        life: 1.2
+      });
 
-    pushLog(`🩸 Кровожадность: +${heal} HP`, 'heal');
+      pushLog(`🩸 Вампиризм: +${heal} HP`, 'heal');
+    }
   }
-
-  enemy.hp -= damage;
 
   ow.floatingNumbers.push({
     x: enemy.x,
