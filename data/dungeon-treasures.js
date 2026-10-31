@@ -45,6 +45,13 @@ export function getDungeonBossClearProgress(bossIds, defeatedBossIds) {
   };
 }
 
+export function isDungeonFloorBossGateOpen(bossIds, defeatedBossIds) {
+  const bosses = [...new Set((Array.isArray(bossIds) ? bossIds : [])
+    .filter(id => typeof id === 'string' && /^[a-z0-9-]+$/i.test(id)))];
+  if (!bosses.length) return true;
+  return getDungeonBossClearProgress(bosses, defeatedBossIds).complete;
+}
+
 export function getDungeonChestType(locationId, floor = 1, index = 0, total = 1) {
   const safeIndex = Math.max(0, Math.floor(Number(index) || 0));
   const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
