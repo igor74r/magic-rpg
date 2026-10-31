@@ -4,6 +4,7 @@ import {
   combatFlee, transitionDungeonFloor
 } from '../systems/overworld.js';
 import { saveGame } from '../systems/save.js';
+import { getDungeonProgress, getDungeonSecrets, saveDungeonSecrets, hasDungeonSecretsGenerated, markDungeonSecretFound, isDungeonChestOpened } from '../systems/exploration.js';
 import { addItem } from '../systems/inventory.js';
 import { saveAndMenu } from './menu.js';
 import { LOCATIONS } from '../data/locations.js';
@@ -25,51 +26,57 @@ let overworldInputBound = false;
 
 // ==================== СЕКРЕТНЫЕ КОМНАТЫ (2) ====================
 function generateSecrets(ow) {
+  const floor = Math.max(1, Number(ow.dungeonFloor) || 1);
+  const saved = getDungeonSecrets(state.game?.player, ow.locationId, floor);
+  const progress = getDungeonProgress(state.game?.player, ow.locationId);
+  const found = new Set(progress?.secretsFound || []);
+  if (hasDungeonSecretsGenerated(state.game?.player, ow.locationId, floor)) {
+    return saved.map(secret => ({
+      ...secret,
+      wx: secret.tx * ow.tile + ow.tile / 2,
+      wy: secret.ty * ow.tile + ow.tile / 2,
+      ax: secret.ax * ow.tile + ow.tile / 2,
+      ay: secret.ay * ow.tile + ow.tile / 2,
+      opened: found.has(secret.id),
+      startedAt: performance.now()
+    }));
+  }
   const secrets = [];
   const loc = LOCATIONS[ow.locationId];
-  if (!loc) return secrets;
-  if (ow.locationId === 'village') return secrets; // в деревне нет секретов
-
-  // Шанс: 20% что на карте будет 1 секрет, 5% что 2
+  if (!loc || ow.locationId === 'village') {
+    saveDungeonSecrets(state.game?.player, ow.locationId, floor, secrets);
+    return secrets;
+  }
   const roll = Math.random();
-  let count = 0;
-  if (roll < 0.05) count = 2;
-  else if (roll < 0.20) count = 1;
-  if (count === 0) return secrets;
-
-  // Ищем кандидатов — «стены» (камни 4 или деревья 2), рядом с которыми проходимый тайл
+  const count = roll < 0.05 ? 2 : roll < 0.20 ? 1 : 0;
   const candidates = [];
   for (let y = 1; y < ow.rows - 1; y++) {
     if (!ow.map[y]) continue;
     for (let x = 1; x < ow.cols - 1; x++) {
-      const t = ow.map[y][x];
-      if (t !== 4 && t !== 2) continue;
+      const tile = ow.map[y][x];
+      if (tile !== 4 && tile !== 2) continue;
       let access = null;
       for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
-        const nt = ow.map[y+dy]?.[x+dx];
-        if (nt === 0 || nt === 1) { access = { ax: x+dx, ay: y+dy }; break; }
+        const next = ow.map[y + dy]?.[x + dx];
+        if (next === 0 || next === 1) { access = { ax: x + dx, ay: y + dy }; break; }
       }
       if (access) candidates.push({ x, y, ax: access.ax, ay: access.ay });
     }
   }
-  if (!candidates.length) return secrets;
-
   for (let i = 0; i < count && candidates.length; i++) {
-    const idx = Math.floor(Math.random() * candidates.length);
-    const c = candidates.splice(idx, 1)[0];
-    const typeRoll = Math.random();
-    const rewardType = typeRoll < 0.60 ? 'chest' : typeRoll < 0.90 ? 'elite' : 'loot';
+    const cell = candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
+    const rollType = Math.random();
     secrets.push({
-      tx: c.x, ty: c.y,
-      wx: c.x * ow.tile + ow.tile / 2,
-      wy: c.y * ow.tile + ow.tile / 2,
-      ax: c.ax * ow.tile + ow.tile / 2,
-      ay: c.ay * ow.tile + ow.tile / 2,
-      rewardType,
-      opened: false,
-      startedAt: performance.now()
+      id: `f${floor}-s${i + 1}`, tx: cell.x, ty: cell.y, ax: cell.ax, ay: cell.ay,
+      rewardType: rollType < 0.60 ? 'chest' : rollType < 0.90 ? 'elite' : 'loot',
+      wx: cell.x * ow.tile + ow.tile / 2,
+      wy: cell.y * ow.tile + ow.tile / 2,
+      ax: cell.ax * ow.tile + ow.tile / 2,
+      ay: cell.ay * ow.tile + ow.tile / 2,
+      opened: false, startedAt: performance.now()
     });
   }
+  saveDungeonSecrets(state.game?.player, ow.locationId, floor, secrets);
   return secrets;
 }
 
