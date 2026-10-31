@@ -7,7 +7,7 @@ import { rollDungeonChestLoot, getDungeonChestType } from '../../data/dungeon-tr
 import { addItem, countItem, removeItem } from '../inventory.js';
 import { checkAchievements } from '../achievements.js';
 import { saveGame } from '../save.js';
-import { updateDungeonProgress, isDungeonChestOpened, isDungeonBossDefeated, isDungeonEliteDefeated } from '../exploration.js';
+import { updateDungeonProgress, isDungeonChestOpened, isDungeonBossDefeated, isDungeonEliteDefeated, saveDungeonEncounter } from '../exploration.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
@@ -231,7 +231,11 @@ export function openChest(chest) {
     const def = enemyId ? ENEMIES[enemyId] : null;
     if (def) {
       const hp = Math.round((def.hp || 30) * 1.35);
-      ow.enemies.push({ id: `mimic-${chest.id || Math.floor(chest.x)}-${Math.floor(chest.y)}`, enemyId, x: chest.x, y: chest.y, homeX: chest.x, homeY: chest.y, hp, maxHp: hp, elite: true, uniqueElite: false, boss: false, modifier: null, effects: [], phase: 0, state: 'chase', wanderTimer: 0, wanderDx: 0, wanderDy: 0, dead: false, respawnAt: 0 });
+      const floor = Math.max(1, Math.floor(Number(ow.dungeonFloor) || 1));
+      const encounterId = `f${floor}-mimic-${String(chest.id || Math.floor(chest.x)).replace(/[^a-z0-9-]/gi, '-')}`;
+      const mimic = { id: encounterId, persistentEncounterId: encounterId, encounterKind: 'mimic', enemyId, x: chest.x, y: chest.y, homeX: chest.x, homeY: chest.y, hp, maxHp: hp, elite: true, uniqueElite: false, boss: false, modifier: null, effects: [], phase: 0, state: 'chase', wanderTimer: 0, wanderDx: 0, wanderDy: 0, dead: false, respawnAt: 0 };
+      ow.enemies.push(mimic);
+      if (ow.locationId) saveDungeonEncounter(p, ow.locationId, floor, { id: encounterId, kind: 'mimic', enemyId, x: chest.x, y: chest.y, hp, maxHp: hp });
       emit('toast', '👁️ Это был мимик! Он нападает!');
       pushLog('👁️ Сундук оказался мимиком — приготовьтесь к бою!', 'danger');
     }
