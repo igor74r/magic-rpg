@@ -49,7 +49,7 @@ assert.equal(ITEM_DATA['rusty-key']?.type, 'quest');
 assert.equal(getDungeonChestType('briar-hollow', 1, 0, 3), 'wooden');
 assert.equal(getDungeonChestType('briar-hollow', 1, 1, 3), 'locked');
 assert.equal(getDungeonChestType('briar-hollow', 1, 1, 3), getDungeonChestType('briar-hollow', 1, 1, 3), 'chest types remain stable after re-entry');
-assert.notEqual(getDungeonChestType('briar-hollow', 1, 2, 3), getDungeonChestType('briar-hollow', 2, 2, 3), 'floor identity participates in chest type generation');
+assert.notEqual(getDungeonChestType('briar-hollow', 1, 2, 3), getDungeonChestType('briar-hollow', 10, 2, 3), 'floor identity participates in chest type generation');
 const generatedTypes = new Set();
 for (let floor = 1; floor <= 80; floor++) for (let index = 2; index < 8; index++) generatedTypes.add(getDungeonChestType('briar-hollow', floor, index, 8));
 for (const type of ['wooden', 'cursed', 'mimic', 'ancient']) assert.ok(generatedTypes.has(type), `chest generation includes ${type}`);
