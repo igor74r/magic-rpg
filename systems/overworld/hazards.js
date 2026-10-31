@@ -1,4 +1,4 @@
-const LAVA_REGIONS = new Set(['volcano', 'dragon', 'obsidian-fields']);
+const LAVA_REGIONS = new Set(['volcano', 'dragon', 'dragon-lair', 'obsidian-fields']);
 const POISON_REGIONS = new Set(['swamp', 'briar-hollow']);
 const TRAP_WATER_REGIONS = new Set(['ruins', 'sunken-necropolis']);
 
