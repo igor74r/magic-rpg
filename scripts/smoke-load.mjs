@@ -21,6 +21,8 @@ const mods = await Promise.all([
   import('../data/passives.js'),
   import('../systems/campaign.js'),
   import('../systems/save.js'),
+  import('../systems/rift-progression.js'),
+  import('../data/rift-canon.js'),
   import('../systems/talents.js'),
   import('../systems/inventory.js'),
   import('../ui/overworld/tile-atlas.js'),
@@ -48,6 +50,8 @@ const { STORY } = mods[14];
 const { getPassiveTree } = mods[15];
 const { getCampaignProgress, isCampaignComplete, canCompleteMainQuest, recordCampaignKill, acceptCampaignMission, claimCampaignMission, getNextCampaignMission, getMissionReward } = mods[16];
 const { migrateGame } = mods[17];
+const { recordDragonVictory, canOpenRift, getRiftFacetAccess, getRiftFacetAccessCounts } = mods[25];
+const { DRAGON_SHARDS, RIFT_TIER_IDS } = mods[26];
 const { getAvailablePassives, allocatePassive, getTalentBonus } = mods[18];
 const { addItem, useItem, equipItemByIndex, socketRune, EQUIPMENT_SLOTS } = mods[19];
 const { drawAtlasTile, drawAtlasProp } = mods[20];
@@ -58,6 +62,16 @@ const { createSpawnRoster } = mods[24];
 
 const results = [];
 const check = (name, cond) => results.push(`${cond ? 'PASS' : 'FAIL'} ${name}`);
+
+check('canonical Rift has exactly three named dragon shards', DRAGON_SHARDS.length === 3 && DRAGON_SHARDS.map(d => d.name).join('|') === 'Пепельный Вестник|Ледяная Хватка|Кровавая Корона' && DRAGON_SHARDS.map(d => d.requiredLevel).join(',') === '30,40,50');
+check('Rift tiers define T1–T6', RIFT_TIER_IDS.join(',') === 'T1,T2,T3,T4,T5,T6');
+const riftPlayer = { level: 50, shards: { forest: true, ruins: true, shadow: true } };
+const legacyShardsDoNotUnlockRift = !canOpenRift(riftPlayer);
+const dragonWins = recordDragonVictory(riftPlayer, 'ashen-herald') && recordDragonVictory(riftPlayer, 'icy-grasp') && recordDragonVictory(riftPlayer, 'blood-crown');
+check('Rift requires all three canonical dragon victories and their fixed shards', legacyShardsDoNotUnlockRift && dragonWins && canOpenRift(riftPlayer));
+check('dragon shard victories cannot be recorded below their required level', !recordDragonVictory({ level: 29 }, 'ashen-herald'));
+const facetCounts = getRiftFacetAccessCounts();
+check('Rift has 30 facets: 20 initially open and 10 level-50 gated', facetCounts.total === 30 && facetCounts.initiallyAvailable === 20 && facetCounts.levelGated === 10 && getRiftFacetAccess({ level: 1 }, 19) && !getRiftFacetAccess({ level: 49 }, 20) && getRiftFacetAccess({ level: 50 }, 20) && getRiftFacetAccess({ level: 50 }, 29) && !getRiftFacetAccess({ level: 50 }, 30));
 
 check('state.game is null initially', state.game === null);
 check('state has settings', !!state.settings);
