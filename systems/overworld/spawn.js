@@ -4,7 +4,7 @@ import { ITEMS, RARITIES } from '../../data/items.js';
 import { addItem } from '../inventory.js';
 import { checkAchievements } from '../achievements.js';
 import { saveGame } from '../save.js';
-import { updateDungeonProgress, isDungeonBossDefeated } from '../exploration.js';
+import { updateDungeonProgress, isDungeonBossDefeated, isDungeonEliteDefeated } from '../exploration.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
@@ -58,7 +58,9 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
   const floor = Math.max(1, Math.floor(Number(opts.dungeonFloor) || 1));
   const eligibleEnemies = loc.enemies.filter(enemyId => {
     const def = ENEMIES[enemyId];
-    return !def?.boss || !locationId || !isDungeonBossDefeated(state.game?.player, locationId, floor, enemyId);
+    if (def?.boss && locationId && isDungeonBossDefeated(state.game?.player, locationId, floor, enemyId)) return false;
+    if (def?.uniqueElite && !opts.rifMode && locationId && isDungeonEliteDefeated(state.game?.player, locationId, floor, enemyId)) return false;
+    return true;
   });
   if (!eligibleEnemies.length) return [];
   const count = Math.min(Math.max(eligibleEnemies.length, 4), 7);
@@ -72,7 +74,8 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
     const def = ENEMIES[enemyId];
     if (!def) continue;
     const isBoss = !!def.boss;
-    const isElite = !isBoss && Math.random() < eliteChance;
+    const isUniqueElite = !opts.rifMode && !!def.uniqueElite;
+    const isElite = !isBoss && (isUniqueElite || Math.random() < eliteChance);
     let modifier = null;
     if (!isBoss && !isElite && Math.random() < MODIFIER_CHANCE) {
       const keys = Object.keys(MODIFIERS);
@@ -83,7 +86,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
     enemies.push({
       id: i, enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
       homeX: pos.x * TILE + TILE / 2, homeY: pos.y * TILE + TILE / 2,
-      hp, maxHp: hp, elite: isElite, boss: isBoss, modifier,
+      hp, maxHp: hp, elite: isElite, uniqueElite: isUniqueElite, boss: isBoss, modifier,
       effects: [], phase: 0, state: 'idle',
       wanderTimer: 1 + Math.random() * 2, wanderDx: 0, wanderDy: 0,
       dead: false, respawnAt: 0,
