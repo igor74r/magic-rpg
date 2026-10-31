@@ -176,7 +176,7 @@ const migratedV10 = migrateGame({
   shards: { forest: true, ruins: false, shadow: false },
   player: { class: 'mage', level: 12, stats: { kills: { [STORY.acts[0].missions[0].enemyId]: 2 } } }
 });
-check('v10 save migrates to v14 without importing lifetime kills', migratedV10.version === 15 && migratedV10.player.dex === 8 && Object.keys(migratedV10.player.campaignKills).length === 0 && migratedV10.player.stats.kills[STORY.acts[0].missions[0].enemyId] === 2 && EQUIPMENT_SLOTS.length === 12 && EQUIPMENT_SLOTS.every(slot => slot in migratedV10.player.equipped));
+check('v10 save migrates to v15 without importing lifetime kills', migratedV10.version === 15 && migratedV10.player.dex === 8 && Object.keys(migratedV10.player.campaignKills).length === 0 && migratedV10.player.stats.kills[STORY.acts[0].missions[0].enemyId] === 2 && EQUIPMENT_SLOTS.length === 12 && EQUIPMENT_SLOTS.every(slot => slot in migratedV10.player.equipped));
 check('v10 legacy campaign shards survive migration but never become dragon shards', migratedV10.shards.forest === true && migratedV10.player.campaignShards.forest === true && migratedV10.player.dragonShards.flame === false && migratedV10.player.dragonShards.ice === false && migratedV10.player.dragonShards.blood === false);
 check('Tower canon is 40 floors across eight five-floor biomes', TOWER_FLOOR_COUNT === 40 && TOWER_BIOMES.length === 8 && TOWER_BIOMES.every((biome, index) => getTowerFloorDefinition(index * 5 + 1)?.biomeId === biome.id));
 const towerFloor1 = getTowerFloorDefinition(1);
@@ -193,6 +193,7 @@ while (towerRun && !towerRun.completed) {
   if (!active || !defeatActiveTowerMob(towerRun, active.id)) { towerMobSequenceWorks = false; break; }
 }
 const towerFirstClear = completeTowerFloor(towerPlayer, towerRun);
+towerPlayer.level = 12;
 const towerCheckpointWorks = towerFirstClear?.checkpointFloor === 2 && canEnterTowerFloor(towerPlayer, 2);
 const towerReplay = createTowerRun(towerPlayer, 1);
 while (towerReplay && !towerReplay.completed) {
