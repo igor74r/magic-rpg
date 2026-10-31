@@ -84,15 +84,15 @@ assert.deepEqual(getDungeonProgress(player, 'forest').openedChests, ['chest-01']
 assert.equal(recordLocationVisit(player, '../bad', 3000), false);
 
 const legacy = normalizeExploration({
-  visited: { forest: { visits: -10, firstVisitedAt: -1, lastVisitedAt: 'bad', cleared: true, dungeon: { floor: 0, openedChests: ['chest-a', '../bad'], secretsFound: ['secret-a'] } }, '../bad': {} },
+  visited: { forest: { visits: -10, firstVisitedAt: -1, lastVisitedAt: 'bad', cleared: true, dungeon: { floor: 0, openedChests: ['chest-a', '../bad'], disarmedTraps: ['f2-cursed-01', '../bad'], secretsFound: ['secret-a'] } }, '../bad': {} },
   lastLocationId: 'forest'
 });
 assert.equal(legacy.visited.forest.visits, 1);
 assert.equal(legacy.visited.forest.firstVisitedAt, 0);
 assert.equal(legacy.visited.forest.lastVisitedAt, 0);
 assert.deepEqual(legacy.visited.forest.dungeon, {
-  floor: 1, checkpoint: null, openedChests: ['chest-a'], disarmedTraps: [],
-  secretsFound: ['secret-a'], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: [], encounters: []
+  floor: 1, checkpoint: null, openedChests: ['chest-a'], disarmedTraps: ['f2-cursed-01'],
+  secretsFound: ['secret-a'], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: []
 });
 assert.deepEqual(legacy.claimedActRelics, []);
 assert.equal(Object.hasOwn(legacy.visited, '../bad'), false);
