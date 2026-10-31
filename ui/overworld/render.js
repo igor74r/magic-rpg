@@ -335,6 +335,22 @@ function render() {
     }
   }
 
+  // Физические лестницы подземелья.
+  for (const stair of ow.dungeonStairs || []) {
+    const sx = stair.x * ow.tile - cam.x, sy = stair.y * ow.tile - cam.y;
+    if (sx < -60 || sx > VIEW_W + 60 || sy < -60 || sy > VIEW_H + 60) continue;
+    const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 350 + stair.x);
+    ctx.save();
+    ctx.fillStyle = 'rgba(8, 8, 14, 0.82)';
+    ctx.beginPath(); ctx.ellipse(sx + ow.tile / 2, sy + ow.tile / 2 + 5, 17, 11, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = stair.direction > 0 ? `rgba(255, 190, 90, ${0.45 + pulse * 0.45})` : `rgba(110, 190, 255, ${0.45 + pulse * 0.45})`;
+    ctx.lineWidth = 2; ctx.stroke();
+    ctx.font = 'bold 25px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = stair.direction > 0 ? '#ffc06a' : '#9bdcff';
+    ctx.fillText(stair.direction > 0 ? '⬇' : '⬆', sx + ow.tile / 2, sy + ow.tile / 2);
+    ctx.restore();
+  }
+
   // ============= СЕКРЕТНЫЕ СТЕНЫ: МЕРЦАНИЕ =============
   if (!ow.combat && ow.secretWalls) {
     for (const sw of ow.secretWalls) {
@@ -522,6 +538,19 @@ function render() {
   ctx.fillRect(px - bw / 2, py - 42, bw * (p.hp / p.maxHp), 4);
   ctx.fillStyle = state.game.player.class === 'warrior' ? '#d000ff' : '#3060d6';
   ctx.fillRect(px - bw / 2, py - 36, bw * (p.mp / p.maxMp), 3);
+
+  // Подсказка взаимодействия с лестницами.
+  if (!ow.combat && ow.dungeonStairs) {
+    for (const stair of ow.dungeonStairs) {
+      const wx = stair.x * ow.tile + ow.tile / 2, wy = stair.y * ow.tile + ow.tile / 2;
+      if (Math.hypot(wx - p.x, wy - p.y) >= ow.tile * 1.5) continue;
+      const sx = wx - cam.x, sy = wy - cam.y;
+      const label = stair.direction > 0 ? '[E] Спуститься' : '[E] Подняться';
+      ctx.font = 'bold 13px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.strokeText(label, sx, sy - 36);
+      ctx.fillStyle = '#ffd060'; ctx.fillText(label, sx, sy - 36);
+    }
+  }
 
   // Подсказка про E
   if (!ow.combat && ow.secretWalls) {
