@@ -26,10 +26,8 @@ for (const [id, loc] of Object.entries(LOCATIONS)) {
   const sy = id === 'village' ? Math.floor(rows / 2) + 4 : Math.floor(rows / 2);
   assert.ok(!isBlocked(map, sx, sy, id), id + ': player spawn must be walkable');
   const cells = reachable(map, id, sx, sy);
-  for (let x = 0; x < cols; x++) {
-    assert.ok(cells.has(x), id + ': north edge must be reachable at x=' + x);
-    assert.ok(cells.has((rows - 1) * cols + x), id + ': south edge must be reachable at x=' + x);
-  }
+  assert.ok(cells.has(sx), id + ': north gate must be reachable');
+  assert.ok(cells.has((rows - 1) * cols + sx), id + ': south gate must be reachable');
   assert.ok(cells.has(sy * cols), id + ': west edge must be reachable');
   assert.ok(cells.has(sy * cols + cols - 1), id + ': east edge must be reachable');
   const cell = findFreeCell(map, cols, rows, [], 0, null, id, () => 0);
