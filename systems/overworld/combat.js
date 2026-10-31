@@ -26,6 +26,7 @@ import { getRiftMult } from '../rift.js';
 import { getActPriceMultiplier } from '../economy.js';
 import { updateQuestProgress } from '../dailyQuests.js';
 import { canCompleteMainQuest, recordCampaignKill, recordCampaignShard } from '../campaign.js';
+import { recordDragonVictoryForEnemy, DRAGON_SHARDS } from '../rift-progression.js';
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
 import {
@@ -1403,6 +1404,12 @@ function combatVictory() {
     (p.stats.kills[enemy.enemyId] || 0) + 1;
 
   recordCampaignKill(p, ow.locationId, enemy.enemyId);
+
+  const dragon = DRAGON_SHARDS.find(entry => entry.enemyId === enemy.enemyId);
+  if (dragon && recordDragonVictoryForEnemy(p, enemy.enemyId)) {
+    pushLog(`🐉 Получен ${dragon.shardName}. Печать дракона восстановлена.`, 'success');
+    emit('rift:dragon-shard', { dragonId: dragon.id, shardId: dragon.shardId });
+  }
 
   p.stats.goldEarned =
     (p.stats.goldEarned || 0) + gold;
