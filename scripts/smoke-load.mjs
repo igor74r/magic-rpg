@@ -105,7 +105,7 @@ check('extra spawn slots repeat enemies only after full roster', createSpawnRost
 check('campaign has 5 acts and 25 missions', STORY.acts?.length === 5 && STORY.acts.reduce((n, act) => n + act.missions.length, 0) === 25);
 check('campaign enemy IDs exist', STORY.acts.every(act => act.missions.every(mission => !!ENEMIES[mission.enemyId])));
 check('25 missions cover all 15 adventure regions with valid enemy spawns', STORY.acts.every(act => act.missions.every(mission => { const location = LOCATIONS[mission.locationId || act.locationId]; return !!location && location.enemies.includes(mission.enemyId); })) && new Set(STORY.acts.flatMap(act => act.missions.map(mission => mission.locationId || act.locationId))).size === 15);
-check('passive trees exist for all 3 playable classes', ['warrior', 'mage', 'archer'].every(id => Object.keys(getPassiveTree(id).nodes).length === 21));
+check('passive trees exist for all 3 playable classes', ['warrior', 'mage', 'archer'].every(id => Object.keys(getPassiveTree(id).nodes).length === 31));
 const passiveTestPlayer = { class: 'warrior', level: 1, passives: ['start'], passivePoints: 1, talents: [] };
 const lockedAtLevelOne = getAvailablePassives(passiveTestPlayer).length === 0;
 passiveTestPlayer.level = 2;
