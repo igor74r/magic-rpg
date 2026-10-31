@@ -1,5 +1,7 @@
 import { state } from '../state.js';
+import { emit } from '../events.js';
 import { ENEMIES } from '../../data/enemies.js';
+import { LOCATIONS } from '../../data/locations.js';
 import { ITEMS, RARITIES } from '../../data/items.js';
 import { rollDungeonChestLoot, getDungeonChestType } from '../../data/dungeon-treasures.js';
 import { addItem, countItem, removeItem } from '../inventory.js';
