@@ -278,5 +278,50 @@ export const ENEMIES = {
       { atHp: 0.55, atkMult: 1.3, msg: 'Глашатай раскрывает разлом!', specialEvery: 2 },
       { atHp: 0.25, atkMult: 1.55, msg: 'Бездна поглощает оболочку глашатая!', specialEvery: 1 }
     ]
-  }
+  },
+
+  'rootbound-sentinel': {
+    name: 'Страж корневой печати', emoji: '🪵',
+    hp: 118, attack: 22, defense: 13, exp: 105, gold: 78,
+    drops: ['root-fiber', 'rune-root'],
+    lore: 'Древний защитник святилища. Его кора хранит приказы первого ордена.',
+    tactics: 'Медленный, но стойкий противник; опасен оглушающими ударами корней.',
+    special: { type: 'double', every: 3, name: 'Корневой захват', effect: 'stun' }
+  },
+
+  'drowned-scribe': {
+    name: 'Утопленный писец', emoji: '📜',
+    hp: 145, attack: 27, defense: 8, exp: 138, gold: 102,
+    drops: ['grave-salt', 'rune-tide'],
+    lore: 'Писец некрополя, который продолжает переписывать имена даже после смерти.',
+    tactics: 'Проклинает героя и истощает его силы; не позволяйте затянуть бой.',
+    special: { type: 'drain', every: 3, name: 'Чернила забвения', effect: 'poison' }
+  },
+
+  'ashbound-renegade': {
+    name: 'Пепельный отступник', emoji: '⚔️',
+    hp: 188, attack: 32, defense: 12, exp: 165, gold: 132,
+    drops: ['ember-core', 'rune-ember'],
+    lore: 'Бывший кузнец пяти орденов, связавший себя с огнём после предательства.',
+    tactics: 'Чередует быстрые атаки и огненный выпад; держите запас лечения.',
+    special: { type: 'snipe', every: 3, mult: 1.9, name: 'Клеймо раскола', effect: 'burn' }
+  },
+
+  'mirror-revenant': {
+    name: 'Зеркальный мститель', emoji: '🪞',
+    hp: 205, attack: 34, defense: 14, exp: 190, gold: 150,
+    drops: ['frost-essence', 'rune-frost'],
+    lore: 'Отражение хранителя, оставшееся в ледяном зале после принесения последней клятвы.',
+    tactics: 'Наказывает за затяжные сражения ледяными проклятиями.',
+    special: { type: 'snipe', every: 3, mult: 2, name: 'Осколок отражения', effect: 'stun' }
+  },
+
+  'riftstalker': {
+    name: 'Охотник разлома', emoji: '🕷️',
+    hp: 295, attack: 40, defense: 13, exp: 320, gold: 250,
+    drops: ['void-dust', 'rune-void'],
+    lore: 'Существо, собранное из воспоминаний тех, кто однажды шагнул за край мира.',
+    tactics: 'Быстро сокращает дистанцию и высасывает жизненную силу.',
+    special: { type: 'drain', every: 2, name: 'Касание пустоты', effect: 'bleed' }
+  },
 };
