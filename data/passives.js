@@ -251,8 +251,3 @@ export function getPassiveTree(classId) {
   return TREE_CACHE.get(key);
 }
 
-
-// Audit note: passive nodes are data-driven. Before expanding the tree, all bonus keys
-// must be checked against systems/stats.js and systems/talents.js; descriptions should
-// be generated from the same values to avoid UI/mechanics drift. Keep existing node IDs
-// stable because allocated node IDs are persisted in player saves.
