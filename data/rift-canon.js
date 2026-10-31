@@ -1,9 +1,9 @@
 // Canonical progression data for «Осколки Разлома».
 // Legacy campaign shards (forest/ruins/shadow) are intentionally separate.
 export const DRAGON_SHARDS = [
-  { id: 'ashen-herald', name: 'Пепельный Вестник', requiredLevel: 30, shardId: 'flame', shardName: 'Осколок Пламени' },
-  { id: 'icy-grasp', name: 'Ледяная Хватка', requiredLevel: 40, shardId: 'ice', shardName: 'Осколок Льда' },
-  { id: 'blood-crown', name: 'Кровавая Корона', requiredLevel: 50, shardId: 'blood', shardName: 'Осколок Крови' }
+  { id: 'ashen-herald', enemyId: 'ashen-herald', locationId: 'obsidian-fields', name: 'Пепельный Вестник', requiredLevel: 30, shardId: 'flame', shardName: 'Осколок Пламени' },
+  { id: 'icy-grasp', enemyId: 'icy-grasp', locationId: 'frost-citadel', name: 'Ледяная Хватка', requiredLevel: 40, shardId: 'ice', shardName: 'Осколок Льда' },
+  { id: 'blood-crown', enemyId: 'blood-crown', locationId: 'void-crater', name: 'Кровавая Корона', requiredLevel: 50, shardId: 'blood', shardName: 'Осколок Крови' }
 ];
 
 export const RIFT_SHARD_SLOTS = ['flame', 'ice', 'blood'];
