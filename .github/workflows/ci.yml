@@ -40,3 +40,6 @@ jobs:
 
       - name: Check item rarity distribution
         run: node scripts/check-rarity.mjs
+
+      - name: Check passive trees and respec
+        run: node scripts/check-passives.mjs
