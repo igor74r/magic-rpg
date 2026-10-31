@@ -20,7 +20,7 @@ import {
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
 import { updateDungeonProgress, saveDungeonEncounter, defeatDungeonEncounter, claimDungeonEliteReward, claimDungeonFloorReward, claimActRelic, isDungeonBossDefeated } from '../exploration.js';
-import { ACT_RELIC_REWARDS } from '../../data/dungeon-treasures.js';
+import { ACT_RELIC_REWARDS, getDungeonBossClearProgress } from '../../data/dungeon-treasures.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
@@ -1442,16 +1442,17 @@ function combatVictory() {
       const floor = Math.max(1, Math.floor(Number(ow.dungeonFloor) || 1));
       updateDungeonProgress(p, ow.locationId, { bossId: `f${floor}-${enemy.enemyId}` });
       const locationBosses = [...new Set((LOCATIONS[ow.locationId]?.enemies || []).filter(id => ENEMIES[id]?.boss))];
-      const allBossesDefeated = locationBosses.length > 0 && locationBosses.every(id => isDungeonBossDefeated(p, ow.locationId, floor, id));
-      if (allBossesDefeated && claimDungeonFloorReward(p, ow.locationId, floor)) {
+      const defeatedBosses = locationBosses.filter(id => isDungeonBossDefeated(p, ow.locationId, floor, id));
+      const bossProgress = getDungeonBossClearProgress(locationBosses, defeatedBosses);
+      if (bossProgress.complete && claimDungeonFloorReward(p, ow.locationId, floor)) {
         const floorGold = Math.round((100 + floor * 20) * getActPriceMultiplier(p));
         p.gold = (p.gold || 0) + floorGold;
         p.stats.goldEarned = (p.stats.goldEarned || 0) + floorGold;
         const treasurePool = locationBosses.flatMap(id => ENEMIES[id]?.drops?.slice(1, 2) || []).filter(id => ITEMS[id]);
         const treasureId = treasurePool.length ? treasurePool[(floor - 1) % treasurePool.length] : null;
         if (treasureId) addItem(treasureId, 1, { rarity: 'rare' });
-        pushLog(`🏆 Этаж ${floor} зачищен! Награда: +${floorGold} золота${treasureId ? ` и редкий предмет «${ITEMS[treasureId].name}»` : ''}.`, 'success');
-        emit('toast', `🏆 Этаж ${floor} полностью зачищен!`);
+        pushLog(`🏆 Все боссы этажа ${floor} побеждены! Награда за испытание: +${floorGold} золота${treasureId ? ` и редкий предмет «${ITEMS[treasureId].name}»` : ''}.`, 'success');
+        emit('toast', `🏆 Стражи этажа ${floor} побеждены! Открыта сокровищница босса.`);
       }
     }
   }
