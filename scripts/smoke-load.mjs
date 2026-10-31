@@ -21,7 +21,6 @@ const mods = await Promise.all([
   import('../data/passives.js'),
   import('../systems/campaign.js'),
   import('../systems/save.js'),
-  import('../systems/exploration.js'),
   import('../systems/talents.js'),
   import('../systems/inventory.js'),
   import('../ui/overworld/tile-atlas.js'),
@@ -29,6 +28,7 @@ const mods = await Promise.all([
   import('../ui/overworld/effects.js'),
   import('../systems/overworld/map.js'),
   import('../systems/overworld/spawn.js'),
+  import('../systems/exploration.js'),
 ]);
 
 const { state } = mods[0];
@@ -49,7 +49,7 @@ const { STORY } = mods[14];
 const { getPassiveTree } = mods[15];
 const { getCampaignProgress, isCampaignComplete, canCompleteMainQuest, recordCampaignKill, acceptCampaignMission, claimCampaignMission, getNextCampaignMission, getMissionReward } = mods[16];
 const { migrateGame } = mods[17];
-const { normalizeExploration, recordLocationVisit, markLocationCleared } = mods[18];
+
 const { getAvailablePassives, allocatePassive, getTalentBonus } = mods[18];
 const { addItem, useItem, equipItemByIndex, socketRune, EQUIPMENT_SLOTS } = mods[19];
 const { drawAtlasTile, drawAtlasProp } = mods[20];
@@ -57,6 +57,7 @@ const { getTileDanger } = mods[21];
 const { getCurrentTheme, THEMES } = mods[22];
 const { isBlocked, isWalkable } = mods[23];
 const { createSpawnRoster } = mods[24];
+const { normalizeExploration, recordLocationVisit, markLocationCleared } = mods[25];
 
 const results = [];
 const check = (name, cond) => results.push(`${cond ? 'PASS' : 'FAIL'} ${name}`);
