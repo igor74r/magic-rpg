@@ -46,3 +46,6 @@ jobs:
 
       - name: Check inventory, affixes and crafting
         run: node scripts/check-inventory-affixes.mjs
+
+      - name: Check five-act story depth and enemy roster
+        run: node scripts/check-story-depth.mjs
