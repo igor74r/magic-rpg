@@ -49,3 +49,6 @@ jobs:
 
       - name: Check five-act story depth and enemy roster
         run: node scripts/check-story-depth.mjs
+
+      - name: Check visual assets and responsive UI
+        run: node scripts/check-visual-assets.mjs
