@@ -25,6 +25,7 @@ for (let act = 0; act < STORY.acts.length; act++) {
 }
 assert.equal(getCurrentActIndex(player), 4);
 assert.equal(getBuyPrice('health-potion', player), Math.round(ITEMS['health-potion'].price * 1.8));
+assert.equal(getSellPrice({ id: 'health-potion', qty: 1 }, player), Math.floor(ITEMS['health-potion'].price * 1.8 * 0.35));
 
 const rewards = [1, 2, 3, 4, 5].map(act => getMissionReward({ id: `a${act}-m1` }));
 assert.deepEqual(rewards.map(r => r.gold), [18, 32, 50, 72, 100]);
