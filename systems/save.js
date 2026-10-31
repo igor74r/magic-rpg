@@ -443,7 +443,7 @@ export function getMaxSlot() {
 
 // ---------- НАСТРОЙКИ ----------
 
-export function migrateSettings(settings) {
+export export function migrateSettings(settings) {
   if (!settings || typeof settings !== 'object') {
     settings = {};
   }
