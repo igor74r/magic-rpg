@@ -51,6 +51,10 @@ export function enterOverworld(locationId, opts = {}) {
 
   const enemies = spawnEnemies(loc, map, cols, rows, playerPos, opts, locationId);
   const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, locationId);
+  chests.forEach((chest, index) => {
+    chest.id = `floor-${dungeonFloor}-chest-${index + 1}`;
+    if (savedDungeon?.openedChests?.includes(chest.id)) chest.opened = true;
+  });
   const npcs = spawnNPCs(loc);
   const statics = spawnStatics(loc);
   const events = spawnEvents(loc, map, cols, rows, playerPos, locationId, [...enemies, ...chests]);
