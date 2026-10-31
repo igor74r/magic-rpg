@@ -30,7 +30,7 @@ assert.equal(isBlocked([[4]], 0, 0, 'briar-hollow'), true, 'dense props remain b
 assert.equal(isBlocked([[0]], -1, 0, 'forest'), true, 'out-of-bounds cells remain blocked');
 
 for (const locationId of [
-  'volcano', 'dragon', 'obsidian-fields',
+  'volcano', 'dragon-lair', 'obsidian-fields',
   'swamp', 'briar-hollow',
   'ruins', 'sunken-necropolis'
 ]) {
@@ -70,7 +70,7 @@ console.log('Overworld map, hazard collision and free-cell checks passed');
 
 const expectedHazards = {
   volcano: { type: 'lava', dmg: 1, every: 90 },
-  dragon: { type: 'lava', dmg: 1, every: 90 },
+  'dragon-lair': { type: 'lava', dmg: 1, every: 90 },
   'obsidian-fields': { type: 'lava', dmg: 1, every: 90 },
   swamp: { type: 'poison', dmg: 1, every: 180 },
   'briar-hollow': { type: 'poison', dmg: 1, every: 180 },
