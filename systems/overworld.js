@@ -6,6 +6,7 @@ import { TILE, generateMap } from './overworld/map.js';
 import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
+import { recordLocationVisit } from './exploration.js';
 
 export { TILE } from './overworld/map.js';
 export { tryMovePlayer, updateOverworld } from './overworld/ai.js';
@@ -17,6 +18,7 @@ export function enterOverworld(locationId, opts = {}) {
   if (!loc) return;
   if (!loc.safe && !loc.enemies?.length) return;
 
+  recordLocationVisit(state.game?.player, locationId);
   const cols = loc.mapCols || 40;
   const rows = loc.mapRows || 30;
   const map = generateMap(locationId, cols, rows);
@@ -53,6 +55,8 @@ export function enterOverworld(locationId, opts = {}) {
   };
 
   emit('overworld:start');
+  // Persist the checkpoint as soon as a region is entered.
+  import('./save.js').then(({ saveGame }) => saveGame());
 }
 
 export function exitOverworld() {
