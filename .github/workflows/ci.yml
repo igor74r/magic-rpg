@@ -55,3 +55,11 @@ jobs:
 
       - name: Check visual assets and responsive UI
         run: node scripts/check-visual-assets.mjs
+
+      - name: Install Playwright for real-browser checks
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run desktop and mobile browser smoke checks
+        run: node scripts/browser-smoke.mjs
