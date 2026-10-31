@@ -420,7 +420,7 @@ function render() {
       !isDungeonTrapDisarmed(playerData, ow.locationId, c.id) &&
       Math.hypot(c.x - ow.player.x, c.y - ow.player.y) < ow.tile * 1.6;
     if (canDisarm && !ow.combat) {
-      const label = '[E] ' + '\\u041e\\u0431\\u0435\\u0437\\u0432\\u0440\\u0435\\u0434\\u0438\\u0442\\u044c';
+      const label = '[E] Обезвредить';
       ctx.save();
       ctx.font = 'bold 11px sans-serif';
       ctx.textAlign = 'center';
