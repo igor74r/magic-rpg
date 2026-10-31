@@ -6,7 +6,7 @@ import { TILE, generateMap, getDungeonStairCells } from './overworld/map.js';
 import { spawnEnemies, spawnChests, spawnBossVaultChest, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
-import { recordLocationVisit, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened } from './exploration.js';
+import { recordLocationVisit, getDungeonProgress, getDungeonEncounters, updateDungeonProgress, isDungeonChestOpened } from './exploration.js';
 import { saveGame } from './save.js';
 import { countItem } from './inventory.js';
 import { prepareChestKeyAccess } from '../data/dungeon-treasures.js';
@@ -52,6 +52,19 @@ export function enterOverworld(locationId, opts = {}) {
   const playerPos = { x: spawnX * TILE + TILE / 2, y: spawnY * TILE + TILE / 2 };
 
   const enemies = spawnEnemies(loc, map, cols, rows, playerPos, { ...opts, dungeonFloor }, locationId);
+  if (!loc.safe && !opts.rifMode) {
+    for (const encounter of getDungeonEncounters(state.game?.player, locationId, dungeonFloor)) {
+      if (encounter.status !== 'active') continue;
+      if (enemies.some(enemy => enemy.persistentEncounterId === encounter.id)) continue;
+      enemies.push({
+        id: encounter.id, persistentEncounterId: encounter.id, encounterKind: encounter.kind,
+        enemyId: encounter.enemyId, x: encounter.x, y: encounter.y,
+        homeX: encounter.x, homeY: encounter.y, hp: encounter.hp, maxHp: encounter.maxHp,
+        elite: true, uniqueElite: false, boss: false, modifier: null, effects: [], phase: 0,
+        state: 'idle', wanderTimer: 0, wanderDx: 0, wanderDy: 0, dead: false, respawnAt: 0
+      });
+    }
+  }
   const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, locationId, dungeonFloor);
   chests.forEach((chest, index) => {
     chest.id = `floor-${dungeonFloor}-chest-${index + 1}`;
