@@ -122,6 +122,7 @@ function openSecret(sw) {
     (ow.chests ||= []).push({
       x: sw.ax, y: sw.ay,
       opened: false,
+      id: 'floor-' + (ow.dungeonFloor || 1) + '-secret-' + sw.id + '-chest',
       _secret: true
     });
     emit('toast', '🪙 Найден древний сундук!');
