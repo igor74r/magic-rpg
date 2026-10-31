@@ -33,7 +33,9 @@ function normalizeRecord(record) {
         rewardType: s.rewardType
       })) : [],
       bossDefeated: dungeon.bossDefeated === true,
-      defeatedBosses: cleanIdList(dungeon.defeatedBosses, 128)
+      defeatedBosses: cleanIdList(dungeon.defeatedBosses, 128),
+      defeatedElites: cleanIdList(dungeon.defeatedElites, 128),
+      claimedEliteRewards: cleanIdList(dungeon.claimedEliteRewards, 128)
     }
   };
 }
@@ -60,7 +62,7 @@ export function recordLocationVisit(player, locationId, now = Date.now()) {
     firstVisitedAt: previous?.firstVisitedAt || now,
     lastVisitedAt: now,
     cleared: previous?.cleared === true,
-    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [] }
+    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [] }
   };
   exploration.lastLocationId = locationId;
   const entries = Object.entries(exploration.visited);
@@ -125,6 +127,21 @@ export function isDungeonBossDefeated(player, locationId, floor, enemyId) {
   return getDungeonProgress(player, locationId)?.defeatedBosses.includes(key) === true;
 }
 
+export function isDungeonEliteDefeated(player, locationId, floor, enemyId) {
+  if (typeof enemyId !== 'string' || !ID_RE.test(enemyId)) return false;
+  const key = `f${Math.max(1, Math.floor(Number(floor) || 1))}-${enemyId}`;
+  return getDungeonProgress(player, locationId)?.defeatedElites.includes(key) === true;
+}
+
+export function claimDungeonEliteReward(player, locationId, floor, enemyId) {
+  if (typeof enemyId !== 'string' || !ID_RE.test(enemyId)) return false;
+  const progress = getDungeonProgress(player, locationId);
+  if (!progress) return false;
+  const key = `f${Math.max(1, Math.floor(Number(floor) || 1))}-${enemyId}`;
+  if (progress.claimedEliteRewards.includes(key)) return false;
+  return updateDungeonProgress(player, locationId, { eliteId: key });
+}
+
 export function isDungeonChestOpened(player, locationId, chestId) {
   if (typeof chestId !== 'string' || !ID_RE.test(chestId)) return false;
   return getDungeonProgress(player, locationId)?.openedChests.includes(chestId) === true;
@@ -141,6 +158,10 @@ export function updateDungeonProgress(player, locationId, patch = {}) {
   if (typeof patch.bossId === 'string' && ID_RE.test(patch.bossId)) {
     next.defeatedBosses = cleanIdList([...next.defeatedBosses, patch.bossId], 128);
     next.bossDefeated = true;
+  }
+  if (typeof patch.eliteId === 'string' && ID_RE.test(patch.eliteId)) {
+    next.defeatedElites = cleanIdList([...next.defeatedElites, patch.eliteId], 128);
+    next.claimedEliteRewards = cleanIdList([...next.claimedEliteRewards, patch.eliteId], 128);
   }
   if (typeof patch.chestId === 'string' && ID_RE.test(patch.chestId)) next.openedChests = cleanIdList([...next.openedChests, patch.chestId]);
   if (typeof patch.secretId === 'string' && ID_RE.test(patch.secretId)) next.secretsFound = cleanIdList([...next.secretsFound, patch.secretId]);
