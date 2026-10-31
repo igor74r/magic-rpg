@@ -7,6 +7,7 @@ import { ENEMIES } from '../../data/enemies.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic } from './models.js';
 import { drawAtlasTile, drawAtlasProp } from './tile-atlas.js';
 import { getTileDanger } from '../../systems/overworld/hazards.js';
+import { isDungeonTrapDisarmed } from '../../systems/exploration.js';
 import { renderCombatPanel } from './combat-panel.js';
 import {
   VIEW_W, VIEW_H, getTheme, MOD_LABEL,
@@ -412,6 +413,29 @@ function render() {
     const [glow, mark] = chestStyles[c.type] || chestStyles.wooden;
     ctx.shadowBlur = (c.type === 'ancient' || c.type === 'boss') ? 18 : 10; ctx.shadowColor = glow; ctx.fillStyle = glow + '66'; ctx.beginPath(); ctx.arc(sx, sy, c.type === 'ancient' ? 20 : 16, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
     if (mark) { ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = glow; ctx.fillText(mark, sx + 15, sy - 14); }
+
+    const playerData = state.game?.player;
+    const canDisarm = c.type === 'cursed' && playerData?.class === 'archer' &&
+      Array.isArray(playerData.talents) && playerData.talents.includes('a-trapper') &&
+      !isDungeonTrapDisarmed(playerData, ow.locationId, c.id) &&
+      Math.hypot(c.x - ow.player.x, c.y - ow.player.y) < ow.tile * 1.6;
+    if (canDisarm && !ow.combat) {
+      const label = '[E] ' + '\\u041e\\u0431\\u0435\\u0437\\u0432\\u0440\\u0435\\u0434\\u0438\\u0442\\u044c';
+      ctx.save();
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      const width = ctx.measureText(label).width + 16;
+      const labelY = sy - 31;
+      ctx.fillStyle = 'rgba(20, 12, 30, 0.88)';
+      ctx.fillRect(sx - width / 2, labelY - 17, width, 21);
+      ctx.strokeStyle = 'rgba(190, 130, 255, 0.9)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(sx - width / 2, labelY - 17, width, 21);
+      ctx.fillStyle = '#e5c8ff';
+      ctx.fillText(label, sx, labelY);
+      ctx.restore();
+    }
   }
 
   const p = ow.player; nearNpc = null;
