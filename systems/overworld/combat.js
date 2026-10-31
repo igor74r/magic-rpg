@@ -1411,12 +1411,16 @@ function combatVictory() {
     p.stats.bossKills = (p.stats.bossKills || 0) + 1;
   }
 
-  // Normal enemies use the difficulty drop rate; elites are generous,
-  // while bosses guarantee only their signature loot without flooding all drops.
-  const dropChance = enemy.boss ? 1 : enemy.elite ? 0.85 : getDropChance();
+  // Elites have a high chance for each listed drop. Bosses guarantee
+  // their first signature drop; additional drops still use normal difficulty odds.
+  const dropChance = enemy.elite ? 0.85 : getDropChance();
 
-  def.drops.forEach(id => {
-    if (Math.random() < dropChance) {
+  def.drops.forEach((id, index) => {
+    const shouldDrop = enemy.boss
+      ? index === 0 || Math.random() < getDropChance()
+      : Math.random() < dropChance;
+
+    if (shouldDrop) {
       const created = addItem(id);
       const instance = created[0];
 
