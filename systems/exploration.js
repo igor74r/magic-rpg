@@ -19,6 +19,18 @@ function normalizeRecord(record) {
       checkpoint: typeof dungeon.checkpoint === 'string' && ID_RE.test(dungeon.checkpoint) ? dungeon.checkpoint : null,
       openedChests: cleanIdList(dungeon.openedChests),
       secretsFound: cleanIdList(dungeon.secretsFound),
+      secrets: Array.isArray(dungeon.secrets) ? dungeon.secrets.filter(s =>
+        s && typeof s === 'object' && !Array.isArray(s) &&
+        typeof s.id === 'string' && ID_RE.test(s.id) &&
+        Number.isInteger(s.tx) && s.tx >= 1 && s.tx <= 256 &&
+        Number.isInteger(s.ty) && s.ty >= 1 && s.ty <= 256 &&
+        Number.isInteger(s.ax) && s.ax >= 0 && s.ax <= 256 &&
+        Number.isInteger(s.ay) && s.ay >= 0 && s.ay <= 256 &&
+        ['chest', 'elite', 'loot'].includes(s.rewardType)
+      ).slice(0, 8).map(s => ({
+        id: s.id, tx: s.tx, ty: s.ty, ax: s.ax, ay: s.ay,
+        rewardType: s.rewardType
+      })) : [],
       bossDefeated: dungeon.bossDefeated === true
     }
   };
@@ -46,7 +58,7 @@ export function recordLocationVisit(player, locationId, now = Date.now()) {
     firstVisitedAt: previous?.firstVisitedAt || now,
     lastVisitedAt: now,
     cleared: previous?.cleared === true,
-    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], bossDefeated: false }
+    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], bossDefeated: false }
   };
   exploration.lastLocationId = locationId;
   const entries = Object.entries(exploration.visited);
@@ -68,6 +80,35 @@ export function markLocationCleared(player, locationId) {
 export function getDungeonProgress(player, locationId) {
   const record = player?.exploration?.visited?.[locationId];
   return record ? normalizeRecord(record)?.dungeon : null;
+}
+
+export function getDungeonSecrets(player, locationId, floor = 1) {
+  const all = getDungeonProgress(player, locationId)?.secrets || [];
+  const prefix = `f${Math.max(1, Math.floor(Number(floor) || 1))}-`;
+  return all.filter(secret => secret.id.startsWith(prefix)).map(secret => ({ ...secret }));
+}
+
+export function saveDungeonSecrets(player, locationId, floor, secrets) {
+  if (!player || !player.exploration?.visited?.[locationId] || !ID_RE.test(locationId)) return false;
+  const current = getDungeonProgress(player, locationId);
+  if (!current || !Array.isArray(secrets)) return false;
+  const prefix = `f${Math.max(1, Math.floor(Number(floor) || 1))}-`;
+  const kept = current.secrets.filter(secret => !secret.id.startsWith(prefix));
+  const clean = secrets.filter(secret => secret && typeof secret.id === 'string' &&
+    ID_RE.test(secret.id) && secret.id.startsWith(prefix) &&
+    Number.isInteger(secret.tx) && Number.isInteger(secret.ty) &&
+    Number.isInteger(secret.ax) && Number.isInteger(secret.ay) &&
+    ['chest', 'elite', 'loot'].includes(secret.rewardType)
+  ).slice(0, 2).map(secret => ({
+    id: secret.id, tx: secret.tx, ty: secret.ty, ax: secret.ax, ay: secret.ay,
+    rewardType: secret.rewardType
+  }));
+  player.exploration.visited[locationId].dungeon = { ...current, secrets: [...kept, ...clean].slice(-16) };
+  return true;
+}
+
+export function markDungeonSecretFound(player, locationId, secretId) {
+  return updateDungeonProgress(player, locationId, { secretId });
 }
 
 export function isDungeonChestOpened(player, locationId, chestId) {
