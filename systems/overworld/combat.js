@@ -23,6 +23,7 @@ import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
 import { getRiftMult } from '../rift.js';
+import { getActPriceMultiplier } from '../economy.js';
 import { updateQuestProgress } from '../dailyQuests.js';
 import { canCompleteMainQuest, recordCampaignKill, recordCampaignShard } from '../campaign.js';
 import { pushLog } from './log.js';
@@ -1307,6 +1308,7 @@ function combatVictory() {
 
   const gold = Math.round(
     def.gold * 0.15 *
+    getActPriceMultiplier(p) *
     (enemy.elite ? 2 : 1) *
     ng.goldMult *
     rift.goldMult
