@@ -19,7 +19,8 @@ import {
 } from '../status.js';
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
-import { updateDungeonProgress, claimDungeonEliteReward, claimDungeonFloorReward, isDungeonBossDefeated } from '../exploration.js';
+import { updateDungeonProgress, claimDungeonEliteReward, claimDungeonFloorReward, claimActRelic, isDungeonBossDefeated } from '../exploration.js';
+import { ACT_RELIC_REWARDS } from '../../data/dungeon-treasures.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
@@ -1438,6 +1439,17 @@ function combatVictory() {
         pushLog(`🏆 Этаж ${floor} зачищен! Награда: +${floorGold} золота${treasureId ? ` и редкий предмет «${ITEMS[treasureId].name}»` : ''}.`, 'success');
         emit('toast', `🏆 Этаж ${floor} полностью зачищен!`);
       }
+    }
+  }
+
+  const actRelic = ACT_RELIC_REWARDS[ow.locationId];
+  if (enemy.boss && actRelic?.bossId === enemy.enemyId && claimActRelic(p, actRelic.actId)) {
+    const alreadyOwned = (p.inventory || []).some(item => item.id === actRelic.itemId) ||
+      Object.values(p.equipped || {}).some(item => item?.id === actRelic.itemId);
+    if (!alreadyOwned) {
+      addItem(actRelic.itemId, 1, { rarity: 'legendary' });
+      pushLog(`🏺 Реликвия акта получена: ${ITEMS[actRelic.itemId].name}!`, 'success');
+      emit('toast', `✨ Найдена уникальная реликвия: ${ITEMS[actRelic.itemId].name}`);
     }
   }
 
