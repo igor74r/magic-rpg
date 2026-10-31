@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { saveGame } from './save.js';
 import { emit } from './events.js';
+import { canOpenRift } from './rift-progression.js';
 
 const RIFT_LOCATIONS = ['forest', 'ruins', 'swamp', 'graveyard', 'volcano', 'ice-peaks', 'wasteland'];
 
@@ -20,9 +21,7 @@ export function getRandomRiftLocation(excludeId) {
 }
 
 export function isRiftReady() {
-  const s = state.game?.shards;
-  if (!s) return false;
-  return !!(s.forest && s.ruins && s.shadow);
+  return canOpenRift(state.game?.player);
 }
 
 export function recordRiftFloor(floor) {
