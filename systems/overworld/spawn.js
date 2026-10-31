@@ -7,7 +7,7 @@ import { rollDungeonChestLoot, getDungeonChestType } from '../../data/dungeon-tr
 import { addItem, countItem, removeItem } from '../inventory.js';
 import { checkAchievements } from '../achievements.js';
 import { saveGame } from '../save.js';
-import { updateDungeonProgress, isDungeonChestOpened, isDungeonBossDefeated, isDungeonEliteDefeated, saveDungeonEncounter } from '../exploration.js';
+import { updateDungeonProgress, isDungeonChestOpened, isDungeonBossDefeated, isDungeonEliteDefeated, saveDungeonEncounter, isDungeonTrapDisarmed } from '../exploration.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
@@ -218,7 +218,7 @@ export function openChest(chest) {
     addItem('rusty-key', 1);
     pushLog('🗝️ В тайнике лежал ржавый ключ от запертого сундука этого этажа.', 'success');
   }
-  if (chest.type === 'cursed') {
+  if (chest.type === 'cursed' && !isDungeonTrapDisarmed(p, ow.locationId, chest.id)) {
     const damage = Math.max(1, Math.round((p.maxHp || p.hp || 100) * 0.08));
     p.hp = Math.max(1, (p.hp || 1) - damage);
     ow.player.hp = p.hp;
