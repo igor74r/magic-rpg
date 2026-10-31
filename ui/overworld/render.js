@@ -21,7 +21,7 @@ let fpsNow = 0, fpsFrames = 0, fpsSampleAt = 0;
 let paused = false, nearNpc = null;
 let footprints = [], lastFootprintPos = { x: 0, y: 0 }, hurtFlash = 0, worldTime = 0;
 let deathParticles = [], bloodSplats = [], lowHpPulse = 0, corpses = [], snowAccum = 0;
-let lastTileKey = null, tileDamageTimer = 0, _weatherEffectApplied = null;
+let lastTileKey = null, tileDamageTimer = 0, lastHazardLocation = null, _weatherEffectApplied = null;
 let mapTooltipEl = null;
 
 const EVENT_PROP_COLUMN = Object.freeze({ mimic: 0, crystal: 1, altar: 2 });
@@ -122,6 +122,12 @@ function tick(ts) {
 
       // Опасные тайлы
       if (!ow.combat && !ow.defeated && state.game) {
+        // Hazard cooldowns belong to a region; never carry them into another map.
+        if (lastHazardLocation !== ow.locationId) {
+          lastHazardLocation = ow.locationId;
+          lastTileKey = null;
+          tileDamageTimer = 0;
+        }
         const tileX = Math.floor(ow.player.x / ow.tile);
         const tileY = Math.floor(ow.player.y / ow.tile);
         const tileType = ow.map[tileY]?.[tileX];
@@ -256,7 +262,7 @@ function drawTile(ctx, type, x, y, size, themeName, colors) {
       ctx.fillStyle = '#1a4a3e'; ctx.beginPath(); ctx.arc(x + half + 2 + wind, y + 18, 10, 0, Math.PI * 2); ctx.fill();
     }
   } else if (type === 3) {
-    const isLava = ['volcano', 'dragon', 'obsidian-fields'].includes(themeName);
+    const isLava = ['volcano', 'dragon', 'dragon-lair', 'obsidian-fields'].includes(themeName);
     const isPoison = ['swamp', 'briar-hollow'].includes(themeName);
     const isTrapWater = ['ruins', 'sunken-necropolis'].includes(themeName);
 
