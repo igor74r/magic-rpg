@@ -82,6 +82,7 @@ check('hazard surfaces are walkable only in their region', isWalkable([[3]], 1, 
 check('ordinary stone and prop obstacles remain blocked', isBlocked([[3]], 0, 0) && isBlocked([[2]], 0, 0) && isBlocked([[4]], 0, 0));
 check('enemies loaded', Object.keys(ENEMIES).length >= 20);
 check('five named regional elites are explicitly marked unique', ['rootbound-sentinel','drowned-scribe','ashbound-renegade','mirror-revenant','riftstalker'].every(id => ENEMIES[id]?.uniqueElite === true));
+check('each unique elite has a valid rage phase and its own special attack', ['rootbound-sentinel','drowned-scribe','ashbound-renegade','mirror-revenant','riftstalker'].every(id => { const e = ENEMIES[id]; const p = e?.phases?.[0]; return !!e?.special && !!p && p.atHp > 0 && p.atHp < 1 && p.atkMult > 1 && p.specialEvery >= 1 && typeof p.msg === 'string'; }));
 check('achievements loaded', ACHIEVEMENTS.length >= 15);
 check('effects loaded', Object.keys(EFFECTS).length >= 5);
 check('critical chance adds temporary bonuses once and caps at 75%', resolveCriticalChance({ critChance: 0.2 }, 0.05) === 0.25 && resolveCriticalChance({ critChance: 0.7 }, 0.1) === 0.75);
