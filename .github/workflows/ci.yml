@@ -65,6 +65,9 @@ jobs:
       - name: Check overworld connectivity and dungeon traversal
         run: node scripts/check-overworld-connectivity.mjs
 
+      - name: Check persistent exploration progress
+        run: node scripts/check-exploration.mjs
+
       - name: Install Playwright for real-browser checks
         run: |
           npm install --no-save playwright
