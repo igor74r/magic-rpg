@@ -50,7 +50,7 @@ export function enterOverworld(locationId, opts = {}) {
   const playerPos = { x: spawnX * TILE + TILE / 2, y: spawnY * TILE + TILE / 2 };
 
   const enemies = spawnEnemies(loc, map, cols, rows, playerPos, { ...opts, dungeonFloor }, locationId);
-  const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, locationId);
+  const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, locationId, dungeonFloor);
   chests.forEach((chest, index) => {
     chest.id = `floor-${dungeonFloor}-chest-${index + 1}`;
     if (isDungeonChestOpened(state.game?.player, locationId, chest.id)) chest.opened = true;
