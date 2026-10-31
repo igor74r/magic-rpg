@@ -23,6 +23,18 @@ let deathParticles = [], bloodSplats = [], lowHpPulse = 0, corpses = [], snowAcc
 let lastTileKey = null, tileDamageTimer = 0, _weatherEffectApplied = null;
 let mapTooltipEl = null;
 
+const EVENT_PROP_COLUMN = Object.freeze({ mimic: 0, crystal: 1, altar: 2 });
+
+function getEventPropIndex(eventType, themeName) {
+  const column = EVENT_PROP_COLUMN[eventType];
+  if (!Number.isInteger(column)) return -1;
+  const row = ['volcano', 'obsidian-fields', 'dragon', 'void-crater'].includes(themeName) ? 3
+    : ['shadow', 'sunken-necropolis', 'library'].includes(themeName) ? 2
+      : ['ice', 'frost-citadel', 'ice-peaks'].includes(themeName) ? 1
+        : 0;
+  return row * 8 + column;
+}
+
 function edgeSpawn() {
   const side = Math.floor(Math.random() * 4);
   const band = 70 + Math.random() * 50;
@@ -400,7 +412,10 @@ function render() {
     }
     const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 400);
     ctx.fillStyle = `rgba(255, 215, 0, ${0.1 + pulse * 0.15})`; ctx.beginPath(); ctx.arc(sx, sy, 24 + pulse * 4, 0, Math.PI * 2); ctx.fill();
-    drawStatic(ctx, ev, sx, sy, theme.shadow);
+    const eventPropIndex = getEventPropIndex(ev.eventType, ow.theme || ow.locationId);
+    if (eventPropIndex < 0 || !drawAtlasProp(ctx, eventPropIndex, sx - 24, sy - 24, 48, 48)) {
+      drawStatic(ctx, ev, sx, sy, theme.shadow);
+    }
     ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
     ctx.strokeText(ev.name, sx, sy - 24); ctx.fillStyle = '#ffd060'; ctx.fillText(ev.name, sx, sy - 24);
   }
