@@ -67,3 +67,31 @@ assert.deepEqual(avoidsOccupied, { x: 2, y: 0 },
   'free-cell search must avoid existing spawn objects');
 
 console.log('Overworld map, hazard collision and free-cell checks passed');
+
+const expectedHazards = {
+  volcano: { type: 'lava', dmg: 1, every: 90 },
+  dragon: { type: 'lava', dmg: 1, every: 90 },
+  'obsidian-fields': { type: 'lava', dmg: 1, every: 90 },
+  swamp: { type: 'poison', dmg: 1, every: 180 },
+  'briar-hollow': { type: 'poison', dmg: 1, every: 180 },
+  ruins: { type: 'spike', dmg: 2, every: 0 },
+  'sunken-necropolis': { type: 'spike', dmg: 2, every: 0 }
+};
+
+for (const [locationId, expected] of Object.entries(expectedHazards)) {
+  const danger = getTileDanger(3, locationId);
+  assert.ok(danger, `${locationId}: configured hazard must exist`);
+  assert.equal(danger.type, expected.type, `${locationId}: hazard type`);
+  assert.equal(danger.dmg, expected.dmg, `${locationId}: hazard damage`);
+  assert.equal(danger.every, expected.every, `${locationId}: hazard cadence`);
+  assert.equal(isWalkable([[3]], 1, 1, 24, 24, locationId), true,
+    `${locationId}: environmental hazard must remain traversable`);
+}
+
+assert.equal(getTileDanger(3, 'forest'), null,
+  'ordinary regions must not inherit biome hazard damage');
+assert.equal(getTileDanger(2, 'volcano'), null,
+  'solid wall tiles must not be treated as environmental hazards');
+assert.equal(getTileDanger(3, null), null,
+  'hazard lookup without a region must remain safe');
+
