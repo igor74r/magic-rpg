@@ -439,6 +439,50 @@ export const RARITIES = {
   legendary: { name: 'Легендарный', color: '#ffa500', multiplier: 3.5, weight: 3 }
 };
 
+export const ITEM_AFFIXES = [
+  { id: 'keen', name: 'Острокованный', types: ['weapon'], bonus: { attack: 2, armorPen: 1 } },
+  { id: 'arcane', name: 'Чародейский', types: ['weapon'], bonus: { magic: 2, critChance: 0.01 } },
+  { id: 'piercing', name: 'Пробивающий', types: ['weapon'], bonus: { armorPen: 2 } },
+  { id: 'precise', name: 'Меткий', types: ['weapon', 'ring', 'amulet'], bonus: { critChance: 0.02, dex: 1 } },
+  { id: 'balanced', name: 'Сбалансированный', types: ['weapon'], bonus: { attack: 1, dex: 2 } },
+  { id: 'warded', name: 'Защищённый', types: ['head', 'shoulders', 'chest', 'back', 'wrists', 'hands', 'legs', 'seal'], bonus: { defense: 2, blockPower: 0.02 } },
+  { id: 'swift', name: 'Стремительный', types: ['head', 'back', 'wrists', 'hands', 'legs', 'ring', 'amulet'], bonus: { dex: 2, dodgeChance: 0.02 } },
+  { id: 'fortified', name: 'Укреплённый', types: ['shoulders', 'chest', 'wrists', 'hands', 'legs', 'seal'], bonus: { defense: 3, blockChance: 0.01 } },
+  { id: 'vigilant', name: 'Бдительный', types: ['head', 'shoulders', 'chest', 'back', 'wrists', 'hands', 'legs', 'ring', 'amulet', 'seal'], bonus: { critChance: 0.01, blockChance: 0.01 } },
+  { id: 'resolute', name: 'Непоколебимый', types: ['head', 'shoulders', 'chest', 'back', 'wrists', 'hands', 'legs', 'ring', 'amulet', 'seal'], bonus: { defense: 1, blockPower: 0.04 } },
+  { id: 'focused', name: 'Сосредоточенный', types: ['weapon', 'ring', 'amulet', 'seal'], bonus: { magic: 1, critChance: 0.01 } }
+];
+
+export function rollItemAffixes(item, rarity, random = Math.random) {
+  const countByRarity = { common: 0, rare: 1, epic: 2, legendary: 3 };
+  const count = countByRarity[rarity] || 0;
+  if (!item || count === 0) return [];
+
+  const pool = ITEM_AFFIXES.filter(affix => affix.types.includes(item.type));
+  const selected = [];
+  while (selected.length < count && selected.length < pool.length) {
+    const sample = typeof random === 'function' ? random() : Math.random();
+    const normalized = Number.isFinite(sample)
+      ? Math.max(0, Math.min(1 - Number.EPSILON, sample))
+      : Math.random();
+    const index = Math.floor(normalized * pool.length);
+    const affix = pool[index];
+    if (!selected.some(entry => entry.id === affix.id)) selected.push(affix);
+  }
+
+  const rarityScale = { common: 1, rare: 1, epic: 1.25, legendary: 1.5 }[rarity] || 1;
+  return selected.map(affix => ({
+    id: affix.id,
+    name: affix.name,
+    bonus: Object.fromEntries(Object.entries(affix.bonus).map(([key, value]) => [
+      key,
+      typeof value === 'number' && ['dodgeChance', 'blockChance', 'blockPower', 'critChance'].includes(key)
+        ? Number((value * rarityScale).toFixed(3))
+        : Math.round(value * rarityScale)
+    ]))
+  }));
+}
+
 export function rollRarity(random = Math.random) {
   const total = Object.values(RARITIES).reduce((sum, rarity) => sum + rarity.weight, 0);
   const sample = typeof random === 'function' ? random() : Math.random();
