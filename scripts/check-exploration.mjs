@@ -5,7 +5,7 @@ const player = {};
 assert.equal(recordLocationVisit(player, 'forest', 1000), true);
 assert.deepEqual(player.exploration.visited.forest, {
   visits: 1, firstVisitedAt: 1000, lastVisitedAt: 1000, cleared: false,
-  dungeon: { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], bossDefeated: false }
+  dungeon: { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false }
 });
 recordLocationVisit(player, 'forest', 2000);
 assert.equal(player.exploration.visited.forest.visits, 2);
@@ -47,7 +47,7 @@ assert.equal(legacy.visited.forest.firstVisitedAt, 0);
 assert.equal(legacy.visited.forest.lastVisitedAt, 0);
 assert.deepEqual(legacy.visited.forest.dungeon, {
   floor: 1, checkpoint: null, openedChests: ['chest-a'],
-  secretsFound: ['secret-a'], bossDefeated: false
+  secretsFound: ['secret-a'], secrets: [], secretFloors: [], bossDefeated: false
 });
 assert.equal(Object.hasOwn(legacy.visited, '../bad'), false);
 assert.equal(legacy.lastLocationId, 'forest');
