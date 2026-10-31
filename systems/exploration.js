@@ -36,7 +36,17 @@ function normalizeRecord(record) {
       defeatedBosses: cleanIdList(dungeon.defeatedBosses, 128),
       defeatedElites: cleanIdList(dungeon.defeatedElites, 128),
       claimedEliteRewards: cleanIdList(dungeon.claimedEliteRewards, 128),
-      claimedFloorRewards: cleanIdList(dungeon.claimedFloorRewards, 128)
+      claimedFloorRewards: cleanIdList(dungeon.claimedFloorRewards, 128),
+      encounters: Array.isArray(dungeon.encounters) ? dungeon.encounters.filter(e =>
+        e && typeof e === 'object' && !Array.isArray(e) &&
+        typeof e.id === 'string' && ID_RE.test(e.id) &&
+        typeof e.enemyId === 'string' && ID_RE.test(e.enemyId) &&
+        ['mimic', 'secret-elite'].includes(e.kind) &&
+        Number.isFinite(e.x) && Number.isFinite(e.y) &&
+        Number.isFinite(e.maxHp) && e.maxHp > 0 &&
+        Number.isFinite(e.hp) && e.hp > 0 && e.hp <= e.maxHp &&
+        ['active', 'defeated'].includes(e.status)
+      ).slice(-64).map(e => ({ id: e.id, kind: e.kind, enemyId: e.enemyId, x: e.x, y: e.y, hp: e.hp, maxHp: e.maxHp, status: e.status })) : []
     }
   };
 }
@@ -76,7 +86,7 @@ export function recordLocationVisit(player, locationId, now = Date.now()) {
     firstVisitedAt: previous?.firstVisitedAt || now,
     lastVisitedAt: now,
     cleared: previous?.cleared === true,
-    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [] }
+    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: [] }
   };
   exploration.lastLocationId = locationId;
   const entries = Object.entries(exploration.visited);
@@ -168,6 +178,44 @@ export function claimDungeonFloorReward(player, locationId, floor) {
 export function isDungeonChestOpened(player, locationId, chestId) {
   if (typeof chestId !== 'string' || !ID_RE.test(chestId)) return false;
   return getDungeonProgress(player, locationId)?.openedChests.includes(chestId) === true;
+}
+
+export function getDungeonEncounters(player, locationId, floor = 1) {
+  const prefix = `f${Math.max(1, Math.floor(Number(floor) || 1))}-`;
+  return (getDungeonProgress(player, locationId)?.encounters || [])
+    .filter(encounter => encounter.id.startsWith(prefix))
+    .map(encounter => ({ ...encounter }));
+}
+
+export function saveDungeonEncounter(player, locationId, floor, encounter) {
+  if (!player || !ID_RE.test(locationId || '') || !encounter || !ID_RE.test(encounter.id || '') ||
+      !ID_RE.test(encounter.enemyId || '') || !['mimic', 'secret-elite'].includes(encounter.kind) ||
+      !Number.isFinite(encounter.x) || !Number.isFinite(encounter.y) ||
+      !Number.isFinite(encounter.hp) || !Number.isFinite(encounter.maxHp) ||
+      encounter.hp <= 0 || encounter.maxHp <= 0 || encounter.hp > encounter.maxHp) return false;
+  const current = getDungeonProgress(player, locationId);
+  if (!current) return false;
+  const prefix = `f${Math.max(1, Math.floor(Number(floor) || 1))}-`;
+  if (!encounter.id.startsWith(prefix)) return false;
+  const records = current.encounters.filter(item => item.id !== encounter.id);
+  records.push({ id: encounter.id, kind: encounter.kind, enemyId: encounter.enemyId,
+    x: encounter.x, y: encounter.y, hp: encounter.hp, maxHp: encounter.maxHp, status: 'active' });
+  player.exploration.visited[locationId].dungeon = { ...current, encounters: records.slice(-64) };
+  return true;
+}
+
+export function defeatDungeonEncounter(player, locationId, encounterId) {
+  if (!player || !ID_RE.test(locationId || '') || !ID_RE.test(encounterId || '')) return false;
+  const current = getDungeonProgress(player, locationId);
+  if (!current) return false;
+  let changed = false;
+  const encounters = current.encounters.map(item => {
+    if (item.id !== encounterId || item.status === 'defeated') return item;
+    changed = true;
+    return { ...item, status: 'defeated' };
+  });
+  if (changed) player.exploration.visited[locationId].dungeon = { ...current, encounters };
+  return changed;
 }
 
 export function updateDungeonProgress(player, locationId, patch = {}) {
