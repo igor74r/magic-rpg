@@ -11,7 +11,10 @@ export function ensureTowerProgress(player) {
   if (!player.tower || typeof player.tower !== 'object' || Array.isArray(player.tower)) player.tower = {};
   const tower = player.tower;
   tower.highestCleared = Number.isInteger(tower.highestCleared) ? Math.max(0, Math.min(TOWER_FLOOR_COUNT, tower.highestCleared)) : 0;
-  tower.checkpointFloor = Number.isInteger(tower.checkpointFloor) ? Math.max(1, Math.min(TOWER_FLOOR_COUNT, tower.checkpointFloor)) : 1;
+  const nextCheckpoint = Math.min(TOWER_FLOOR_COUNT, tower.highestCleared + 1);
+  tower.checkpointFloor = Number.isInteger(tower.checkpointFloor)
+    ? Math.max(nextCheckpoint, Math.min(TOWER_FLOOR_COUNT, tower.checkpointFloor))
+    : nextCheckpoint;
   tower.clearedFloors = Array.isArray(tower.clearedFloors) ? [...new Set(tower.clearedFloors.filter(n => Number.isInteger(n) && n >= 1 && n <= TOWER_FLOOR_COUNT))].sort((a, b) => a - b) : [];
   tower.claimedChests = Array.isArray(tower.claimedChests) ? [...new Set(tower.claimedChests.filter(n => TOWER_CHEST_FLOORS.includes(n)))] : [];
   tower.checkpointFloor = Math.min(tower.checkpointFloor, Math.max(1, tower.highestCleared + 1));
@@ -92,7 +95,8 @@ export function defeatActiveTowerMob(run, mobId) {
 }
 
 export function completeTowerFloor(player, run) {
-  if (!player || !run || !run.completed || run.mobs.some(mob => !mob.defeated)) return null;
+  if (!player || !run || !run.completed || run.rewardClaimed || run.mobs.some(mob => !mob.defeated)) return null;
+  run.rewardClaimed = true;
   const tower = ensureTowerProgress(player);
   const firstClear = !tower.clearedFloors.includes(run.floor);
   const baseExp = run.mobs.reduce((sum, mob) => sum + mob.exp, 0);
