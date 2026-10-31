@@ -4,7 +4,7 @@ import {
   combatFlee, transitionDungeonFloor
 } from '../systems/overworld.js';
 import { saveGame } from '../systems/save.js';
-import { getDungeonProgress, getDungeonSecrets, saveDungeonSecrets, hasDungeonSecretsGenerated, markDungeonSecretFound, isDungeonChestOpened, getDungeonEncounters, saveDungeonEncounter } from '../systems/exploration.js';
+import { getDungeonProgress, getDungeonSecrets, saveDungeonSecrets, hasDungeonSecretsGenerated, markDungeonSecretFound, isDungeonChestOpened, getDungeonEncounters, saveDungeonEncounter, disarmDungeonTrap } from '../systems/exploration.js';
 import { addItem } from '../systems/inventory.js';
 import { saveAndMenu } from './menu.js';
 import { LOCATIONS } from '../data/locations.js';
@@ -103,10 +103,30 @@ function generateSecrets(ow) {
   return secrets.map(secret => ({ ...secret, wx: secret.tx * ow.tile + ow.tile / 2, wy: secret.ty * ow.tile + ow.tile / 2, ax: secret.ax * ow.tile + ow.tile / 2, ay: secret.ay * ow.tile + ow.tile / 2 }));
 }
 
+function tryDisarmNearbyTrap() {
+  const ow = state.overworld;
+  const player = state.game?.player;
+  if (!ow || !player || ow.combat || ow.defeated) return false;
+  const canDisarm = player.class === 'archer' && Array.isArray(player.talents) &&
+    player.talents.includes('a-trapper');
+  if (!canDisarm) return false;
+  const chest = (ow.chests || []).find(item =>
+    !item.opened && item.type === 'cursed' && item.id &&
+    Math.hypot(item.x - ow.player.x, item.y - ow.player.y) < ow.tile * 1.6
+  );
+  if (!chest) return false;
+  if (!disarmDungeonTrap(player, ow.locationId, chest.id)) return false;
+  saveGame();
+  emit('toast', '🪤 Ловушка обезврежена!');
+  emit('log', { channel: 'game', msg: '🏹 Мастер ловушек обезвредил проклятый сундук. Его можно открыть без урона.', cls: 'success' });
+  return true;
+}
+
 function tryOpenSecret() {
   const ow = state.overworld;
   if (!ow || !ow.secretWalls) return;
   if (ow.combat || ow.defeated) return;
+  if (tryDisarmNearbyTrap()) return;
   const p = ow.player;
   for (const stair of ow.dungeonStairs || []) {
     const sx = stair.x * ow.tile + ow.tile / 2, sy = stair.y * ow.tile + ow.tile / 2;
