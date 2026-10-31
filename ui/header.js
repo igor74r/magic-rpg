@@ -16,6 +16,8 @@ import {
 } from './quests.js';
 import { renderPassives } from './passives.js';
 import { renderChronicles } from './chronicles.js';
+import { DRAGON_SHARDS } from '../data/rift-canon.js';
+import { canOpenRift, ensureRiftProgress } from '../systems/rift-progression.js';
 
 let overhaulCssLoaded = false;
 
@@ -187,12 +189,8 @@ export function renderHeader() {
 }
 
 function renderEndgameHint(p) {
-  const shards = state.game.shards || {};
-
-  const shardCount = Object.values(shards)
-    .filter(Boolean)
-    .length;
-
+  ensureRiftProgress(p);
+  const defeated = DRAGON_SHARDS.filter(dragon => p.dragonDefeated[dragon.shardId]).length;
   const riftBest = p.riftBest || 0;
 
   if (riftBest > 0) {
@@ -203,20 +201,24 @@ function renderEndgameHint(p) {
     `;
   }
 
-  if (shardCount === 3) {
+  if (canOpenRift(p)) {
     return `
       <div class="endgame-hint rift">
         🌀 <b>Разлом открыт!</b>
-        Зайди в деревню и войди в портал
+        Три драконьи печати восстановлены
       </div>
     `;
   }
 
+  const nextDragon = DRAGON_SHARDS.find(dragon => !p.dragonDefeated[dragon.shardId]);
+  const nextHint = nextDragon
+    ? `Следующий страж: ${nextDragon.name} · Ур. ${nextDragon.requiredLevel}`
+    : 'Проверьте условия открытия Разлома';
+
   return `
     <div class="endgame-hint">
-      💎 Осколки Кристалла:
-      <b>${shardCount}/3</b>
-      · собери все — откроется Разлом
+      🐉 Драконьи печати: <b>${defeated}/3</b>
+      <small>${nextHint}</small>
     </div>
   `;
 }
