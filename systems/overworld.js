@@ -8,6 +8,8 @@ import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
 import { recordLocationVisit, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened } from './exploration.js';
 import { saveGame } from './save.js';
+import { countItem } from './inventory.js';
+import { prepareChestKeyAccess } from '../data/dungeon-treasures.js';
 
 export { TILE } from './overworld/map.js';
 export { tryMovePlayer, updateOverworld } from './overworld/ai.js';
@@ -55,6 +57,7 @@ export function enterOverworld(locationId, opts = {}) {
     chest.id = `floor-${dungeonFloor}-chest-${index + 1}`;
     if (isDungeonChestOpened(state.game?.player, locationId, chest.id)) chest.opened = true;
   });
+  prepareChestKeyAccess(chests, countItem('rusty-key') > 0);
   const npcs = spawnNPCs(loc);
   const statics = spawnStatics(loc);
   const events = spawnEvents(loc, map, cols, rows, playerPos, locationId, [...enemies, ...chests]);
