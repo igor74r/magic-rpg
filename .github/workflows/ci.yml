@@ -67,6 +67,8 @@ jobs:
 
       - name: Check persistent exploration progress
         run: node scripts/check-exploration.mjs
+      - name: Check act relics and regional dungeon treasure
+        run: node scripts/check-dungeon-treasures.mjs
 
       - name: Install Playwright for real-browser checks
         run: |
