@@ -230,15 +230,13 @@ export function generateMap(locationId, cols, rows) {
   const cy = Math.floor(rows / 2);
 
   for (let x = 0; x < cols; x++) {
-    if (grid[cy][x] === 0 || grid[cy][x] === 4) {
-      grid[cy][x] = 1;
-    }
+    // The main horizontal road must never be cut by a random obstacle.
+    grid[cy][x] = 1;
   }
 
   for (let y = 0; y < rows; y++) {
-    if (grid[y][cx] === 0 || grid[y][cx] === 4) {
-      grid[y][cx] = 1;
-    }
+    // The main vertical road connects the spawn area to both map edges.
+    grid[y][cx] = 1;
   }
 
   for (let y = cy - 2; y <= cy + 2; y++) {
