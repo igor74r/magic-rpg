@@ -9,7 +9,7 @@ assert.deepEqual(player.exploration.claimedActRelics, ['act-1', 'act-2']);
 assert.equal(recordLocationVisit(player, 'forest', 1000), true);
 assert.deepEqual(player.exploration.visited.forest, {
   visits: 1, firstVisitedAt: 1000, lastVisitedAt: 1000, cleared: false,
-  dungeon: { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [] }
+  dungeon: { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: [] }
 });
 recordLocationVisit(player, 'forest', 2000);
 assert.equal(player.exploration.visited.forest.visits, 2);
@@ -21,7 +21,7 @@ assert.equal(markLocationCleared(player, 'ruins'), false);
 assert.equal(updateDungeonProgress(player, 'forest', { floor: 2, checkpoint: 'crypt-hall', chestId: 'chest-01', secretId: 'hidden-room', bossId: 'f2-shadow-mage' }), true);
 assert.deepEqual(getDungeonProgress(player, 'forest'), {
   floor: 2, checkpoint: 'crypt-hall', openedChests: ['chest-01'],
-  secretsFound: ['hidden-room'], secrets: [], secretFloors: [], bossDefeated: true, defeatedBosses: ['f2-shadow-mage'], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: []
+  secretsFound: ['hidden-room'], secrets: [], secretFloors: [], bossDefeated: true, defeatedBosses: ['f2-shadow-mage'], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: [], encounters: []
 });
 assert.equal(saveDungeonEncounter(player, 'forest', 2, {
   id: 'f2-mimic-chest-2', kind: 'mimic', enemyId: 'goblin',
@@ -87,7 +87,7 @@ assert.equal(legacy.visited.forest.firstVisitedAt, 0);
 assert.equal(legacy.visited.forest.lastVisitedAt, 0);
 assert.deepEqual(legacy.visited.forest.dungeon, {
   floor: 1, checkpoint: null, openedChests: ['chest-a'],
-  secretsFound: ['secret-a'], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: []
+  secretsFound: ['secret-a'], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: [], encounters: []
 });
 assert.deepEqual(legacy.claimedActRelics, []);
 assert.equal(Object.hasOwn(legacy.visited, '../bad'), false);
