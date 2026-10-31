@@ -1298,3 +1298,24 @@ input[type="text"]:focus, select:focus { outline: none; border-color: var(--gold
   0%, 100% { box-shadow: 0 0 10px rgba(96, 255, 96, 0.3); }
   50% { box-shadow: 0 0 25px rgba(96, 255, 96, 0.8); }
 }
+
+/* Расширенные настройки */
+#settings-content .settings-note {
+  margin:12px 0 2px;
+  padding:10px 12px;
+  border-left:2px solid rgba(201,162,39,.55);
+  border-radius:0 4px 4px 0;
+  background:rgba(201,162,39,.06);
+  color:var(--ink-dim);
+  font-size:12px;
+  line-height:1.6;
+}
+@media (max-width:600px) {
+  #settings-content .settings-row {
+    grid-template-columns:minmax(0,1fr) minmax(120px,1fr);
+    gap:7px 10px;
+  }
+  #settings-content .settings-row label { grid-column:1 / -1; }
+  #settings-content .settings-row span { min-width:0; }
+  .settings-tab { padding:9px 12px; font-size:12px; }
+}
