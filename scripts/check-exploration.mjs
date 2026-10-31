@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
-import { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened, getDungeonSecrets, saveDungeonSecrets, hasDungeonSecretsGenerated, isDungeonBossDefeated, isDungeonEliteDefeated, claimDungeonEliteReward } from '../systems/exploration.js';
+import { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened, getDungeonSecrets, saveDungeonSecrets, hasDungeonSecretsGenerated, isDungeonBossDefeated, isDungeonEliteDefeated, claimDungeonEliteReward, claimDungeonFloorReward } from '../systems/exploration.js';
 
 const player = {};
 assert.equal(recordLocationVisit(player, 'forest', 1000), true);
 assert.deepEqual(player.exploration.visited.forest, {
   visits: 1, firstVisitedAt: 1000, lastVisitedAt: 1000, cleared: false,
-  dungeon: { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [] }
+  dungeon: { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [] }
 });
 recordLocationVisit(player, 'forest', 2000);
 assert.equal(player.exploration.visited.forest.visits, 2);
@@ -17,7 +17,7 @@ assert.equal(markLocationCleared(player, 'ruins'), false);
 assert.equal(updateDungeonProgress(player, 'forest', { floor: 2, checkpoint: 'crypt-hall', chestId: 'chest-01', secretId: 'hidden-room', bossId: 'f2-shadow-mage' }), true);
 assert.deepEqual(getDungeonProgress(player, 'forest'), {
   floor: 2, checkpoint: 'crypt-hall', openedChests: ['chest-01'],
-  secretsFound: ['hidden-room'], secrets: [], secretFloors: [], bossDefeated: true, defeatedBosses: ['f2-shadow-mage'], defeatedElites: [], claimedEliteRewards: []
+  secretsFound: ['hidden-room'], secrets: [], secretFloors: [], bossDefeated: true, defeatedBosses: ['f2-shadow-mage'], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: []
 });
 assert.equal(isDungeonChestOpened(player, 'forest', 'chest-01'), true);
 assert.equal(isDungeonChestOpened(player, 'forest', 'chest-02'), false);
@@ -32,6 +32,10 @@ assert.equal(claimDungeonEliteReward(player, 'forest', 2, 'rootbound-sentinel'),
 assert.equal(isDungeonEliteDefeated(player, 'forest', 1, 'rootbound-sentinel'), false);
 assert.equal(isDungeonEliteDefeated(player, 'ruins', 2, 'rootbound-sentinel'), false);
 assert.deepEqual(getDungeonProgress(player, 'forest').claimedEliteRewards, ['f2-rootbound-sentinel']);
+assert.equal(claimDungeonFloorReward(player, 'forest', 2), true);
+assert.equal(claimDungeonFloorReward(player, 'forest', 2), false);
+assert.equal(claimDungeonFloorReward(player, 'forest', 1), true);
+assert.deepEqual(getDungeonProgress(player, 'forest').claimedFloorRewards, ['f2', 'f1']);
 assert.equal(updateDungeonProgress(player, 'forest', { bossId: 'f1-grave-king' }), true);
 assert.equal(isDungeonBossDefeated(player, 'forest', 1, 'grave-king'), true);
 
