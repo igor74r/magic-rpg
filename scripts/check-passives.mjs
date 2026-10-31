@@ -12,9 +12,10 @@ const classes = ['warrior', 'mage', 'archer'];
 for (const classId of classes) {
   const tree = getPassiveTree(classId);
   assert.equal(tree.classId, classId);
-  assert.equal(Object.keys(tree.nodes).length, 21, `${classId}: expected 20 nodes plus start`);
+  assert.equal(Object.keys(tree.nodes).length, 31, `${classId}: expected 20 nodes plus start`);
   assert.ok(tree.nodes.start);
   for (const node of Object.values(tree.nodes)) {
+    if (node.id !== 'start') assert.ok(node.levelReq >= 2 && node.levelReq <= 35);
     for (const parentId of node.conn) {
       assert.ok(tree.nodes[parentId], `${classId}/${node.id}: missing connection ${parentId}`);
     }
