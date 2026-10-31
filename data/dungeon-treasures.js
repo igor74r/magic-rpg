@@ -49,6 +49,13 @@ export function getDungeonChestType(locationId, floor = 1, index = 0, total = 1)
 
 export function prepareChestKeyAccess(chests, hasKey = false) {
   if (!Array.isArray(chests)) return -1;
+  // Rebuild access flags from current inventory and unopened chests. This
+  // prevents stale key caches/free-picks from duplicating after re-entry.
+  for (const chest of chests) {
+    if (!chest) continue;
+    delete chest.keyCache;
+    delete chest.freePick;
+  }
   const locked = chests.filter(chest => chest && chest.type === 'locked' && !chest.opened);
   if (!locked.length || hasKey) return -1;
   const cacheIndex = chests.findIndex(chest => chest && !chest.opened && chest.type !== 'locked');
