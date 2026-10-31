@@ -346,7 +346,12 @@ export function combatCastSpell(spellId) {
         (
           spell.damage +
           Math.floor(stats.mag / 2) -
-          Math.floor(enemyDefValue(enemy) / 2)
+          Math.floor(
+            Math.max(
+              0,
+              enemyDefValue(enemy) - (stats.armorPen || 0)
+            ) / 2
+          )
         ) *
         talent.spellMult
       )
