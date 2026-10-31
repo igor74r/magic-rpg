@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened, getDungeonSecrets, saveDungeonSecrets, hasDungeonSecretsGenerated, isDungeonBossDefeated, isDungeonEliteDefeated, claimDungeonEliteReward, claimDungeonFloorReward, claimActRelic } from '../systems/exploration.js';
+import { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened, getDungeonSecrets, saveDungeonSecrets, hasDungeonSecretsGenerated, isDungeonBossDefeated, isDungeonEliteDefeated, claimDungeonEliteReward, claimDungeonFloorReward, claimActRelic, getDungeonEncounters, saveDungeonEncounter, defeatDungeonEncounter } from '../systems/exploration.js';
 
 const player = {};
 assert.equal(claimActRelic(player, 'act-1'), true);
@@ -21,8 +21,24 @@ assert.equal(markLocationCleared(player, 'ruins'), false);
 assert.equal(updateDungeonProgress(player, 'forest', { floor: 2, checkpoint: 'crypt-hall', chestId: 'chest-01', secretId: 'hidden-room', bossId: 'f2-shadow-mage' }), true);
 assert.deepEqual(getDungeonProgress(player, 'forest'), {
   floor: 2, checkpoint: 'crypt-hall', openedChests: ['chest-01'],
-  secretsFound: ['hidden-room'], secrets: [], secretFloors: [], bossDefeated: true, defeatedBosses: ['f2-shadow-mage'], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: []
+  secretsFound: ['hidden-room'], secrets: [], secretFloors: [], bossDefeated: true, defeatedBosses: ['f2-shadow-mage'], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: []
 });
+assert.equal(saveDungeonEncounter(player, 'forest', 2, {
+  id: 'f2-mimic-chest-2', kind: 'mimic', enemyId: 'goblin',
+  x: 320, y: 480, hp: 45, maxHp: 60
+}), true);
+assert.deepEqual(getDungeonEncounters(player, 'forest', 2), [{
+  id: 'f2-mimic-chest-2', kind: 'mimic', enemyId: 'goblin',
+  x: 320, y: 480, hp: 45, maxHp: 60, status: 'active'
+}]);
+assert.equal(getDungeonEncounters(player, 'forest', 1).length, 0);
+assert.equal(defeatDungeonEncounter(player, 'forest', 'f2-mimic-chest-2'), true);
+assert.equal(getDungeonEncounters(player, 'forest', 2)[0].status, 'defeated');
+assert.equal(defeatDungeonEncounter(player, 'forest', 'f2-mimic-chest-2'), false);
+assert.equal(saveDungeonEncounter(player, 'forest', 2, {
+  id: '../invalid', kind: 'mimic', enemyId: 'goblin',
+  x: 320, y: 480, hp: 45, maxHp: 60
+}), false);
 assert.equal(isDungeonChestOpened(player, 'forest', 'chest-01'), true);
 assert.equal(isDungeonChestOpened(player, 'forest', 'chest-02'), false);
 assert.equal(isDungeonChestOpened(player, 'forest', '../invalid'), false);
@@ -71,7 +87,7 @@ assert.equal(legacy.visited.forest.firstVisitedAt, 0);
 assert.equal(legacy.visited.forest.lastVisitedAt, 0);
 assert.deepEqual(legacy.visited.forest.dungeon, {
   floor: 1, checkpoint: null, openedChests: ['chest-a'],
-  secretsFound: ['secret-a'], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: []
+  secretsFound: ['secret-a'], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: []
 });
 assert.deepEqual(legacy.claimedActRelics, []);
 assert.equal(Object.hasOwn(legacy.visited, '../bad'), false);
