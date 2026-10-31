@@ -578,7 +578,7 @@ function render() {
     ctx.strokeStyle = 'rgba(201,162,39,0.6)'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]);
   }
 
-  drawBloom(ctx);
+  if (!reduceMotion) drawBloom(ctx);
 
   const dayPhase = (worldTime % 120) / 120;
   let nightAlpha = 0;
@@ -651,9 +651,11 @@ function render() {
     ctx.drawImage(fogCanvas, 0, 0);
   }
 
-  drawFireflies(ctx, worldTime);
-  drawFogLayers(ctx);
-  drawWeather(ctx);
+  if (!reduceMotion) {
+    drawFireflies(ctx, worldTime);
+    drawFogLayers(ctx);
+    drawWeather(ctx);
+  }
 
   if (getLightningFlash() > 0) {
     ctx.fillStyle = `rgba(255, 255, 255, ${getLightningFlash() * 0.5})`;
