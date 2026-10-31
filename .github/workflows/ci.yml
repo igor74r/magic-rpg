@@ -62,6 +62,9 @@ jobs:
       - name: Check overworld maps and region collision
         run: node scripts/check-overworld-map.mjs
 
+      - name: Check overworld connectivity and dungeon traversal
+        run: node scripts/check-overworld-connectivity.mjs
+
       - name: Install Playwright for real-browser checks
         run: |
           npm install --no-save playwright
