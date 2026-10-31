@@ -1,12 +1,13 @@
 import { state } from './state.js';
 import { STORY } from '../data/story.js';
 import { ensureRiftProgress } from './rift-progression.js';
+import { ensureTowerProgress } from './tower.js';
 
 const SLOT_PREFIX = 'magic-rpg-save-';
 const LEGACY_KEY = 'magic-rpg-save';
 const SETTINGS_KEY = 'magic-rpg-settings';
 
-const SAVE_VERSION = 14;
+const SAVE_VERSION = 15;
 const SETTINGS_VERSION = 4;
 const MAX_SLOT = 3;
 
@@ -369,7 +370,13 @@ export function migrateGame(game) {
     game.version = 14;
   }
 
+  if (game.version < 15) {
+    ensureTowerProgress(game.player);
+    game.version = 15;
+  }
+
   ensureRiftProgress(game.player);
+  ensureTowerProgress(game.player);
   return game;
 }
 
