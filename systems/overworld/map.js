@@ -225,6 +225,33 @@ export function generateMap(locationId, cols, rows) {
     }
   }
 
+  // Guaranteed biome hazard pockets. They are placed away from the central
+  // travel lanes so every region has readable environmental danger without
+  // trapping the player at the spawn point.
+  const hazardRegions = new Set([
+    'volcano', 'dragon', 'obsidian-fields',
+    'swamp', 'briar-hollow',
+    'ruins', 'sunken-necropolis'
+  ]);
+  if (hazardRegions.has(locationId)) {
+    const pockets = [
+      [Math.max(2, Math.floor(cols * 0.22)), Math.max(2, Math.floor(rows * 0.24))],
+      [Math.min(cols - 3, Math.floor(cols * 0.78)), Math.min(rows - 3, Math.floor(rows * 0.76))]
+    ];
+    for (const [hx, hy] of pockets) {
+      for (let oy = -1; oy <= 1; oy++) {
+        for (let ox = -1; ox <= 1; ox++) {
+          if (Math.abs(ox) + Math.abs(oy) > 2) continue;
+          const x = hx + ox;
+          const y = hy + oy;
+          if (x >= 0 && x < cols && y >= 0 && y < rows) {
+            grid[y][x] = 3;
+          }
+        }
+      }
+    }
+  }
+
   // Центральные дороги и безопасная зона появления героя.
   const cx = Math.floor(cols / 2);
   const cy = Math.floor(rows / 2);
