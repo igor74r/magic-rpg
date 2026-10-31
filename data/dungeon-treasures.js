@@ -47,6 +47,19 @@ export function getDungeonChestType(locationId, floor = 1, index = 0, total = 1)
   return 'wooden';
 }
 
+export function prepareChestKeyAccess(chests, hasKey = false) {
+  if (!Array.isArray(chests)) return -1;
+  const locked = chests.filter(chest => chest && chest.type === 'locked' && !chest.opened);
+  if (!locked.length || hasKey) return -1;
+  const cacheIndex = chests.findIndex(chest => chest && !chest.opened && chest.type !== 'locked');
+  if (cacheIndex >= 0) {
+    chests[cacheIndex].keyCache = true;
+    return cacheIndex;
+  }
+  locked[0].freePick = true;
+  return chests.indexOf(locked[0]);
+}
+
 export function rollDungeonChestLoot(locationId, random = Math.random) {
   const location = LOCATIONS[locationId];
   const actNumber = getActNumberForLocation(locationId);
