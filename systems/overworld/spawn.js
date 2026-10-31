@@ -4,7 +4,7 @@ import { ITEMS, RARITIES } from '../../data/items.js';
 import { addItem } from '../inventory.js';
 import { checkAchievements } from '../achievements.js';
 import { saveGame } from '../save.js';
-import { updateDungeonProgress } from '../exploration.js';
+import { updateDungeonProgress, isDungeonBossDefeated } from '../exploration.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
@@ -55,8 +55,14 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
   const ng = getNGPlusMult();
   const riftM = opts.rifMode ? getRiftMult(opts.rifFloor || 1) : { hpMult: 1 };
   const enemies = [];
-  const count = Math.min(Math.max(loc.enemies.length, 4), 7);
-  const spawnRoster = createSpawnRoster(loc.enemies, count);
+  const floor = Math.max(1, Math.floor(Number(opts.dungeonFloor) || 1));
+  const eligibleEnemies = loc.enemies.filter(enemyId => {
+    const def = ENEMIES[enemyId];
+    return !def?.boss || !locationId || !isDungeonBossDefeated(state.game?.player, locationId, floor, enemyId);
+  });
+  if (!eligibleEnemies.length) return [];
+  const count = Math.min(Math.max(eligibleEnemies.length, 4), 7);
+  const spawnRoster = createSpawnRoster(eligibleEnemies, count);
   const eliteChance = getEliteChance();
 
   for (let i = 0; i < count; i++) {
