@@ -278,17 +278,14 @@ export function findFreeCell(
   map,
   cols,
   rows,
-  avoidList,
-  minDistFromPlayer,
-  playerPos,
+  avoidList = [],
+  minDistFromPlayer = 0,
+  playerPos = null,
   locationId = null,
   random = Math.random
 ) {
-  for (let attempt = 0; attempt < 300; attempt++) {
-    const x = Math.floor(random() * cols);
-    const y = Math.floor(random() * rows);
-
-    if (isBlocked(map, x, y, locationId)) continue;
+  const isCandidate = (x, y) => {
+    if (isBlocked(map, x, y, locationId)) return false;
 
     const px = x * TILE + TILE / 2;
     const py = y * TILE + TILE / 2;
@@ -297,22 +294,29 @@ export function findFreeCell(
       playerPos &&
       Math.hypot(px - playerPos.x, py - playerPos.y) < minDistFromPlayer
     ) {
-      continue;
+      return false;
     }
-
-    let overlap = false;
 
     for (const obj of avoidList) {
-      if (obj.dead) continue;
-
-      if (Math.hypot(px - obj.x, py - obj.y) < 80) {
-        overlap = true;
-        break;
-      }
+      if (!obj || obj.dead || obj.opened) continue;
+      if (Math.hypot(px - obj.x, py - obj.y) < 80) return false;
     }
 
-    if (!overlap) {
-      return { x, y };
+    return true;
+  };
+
+  // Fast random placement keeps the map feeling varied.
+  for (let attempt = 0; attempt < 300; attempt++) {
+    const x = Math.floor(random() * cols);
+    const y = Math.floor(random() * rows);
+    if (isCandidate(x, y)) return { x, y };
+  }
+
+  // A bounded full scan prevents random clustering from hiding valid cells.
+  // It also makes spawn placement reliable on small or obstacle-heavy maps.
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (isCandidate(x, y)) return { x, y };
     }
   }
 
