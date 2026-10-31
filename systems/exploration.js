@@ -19,6 +19,7 @@ function normalizeRecord(record) {
       checkpoint: typeof dungeon.checkpoint === 'string' && ID_RE.test(dungeon.checkpoint) ? dungeon.checkpoint : null,
       openedChests: cleanIdList(dungeon.openedChests),
       secretsFound: cleanIdList(dungeon.secretsFound),
+      secretFloors: Array.isArray(dungeon.secretFloors) ? [...new Set(dungeon.secretFloors.filter(n => Number.isInteger(n) && n >= 1 && n <= 999))].slice(0, 16) : [],
       secrets: Array.isArray(dungeon.secrets) ? dungeon.secrets.filter(s =>
         s && typeof s === 'object' && !Array.isArray(s) &&
         typeof s.id === 'string' && ID_RE.test(s.id) &&
@@ -58,7 +59,7 @@ export function recordLocationVisit(player, locationId, now = Date.now()) {
     firstVisitedAt: previous?.firstVisitedAt || now,
     lastVisitedAt: now,
     cleared: previous?.cleared === true,
-    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], bossDefeated: false }
+    dungeon: previous?.dungeon || { floor: 1, checkpoint: null, openedChests: [], secretsFound: [], secrets: [], secretFloors: [], bossDefeated: false }
   };
   exploration.lastLocationId = locationId;
   const entries = Object.entries(exploration.visited);
@@ -88,6 +89,11 @@ export function getDungeonSecrets(player, locationId, floor = 1) {
   return all.filter(secret => secret.id.startsWith(prefix)).map(secret => ({ ...secret }));
 }
 
+export function hasDungeonSecretsGenerated(player, locationId, floor = 1) {
+  const n = Math.max(1, Math.floor(Number(floor) || 1));
+  return getDungeonProgress(player, locationId)?.secretFloors.includes(n) === true;
+}
+
 export function saveDungeonSecrets(player, locationId, floor, secrets) {
   if (!player || !player.exploration?.visited?.[locationId] || !ID_RE.test(locationId)) return false;
   const current = getDungeonProgress(player, locationId);
@@ -103,7 +109,8 @@ export function saveDungeonSecrets(player, locationId, floor, secrets) {
     id: secret.id, tx: secret.tx, ty: secret.ty, ax: secret.ax, ay: secret.ay,
     rewardType: secret.rewardType
   }));
-  player.exploration.visited[locationId].dungeon = { ...current, secrets: [...kept, ...clean].slice(-16) };
+  const floorNumber = Math.max(1, Math.floor(Number(floor) || 1));
+  player.exploration.visited[locationId].dungeon = { ...current, secrets: [...kept, ...clean].slice(-16), secretFloors: [...new Set([...current.secretFloors, floorNumber])].slice(-16) };
   return true;
 }
 
