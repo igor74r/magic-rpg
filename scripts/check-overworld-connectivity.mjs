@@ -35,6 +35,8 @@ for (const [id, loc] of Object.entries(LOCATIONS)) {
       const floorMap = map.map(row => [...row]);
       const stairs = getDungeonStairCells(cols, rows, floor);
       for (const stair of stairs) {
+        for (let x = Math.min(sx, stair.x); x <= Math.max(sx, stair.x); x++) floorMap[sy][x] = 1;
+        for (let y = Math.min(sy, stair.y); y <= Math.max(sy, stair.y); y++) floorMap[y][stair.x] = 1;
         for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
           const x = stair.x + ox, y = stair.y + oy;
           if (floorMap[y] && floorMap[y][x] !== undefined) floorMap[y][x] = 1;
