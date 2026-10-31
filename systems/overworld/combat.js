@@ -19,6 +19,7 @@ import {
 } from '../status.js';
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
+import { updateDungeonProgress } from '../exploration.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
@@ -1413,6 +1414,10 @@ function combatVictory() {
 
   if (enemy.boss) {
     p.stats.bossKills = (p.stats.bossKills || 0) + 1;
+    if (!ow.rifMode && ow.locationId) {
+      const floor = Math.max(1, Math.floor(Number(ow.dungeonFloor) || 1));
+      updateDungeonProgress(p, ow.locationId, { bossId: `f${floor}-${enemy.enemyId}` });
+    }
   }
 
   // Elites have a high chance for each listed drop. Bosses guarantee
