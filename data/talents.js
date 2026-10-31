@@ -11,13 +11,23 @@ export const TALENTS = {
   ],
   mage: [
     { id: 'm-pyromancer', tier: 5,  name: 'Пиромант',      icon: '🔥', desc: '+25% урона заклинаниями', effects: { spellMult: 1.25 } },
-    { id: 'm-cryomancer', tier: 5,  name: 'Криомант',      icon: '❄️', desc: '+40% макс MP, +50% урона заклинаниями (нет)', effects: { mpMult: 1.4, spellMult: 1.0 } },
+    { id: 'm-cryomancer', tier: 5,  name: 'Криомант',      icon: '❄️', desc: '+40% макс MP, +50% урона заклинаниями (нет)', effects: { mpMult: 1.4, spellMult: 1.5 } },
     { id: 'm-arcanist',   tier: 10, name: 'Чародей',       icon: '✨', desc: '+20% урона заклинаниями, +5 MP/ход', effects: { spellMult: 1.2, manaRegen: 5 } },
     { id: 'm-scholar',    tier: 10, name: 'Учёный',        icon: '📚', desc: '+50% макс MP, +3 MP/ход', effects: { mpMult: 1.5, manaRegen: 3 } },
     { id: 'm-metmaster',  tier: 15, name: 'Метеор-мастер', icon: '☄️', desc: 'Метеор +50% урона', effects: { meteorMult: 1.5 } },
     { id: 'm-telemaster', tier: 15, name: 'Телепорт-мастер', icon: '💨', desc: 'Кулдаун способностей −2', effects: { abilityCdDelta: -2 } },
     { id: 'm-archmage',   tier: 20, name: 'Архимаг',       icon: '🌟', desc: '+30% урона заклинаниями, +30% макс MP', effects: { spellMult: 1.3, mpMult: 1.3 } },
     { id: 'm-immortal',   tier: 20, name: 'Бессмертный',   icon: '🛡️', desc: '+30% защиты, +20% HP', effects: { defMult: 1.3, hpMult: 1.2 } }
+  ],
+  archer: [
+    { id: 'a-deadeye',    tier: 5,  name: 'Смертельный прицел', icon: '🎯', desc: '+10% к критическому шансу', effects: { critChance: 0.10 } },
+    { id: 'a-quickdraw',  tier: 5,  name: 'Быстрая тетива',     icon: '🏹', desc: '+10% к урону и +2 к атаке', effects: { dmgMult: 1.10, atkFlat: 2 } },
+    { id: 'a-piercer',    tier: 10, name: 'Пробивающая стрела', icon: '➶', desc: '+6 к пробитию брони', effects: { armorPen: 6 } },
+    { id: 'a-evasion',    tier: 10, name: 'Теневой шаг',        icon: '💨', desc: '+8% к уклонению', effects: { dodgeChance: 0.08 } },
+    { id: 'a-poison',     tier: 15, name: 'Смертельный токсин', icon: '☠️', desc: '+15% к урону', effects: { dmgMult: 1.15 } },
+    { id: 'a-trapper',    tier: 15, name: 'Мастер ловушек',     icon: '🪤', desc: '+8% к шансу блока и +3 к защите', effects: { blockChance: 0.08, defFlat: 3 } },
+    { id: 'a-hawkeye',    tier: 20, name: 'Глаз ястреба',       icon: '🦅', desc: '+15% к критическому шансу и +10% к урону', effects: { critChance: 0.15, dmgMult: 1.10 } },
+    { id: 'a-apex',       tier: 20, name: 'Идеальный хищник',   icon: '🐺', desc: '+25% к урону и +10% к уклонению, −8% защиты', effects: { dmgMult: 1.25, dodgeChance: 0.10, defMult: 0.92 } }
   ],
   priest: [
     { id: 'p-light',    tier: 5,  name: 'Свет',         icon: '☀️', desc: '+40% лечения', effects: { healMult: 1.4 } },
