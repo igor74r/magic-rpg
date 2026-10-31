@@ -446,3 +446,104 @@
   .passive-tree-viewport { height:470px; }
   .rpg-inv-grid { grid-template-columns:repeat(auto-fill,minmax(48px,1fr)); }
 }
+
+
+/* ---------- Глобальное оформление и мобильная игра ---------- */
+.logo-gem img {
+  display:block;
+  width:88px;
+  height:88px;
+  margin:0 auto;
+  image-rendering:auto;
+  filter:drop-shadow(0 0 14px rgba(95,205,255,.55)) drop-shadow(0 0 28px rgba(160,96,255,.28));
+  animation:crystalFloat 4s ease-in-out infinite;
+}
+@keyframes crystalFloat {
+  0%,100% { transform:translateY(0) rotate(-2deg); }
+  50% { transform:translateY(-5px) rotate(2deg); }
+}
+button:focus-visible, a:focus-visible, .tab:focus-visible {
+  outline:2px solid #ffe39a;
+  outline-offset:3px;
+}
+#overworld-canvas {
+  border:2px solid rgba(201,162,39,.72) !important;
+  border-radius:9px !important;
+  box-shadow:0 0 0 1px rgba(0,0,0,.8), 0 10px 28px rgba(0,0,0,.42), 0 0 22px rgba(90,155,190,.12);
+  touch-action:pan-y;
+}
+#mobile-dpad {
+  padding:7px;
+  border:1px solid rgba(201,162,39,.35);
+  border-radius:14px;
+  background:rgba(10,8,12,.52);
+  backdrop-filter:blur(5px);
+  touch-action:none;
+}
+#mobile-dpad .dpad-btn {
+  width:56px;
+  min-width:56px;
+  height:52px;
+  margin:0;
+  padding:0;
+  border:1px solid rgba(220,190,110,.55);
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(76,59,38,.94),rgba(24,18,14,.96));
+  color:#f3d98e;
+  font-size:20px;
+  box-shadow:0 3px 8px rgba(0,0,0,.38), inset 0 1px rgba(255,255,255,.08);
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
+  touch-action:none;
+}
+#mobile-dpad .dpad-btn:active {
+  transform:translateY(1px) scale(.96);
+  background:linear-gradient(180deg,#80612c,#342315);
+  border-color:#ffe39a;
+}
+.campaign-story-beat, .campaign-story-clue, .campaign-story-aftermath {
+  margin:7px 0;
+  padding:8px 9px;
+  border-left:2px solid rgba(201,162,39,.5);
+  border-radius:0 4px 4px 0;
+  background:rgba(201,162,39,.055);
+}
+.campaign-story-clue { border-left-color:rgba(115,190,210,.65); color:#b9d7df !important; }
+.campaign-story-aftermath { border-left-color:rgba(134,183,100,.65); }
+@media (max-width:650px) {
+  .screen.active { padding:14px 10px; padding-top:18px; }
+  .screen.screen-dashboard.active { padding:0; }
+  .dashboard-layout { height:100dvh; min-height:100dvh; }
+  .dashboard-sidebar {
+    min-height:52px;
+    padding:5px 6px;
+    gap:3px;
+    border-right:0;
+    border-bottom:1px solid rgba(201,162,39,.25);
+    scrollbar-width:thin;
+  }
+  .dashboard-sidebar .tab {
+    min-height:40px;
+    padding:7px 9px;
+    font-size:11px;
+  }
+  .dashboard-main { min-height:0; overflow-y:auto; }
+  .dashboard-content { padding:10px; }
+  .dashboard-header { padding:9px 10px; }
+  .rpg-inventory-layout { grid-template-columns:minmax(0,1fr); }
+  .equipment-slots { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #screen-overworld .game-container { padding:0 2px; }
+  #overworld-canvas { max-height:62dvh; object-fit:contain; }
+  #mobile-dpad { left:8px !important; bottom:8px !important; }
+  #mobile-dpad .dpad-btn { width:48px; min-width:48px; height:46px; }
+  .logo-gem img { width:76px; height:76px; }
+}
+@media (max-width:380px) {
+  .dashboard-sidebar .tab { padding:6px 7px; gap:5px; }
+  .dashboard-sidebar .tab-text { font-size:10px; }
+  #mobile-dpad .dpad-btn { width:44px; min-width:44px; height:42px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .logo-gem img { animation:none; }
+}
