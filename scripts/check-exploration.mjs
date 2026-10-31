@@ -20,8 +20,8 @@ assert.equal(player.exploration.visited.forest.cleared, true);
 assert.equal(markLocationCleared(player, 'ruins'), false);
 assert.equal(updateDungeonProgress(player, 'forest', { floor: 2, checkpoint: 'crypt-hall', chestId: 'chest-01', secretId: 'hidden-room', bossId: 'f2-shadow-mage' }), true);
 assert.deepEqual(getDungeonProgress(player, 'forest'), {
-  floor: 2, checkpoint: 'crypt-hall', openedChests: ['chest-01'],
-  secretsFound: ['hidden-room'], secrets: [], secretFloors: [], bossDefeated: true, defeatedBosses: ['f2-shadow-mage'], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: [], encounters: []
+  floor: 2, checkpoint: 'crypt-hall', openedChests: ['chest-01'], disarmedTraps: [],
+  secretsFound: ['hidden-room'], secrets: [], secretFloors: [], bossDefeated: true, defeatedBosses: ['f2-shadow-mage'], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: [], encounters: []
 });
 assert.equal(saveDungeonEncounter(player, 'forest', 2, {
   id: 'f2-mimic-chest-2', kind: 'mimic', enemyId: 'goblin',
