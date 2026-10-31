@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { migrateSettings } from '../systems/save.js';
 
 const legacy = migrateSettings({ volume: 42 });
@@ -55,4 +56,24 @@ assert.equal(empty.musicVolume, 60);
 assert.equal(empty.sfxVolume, 80);
 assert.equal(empty.reducedMotion, false);
 
-console.log('Settings migration checks passed');
+
+const menu = readFileSync(new URL('../ui/menu.js', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const css = readFileSync(new URL('../css/style.css', import.meta.url), 'utf8');
+
+for (const controlId of [
+  'set-music-volume', 'set-sfx-volume', 'set-sound',
+  'set-difficulty', 'set-autosave', 'set-autosave-interval',
+  'set-hotkeys', 'set-fps', 'set-damage-numbers',
+  'set-screen-shake', 'set-low-health', 'set-reduced-motion'
+]) {
+  assert.ok(menu.includes(`id="${controlId}"`), `missing settings control: ${controlId}`);
+  assert.ok(menu.includes(`value('${controlId}')`) || controlId.includes('volume'), `settings control is not read: ${controlId}`);
+}
+assert.ok(html.includes("switchSettingsTab('accessibility')"), 'accessibility tab is not reachable');
+assert.ok(menu.includes("tab === 'accessibility'"), 'accessibility settings are not rendered');
+assert.match(css, /@media\s*\(max-width:\s*600px\)/, 'mobile settings layout breakpoint missing');
+assert.ok(css.includes('#settings-content .settings-row'), 'settings row styles missing');
+assert.ok(menu.includes('saveSettings();'), 'settings are not persisted after applying');
+
+console.log('Settings migration and settings UI checks passed');
