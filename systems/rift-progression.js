@@ -20,9 +20,25 @@ export function recordDragonVictory(player, dragonId) {
   const dragon = DRAGON_SHARDS.find(entry => entry.id === dragonId);
   if (!dragon || (player.level || 1) < dragon.requiredLevel) return false;
   ensureRiftProgress(player);
+  const dragonIndex = DRAGON_SHARDS.indexOf(dragon);
+  if (dragonIndex > 0 && !player.dragonDefeated[DRAGON_SHARDS[dragonIndex - 1].shardId]) return false;
   player.dragonDefeated[dragon.shardId] = true;
   player.dragonShards[dragon.shardId] = true;
   return true;
+}
+
+export function recordDragonVictoryForEnemy(player, enemyId) {
+  const dragon = DRAGON_SHARDS.find(entry => entry.enemyId === enemyId);
+  return dragon ? recordDragonVictory(player, dragon.id) : false;
+}
+
+export function canFightDragon(player, dragonId) {
+  if (!player) return false;
+  const index = DRAGON_SHARDS.findIndex(entry => entry.id === dragonId);
+  if (index < 0 || (player.level || 1) < DRAGON_SHARDS[index].requiredLevel) return false;
+  ensureRiftProgress(player);
+  if (player.dragonDefeated[DRAGON_SHARDS[index].shardId]) return false;
+  return index === 0 || player.dragonDefeated[DRAGON_SHARDS[index - 1].shardId] === true;
 }
 
 export function hasAllDragonShards(player) {
@@ -37,6 +53,7 @@ export function canOpenRift(player) {
 
 export function getRiftFacetAccess(player, facetIndex) {
   if (!Number.isInteger(facetIndex) || facetIndex < 0 || facetIndex >= RIFT_FACET_COUNT) return false;
+  if (!canOpenRift(player)) return false;
   if (facetIndex < RIFT_INITIAL_FACET_COUNT) return true;
   return (player?.level || 1) >= RIFT_FACET_LEVEL_GATE &&
     facetIndex < RIFT_INITIAL_FACET_COUNT + RIFT_LEVEL_GATED_FACET_COUNT;
