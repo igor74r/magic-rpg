@@ -499,6 +499,8 @@ export function renderBestiary() {
           </div>
 
           <div class="item-desc">
+            ${enemy.lore ? `<p>${enemy.lore}</p>` : ''}
+            ${enemy.tactics ? `<p><b>Тактика:</b> ${enemy.tactics}</p>` : ''}
             ❤️ ${enemy.hp} · ⚔️ ${enemy.attack} · 🛡️ ${enemy.defense}<br>
             🏆 ${enemy.exp} EXP · 💰 ${enemy.gold} золота<br>
             📦 Дроп: ${drops}
