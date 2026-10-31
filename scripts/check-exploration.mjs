@@ -67,7 +67,7 @@ assert.equal(legacy.visited.forest.firstVisitedAt, 0);
 assert.equal(legacy.visited.forest.lastVisitedAt, 0);
 assert.deepEqual(legacy.visited.forest.dungeon, {
   floor: 1, checkpoint: null, openedChests: ['chest-a'],
-  secretsFound: ['secret-a'], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: []
+  secretsFound: ['secret-a'], secrets: [], secretFloors: [], bossDefeated: false, defeatedBosses: [], defeatedElites: [], claimedEliteRewards: [], claimedFloorRewards: []
 });
 assert.equal(Object.hasOwn(legacy.visited, '../bad'), false);
 assert.equal(legacy.lastLocationId, 'forest');
