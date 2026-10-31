@@ -534,9 +534,13 @@ export function combatUseAbility(abilityId) {
 
     spawnParticles(ow.player.x, ow.player.y, 'smoke', 8);
   } else if (abilityId === 'toxic-blade') {
+    const enemyDefense = Math.max(
+      0,
+      enemyDefValue(enemy) - (stats.armorPen || 0)
+    );
     const damage = Math.max(
       1,
-      Math.floor(stats.atk * 0.7)
+      Math.floor(stats.atk * 0.7 - Math.floor(enemyDefense / 2))
     );
 
     enemy.hp -= damage;
