@@ -30,6 +30,8 @@ const mods = await Promise.all([
   import('../systems/overworld/spawn.js'),
   import('../systems/rift-progression.js'),
   import('../data/rift-canon.js'),
+  import('../data/tower.js'),
+  import('../systems/tower.js'),
 ]);
 
 const { state } = mods[0];
@@ -52,6 +54,8 @@ const { getCampaignProgress, isCampaignComplete, canCompleteMainQuest, recordCam
 const { migrateGame } = mods[17];
 const { recordDragonVictory, recordDragonVictoryForEnemy, canFightDragon, canOpenRift, getRiftFacetAccess, getRiftFacetAccessCounts } = mods[25];
 const { DRAGON_SHARDS, RIFT_TIER_IDS } = mods[26];
+const { TOWER_BIOMES, TOWER_FLOOR_COUNT, TOWER_CHEST_FLOORS, TOWER_MOBS_PER_FLOOR } = mods[27];
+const { getTowerFloorDefinition, canEnterTowerFloor, createTowerRun, getActiveTowerMob, defeatActiveTowerMob, completeTowerFloor, claimTowerChest } = mods[28];
 const { getAvailablePassives, allocatePassive, getTalentBonus } = mods[18];
 const { addItem, useItem, equipItemByIndex, socketRune, EQUIPMENT_SLOTS } = mods[19];
 const { drawAtlasTile, drawAtlasProp } = mods[20];
@@ -172,8 +176,35 @@ const migratedV10 = migrateGame({
   shards: { forest: true, ruins: false, shadow: false },
   player: { class: 'mage', level: 12, stats: { kills: { [STORY.acts[0].missions[0].enemyId]: 2 } } }
 });
-check('v10 save migrates to v14 without importing lifetime kills', migratedV10.version === 14 && migratedV10.player.dex === 8 && Object.keys(migratedV10.player.campaignKills).length === 0 && migratedV10.player.stats.kills[STORY.acts[0].missions[0].enemyId] === 2 && EQUIPMENT_SLOTS.length === 12 && EQUIPMENT_SLOTS.every(slot => slot in migratedV10.player.equipped));
+check('v10 save migrates to v14 without importing lifetime kills', migratedV10.version === 15 && migratedV10.player.dex === 8 && Object.keys(migratedV10.player.campaignKills).length === 0 && migratedV10.player.stats.kills[STORY.acts[0].missions[0].enemyId] === 2 && EQUIPMENT_SLOTS.length === 12 && EQUIPMENT_SLOTS.every(slot => slot in migratedV10.player.equipped));
 check('v10 legacy campaign shards survive migration but never become dragon shards', migratedV10.shards.forest === true && migratedV10.player.campaignShards.forest === true && migratedV10.player.dragonShards.flame === false && migratedV10.player.dragonShards.ice === false && migratedV10.player.dragonShards.blood === false);
+check('Tower canon is 40 floors across eight five-floor biomes', TOWER_FLOOR_COUNT === 40 && TOWER_BIOMES.length === 8 && TOWER_BIOMES.every((biome, index) => getTowerFloorDefinition(index * 5 + 1)?.biomeId === biome.id));
+const towerFloor1 = getTowerFloorDefinition(1);
+const towerFloor40 = getTowerFloorDefinition(40);
+check('Tower level requirement scales from level 10 to level 88', towerFloor1.requiredLevel === 10 && towerFloor40.requiredLevel === 88);
+check('each Tower floor has exactly ten fixed-position mobs', towerFloor1.mobs.length === TOWER_MOBS_PER_FLOOR && new Set(towerFloor1.mobs.map(mob => `${mob.x},${mob.y}`)).size === 10);
+check('Tower chests exist only on floors 10, 20, 30 and 40', TOWER_CHEST_FLOORS.join(',') === '10,20,30,40' && [1,9,11,19,21,29,31,39].every(floor => !getTowerFloorDefinition(floor).chestAvailable));
+const towerPlayer = { level: 10 };
+const towerRun = createTowerRun(towerPlayer, 1);
+const towerStartsSequentially = !!towerRun && getActiveTowerMob(towerRun)?.id === 'tower-1-mob-1' && !canEnterTowerFloor(towerPlayer, 2);
+let towerMobSequenceWorks = true;
+while (towerRun && !towerRun.completed) {
+  const active = getActiveTowerMob(towerRun);
+  if (!active || !defeatActiveTowerMob(towerRun, active.id)) { towerMobSequenceWorks = false; break; }
+}
+const towerFirstClear = completeTowerFloor(towerPlayer, towerRun);
+const towerCheckpointWorks = towerFirstClear?.checkpointFloor === 2 && canEnterTowerFloor(towerPlayer, 2);
+const towerReplay = createTowerRun(towerPlayer, 1);
+while (towerReplay && !towerReplay.completed) {
+  const active = getActiveTowerMob(towerReplay);
+  if (!active || !defeatActiveTowerMob(towerReplay, active.id)) break;
+}
+const towerRepeatClear = completeTowerFloor(towerPlayer, towerReplay);
+check('Tower activates one mob at a time and checkpoints after all ten are defeated', towerStartsSequentially && towerMobSequenceWorks && towerFirstClear?.firstClear && towerCheckpointWorks);
+check('Tower repeat clears grant exactly 25% of first-clear XP', towerFirstClear?.exp > 0 && towerRepeatClear?.firstClear === false && towerRepeatClear?.exp === Math.round(towerFirstClear.exp * 0.25));
+const towerChestPlayer = { level: 28, tower: { highestCleared: 9, checkpointFloor: 10, clearedFloors: [1,2,3,4,5,6,7,8,9], claimedChests: [] } };
+check('Tower chest can be claimed once after floor 10 is cleared', claimTowerChest(towerChestPlayer, 10) === false && (towerChestPlayer.tower.clearedFloors.push(10), claimTowerChest(towerChestPlayer, 10)) && !claimTowerChest(towerChestPlayer, 10));
+
 
 state.game = { player: { inventory: [], spells: [], hp: 100, maxHp: 500, mp: 0, maxMp: 300 } };
 addItem('scroll-frost-nova', 2);
