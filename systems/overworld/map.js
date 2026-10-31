@@ -277,6 +277,14 @@ export function generateMap(locationId, cols, rows) {
   return grid;
 }
 
+
+export function getDungeonStairCells(cols, rows, floor = 1) {
+  const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
+  const cells = [{ id: 'stairs-down', direction: 1, x: Math.min(cols - 2, cx + 4), y: Math.min(rows - 2, cy + 4) }];
+  if (floor > 1) cells.push({ id: 'stairs-up', direction: -1, x: Math.max(1, cx - 4), y: Math.max(1, cy - 4) });
+  return cells;
+}
+
 export function isBlocked(map, x, y, locationId = null) {
   if (!Array.isArray(map) || !map.length || !Array.isArray(map[0]) || x < 0 || x >= map[0].length || y < 0 || y >= map.length) {
     return true;
