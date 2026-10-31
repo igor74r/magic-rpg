@@ -281,6 +281,7 @@ export const ENEMIES = {
   },
 
   'rootbound-sentinel': {
+    uniqueElite: true,
     name: 'Страж корневой печати', emoji: '🪵',
     hp: 118, attack: 22, defense: 13, exp: 105, gold: 78,
     drops: ['root-fiber', 'rune-root'],
@@ -290,6 +291,7 @@ export const ENEMIES = {
   },
 
   'drowned-scribe': {
+    uniqueElite: true,
     name: 'Утопленный писец', emoji: '📜',
     hp: 145, attack: 27, defense: 8, exp: 138, gold: 102,
     drops: ['grave-salt', 'rune-tide'],
@@ -299,6 +301,7 @@ export const ENEMIES = {
   },
 
   'ashbound-renegade': {
+    uniqueElite: true,
     name: 'Пепельный отступник', emoji: '⚔️',
     hp: 188, attack: 32, defense: 12, exp: 165, gold: 132,
     drops: ['ember-core', 'rune-ember'],
@@ -308,6 +311,7 @@ export const ENEMIES = {
   },
 
   'mirror-revenant': {
+    uniqueElite: true,
     name: 'Зеркальный мститель', emoji: '🪞',
     hp: 205, attack: 34, defense: 14, exp: 190, gold: 150,
     drops: ['frost-essence', 'rune-frost'],
@@ -317,6 +321,7 @@ export const ENEMIES = {
   },
 
   'riftstalker': {
+    uniqueElite: true,
     name: 'Охотник разлома', emoji: '🕷️',
     hp: 295, attack: 40, defense: 13, exp: 320, gold: 250,
     drops: ['void-dust', 'rune-void'],
