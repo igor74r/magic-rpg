@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { LOCATIONS } from '../data/locations.js';
-import { generateMap, isBlocked, findFreeCell } from '../systems/overworld/map.js';
+import { generateMap, isBlocked, findFreeCell, getDungeonStairCells } from '../systems/overworld/map.js';
 
 function reachable(map, locationId, startX, startY) {
   const rows = map.length, cols = map[0]?.length || 0;
@@ -30,6 +30,24 @@ for (const [id, loc] of Object.entries(LOCATIONS)) {
   assert.ok(cells.has((rows - 1) * cols + sx), id + ': south gate must be reachable');
   assert.ok(cells.has(sy * cols), id + ': west edge must be reachable');
   assert.ok(cells.has(sy * cols + cols - 1), id + ': east edge must be reachable');
+  if (!loc.safe) {
+    for (const floor of [1, 2]) {
+      const floorMap = map.map(row => [...row]);
+      const stairs = getDungeonStairCells(cols, rows, floor);
+      for (const stair of stairs) {
+        for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
+          const x = stair.x + ox, y = stair.y + oy;
+          if (floorMap[y] && floorMap[y][x] !== undefined) floorMap[y][x] = 1;
+        }
+      }
+      const floorReachable = reachable(floorMap, id, sx, sy);
+      for (const stair of stairs) {
+        assert.ok(floorReachable.has(stair.y * cols + stair.x),
+          id + ': floor ' + floor + ' stair ' + stair.id + ' must be reachable');
+      }
+      assert.equal(stairs.length, floor === 1 ? 1 : 2, id + ': correct stair count per floor');
+    }
+  }
   const cell = findFreeCell(map, cols, rows, [], 0, null, id, () => 0);
   assert.ok(cell, id + ': spawn search must find a free cell');
   assert.ok(!isBlocked(map, cell.x, cell.y, id), id + ': spawn search must respect biome collision');
