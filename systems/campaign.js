@@ -114,10 +114,15 @@ export function getMissionReward(mission) {
   const act = match ? Number(match[1]) : 1;
   const stage = match ? Number(match[2]) : 1;
   const materials = ['root-fiber', 'grave-salt', 'ember-core', 'frost-essence', 'void-dust'];
+  // Campaign-based rewards discourage low-act farming and keep progression predictable.
+  const actIndex = Math.max(0, Math.min(4, act - 1));
+  const actGold = [18, 32, 50, 72, 100][actIndex];
+  const actExp = [70, 145, 250, 390, 570][actIndex];
+  const missionBonus = stage >= 4 ? 1.2 : 1;
   return {
-    gold: 12 + (act - 1) * 10 + (stage - 1) * 2,
-    exp: 45 + (act - 1) * 50 + (stage - 1) * 15,
-    itemId: materials[Math.max(0, Math.min(materials.length - 1, act - 1))]
+    gold: Math.round((actGold + (stage - 1) * 5) * missionBonus),
+    exp: actExp + (stage - 1) * Math.round(actExp * 0.12),
+    itemId: materials[actIndex]
   };
 }
 
