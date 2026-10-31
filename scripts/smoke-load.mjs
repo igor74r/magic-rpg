@@ -169,6 +169,7 @@ check('main quest completes after all shards and missions', canCompleteMainQuest
 
 const migratedV10 = migrateGame({
   version: 10,
+  shards: { forest: true, ruins: false, shadow: false },
   player: { class: 'mage', level: 12, stats: { kills: { [STORY.acts[0].missions[0].enemyId]: 2 } } }
 });
 check('v10 save migrates to v14 without importing lifetime kills', migratedV10.version === 14 && migratedV10.player.dex === 8 && Object.keys(migratedV10.player.campaignKills).length === 0 && migratedV10.player.stats.kills[STORY.acts[0].missions[0].enemyId] === 2 && EQUIPMENT_SLOTS.length === 12 && EQUIPMENT_SLOTS.every(slot => slot in migratedV10.player.equipped));
