@@ -1429,12 +1429,12 @@ function combatVictory() {
     }
   }
 
-  // Elites have a high chance for each listed drop. Bosses guarantee
-  // their first signature drop; additional drops still use normal difficulty odds.
+  // Random elites use elevated drop odds. Bosses and named unique elites
+  // guarantee their first signature drop; additional drops use normal odds.
   const dropChance = enemy.elite ? 0.85 : getDropChance();
 
   def.drops.forEach((id, index) => {
-    const shouldDrop = enemy.boss
+    const shouldDrop = (enemy.boss || enemy.uniqueElite)
       ? index === 0 || Math.random() < getDropChance()
       : Math.random() < dropChance;
 
