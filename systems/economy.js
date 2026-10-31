@@ -13,7 +13,10 @@ export function getCurrentActIndex(player) {
   let completed = 0;
   for (const act of STORY.acts) {
     const actComplete = act.missions.every(m => player.campaignClaimed?.[m.id] === true);
-    if (!actComplete) return Math.min(act.number - 1, ACT_PRICE_MULTIPLIERS.length - 1);
+    if (!actComplete) {
+      const index = Number.isInteger(act.number) ? act.number - 1 : completed;
+      return Math.max(0, Math.min(index, ACT_PRICE_MULTIPLIERS.length - 1));
+    }
     completed++;
   }
   return Math.min(completed, ACT_PRICE_MULTIPLIERS.length - 1);
