@@ -10,6 +10,7 @@ import { saveAndMenu } from './menu.js';
 import { LOCATIONS } from '../data/locations.js';
 import { ENEMIES } from '../data/enemies.js';
 import { ITEMS } from '../data/items.js';
+import { getActNumberForLocation } from '../data/dungeon-treasures.js';
 import { CLASSES } from '../data/classes.js';
 import { emit, on } from '../systems/events.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic, EFFECTS_DATA, MODIFIERS_LABEL } from './overworld/models.js';
@@ -156,14 +157,20 @@ function openSecret(sw) {
     emit('toast', '⚠️ Пробуждён древний страж!');
     emit('log', { channel: 'game', msg: '👁️ Из тьмы вышел страж.', cls: 'danger' });
   } else {
-    // Лут — золото и зелья
-    const gold = 5 + Math.floor(Math.random() * 9);
+    // Тайник выдаёт тематический материал своего акта, а не только стандартные зелья.
+    const actNumber = getActNumberForLocation(ow.locationId);
+    const materials = ['root-fiber', 'grave-salt', 'ember-core', 'frost-essence', 'void-dust'];
+    const materialId = materials[Math.max(0, Math.min(4, actNumber - 1))];
+    const gold = 10 + actNumber * 5 + Math.min(10, Math.max(1, Number(ow.dungeonFloor) || 1)) * 2;
+    const materialQty = 1 + Math.floor(actNumber / 2);
     p.gold = (p.gold || 0) + gold;
+    addItem(materialId, materialQty);
     addItem('health-potion', 1);
     addItem('mana-potion', 1);
-    emit('toast', `💰 +${gold} золота, +2 зелья`);
-    emit('log', { channel: 'game', msg: `✨ Скрытая ниша: +${gold}💰, +2 зелья.`, cls: 'success' });
+    emit('toast', `💰 +${gold} золота, ${ITEMS[materialId].name} ×${materialQty} и 2 зелья`);
+    emit('log', { channel: 'game', msg: `✨ Тайник акта ${actNumber}: +${gold}💰, ${ITEMS[materialId].name} ×${materialQty}, +2 зелья.`, cls: 'success' });
   }
+  saveGame();
 }
 
 
