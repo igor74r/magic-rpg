@@ -19,7 +19,7 @@ import {
 } from '../status.js';
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
-import { updateDungeonProgress, defeatDungeonEncounter, claimDungeonEliteReward, claimDungeonFloorReward, claimActRelic, isDungeonBossDefeated } from '../exploration.js';
+import { updateDungeonProgress, saveDungeonEncounter, defeatDungeonEncounter, claimDungeonEliteReward, claimDungeonFloorReward, claimActRelic, isDungeonBossDefeated } from '../exploration.js';
 import { ACT_RELIC_REWARDS } from '../../data/dungeon-treasures.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
@@ -856,6 +856,16 @@ export function combatFlee(forced = false) {
   }
 
   pushLog('Вы сбежали', 'info');
+  const enemy = ow.combat.enemy;
+  if (enemy.persistentEncounterId && ow.locationId && enemy.hp > 0) {
+    saveDungeonEncounter(state.game?.player, ow.locationId, ow.dungeonFloor || 1, {
+      id: enemy.persistentEncounterId,
+      kind: enemy.encounterKind || 'mimic',
+      enemyId: enemy.enemyId, x: enemy.x, y: enemy.y,
+      hp: enemy.hp, maxHp: enemy.maxHp
+    });
+    saveGame();
+  }
   clearPlayerEffects();
   endCombat();
 }
