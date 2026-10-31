@@ -439,13 +439,17 @@ export const RARITIES = {
   legendary: { name: 'Легендарный', color: '#ffa500', multiplier: 3.5, weight: 3 }
 };
 
-export function rollRarity() {
+export function rollRarity(random = Math.random) {
   const total = Object.values(RARITIES).reduce((sum, rarity) => sum + rarity.weight, 0);
-  let roll = Math.random() * total;
+  const sample = typeof random === 'function' ? random() : Math.random();
+  const normalized = Number.isFinite(sample)
+    ? Math.max(0, Math.min(1 - Number.EPSILON, sample))
+    : Math.random();
+  let roll = normalized * total;
 
   for (const [key, rarity] of Object.entries(RARITIES)) {
     roll -= rarity.weight;
-    if (roll <= 0) return key;
+    if (roll < 0) return key;
   }
 
   return 'common';
