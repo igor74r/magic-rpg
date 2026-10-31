@@ -99,8 +99,9 @@ state.overworld = { locationId: 'obsidian-fields', theme: LOCATIONS['obsidian-fi
 const obsidianWeather = getCurrentTheme().weather;
 state.overworld = null;
 check('new regions use their own biome weather', briarWeather === 'rain' && obsidianWeather === 'embers');
-const actRoster = createSpawnRoster(LOCATIONS['void-crater'].enemies, 5, () => 0);
-check('act spawn always includes each enemy and the boss', actRoster.length === 5 && new Set(actRoster).size === 5 && LOCATIONS['void-crater'].enemies.every(id => actRoster.includes(id)));
+const voidRosterSize = LOCATIONS['void-crater'].enemies.length;
+const actRoster = createSpawnRoster(LOCATIONS['void-crater'].enemies, voidRosterSize, () => 0);
+check('act spawn always includes each enemy and the boss', actRoster.length === voidRosterSize && new Set(actRoster).size === voidRosterSize && LOCATIONS['void-crater'].enemies.every(id => actRoster.includes(id)));
 check('extra spawn slots repeat enemies only after full roster', createSpawnRoster(['wolf', 'boss'], 4, () => 0).length === 4 && new Set(createSpawnRoster(['wolf', 'boss'], 4, () => 0)).size === 2);
 check('campaign has 5 acts and 25 missions', STORY.acts?.length === 5 && STORY.acts.reduce((n, act) => n + act.missions.length, 0) === 25);
 check('campaign enemy IDs exist', STORY.acts.every(act => act.missions.every(mission => !!ENEMIES[mission.enemyId])));
