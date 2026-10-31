@@ -68,7 +68,7 @@ for (const controlId of [
   'set-screen-shake', 'set-low-health', 'set-reduced-motion'
 ]) {
   assert.ok(menu.includes(`id="${controlId}"`), `missing settings control: ${controlId}`);
-  assert.ok(menu.includes(`value('${controlId}')`) || controlId.includes('volume'), `settings control is not read: ${controlId}`);
+  assert.ok(menu.includes(`value('${controlId}')`) || menu.includes(`setBool('${controlId}'`) || controlId.includes('volume'), `settings control is not read: ${controlId}`);
 }
 assert.ok(html.includes("switchSettingsTab('accessibility')"), 'accessibility tab is not reachable');
 assert.ok(menu.includes("tab === 'accessibility'"), 'accessibility settings are not rendered');
