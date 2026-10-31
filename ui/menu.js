@@ -93,9 +93,9 @@ function renderSettingsTab(tab) {
         <select id="set-sound" onchange="GameAPI.applySettings()">
           <option value="on" ${s.soundEnabled !== false ? 'selected' : ''}>Включён</option>
           <option value="off" ${s.soundEnabled === false ? 'selected' : ''}>Выключен</option>
-        </select>
-        <span></span>
+        </select><span></span>
       </div>
+      <p class="settings-note">Громкость музыки и эффектов регулируется отдельно. Общий переключатель отключает весь звук.</p>
     `;
   } else if (tab === 'game') {
     content.innerHTML = `
@@ -105,89 +105,117 @@ function renderSettingsTab(tab) {
           <option value="easy" ${s.difficulty === 'easy' ? 'selected' : ''}>Лёгкая</option>
           <option value="normal" ${s.difficulty === 'normal' ? 'selected' : ''}>Обычная</option>
           <option value="hard" ${s.difficulty === 'hard' ? 'selected' : ''}>Сложная</option>
-        </select>
-        <span></span>
+        </select><span></span>
       </div>
       <div class="settings-row">
         <label>💾 Автосохранение</label>
         <select id="set-autosave" onchange="GameAPI.applySettings()">
-          <option value="on" ${s.autoSave !== false ? 'selected' : ''}>Включено (каждые 30 сек)</option>
+          <option value="on" ${s.autoSave !== false ? 'selected' : ''}>Включено</option>
           <option value="off" ${s.autoSave === false ? 'selected' : ''}>Выключено</option>
-        </select>
-        <span></span>
+        </select><span></span>
       </div>
       <div class="settings-row">
-        <label>💡 Подсказки хоткеев</label>
+        <label>⏱ Интервал сохранения</label>
+        <select id="set-autosave-interval" onchange="GameAPI.applySettings()">
+          <option value="15" ${(s.autoSaveInterval ?? 30) === 15 ? 'selected' : ''}>15 секунд</option>
+          <option value="30" ${(s.autoSaveInterval ?? 30) === 30 ? 'selected' : ''}>30 секунд</option>
+          <option value="60" ${(s.autoSaveInterval ?? 30) === 60 ? 'selected' : ''}>60 секунд</option>
+        </select><span></span>
+      </div>
+      <div class="settings-row">
+        <label>💡 Подсказки клавиш</label>
         <select id="set-hotkeys" onchange="GameAPI.applySettings()">
           <option value="on" ${s.showHotkeys !== false ? 'selected' : ''}>Показывать</option>
           <option value="off" ${s.showHotkeys === false ? 'selected' : ''}>Скрывать</option>
-        </select>
-        <span></span>
+        </select><span></span>
       </div>
       <div class="settings-row">
         <label>📊 Счётчик FPS</label>
         <select id="set-fps" onchange="GameAPI.applySettings()">
           <option value="off" ${s.showFps !== true ? 'selected' : ''}>Скрыт</option>
-          <option value="on" ${s.showFps === true ? 'selected' : ''}>Показывать в бою</option>
-        </select>
-        <span></span>
+          <option value="on" ${s.showFps === true ? 'selected' : ''}>Показывать</option>
+        </select><span></span>
       </div>
+      <p class="settings-note">Сложность влияет на игровой баланс. Автосохранение выполняется в безопасные моменты исследования, вне боя.</p>
+    `;
+  } else if (tab === 'accessibility') {
+    content.innerHTML = `
+      <div class="settings-row">
+        <label>🔢 Числа урона и лечения</label>
+        <select id="set-damage-numbers" onchange="GameAPI.applySettings()">
+          <option value="on" ${s.damageNumbers !== false ? 'selected' : ''}>Показывать</option>
+          <option value="off" ${s.damageNumbers === false ? 'selected' : ''}>Скрывать</option>
+        </select><span></span>
+      </div>
+      <div class="settings-row">
+        <label>📳 Тряска экрана</label>
+        <select id="set-screen-shake" onchange="GameAPI.applySettings()">
+          <option value="on" ${s.screenShake !== false ? 'selected' : ''}>Включена</option>
+          <option value="off" ${s.screenShake === false ? 'selected' : ''}>Выключена</option>
+        </select><span></span>
+      </div>
+      <div class="settings-row">
+        <label>❤️ Эффекты низкого здоровья</label>
+        <select id="set-low-health" onchange="GameAPI.applySettings()">
+          <option value="on" ${s.lowHealthEffects !== false ? 'selected' : ''}>Показывать</option>
+          <option value="off" ${s.lowHealthEffects === false ? 'selected' : ''}>Скрывать</option>
+        </select><span></span>
+      </div>
+      <div class="settings-row">
+        <label>🌿 Уменьшить анимацию</label>
+        <select id="set-reduced-motion" onchange="GameAPI.applySettings()">
+          <option value="off" ${s.reducedMotion !== true ? 'selected' : ''}>Обычная</option>
+          <option value="on" ${s.reducedMotion === true ? 'selected' : ''}>Уменьшенная</option>
+        </select><span></span>
+      </div>
+      <p class="settings-note">Эти параметры уменьшают визуальную нагрузку и помогают настроить эффекты под себя. Они не меняют сложность и характеристики персонажа.</p>
     `;
   } else if (tab === 'data') {
     content.innerHTML = `
       <p style="color:#a89060;margin-bottom:16px;line-height:1.7;font-size:13px;">
-        <b style="color:#60ff60;">💾 Бэкап:</b> скачайте сейв в файл — на случай очистки кэша или переноса на другое устройство.
+        <b style="color:#60ff60;">💾 Резервная копия:</b> экспортируйте сохранение перед очисткой данных браузера или переносом на другое устройство.
       </p>
-      <button onclick="GameAPI.exportSave()" style="width:100%;border-color:#60ff60;background:linear-gradient(180deg,#2a5a3a,#1a3a2a);margin-bottom:10px;">
-        💾 Экспортировать сейв (файл .json)
-      </button>
+      <button onclick="GameAPI.exportSave()" style="width:100%;border-color:#60ff60;background:linear-gradient(180deg,#2a5a3a,#1a3a2a);margin-bottom:10px;">💾 Экспортировать сейв (.json)</button>
       <label style="display:block;width:100%;margin-bottom:16px;">
         <input type="file" id="import-save-input" accept=".json" style="display:none;" onchange="GameAPI.importSave(event)">
-        <button onclick="document.getElementById('import-save-input').click()" style="width:100%;border-color:#60a0ff;background:linear-gradient(180deg,#1a3a6a,#0a1a3a);">
-          📂 Импортировать сейв
-        </button>
+        <button onclick="document.getElementById('import-save-input').click()" style="width:100%;border-color:#60a0ff;background:linear-gradient(180deg,#1a3a6a,#0a1a3a);">📂 Импортировать сейв</button>
       </label>
-
       <div class="divider"></div>
-
-      <p style="color:#a89060;margin-bottom:16px;line-height:1.7;font-size:13px;">
-        <b style="color:#ff6060;">⚠️ Опасные действия:</b> необратимы. Используйте с осторожностью.
-      </p>
-      <button onclick="GameAPI.deleteAllSaves()" style="width:100%;border-color:#8b1a1a;background:linear-gradient(180deg,#5a1a1a,#2a0a0a);margin-bottom:10px;">
-        🗑️ Удалить ВСЕ сохранения (все 3 слота)
-      </button>
-      <button onclick="GameAPI.resetAllSettings()" style="width:100%;">
-        🔄 Сбросить настройки на стандартные
-      </button>
+      <p style="color:#ffb0a0;margin-bottom:16px;line-height:1.7;font-size:13px;"><b>⚠️ Опасные действия:</b> удаление сохранений необратимо.</p>
+      <button onclick="GameAPI.deleteAllSaves()" style="width:100%;border-color:#8b1a1a;background:linear-gradient(180deg,#5a1a1a,#2a0a0a);margin-bottom:10px;">🗑️ Удалить ВСЕ сохранения</button>
+      <button onclick="GameAPI.resetAllSettings()" style="width:100%;">🔄 Сбросить настройки</button>
     `;
   }
 }
 
 export function applySettings() {
   const s = state.settings;
-  const musicEl = document.getElementById('set-music-volume');
-  const sfxEl = document.getElementById('set-sfx-volume');
-  const soundEl = document.getElementById('set-sound');
-  const diffEl = document.getElementById('set-difficulty');
-  const autoEl = document.getElementById('set-autosave');
-  const hkEl = document.getElementById('set-hotkeys');
-  const fpsEl = document.getElementById('set-fps');
-
-  if (musicEl) {
-    s.musicVolume = parseInt(musicEl.value);
-    const val = document.getElementById('set-music-volume-val');
-    if (val) val.textContent = s.musicVolume + '%';
+  const value = id => document.getElementById(id)?.value;
+  const music = value('set-music-volume');
+  const sfx = value('set-sfx-volume');
+  if (music !== undefined) {
+    s.musicVolume = Math.max(0, Math.min(100, Number(music) || 0));
+    const label = document.getElementById('set-music-volume-val');
+    if (label) label.textContent = s.musicVolume + '%';
   }
-  if (sfxEl) {
-    s.sfxVolume = parseInt(sfxEl.value);
-    const val = document.getElementById('set-sfx-volume-val');
-    if (val) val.textContent = s.sfxVolume + '%';
+  if (sfx !== undefined) {
+    s.sfxVolume = Math.max(0, Math.min(100, Number(sfx) || 0));
+    const label = document.getElementById('set-sfx-volume-val');
+    if (label) label.textContent = s.sfxVolume + '%';
   }
-  if (soundEl) s.soundEnabled = soundEl.value === 'on';
-  if (diffEl) s.difficulty = diffEl.value;
-  if (autoEl) s.autoSave = autoEl.value === 'on';
-  if (hkEl) s.showHotkeys = hkEl.value === 'on';
-  if (fpsEl) s.showFps = fpsEl.value === 'on';
+  const setBool = (id, key) => { const v = value(id); if (v !== undefined) s[key] = v === 'on'; };
+  const difficulty = value('set-difficulty');
+  if (difficulty && ['easy', 'normal', 'hard'].includes(difficulty)) s.difficulty = difficulty;
+  setBool('set-sound', 'soundEnabled');
+  setBool('set-autosave', 'autoSave');
+  setBool('set-hotkeys', 'showHotkeys');
+  setBool('set-fps', 'showFps');
+  setBool('set-damage-numbers', 'damageNumbers');
+  setBool('set-screen-shake', 'screenShake');
+  setBool('set-low-health', 'lowHealthEffects');
+  setBool('set-reduced-motion', 'reducedMotion');
+  const interval = Number(value('set-autosave-interval'));
+  if ([15, 30, 60].includes(interval)) s.autoSaveInterval = interval;
 
   updateVolume();
   saveSettings();
@@ -205,8 +233,10 @@ export function resetAllSettings() {
   if (!confirm('Сбросить ВСЕ настройки на стандартные?')) return;
   state.settings = {
     musicVolume: 60, sfxVolume: 80, difficulty: 'normal',
-    soundEnabled: true, autoSave: true, showHotkeys: true,
-    showFps: false, settingsVersion: 3
+    soundEnabled: true, autoSave: true, autoSaveInterval: 30,
+    showHotkeys: true, showFps: false, screenShake: true,
+    damageNumbers: true, lowHealthEffects: true, reducedMotion: false,
+    settingsVersion: 4
   };
   saveSettings();
   updateVolume();
