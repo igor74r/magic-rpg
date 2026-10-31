@@ -242,7 +242,28 @@ function createTree(classId, branches) {
 const TREE_CACHE = new Map();
 
 export function getPassiveTree(classId) {
-  const key = BRANCHES[classId] ? classId : 'warrior';
+  // Старый скрытый класс priest сохраняется для совместимости сейвов,
+  // но не должен получать дерево воина по умолчанию.
+  const key = BRANCHES[classId] ? classId : null;
+
+  if (!key) {
+    return {
+      classId: classId || 'unknown',
+      nodes: {
+        start: {
+          id: 'start',
+          x: 50,
+          y: 50,
+          name: 'Начало пути',
+          desc: 'Центр вашего мастерства',
+          type: 'start',
+          icon: '✦',
+          conn: [],
+          effects: {}
+        }
+      }
+    };
+  }
 
   if (!TREE_CACHE.has(key)) {
     TREE_CACHE.set(key, createTree(key, BRANCHES[key]));
