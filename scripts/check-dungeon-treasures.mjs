@@ -3,7 +3,7 @@ import { ITEMS } from '../data/items.js';
 import { ENEMIES } from '../data/enemies.js';
 import { LOCATIONS } from '../data/locations.js';
 import { STORY } from '../data/story.js';
-import { ACT_RELIC_REWARDS, getActNumberForLocation, rollDungeonChestLoot, getDungeonChestType } from '../data/dungeon-treasures.js';
+import { ACT_RELIC_REWARDS, getActNumberForLocation, rollDungeonChestLoot, getDungeonChestType, prepareChestKeyAccess } from '../data/dungeon-treasures.js';
 import { ITEMS as ITEM_DATA } from '../data/items.js';
 
 const expectedRelics = [
@@ -53,4 +53,12 @@ assert.notEqual(getDungeonChestType('briar-hollow', 1, 2, 3), getDungeonChestTyp
 const generatedTypes = new Set();
 for (let floor = 1; floor <= 80; floor++) for (let index = 2; index < 8; index++) generatedTypes.add(getDungeonChestType('briar-hollow', floor, index, 8));
 for (const type of ['wooden', 'cursed', 'mimic', 'ancient']) assert.ok(generatedTypes.has(type), `chest generation includes ${type}`);
+const legacyFloorChests = [{ type: 'wooden', opened: true }, { type: 'wooden', opened: false }, { type: 'locked', opened: false }];
+assert.equal(prepareChestKeyAccess(legacyFloorChests, false), 1, 'legacy floor receives a key cache if its original first chest was already opened');
+assert.equal(legacyFloorChests[1].keyCache, true);
+const isolatedLockedChest = [{ type: 'locked', opened: false }];
+assert.equal(prepareChestKeyAccess(isolatedLockedChest, false), 0, 'a locked chest without another key source remains pickable');
+assert.equal(isolatedLockedChest[0].freePick, true);
+const keyedFloor = [{ type: 'locked', opened: false }];
+assert.equal(prepareChestKeyAccess(keyedFloor, true), -1, 'players who already have a key do not get duplicate key caches');
 console.log('Act relic and regional dungeon treasure checks passed');
