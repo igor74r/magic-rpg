@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, global-edition ]
+    branches: [ main, global-edition, 'work/**' ]
   pull_request:
     branches: [ main ]
 
