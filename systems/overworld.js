@@ -7,6 +7,7 @@ import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from 
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
 import { recordLocationVisit } from './exploration.js';
+import { saveGame } from './save.js';
 
 export { TILE } from './overworld/map.js';
 export { tryMovePlayer, updateOverworld } from './overworld/ai.js';
@@ -56,7 +57,7 @@ export function enterOverworld(locationId, opts = {}) {
 
   emit('overworld:start');
   // Persist the checkpoint as soon as a region is entered.
-  import('./save.js').then(({ saveGame }) => saveGame());
+  saveGame();
 }
 
 export function exitOverworld() {
