@@ -202,7 +202,7 @@ function renderPaperdoll(p) {
         onmouseout="GameAPI.hideTooltip()">
         <span class="gear-slot-icon">${item.icon}</span>
         <span class="gear-slot-label">${label}</span>
-        <span class="gear-slot-name">${item.name}${obj.forgeLevel ? ` +${obj.forgeLevel}` : ''}</span>
+        <span class="gear-slot-name">${(obj.affixes || []).map(affix => affix.name).join(' ')} ${item.name}${obj.forgeLevel ? ` +${obj.forgeLevel}` : ''}</span>
         <span class="gear-slot-sockets">${sockets ? `◈ ${runes}/${sockets}` : ''}</span>
         <button class="gear-slot-remove" onclick="GameAPI.unequip('${slot}')" title="Снять">×</button>
       </div>`;
@@ -497,14 +497,16 @@ function buildTooltipHTML(inst) {
   const rarity = RARITIES[inst.rarity];
   const color = rarity?.color || '#c9a227';
   const rarityLabel = rarity && inst.rarity !== 'common' ? ` · ${rarity.name}` : '';
+  const affixLabel = (inst.affixes || []).map(affix => affix.name).join(' · ');
   const stats = item.runeBonus ? formatBonus({ bonus: item.runeBonus }, { bonus: item.runeBonus }) : formatBonus(inst, item);
   const sockets = EQUIPMENT_TYPES.has(item.type)
     ? `<div class="tooltip-sockets">Гнёзда: ${(inst.runes || []).length}/${inst.sockets ?? item.sockets ?? 0} ${(inst.runes || []).map(id => ITEMS[id]?.icon || 'ᛉ').join(' ')}</div>`
     : '';
   return `
-    <div class="tooltip-title" style="color:${color}">${item.icon} ${item.name}${rarityLabel}${inst.forgeLevel ? ` +${inst.forgeLevel}` : ''}</div>
+    <div class="tooltip-title" style="color:${color}">${item.icon} ${(inst.affixes || []).map(affix => affix.name).join(' ')} ${item.name}${rarityLabel}${inst.forgeLevel ? ` +${inst.forgeLevel}` : ''}</div>
     <div class="tooltip-type">${TYPE_LABELS[item.type] || item.type}</div>
     <div class="tooltip-desc">${item.desc}</div>
+    ${affixLabel ? `<div class="tooltip-type">Модификаторы: ${affixLabel}</div>` : ''}
     ${stats ? `<div class="tooltip-stats">${stats}</div>` : ''}
     ${sockets}
     ${buildCompareHTML(inst, item)}
