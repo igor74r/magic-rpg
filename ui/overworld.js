@@ -71,13 +71,11 @@ function generateSecrets(ow) {
       rewardType: rollType < 0.60 ? 'chest' : rollType < 0.90 ? 'elite' : 'loot',
       wx: cell.x * ow.tile + ow.tile / 2,
       wy: cell.y * ow.tile + ow.tile / 2,
-      ax: cell.ax * ow.tile + ow.tile / 2,
-      ay: cell.ay * ow.tile + ow.tile / 2,
       opened: false, startedAt: performance.now()
     });
   }
   saveDungeonSecrets(state.game?.player, ow.locationId, floor, secrets);
-  return secrets;
+  return secrets.map(secret => ({ ...secret, wx: secret.tx * ow.tile + ow.tile / 2, wy: secret.ty * ow.tile + ow.tile / 2, ax: secret.ax * ow.tile + ow.tile / 2, ay: secret.ay * ow.tile + ow.tile / 2 }));
 }
 
 function tryOpenSecret() {
