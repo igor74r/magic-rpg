@@ -25,6 +25,9 @@ for (const [index, act] of STORY.acts.entries()) {
 }
 
 assert.equal(DRAGON_SHARDS.length, 3);
+assert.equal(STORY.acts[2].missions[4].enemyId, 'ashen-herald');
+assert.equal(STORY.acts[3].missions[4].enemyId, 'icy-grasp');
+assert.equal(STORY.acts[4].missions[4].enemyId, 'blood-crown');
 for (const dragon of DRAGON_SHARDS) {
   assert.ok(ENEMIES[dragon.enemyId]?.boss, `dragon ${dragon.id} must be a boss enemy`);
   assert.ok(LOCATIONS[dragon.locationId]?.enemies.includes(dragon.enemyId), `dragon ${dragon.id} must be present in its assigned region`);
