@@ -78,6 +78,12 @@ function tryOpenSecret() {
   if (!ow || !ow.secretWalls) return;
   if (ow.combat || ow.defeated) return;
   const p = ow.player;
+  for (const stair of ow.dungeonStairs || []) {
+    const sx = stair.x * ow.tile + ow.tile / 2, sy = stair.y * ow.tile + ow.tile / 2;
+    if (Math.hypot(sx - p.x, sy - p.y) < ow.tile * 1.35) {
+      return transitionDungeonFloor(stair.direction);
+    }
+  }
   for (const sw of ow.secretWalls) {
     if (sw.opened) continue;
     const dist = Math.hypot(sw.wx - p.x, sw.wy - p.y);
