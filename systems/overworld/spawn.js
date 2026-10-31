@@ -115,7 +115,7 @@ export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId
   const chests = [];
   const chestsCount = loc.chestsCount || 3;
   for (let i = 0; i < chestsCount; i++) {
-    const pos = findFreeCell(map, cols, rows, enemies, 150, playerPos, loc.id || loc.locationId || null);
+    const pos = findFreeCell(map, cols, rows, enemies, 150, playerPos, locationId);
     if (pos) chests.push({ x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2, opened: false });
   }
   return chests;
@@ -131,7 +131,7 @@ export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null) 
   const EMOJIS = { altar: '⛩️', mimic: '🎁', crystal: '💎', traveler: '🧙' };
 
   for (let i = 0; i < count; i++) {
-    const pos = findFreeCell(map, cols, rows, [], 200, playerPos, loc.id || loc.locationId || null);
+    const pos = findFreeCell(map, cols, rows, [], 200, playerPos, locationId);
     if (!pos) continue;
     const type = types[Math.floor(Math.random() * types.length)];
     events.push({
