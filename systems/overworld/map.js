@@ -229,7 +229,7 @@ export function generateMap(locationId, cols, rows) {
   // travel lanes so every region has readable environmental danger without
   // trapping the player at the spawn point.
   const hazardRegions = new Set([
-    'volcano', 'dragon', 'obsidian-fields',
+    'volcano', 'dragon-lair', 'obsidian-fields',
     'swamp', 'briar-hollow',
     'ruins', 'sunken-necropolis'
   ]);
