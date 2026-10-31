@@ -500,15 +500,28 @@ function render() {
        eLungeX = Math.cos(now / 50) * 5; 
     }
     
+    if (e.uniqueElite) {
+      const pulse = 0.5 + 0.5 * Math.sin(now / 260);
+      ctx.save();
+      ctx.globalAlpha = 0.18 + pulse * 0.12;
+      ctx.strokeStyle = e.phase > 0 ? '#ff7040' : '#65d9d0';
+      ctx.lineWidth = 2.5;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = e.phase > 0 ? '#ff5030' : '#55d8d0';
+      ctx.beginPath();
+      ctx.arc(sx, sy, 23 + pulse * 3, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
     drawEnemyByType(ctx, e, sx + eLungeX, sy + eLungeY, theme.shadow);
 
     const distToPlayer = Math.hypot(e.x - ow.player.x, e.y - ow.player.y);
     if (distToPlayer < 300) {
       const def = ENEMIES[e.enemyId];
-      const label = e.boss ? '☠ ' + def.name : e.elite ? '★ ' + def.name : def.name;
-      const labelY = sy - (e.boss ? 55 : e.elite ? 45 : 32);
+      const label = e.boss ? '☠ ' + def.name : e.uniqueElite ? '✦ ' + def.name : e.elite ? '★ ' + def.name : def.name;
+      const labelY = sy - (e.boss ? 55 : e.uniqueElite ? 49 : e.elite ? 45 : 32);
       ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
-      ctx.strokeText(label, sx, labelY); ctx.fillStyle = e.boss ? '#b060ff' : e.elite ? '#ffd060' : '#d4c8a8'; ctx.fillText(label, sx, labelY);
+      ctx.strokeText(label, sx, labelY); ctx.fillStyle = e.boss ? '#b060ff' : e.uniqueElite ? (e.phase > 0 ? '#ff8050' : '#75e8dc') : e.elite ? '#ffd060' : '#d4c8a8'; ctx.fillText(label, sx, labelY);
     }
   }
 
@@ -821,10 +834,12 @@ export function onCanvasMouseMove(e) {
 
 function showMapTooltip(cx, cy, enemy) {
   const def = ENEMIES[enemy.enemyId]; const modName = enemy.modifier ? ` (${MOD_LABEL[enemy.modifier]})` : '';
-  const nameColor = enemy.boss ? '#b060ff' : enemy.elite ? '#ffd060' : '#c9a227'; const prefix = enemy.boss ? '☠ ' : enemy.elite ? '★ ' : '';
+  const nameColor = enemy.boss ? '#b060ff' : enemy.uniqueElite ? '#75e8dc' : enemy.elite ? '#ffd060' : '#c9a227'; const prefix = enemy.boss ? '☠ ' : enemy.uniqueElite ? '✦ ' : enemy.elite ? '★ ' : '';
   let html = `<div class="map-tt-name" style="color:${nameColor};">${prefix}${def.name}${modName}</div>`;
   html += `<div class="map-tt-row">❤️ HP: ${enemy.hp}/${enemy.maxHp}</div><div class="map-tt-row">⚔️ Атака: ${def.attack}</div><div class="map-tt-row">🛡️ Защита: ${def.defense}</div>`;
   if (enemy.elite) html += `<div class="map-tt-row" style="color:#ffd060;">★ Элитный (HP×1.5, атака×1.3)</div>`;
+  if (enemy.uniqueElite) html += `<div class="map-tt-row" style="color:#75e8dc;">✦ Уникальный противник — победа сохраняется на этом этаже</div>`;
+  if (enemy.phase > 0) html += `<div class="map-tt-row" style="color:#ff8050;">⚠️ Фаза ярости: усиленные атаки</div>`;
   if (enemy.boss) html += `<div class="map-tt-row" style="color:#b060ff;">☠ Мини-босс</div>`;
   if (def.special) html += `<div class="map-tt-row" style="color:#ffa500;">⚠️ ${def.special.name} (кажд. ${def.special.every} х.)</div>`;
   if (!mapTooltipEl) { mapTooltipEl = document.createElement('div'); mapTooltipEl.id = 'map-tooltip'; mapTooltipEl.className = 'map-tooltip'; document.body.appendChild(mapTooltipEl); }
