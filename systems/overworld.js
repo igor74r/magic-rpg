@@ -28,6 +28,13 @@ export function enterOverworld(locationId, opts = {}) {
   const map = generateMap(locationId, cols, rows);
   const dungeonStairs = loc.safe ? [] : getDungeonStairCells(cols, rows, dungeonFloor);
   for (const stair of dungeonStairs) {
+    // Carve a guaranteed L-shaped corridor from the central road to each stair.
+    for (let x = Math.min(Math.floor(cols / 2), stair.x); x <= Math.max(Math.floor(cols / 2), stair.x); x++) {
+      if (map[Math.floor(rows / 2)] && map[Math.floor(rows / 2)][x] !== undefined) map[Math.floor(rows / 2)][x] = 1;
+    }
+    for (let y = Math.min(Math.floor(rows / 2), stair.y); y <= Math.max(Math.floor(rows / 2), stair.y); y++) {
+      if (map[y] && map[y][stair.x] !== undefined) map[y][stair.x] = 1;
+    }
     for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
       const x = stair.x + ox, y = stair.y + oy;
       if (map[y] && map[y][x] !== undefined) map[y][x] = 1;
