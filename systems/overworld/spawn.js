@@ -123,6 +123,17 @@ export function spawnStatics(loc) {
   }));
 }
 
+export function spawnBossVaultChest(loc, map, cols, rows, enemies, chests, playerPos, locationId, dungeonFloor, player) {
+  if (!loc || loc.safe || !locationId) return null;
+  const bosses = [...new Set((loc.enemies || []).filter(id => ENEMIES[id]?.boss))];
+  if (!bosses.length || !bosses.every(id => isDungeonBossDefeated(player, locationId, dungeonFloor, id))) return null;
+  const id = `boss-vault-f${Math.max(1, Math.floor(Number(dungeonFloor) || 1))}`;
+  if (isDungeonChestOpened(player, locationId, id)) return null;
+  const pos = findFreeCell(map, cols, rows, [...enemies, ...chests], 260, playerPos, locationId);
+  if (!pos) return null;
+  return { id, type: 'boss', x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2, opened: false };
+}
+
 export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId = null, dungeonFloor = 1) {
   if (loc.safe) return [];
   const chests = [];
@@ -196,6 +207,7 @@ export function openChest(chest) {
   const loot = rollDungeonChestLoot(ow.locationId);
   const rarityOrder = ['common', 'rare', 'epic', 'legendary'];
   if (chest.type === 'ancient') loot.rarity = rarityOrder[Math.min(3, rarityOrder.indexOf(loot.rarity) + 1)];
+  if (chest.type === 'boss') loot.rarity = rarityOrder[Math.max(2, rarityOrder.indexOf(loot.rarity))];
   const id = loot.itemId;
   const created = addItem(id, 1, { rarity: loot.rarity });
   const inst = created[0];
@@ -223,6 +235,13 @@ export function openChest(chest) {
       emit('toast', '👁️ Это был мимик! Он нападает!');
       pushLog('👁️ Сундук оказался мимиком — приготовьтесь к бою!', 'danger');
     }
+  } else if (chest.type === 'boss') {
+    const bonusGold = 150 + loot.actNumber * 75;
+    p.gold = (p.gold || 0) + bonusGold;
+    p.stats ||= {};
+    p.stats.goldEarned = (p.stats.goldEarned || 0) + bonusGold;
+    pushLog(`👑 Сокровищница босса: гарантированная редкая добыча и +${bonusGold} золота!`, 'success');
+    emit('toast', '👑 Сокровищница босса открыта!');
   } else if (chest.type === 'ancient') {
     const bonusGold = 20 + loot.actNumber * 10;
     p.gold = (p.gold || 0) + bonusGold;
