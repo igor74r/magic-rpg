@@ -6,7 +6,7 @@ const LEGACY_KEY = 'magic-rpg-save';
 const SETTINGS_KEY = 'magic-rpg-settings';
 
 const SAVE_VERSION = 13;
-const SETTINGS_VERSION = 3;
+const SETTINGS_VERSION = 4;
 const MAX_SLOT = 3;
 
 let lastSaveTime = null;
@@ -473,6 +473,15 @@ export function migrateSettings(settings) {
   if (typeof settings.showFps !== 'boolean') {
     settings.showFps = false;
   }
+
+  if (![15, 30, 60].includes(settings.autoSaveInterval)) {
+    settings.autoSaveInterval = 30;
+  }
+
+  if (typeof settings.screenShake !== 'boolean') settings.screenShake = true;
+  if (typeof settings.damageNumbers !== 'boolean') settings.damageNumbers = true;
+  if (typeof settings.lowHealthEffects !== 'boolean') settings.lowHealthEffects = true;
+  if (typeof settings.reducedMotion !== 'boolean') settings.reducedMotion = false;
 
   if (typeof settings.difficulty !== 'string') {
     settings.difficulty = 'normal';
