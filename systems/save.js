@@ -1,11 +1,12 @@
 import { state } from './state.js';
 import { STORY } from '../data/story.js';
+import { normalizeExploration } from './exploration.js';
 
 const SLOT_PREFIX = 'magic-rpg-save-';
 const LEGACY_KEY = 'magic-rpg-save';
 const SETTINGS_KEY = 'magic-rpg-settings';
 
-const SAVE_VERSION = 13;
+const SAVE_VERSION = 14;
 const SETTINGS_VERSION = 4;
 const MAX_SLOT = 3;
 
@@ -360,6 +361,14 @@ export function migrateGame(game) {
       if (game.shards?.[shard]) player.campaignShards[shard] = true;
     }
     game.version = 13;
+  }
+
+  // Version 14: persistent region discovery and dungeon checkpoints.
+  if (game.version < 14) {
+    game.player.exploration = normalizeExploration(game.player.exploration);
+    game.version = 14;
+  } else {
+    game.player.exploration = normalizeExploration(game.player.exploration);
   }
 
   return game;
