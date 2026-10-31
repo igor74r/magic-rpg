@@ -115,14 +115,14 @@ export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId
   const chests = [];
   const chestsCount = loc.chestsCount || 3;
   for (let i = 0; i < chestsCount; i++) {
-    const pos = findFreeCell(map, cols, rows, enemies, 150, playerPos, locationId);
+    const pos = findFreeCell(map, cols, rows, [...enemies, ...chests], 150, playerPos, locationId);
     if (pos) chests.push({ x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2, opened: false });
   }
   return chests;
 }
 
 // ⬇️ НОВОЕ: спавн случайных событий на карте
-export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null) {
+export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null, avoidList = []) {
   if (loc.safe) return [];
   const events = [];
   const count = 1 + Math.floor(Math.random() * 2);
@@ -131,7 +131,7 @@ export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null) 
   const EMOJIS = { altar: '⛩️', mimic: '🎁', crystal: '💎', traveler: '🧙' };
 
   for (let i = 0; i < count; i++) {
-    const pos = findFreeCell(map, cols, rows, [], 200, playerPos, locationId);
+    const pos = findFreeCell(map, cols, rows, avoidList.concat(events), 200, playerPos, locationId);
     if (!pos) continue;
     const type = types[Math.floor(Math.random() * types.length)];
     events.push({
