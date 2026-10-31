@@ -21,6 +21,7 @@ const mods = await Promise.all([
   import('../data/passives.js'),
   import('../systems/campaign.js'),
   import('../systems/save.js'),
+  import('../systems/exploration.js'),
   import('../systems/talents.js'),
   import('../systems/inventory.js'),
   import('../ui/overworld/tile-atlas.js'),
@@ -48,6 +49,7 @@ const { STORY } = mods[14];
 const { getPassiveTree } = mods[15];
 const { getCampaignProgress, isCampaignComplete, canCompleteMainQuest, recordCampaignKill, acceptCampaignMission, claimCampaignMission, getNextCampaignMission, getMissionReward } = mods[16];
 const { migrateGame } = mods[17];
+const { normalizeExploration, recordLocationVisit, markLocationCleared } = mods[18];
 const { getAvailablePassives, allocatePassive, getTalentBonus } = mods[18];
 const { addItem, useItem, equipItemByIndex, socketRune, EQUIPMENT_SLOTS } = mods[19];
 const { drawAtlasTile, drawAtlasProp } = mods[20];
@@ -152,7 +154,13 @@ const migratedV10 = migrateGame({
   version: 10,
   player: { class: 'mage', level: 12, stats: { kills: { [STORY.acts[0].missions[0].enemyId]: 2 } } }
 });
-check('v10 save migrates to v13 without importing lifetime kills', migratedV10.version === 13 && migratedV10.player.dex === 8 && Object.keys(migratedV10.player.campaignKills).length === 0 && migratedV10.player.stats.kills[STORY.acts[0].missions[0].enemyId] === 2 && EQUIPMENT_SLOTS.length === 12 && EQUIPMENT_SLOTS.every(slot => slot in migratedV10.player.equipped));
+check('v10 save migrates to v14 without importing lifetime kills', migratedV10.version === 14 && migratedV10.player.dex === 8 && Object.keys(migratedV10.player.campaignKills).length === 0 && migratedV10.player.stats.kills[STORY.acts[0].missions[0].enemyId] === 2 && EQUIPMENT_SLOTS.length === 12 && EQUIPMENT_SLOTS.every(slot => slot in migratedV10.player.equipped));
+const explorationPlayer = {};
+recordLocationVisit(explorationPlayer, 'forest', 1000);
+recordLocationVisit(explorationPlayer, 'forest', 2000);
+const explorationCleared = markLocationCleared(explorationPlayer, 'forest');
+check('exploration checkpoints persist visits, timestamps and cleared state', explorationPlayer.exploration.visited.forest.visits === 2 && explorationPlayer.exploration.visited.forest.firstVisitedAt === 1000 && explorationCleared && explorationPlayer.exploration.visited.forest.cleared);
+check('legacy saves receive safe exploration defaults', !!migratedV10.player.exploration && migratedV10.player.exploration.lastLocationId === null && Object.keys(normalizeExploration(null).visited).length === 0);
 
 state.game = { player: { inventory: [], spells: [], hp: 100, maxHp: 500, mp: 0, maxMp: 300 } };
 addItem('scroll-frost-nova', 2);
