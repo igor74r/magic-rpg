@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress } from '../systems/exploration.js';
+import { normalizeExploration, recordLocationVisit, markLocationCleared, getDungeonProgress, updateDungeonProgress, isDungeonChestOpened } from '../systems/exploration.js';
 
 const player = {};
 assert.equal(recordLocationVisit(player, 'forest', 1000), true);
@@ -19,6 +19,9 @@ assert.deepEqual(getDungeonProgress(player, 'forest'), {
   floor: 2, checkpoint: 'crypt-hall', openedChests: ['chest-01'],
   secretsFound: ['hidden-room'], bossDefeated: true
 });
+assert.equal(isDungeonChestOpened(player, 'forest', 'chest-01'), true);
+assert.equal(isDungeonChestOpened(player, 'forest', 'chest-02'), false);
+assert.equal(isDungeonChestOpened(player, 'forest', '../invalid'), false);
 assert.equal(updateDungeonProgress(player, 'forest', { floor: -20, checkpoint: '../invalid', chestId: '../bad' }), true);
 assert.equal(getDungeonProgress(player, 'forest').floor, 1);
 assert.equal(getDungeonProgress(player, 'forest').checkpoint, 'crypt-hall');
