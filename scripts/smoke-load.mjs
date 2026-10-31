@@ -21,8 +21,6 @@ const mods = await Promise.all([
   import('../data/passives.js'),
   import('../systems/campaign.js'),
   import('../systems/save.js'),
-  import('../systems/rift-progression.js'),
-  import('../data/rift-canon.js'),
   import('../systems/talents.js'),
   import('../systems/inventory.js'),
   import('../ui/overworld/tile-atlas.js'),
@@ -30,6 +28,8 @@ const mods = await Promise.all([
   import('../ui/overworld/effects.js'),
   import('../systems/overworld/map.js'),
   import('../systems/overworld/spawn.js'),
+  import('../systems/rift-progression.js'),
+  import('../data/rift-canon.js'),
 ]);
 
 const { state } = mods[0];
