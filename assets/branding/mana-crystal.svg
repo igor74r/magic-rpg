@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="crystal" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fff3b0"/>
+      <stop offset=".42" stop-color="#75e5ff"/>
+      <stop offset="1" stop-color="#7653c9"/>
+    </linearGradient>
+    <radialGradient id="glow"><stop stop-color="#8ceaff" stop-opacity=".65"/><stop offset="1" stop-color="#8ceaff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <circle cx="64" cy="64" r="59" fill="#100d1b" stroke="#c9a227" stroke-width="3"/>
+  <circle cx="64" cy="64" r="48" fill="url(#glow)"/>
+  <path d="M64 13 95 48 79 105 49 105 33 48Z" fill="url(#crystal)" stroke="#fff1b0" stroke-width="3" stroke-linejoin="round"/>
+  <path d="m64 13 1 92 14 0 16-57Z" fill="#fff" fill-opacity=".2"/>
+  <path d="m33 48 31 16 31-16M49 105l15-41 15 41" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="2"/>
+  <path d="m20 32 5 8m78 36 6 4M26 89l-5 7m78-66 6-7" stroke="#ffe39a" stroke-width="3" stroke-linecap="round"/>
+</svg>

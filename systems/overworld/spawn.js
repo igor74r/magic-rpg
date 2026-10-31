@@ -49,7 +49,7 @@ export function createSpawnRoster(enemyIds, count, random = Math.random) {
   return result;
 }
 
-export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}) {
+export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locationId = null) {
   if (loc.safe) return [];
   const ng = getNGPlusMult();
   const riftM = opts.rifMode ? getRiftMult(opts.rifFloor || 1) : { hpMult: 1 };
@@ -59,7 +59,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}) {
   const eliteChance = getEliteChance();
 
   for (let i = 0; i < count; i++) {
-    const pos = findFreeCell(map, cols, rows, enemies, 220, playerPos);
+    const pos = findFreeCell(map, cols, rows, enemies, 220, playerPos, locationId);
     if (!pos) continue;
     const enemyId = spawnRoster[i];
     const def = ENEMIES[enemyId];
@@ -110,19 +110,19 @@ export function spawnStatics(loc) {
   }));
 }
 
-export function spawnChests(loc, map, cols, rows, enemies, playerPos) {
+export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId = null) {
   if (loc.safe) return [];
   const chests = [];
   const chestsCount = loc.chestsCount || 3;
   for (let i = 0; i < chestsCount; i++) {
-    const pos = findFreeCell(map, cols, rows, enemies, 150, playerPos);
+    const pos = findFreeCell(map, cols, rows, [...enemies, ...chests], 150, playerPos, locationId);
     if (pos) chests.push({ x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2, opened: false });
   }
   return chests;
 }
 
 // ⬇️ НОВОЕ: спавн случайных событий на карте
-export function spawnEvents(loc, map, cols, rows, playerPos) {
+export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null, avoidList = []) {
   if (loc.safe) return [];
   const events = [];
   const count = 1 + Math.floor(Math.random() * 2);
@@ -131,7 +131,7 @@ export function spawnEvents(loc, map, cols, rows, playerPos) {
   const EMOJIS = { altar: '⛩️', mimic: '🎁', crystal: '💎', traveler: '🧙' };
 
   for (let i = 0; i < count; i++) {
-    const pos = findFreeCell(map, cols, rows, [], 200, playerPos);
+    const pos = findFreeCell(map, cols, rows, avoidList.concat(events), 200, playerPos, locationId);
     if (!pos) continue;
     const type = types[Math.floor(Math.random() * types.length)];
     events.push({

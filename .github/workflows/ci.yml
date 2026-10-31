@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, global-edition, 'work/**' ]
   pull_request:
     branches: [ main ]
 
@@ -34,3 +34,38 @@ jobs:
 
       - name: Run boot smoke test
         run: node scripts/smoke-boot.mjs
+
+      - name: Check economy and campaign rewards
+        run: node scripts/check-economy.mjs
+
+      - name: Check item rarity distribution
+        run: node scripts/check-rarity.mjs
+
+      - name: Check passive trees and respec
+        run: node scripts/check-passives.mjs
+
+      - name: Check class talents and legacy compatibility
+        run: node scripts/check-class-talents.mjs
+
+      - name: Check settings migration and defaults
+        run: node scripts/check-settings.mjs
+
+      - name: Check inventory, affixes and crafting
+        run: node scripts/check-inventory-affixes.mjs
+
+      - name: Check five-act story depth and enemy roster
+        run: node scripts/check-story-depth.mjs
+
+      - name: Check visual assets and responsive UI
+        run: node scripts/check-visual-assets.mjs
+
+      - name: Check overworld maps and region collision
+        run: node scripts/check-overworld-map.mjs
+
+      - name: Install Playwright for real-browser checks
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run desktop and mobile browser smoke checks
+        run: node scripts/browser-smoke.mjs

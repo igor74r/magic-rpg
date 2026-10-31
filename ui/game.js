@@ -5,4 +5,4 @@ export { renderQuests, renderAchievements, renderStatistics, renderBestiary, ope
 export { openBlacksmith, openHealer, openAlchemist, openMerchant, openElder, openWell, openBard, openGuard, openCat, openKids, openHerald, payBardUI, petCatUI, closeNpcAndResumeUI, takeElderBlessingUI, useWellUI, acceptElderQuestUI, turnInElderQuestUI } from './npcs.js';
 export { openShop, showShopTooltip, buyItemUI, backToVillage, upgradeEquipmentUI, healAtHealerUI, craftRecipeUI } from './shop.js';
 export { travelTo, enterOverworldFromUI, mapSelect, mapTravel, mapEnter } from './locations.js';
-export { renderPassives, allocatePassiveUI, passiveTreePointerDown, passiveTreePointerMove, passiveTreePointerUp } from './passives.js';
+export { renderPassives, allocatePassiveUI, resetPassivesUI, passiveTreePointerDown, passiveTreePointerMove, passiveTreePointerUp } from './passives.js';

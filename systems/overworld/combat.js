@@ -23,6 +23,7 @@ import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
 import { getRiftMult } from '../rift.js';
+import { getActPriceMultiplier } from '../economy.js';
 import { updateQuestProgress } from '../dailyQuests.js';
 import { canCompleteMainQuest, recordCampaignKill, recordCampaignShard } from '../campaign.js';
 import { pushLog } from './log.js';
@@ -345,7 +346,12 @@ export function combatCastSpell(spellId) {
         (
           spell.damage +
           Math.floor(stats.mag / 2) -
-          Math.floor(enemyDefValue(enemy) / 2)
+          Math.floor(
+            Math.max(
+              0,
+              enemyDefValue(enemy) - (stats.armorPen || 0)
+            ) / 2
+          )
         ) *
         talent.spellMult
       )
@@ -528,9 +534,13 @@ export function combatUseAbility(abilityId) {
 
     spawnParticles(ow.player.x, ow.player.y, 'smoke', 8);
   } else if (abilityId === 'toxic-blade') {
+    const enemyDefense = Math.max(
+      0,
+      enemyDefValue(enemy) - (stats.armorPen || 0)
+    );
     const damage = Math.max(
       1,
-      Math.floor(stats.atk * 0.7)
+      Math.floor(stats.atk * 0.7 - Math.floor(enemyDefense / 2))
     );
 
     enemy.hp -= damage;
@@ -1307,6 +1317,7 @@ function combatVictory() {
 
   const gold = Math.round(
     def.gold * 0.15 *
+    getActPriceMultiplier(p) *
     (enemy.elite ? 2 : 1) *
     ng.goldMult *
     rift.goldMult
@@ -1404,13 +1415,16 @@ function combatVictory() {
     p.stats.bossKills = (p.stats.bossKills || 0) + 1;
   }
 
-  const dropChance =
-    (enemy.elite || enemy.boss)
-      ? 1
-      : getDropChance();
+  // Elites have a high chance for each listed drop. Bosses guarantee
+  // their first signature drop; additional drops still use normal difficulty odds.
+  const dropChance = enemy.elite ? 0.85 : getDropChance();
 
-  def.drops.forEach(id => {
-    if (Math.random() < dropChance) {
+  def.drops.forEach((id, index) => {
+    const shouldDrop = enemy.boss
+      ? index === 0 || Math.random() < getDropChance()
+      : Math.random() < dropChance;
+
+    if (shouldDrop) {
       const created = addItem(id);
       const instance = created[0];
 
@@ -1455,8 +1469,9 @@ function combatVictory() {
     playSound('chest');
   }
 
-  const herbChance =
-    (enemy.elite || enemy.boss)
+  const herbChance = enemy.boss
+    ? Math.min(1, HERB_DROP_CHANCE_ELITE * 1.25)
+    : enemy.elite
       ? HERB_DROP_CHANCE_ELITE
       : HERB_DROP_CHANCE;
 

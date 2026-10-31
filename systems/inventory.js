@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { ITEMS, RARITIES, rollRarity } from '../data/items.js';
+import { ITEMS, RARITIES, rollRarity, rollItemAffixes } from '../data/items.js';
 import { FORGE_BONUS } from '../data/npcs.js';
 
 export const EQUIPMENT_SLOTS = [
@@ -77,17 +77,22 @@ export function addItem(id, qty = 1, opts = {}) {
   const item = ITEMS[id];
   if (!item || !Number.isFinite(qty) || qty <= 0) return [];
 
+  const amount = Math.floor(qty);
+  if (amount < 1) return [];
+
   if (STACKABLE_TYPES.has(item.type)) {
     const existing = inv.find(i => i.id === id && !i.rarity);
-    if (existing) existing.qty += qty;
-    else inv.push({ id, qty });
-    return [{ id, qty }];
+    if (existing) existing.qty += amount;
+    else inv.push({ id, qty: amount });
+    return [{ id, qty: amount }];
   }
 
   const created = [];
-  for (let i = 0; i < Math.floor(qty); i++) {
-    const rarity = opts.rarity === undefined ? rollRarity() : opts.rarity;
-    const mult = RARITIES[rarity]?.multiplier || 1;
+  const random = typeof opts.random === 'function' ? opts.random : Math.random;
+  for (let i = 0; i < amount; i++) {
+    const rarity = opts.rarity === undefined ? rollRarity(random) : opts.rarity;
+    if (!RARITIES[rarity]) continue;
+    const mult = RARITIES[rarity].multiplier;
     const bonus = {};
     for (const k in (item.bonus || {})) {
       const value = item.bonus[k];
@@ -97,8 +102,15 @@ export function addItem(id, qty = 1, opts = {}) {
           : Math.round(value * mult))
         : value;
     }
+    const affixes = rollItemAffixes(item, rarity, random);
+    for (const affix of affixes) {
+      for (const [key, value] of Object.entries(affix.bonus)) {
+        bonus[key] = (bonus[key] || 0) + value;
+      }
+    }
     const inst = {
       id, qty: 1, rarity, bonus,
+      affixes,
       runes: [], sockets: item.sockets || 0
     };
     inv.push(inst);
@@ -113,13 +125,21 @@ export function countItem(id) {
 }
 
 export function removeItem(id, qty = 1) {
-  const inv = state.game.player.inventory;
-  const idx = inv.findIndex(i => i.id === id);
-  if (idx === -1 || qty <= 0) return false;
-  const inst = inv[idx];
-  inst.qty = (inst.qty || 1) - qty;
-  if (inst.qty <= 0) inv.splice(idx, 1);
-  return true;
+  const inv = state.game?.player?.inventory;
+  if (!Array.isArray(inv) || !Number.isSafeInteger(qty) || qty <= 0) return false;
+  if (countItem(id) < qty) return false;
+
+  let remaining = qty;
+  for (let i = inv.length - 1; i >= 0 && remaining > 0; i--) {
+    const inst = inv[i];
+    if (inst.id !== id) continue;
+    const stackQty = Number.isSafeInteger(inst.qty) && inst.qty > 0 ? inst.qty : 1;
+    const taken = Math.min(stackQty, remaining);
+    remaining -= taken;
+    if (taken === stackQty) inv.splice(i, 1);
+    else inst.qty = stackQty - taken;
+  }
+  return remaining === 0;
 }
 
 function scoreInst(inst) {

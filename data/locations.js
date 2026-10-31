@@ -140,7 +140,7 @@ export const LOCATIONS = {
     emoji: '🌳',
     desc: 'Запутанные корни, грибные круги и святилище, в котором проснулся Древний энт.',
     theme: 'briar-hollow',
-    enemies: ['thorn-stalker', 'spore-shaman', 'moss-troll', 'goblin', 'elder-treant'],
+    enemies: ['thorn-stalker', 'spore-shaman', 'moss-troll', 'rootbound-sentinel', 'goblin', 'elder-treant'],
     chestsCount: 5,
     mapCols: 44,
     mapRows: 34
@@ -151,7 +151,7 @@ export const LOCATIONS = {
     emoji: '⚰️',
     desc: 'Подземный город мёртвых. Затопленные крипты ведут к трону Костяного тирана.',
     theme: 'sunken-necropolis',
-    enemies: ['grave-scout', 'crypt-hound', 'bone-colossus', 'grave-king', 'bone-tyrant'],
+    enemies: ['grave-scout', 'crypt-hound', 'drowned-scribe', 'bone-colossus', 'grave-king', 'bone-tyrant'],
     chestsCount: 5,
     mapCols: 44,
     mapRows: 34
@@ -162,7 +162,7 @@ export const LOCATIONS = {
     emoji: '🌋',
     desc: 'Застывшие лавовые реки, чёрные башни и гарпии, кружащие над жерлом.',
     theme: 'obsidian-fields',
-    enemies: ['fire-elemental', 'ash-harpy', 'obsidian-guard', 'magma-golem', 'flame-lord'],
+    enemies: ['fire-elemental', 'ash-harpy', 'ashbound-renegade', 'obsidian-guard', 'magma-golem', 'flame-lord'],
     chestsCount: 5,
     mapCols: 44,
     mapRows: 34
@@ -173,7 +173,7 @@ export const LOCATIONS = {
     emoji: '🏔️',
     desc: 'Старая цитадель погребена в леднике. В её залах не тает даже пламя.',
     theme: 'frost-citadel',
-    enemies: ['frost-wolf', 'rime-witch', 'ice-elemental', 'frost-giant', 'ice-queen'],
+    enemies: ['frost-wolf', 'rime-witch', 'mirror-revenant', 'ice-elemental', 'frost-giant', 'ice-queen'],
     chestsCount: 5,
     mapCols: 44,
     mapRows: 34
@@ -184,7 +184,7 @@ export const LOCATIONS = {
     emoji: '🌀',
     desc: 'Разлом между мирами. Пространство искажено, а древние драконы стерегут сердце тьмы.',
     theme: 'void-crater',
-    enemies: ['dragonling', 'fire-drake', 'dragon-guardian', 'void-harbinger', 'ancient-dragon'],
+    enemies: ['dragonling', 'fire-drake', 'dragon-guardian', 'riftstalker', 'void-harbinger', 'ancient-dragon'],
     chestsCount: 6,
     mapCols: 46,
     mapRows: 36

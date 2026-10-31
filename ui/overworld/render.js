@@ -17,11 +17,24 @@ import {
 
 // Состояние canvas-цикла и визуальных эффектов (погода живёт в effects.js)
 let rafId = null, lastTs = 0, lastNpcKey = '', autosaveTimer = null, autosaveAt = 0;
+let fpsNow = 0, fpsFrames = 0, fpsSampleAt = 0;
 let paused = false, nearNpc = null;
 let footprints = [], lastFootprintPos = { x: 0, y: 0 }, hurtFlash = 0, worldTime = 0;
 let deathParticles = [], bloodSplats = [], lowHpPulse = 0, corpses = [], snowAccum = 0;
 let lastTileKey = null, tileDamageTimer = 0, _weatherEffectApplied = null;
 let mapTooltipEl = null;
+
+const EVENT_PROP_COLUMN = Object.freeze({ mimic: 0, crystal: 1, altar: 2 });
+
+function getEventPropIndex(eventType, themeName) {
+  const column = EVENT_PROP_COLUMN[eventType];
+  if (!Number.isInteger(column)) return -1;
+  const row = ['volcano', 'obsidian-fields', 'dragon', 'void-crater'].includes(themeName) ? 3
+    : ['shadow', 'sunken-necropolis', 'library'].includes(themeName) ? 2
+      : ['ice', 'frost-citadel', 'ice-peaks'].includes(themeName) ? 1
+        : 0;
+  return row * 8 + column;
+}
 
 function edgeSpawn() {
   const side = Math.floor(Math.random() * 4);
@@ -34,14 +47,27 @@ function edgeSpawn() {
 
 export function startAutosave() {
   if (autosaveTimer) return;
+  autosaveAt = performance.now();
   autosaveTimer = setInterval(() => {
     const ow = state.overworld;
-    if (ow && ow.active && !ow.combat && !ow.defeated && !paused && state.settings?.autoSave !== false) { saveGame(); autosaveAt = performance.now(); }
-  }, 30000);
+    const interval = Math.max(15, Math.min(60, Number(state.settings?.autoSaveInterval) || 30)) * 1000;
+    if (ow && ow.active && !ow.combat && !ow.defeated && !paused &&
+        state.settings?.autoSave !== false && performance.now() - autosaveAt >= interval) {
+      saveGame();
+      autosaveAt = performance.now();
+    }
+  }, 1000);
 }
 
 function tick(ts) {
   const dt = Math.min(50, ts - lastTs) / 16.67; lastTs = ts;
+  fpsFrames++;
+  if (!fpsSampleAt) fpsSampleAt = ts;
+  if (ts - fpsSampleAt >= 1000) {
+    fpsNow = Math.round(fpsFrames * 1000 / (ts - fpsSampleAt));
+    fpsFrames = 0;
+    fpsSampleAt = ts;
+  }
   if (state.overworld && state.overworld.active) {
     if (!paused) {
       worldTime += dt * 0.005;
@@ -273,14 +299,18 @@ function render() {
 
   const player = state.game.player;
   const isLowHp = player.hp / player.maxHp < 0.25;
+  const settings = state.settings || {};
+  const reduceMotion = settings.reducedMotion === true;
+  const allowShake = settings.screenShake !== false && !reduceMotion;
+  const showLowHealth = settings.lowHealthEffects !== false && !reduceMotion;
   let shakeX = 0, shakeY = 0;
-  if (isLowHp) {
+  if (isLowHp && showLowHealth && allowShake) {
     shakeX = (Math.random() - 0.5) * 1.5 * Math.sin(lowHpPulse * 5);
     shakeY = (Math.random() - 0.5) * 1.5 * Math.sin(lowHpPulse * 5);
   }
 
   ctx.save();
-  if (ow.shake && ow.shake.t > 0) ctx.translate((Math.random() * 2 - 1) * ow.shake.mag, (Math.random() * 2 - 1) * ow.shake.mag);
+  if (allowShake && ow.shake && ow.shake.t > 0) ctx.translate((Math.random() * 2 - 1) * ow.shake.mag, (Math.random() * 2 - 1) * ow.shake.mag);
   ctx.translate(shakeX, shakeY);
   
   ctx.fillStyle = theme.colors[0] || '#2a4a2a'; ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
@@ -400,7 +430,10 @@ function render() {
     }
     const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 400);
     ctx.fillStyle = `rgba(255, 215, 0, ${0.1 + pulse * 0.15})`; ctx.beginPath(); ctx.arc(sx, sy, 24 + pulse * 4, 0, Math.PI * 2); ctx.fill();
-    drawStatic(ctx, ev, sx, sy, theme.shadow);
+    const eventPropIndex = getEventPropIndex(ev.eventType, ow.theme || ow.locationId);
+    if (eventPropIndex < 0 || !drawAtlasProp(ctx, eventPropIndex, sx - 24, sy - 24, 48, 48)) {
+      drawStatic(ctx, ev, sx, sy, theme.shadow);
+    }
     ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
     ctx.strokeText(ev.name, sx, sy - 24); ctx.fillStyle = '#ffd060'; ctx.fillText(ev.name, sx, sy - 24);
   }
@@ -511,7 +544,7 @@ function render() {
     ctx.shadowBlur = 8; ctx.shadowColor = part.color; ctx.beginPath(); ctx.arc(sx, sy, part.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
   }
 
-  for (const fn of (ow.floatingNumbers || [])) {
+  for (const fn of (settings.damageNumbers === false ? [] : (ow.floatingNumbers || []))) {
     const sx = fn.x - cam.x, sy = fn.y - cam.y;
     const bounce = Math.sin(fn.life * Math.PI) * 15;
     ctx.save(); 
@@ -545,7 +578,7 @@ function render() {
     ctx.strokeStyle = 'rgba(201,162,39,0.6)'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]);
   }
 
-  drawBloom(ctx);
+  if (!reduceMotion) drawBloom(ctx);
 
   const dayPhase = (worldTime % 120) / 120;
   let nightAlpha = 0;
@@ -618,9 +651,11 @@ function render() {
     ctx.drawImage(fogCanvas, 0, 0);
   }
 
-  drawFireflies(ctx, worldTime);
-  drawFogLayers(ctx);
-  drawWeather(ctx);
+  if (!reduceMotion) {
+    drawFireflies(ctx, worldTime);
+    drawFogLayers(ctx);
+    drawWeather(ctx);
+  }
 
   if (getLightningFlash() > 0) {
     ctx.fillStyle = `rgba(255, 255, 255, ${getLightningFlash() * 0.5})`;
@@ -636,7 +671,7 @@ function render() {
   gradient.addColorStop(0, 'rgba(0,0,0,0)'); gradient.addColorStop(1, `rgba(0,0,0,${theme.vignette || 0.4})`);
   ctx.fillStyle = gradient; ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
 
-  if (isLowHp) {
+  if (isLowHp && showLowHealth) {
     const pulse = 0.06 + 0.04 * Math.sin(lowHpPulse * 2);
     const hurtGrad = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, 200, VIEW_W / 2, VIEW_H / 2, 450);
     hurtGrad.addColorStop(0, 'rgba(255,0,0,0)');
@@ -651,7 +686,7 @@ function render() {
     ctx.fillStyle = hurtGrad; ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
   }
 
-  if (ow.shake && ow.shake.t > 0 && ow.combat) {
+  if (allowShake && ow.shake && ow.shake.t > 0 && ow.combat) {
     let targetX, targetY, color;
     if (ow.shake.mag === 8) { targetX = ow.combat.enemy.x - cam.x; targetY = ow.combat.enemy.y - cam.y; color = '#ffd060'; }
     else if (ow.shake.mag === 5) { targetX = ow.player.x - cam.x; targetY = ow.player.y - cam.y; color = '#ff4040'; }
@@ -680,6 +715,17 @@ function render() {
   ctx.restore();
 
   drawMinimap(ctx, ow);
+  if (settings.showFps === true) {
+    ctx.save();
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(8,12,18,0.78)';
+    ctx.fillRect(VIEW_W - 76, VIEW_H - 28, 64, 20);
+    ctx.fillStyle = fpsNow >= 50 ? '#8ee6a1' : fpsNow >= 30 ? '#f0d27b' : '#ff8e8e';
+    ctx.fillText(`${fpsNow} FPS`, VIEW_W - 18, VIEW_H - 24);
+    ctx.restore();
+  }
   if (performance.now() - autosaveAt < 1500) {
     ctx.font = 'bold 12px Montserrat, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
     ctx.strokeText('💾 сохранено', 12, VIEW_H - 12); ctx.fillStyle = 'rgba(96,255,96,0.9)'; ctx.fillText('💾 сохранено', 12, VIEW_H - 12);

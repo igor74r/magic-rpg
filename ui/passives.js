@@ -2,7 +2,8 @@ import { state } from '../systems/state.js';
 import { getPassiveTree } from '../data/passives.js';
 import {
   canAllocatePassive,
-  allocatePassive
+  allocatePassive,
+  resetPassives
 } from '../systems/talents.js';
 import { toast } from './screens.js';
 import { renderHeader } from './header.js';
@@ -101,6 +102,14 @@ export function renderPassives() {
       <p style="color:#b7a989;font-size:13px;">
         ${points} очков пассивных навыков · ${allocated.length - 1} узлов изучено
       </p>
+      <div class="passive-actions">
+        <span>Сброс древа возвращает все вложенные очки. Стоимость: 500 золота.</span>
+        <button type="button" class="secondary-btn"
+          onclick="GameAPI.resetPassives()"
+          ${allocated.length <= 1 || (player.gold || 0) < 500 ? 'disabled' : ''}>
+          Сбросить древо · 500 💰
+        </button>
+      </div>
 
       <p style="color:#8f8065;font-size:12px;">
         Открывайте соединённые узлы. Ключевые пассивки дают мощный бонус, но имеют цену.
@@ -220,4 +229,22 @@ export function allocatePassiveUI(nodeId) {
   if (content) {
     content.innerHTML = renderPassives();
   }
+}
+export function resetPassivesUI() {
+  const player = state.game?.player;
+  if (!player) return;
+
+  if (!window.confirm('Сбросить все пассивные навыки за 500 золота? Все вложенные очки будут возвращены.')) {
+    return;
+  }
+
+  const result = resetPassives(player);
+  if (!result.ok) {
+    toast(result.msg || 'Не удалось сбросить древо');
+    return;
+  }
+
+  renderHeader();
+  const content = document.getElementById('tab-content');
+  if (content) content.innerHTML = renderPassives();
 }

@@ -6,7 +6,7 @@ const LEGACY_KEY = 'magic-rpg-save';
 const SETTINGS_KEY = 'magic-rpg-settings';
 
 const SAVE_VERSION = 13;
-const SETTINGS_VERSION = 3;
+const SETTINGS_VERSION = 4;
 const MAX_SLOT = 3;
 
 let lastSaveTime = null;
@@ -448,19 +448,15 @@ export function migrateSettings(settings) {
     settings = {};
   }
 
-  if (typeof settings.musicVolume !== 'number') {
-    settings.musicVolume =
-      typeof settings.volume === 'number'
-        ? settings.volume
-        : 60;
+  if (!Number.isFinite(settings.musicVolume)) {
+    settings.musicVolume = Number.isFinite(settings.volume) ? settings.volume : 60;
   }
+  settings.musicVolume = Math.max(0, Math.min(100, settings.musicVolume));
 
-  if (typeof settings.sfxVolume !== 'number') {
-    settings.sfxVolume =
-      typeof settings.volume === 'number'
-        ? settings.volume
-        : 80;
+  if (!Number.isFinite(settings.sfxVolume)) {
+    settings.sfxVolume = Number.isFinite(settings.volume) ? settings.volume : 80;
   }
+  settings.sfxVolume = Math.max(0, Math.min(100, settings.sfxVolume));
 
   if (typeof settings.autoSave !== 'boolean') {
     settings.autoSave = true;
@@ -474,7 +470,16 @@ export function migrateSettings(settings) {
     settings.showFps = false;
   }
 
-  if (typeof settings.difficulty !== 'string') {
+  if (![15, 30, 60].includes(settings.autoSaveInterval)) {
+    settings.autoSaveInterval = 30;
+  }
+
+  if (typeof settings.screenShake !== 'boolean') settings.screenShake = true;
+  if (typeof settings.damageNumbers !== 'boolean') settings.damageNumbers = true;
+  if (typeof settings.lowHealthEffects !== 'boolean') settings.lowHealthEffects = true;
+  if (typeof settings.reducedMotion !== 'boolean') settings.reducedMotion = false;
+
+  if (!['easy', 'normal', 'hard'].includes(settings.difficulty)) {
     settings.difficulty = 'normal';
   }
 

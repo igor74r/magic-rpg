@@ -17,7 +17,12 @@ export const NPCS = {
       { id: 'r-hp',  result: 'health-potion', qty: 1, ingredients: [{ id: 'herb-life', qty: 3 }] },
       { id: 'r-mp',  result: 'mana-potion', qty: 1, ingredients: [{ id: 'herb-moon', qty: 3 }] },
       { id: 'r-shp', result: 'strong-health-potion', qty: 1, ingredients: [{ id: 'herb-life', qty: 5 }] },
-      { id: 'r-smp', result: 'strong-mana-potion', qty: 1, ingredients: [{ id: 'herb-moon', qty: 5 }] }
+      { id: 'r-smp', result: 'strong-mana-potion', qty: 1, ingredients: [{ id: 'herb-moon', qty: 5 }] },
+      { id: 'r-rune-root', result: 'rune-root', qty: 1, ingredients: [{ id: 'root-fiber', qty: 3 }, { id: 'herb-life', qty: 1 }] },
+      { id: 'r-rune-ember', result: 'rune-ember', qty: 1, ingredients: [{ id: 'ember-core', qty: 2 }, { id: 'grave-salt', qty: 1 }] },
+      { id: 'r-rune-tide', result: 'rune-tide', qty: 1, ingredients: [{ id: 'frost-essence', qty: 2 }, { id: 'herb-moon', qty: 1 }] },
+      { id: 'r-rune-frost', result: 'rune-frost', qty: 1, ingredients: [{ id: 'frost-essence', qty: 3 }] },
+      { id: 'r-rune-void', result: 'rune-void', qty: 1, ingredients: [{ id: 'void-dust', qty: 3 }, { id: 'ember-core', qty: 1 }] }
     ]
   },
   merchant: {

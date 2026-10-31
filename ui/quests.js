@@ -131,6 +131,9 @@ function renderMission(player, act, actIndex, mission, missionIndex) {
 
       <h4>${mission.title}</h4>
       <p>${mission.desc}</p>
+      ${mission.briefing ? `<p class="campaign-story-beat"><b>Слова Эдвина:</b> ${mission.briefing}</p>` : ''}
+      ${mission.clue ? `<p class="campaign-story-clue">◆ ${mission.clue}</p>` : ''}
+      ${done && mission.aftermath ? `<p class="campaign-story-aftermath"><b>Итог:</b> ${mission.aftermath}</p>` : ''}
 
       <div class="campaign-objective">
         <span>${enemy?.emoji || '⚔️'} ${mission.objective}</span>
@@ -192,9 +195,12 @@ export function renderQuests() {
       <section class="campaign-act ${unlocked ? 'unlocked' : 'locked'} ${completed ? 'completed' : ''}">
         <div class="campaign-act-heading">
           <div>
-            <span class="campaign-act-kicker">${act.subtitle}</span>
+            <span class="campaign-act-kicker">${act.subtitle} · Рекомендуемый уровень: ${act.recommendedLevel || '—'}</span>
             <h3>${act.number}. ${act.title}</h3>
             <p>${act.intro}</p>
+            ${act.chapter ? `<p class="campaign-chapter"><b>${act.chapter}</b> — ${act.chapterGoal}</p>` : ''}
+            ${act.keyCharacters ? `<p class="campaign-act-characters">Ключевые персонажи: ${act.keyCharacters}</p>` : ''}
+            ${completed && act.revelation ? `<p class="campaign-act-revelation"><b>Открытая истина:</b> ${act.revelation}</p>` : ''}
           </div>
 
           <div class="campaign-act-progress">
@@ -493,6 +499,8 @@ export function renderBestiary() {
           </div>
 
           <div class="item-desc">
+            ${enemy.lore ? `<p>${enemy.lore}</p>` : ''}
+            ${enemy.tactics ? `<p><b>Тактика:</b> ${enemy.tactics}</p>` : ''}
             ❤️ ${enemy.hp} · ⚔️ ${enemy.attack} · 🛡️ ${enemy.defense}<br>
             🏆 ${enemy.exp} EXP · 💰 ${enemy.gold} золота<br>
             📦 Дроп: ${drops}
