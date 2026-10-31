@@ -415,6 +415,37 @@ export const ITEMS = {
     price: 140, type: 'seal', sockets: 1,
     bonus: { magic: 5, defense: 4, critChance: 0.02 }
   },
+  'relic-root-memory': {
+    name: 'Семя памяти корней', icon: '🌱',
+    desc: 'Уникальная реликвия первого акта. +6 к защите, +3% к уклонению.',
+    price: 0, type: 'shoulders', sockets: 1, unique: true, relicAct: 1,
+    bonus: { defense: 6, dodgeChance: 0.03 }
+  },
+  'relic-last-archive': {
+    name: 'Кольцо последнего архива', icon: '📜',
+    desc: 'Уникальная реликвия второго акта. +5 к магии, +3% к критическому шансу.',
+    price: 0, type: 'ring', sockets: 1, unique: true, relicAct: 2,
+    bonus: { magic: 5, critChance: 0.03 }
+  },
+  'relic-ember-oath': {
+    name: 'Наручи огненной клятвы', icon: '🔥',
+    desc: 'Уникальная реликвия третьего акта. +5 к атаке, +4% к силе блока.',
+    price: 0, type: 'wrists', sockets: 1, unique: true, relicAct: 3,
+    bonus: { attack: 5, blockPower: 0.04 }
+  },
+  'relic-frost-crown': {
+    name: 'Корона безмолвного инея', icon: '❄️',
+    desc: 'Уникальная реликвия четвёртого акта. +7 к защите, +3 к магии, +3% к шансу блока.',
+    price: 0, type: 'head', sockets: 1, unique: true, relicAct: 4,
+    bonus: { defense: 7, magic: 3, blockChance: 0.03 }
+  },
+  'relic-void-star': {
+    name: 'Звезда последнего хранителя', icon: '🌌',
+    desc: 'Уникальная реликвия пятого акта. +5 к атаке, +6 к магии, +3% к критическому шансу.',
+    price: 0, type: 'amulet', sockets: 1, unique: true, relicAct: 5,
+    bonus: { attack: 5, magic: 6, critChance: 0.03 }
+  },
+
   'shard-forest': {
     name: 'Осколок Корневого сердца', icon: '💚',
     desc: 'Первый осколок Кристалла Маны. Внутри него движется свет, похожий на дыхание древнего леса.',
