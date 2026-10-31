@@ -408,9 +408,9 @@ function render() {
       ctx.fillStyle = '#5a3a20'; ctx.beginPath(); ctx.arc(sx, sy - 4, 14, Math.PI, 0); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#ffcc00'; ctx.fillRect(sx - 3, sy + 2, 6, 6);
     }
-    const chestStyles = { wooden: ['#ffcc00', ''], locked: ['#80bfff', '🔒'], cursed: ['#a060d0', '☠️'], mimic: ['#ff6040', '👁️'], ancient: ['#ffe080', '✦'] };
+    const chestStyles = { wooden: ['#ffcc00', ''], locked: ['#80bfff', '🔒'], cursed: ['#a060d0', '☠️'], mimic: ['#ff6040', '👁️'], ancient: ['#ffe080', '✦'], boss: ['#ff9b35', '👑'] };
     const [glow, mark] = chestStyles[c.type] || chestStyles.wooden;
-    ctx.shadowBlur = c.type === 'ancient' ? 18 : 10; ctx.shadowColor = glow; ctx.fillStyle = glow + '66'; ctx.beginPath(); ctx.arc(sx, sy, c.type === 'ancient' ? 20 : 16, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.shadowBlur = (c.type === 'ancient' || c.type === 'boss') ? 18 : 10; ctx.shadowColor = glow; ctx.fillStyle = glow + '66'; ctx.beginPath(); ctx.arc(sx, sy, c.type === 'ancient' ? 20 : 16, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
     if (mark) { ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = glow; ctx.fillText(mark, sx + 15, sy - 14); }
   }
 
