@@ -17,7 +17,7 @@ assert.equal(markLocationCleared(player, 'ruins'), false);
 assert.equal(updateDungeonProgress(player, 'forest', { floor: 2, checkpoint: 'crypt-hall', chestId: 'chest-01', secretId: 'hidden-room', bossDefeated: true }), true);
 assert.deepEqual(getDungeonProgress(player, 'forest'), {
   floor: 2, checkpoint: 'crypt-hall', openedChests: ['chest-01'],
-  secretsFound: ['hidden-room'], bossDefeated: true
+  secretsFound: ['hidden-room'], secrets: [], secretFloors: [], bossDefeated: true
 });
 assert.equal(isDungeonChestOpened(player, 'forest', 'chest-01'), true);
 assert.equal(isDungeonChestOpened(player, 'forest', 'chest-02'), false);
