@@ -162,7 +162,7 @@ export const LOCATIONS = {
     emoji: '🌋',
     desc: 'Застывшие лавовые реки, чёрные башни и гарпии, кружащие над жерлом.',
     theme: 'obsidian-fields',
-    enemies: ['fire-elemental', 'ash-harpy', 'ashbound-renegade', 'obsidian-guard', 'magma-golem', 'flame-lord', 'ashen-herald'],
+    enemies: ['fire-elemental', 'ash-harpy', 'ashbound-renegade', 'obsidian-guard', 'magma-golem', 'ashen-herald'],
     chestsCount: 5,
     mapCols: 44,
     mapRows: 34
@@ -173,7 +173,7 @@ export const LOCATIONS = {
     emoji: '🏔️',
     desc: 'Старая цитадель погребена в леднике. В её залах не тает даже пламя.',
     theme: 'frost-citadel',
-    enemies: ['frost-wolf', 'rime-witch', 'mirror-revenant', 'ice-elemental', 'frost-giant', 'ice-queen', 'icy-grasp'],
+    enemies: ['frost-wolf', 'rime-witch', 'mirror-revenant', 'ice-elemental', 'frost-giant', 'icy-grasp'],
     chestsCount: 5,
     mapCols: 44,
     mapRows: 34
@@ -184,7 +184,7 @@ export const LOCATIONS = {
     emoji: '🌀',
     desc: 'Разлом между мирами. Пространство искажено, а древние драконы стерегут сердце тьмы.',
     theme: 'void-crater',
-    enemies: ['dragonling', 'fire-drake', 'dragon-guardian', 'riftstalker', 'void-harbinger', 'ancient-dragon', 'blood-crown'],
+    enemies: ['dragonling', 'fire-drake', 'dragon-guardian', 'riftstalker', 'void-harbinger', 'blood-crown'],
     chestsCount: 6,
     mapCols: 46,
     mapRows: 36
