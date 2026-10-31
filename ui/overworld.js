@@ -103,6 +103,8 @@ function openSecret(sw) {
   const ow = state.overworld;
   const p = state.game.player;
   sw.opened = true;
+  markDungeonSecretFound(p, ow.locationId, sw.id);
+  saveGame();
 
   // Эффект: взрыв искр
   for (let i = 0; i < 30; i++) {
