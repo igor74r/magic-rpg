@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { STORY } from '../data/story.js';
 import { ENEMIES } from '../data/enemies.js';
 import { LOCATIONS } from '../data/locations.js';
+import { DRAGON_SHARDS } from '../data/rift-canon.js';
 
 assert.equal(STORY.acts.length, 5);
 assert.equal(STORY.acts.reduce((sum, act) => sum + act.missions.length, 0), 25);
@@ -21,6 +22,13 @@ for (const [index, act] of STORY.acts.entries()) {
     assert.ok(location.enemies.includes(mission.enemyId), `mission ${mission.id} enemy is not in its region`);
     assert.ok(ENEMIES[mission.enemyId], `mission ${mission.id} has unknown enemy`);
   }
+}
+
+assert.equal(DRAGON_SHARDS.length, 3);
+for (const dragon of DRAGON_SHARDS) {
+  assert.ok(ENEMIES[dragon.enemyId]?.boss, `dragon ${dragon.id} must be a boss enemy`);
+  assert.ok(LOCATIONS[dragon.locationId]?.enemies.includes(dragon.enemyId), `dragon ${dragon.id} must be present in its assigned region`);
+  assert.ok(ENEMIES[dragon.enemyId].lore && ENEMIES[dragon.enemyId].tactics, `dragon ${dragon.id} needs lore and tactics`);
 }
 
 const newVariants = ['rootbound-sentinel', 'drowned-scribe', 'ashbound-renegade', 'mirror-revenant', 'riftstalker'];
