@@ -140,5 +140,22 @@ for (const unsupportedVersion of [18, 'future', 17.5, -1, true]) {
   assert.equal(state.game, null, `unsupported schema ${unsupportedVersion} must not replace active game state`);
   console.log(`PASS future/malformed save version ${String(unsupportedVersion)} is rejected without mutation`);
 }
+
+const malformedSave = JSON.stringify({ version: 17, inventory: [{ id: 'health-potion', qty: 1 }] });
+storage.set('magic-rpg-save-1', malformedSave);
+state.game = null;
+const realConsoleError = console.error;
+console.error = () => {};
+let malformedRejected = false;
+try {
+  malformedRejected = loadGameData(1) === false;
+} finally {
+  console.error = realConsoleError;
+}
+assert.equal(malformedRejected, true, 'save without player object must be rejected');
+assert.equal(storage.get('magic-rpg-save-1'), malformedSave, 'malformed save must not be rewritten');
+assert.equal(state.game, null, 'malformed save must not replace active game state');
+console.log('PASS malformed save structure is rejected without mutation');
+
 console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + load path + future-version guards passed; 12 equipment slots verified.`);
 if (failures.length) process.exitCode = 1;
