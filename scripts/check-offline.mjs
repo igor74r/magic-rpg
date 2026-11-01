@@ -4,7 +4,8 @@ import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
-const forbidden = /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|\bEventSource\b|\bnavigator\.sendBeacon\s*\(|https?:\/\//i;
+// SVG namespace identifiers are not network endpoints and are required for inline vector assets.
+const forbidden = /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\b|\bEventSource\b|\bnavigator\.sendBeacon\s*\(|https?:\/\/(?!www\.w3\.org\/2000\/svg\b|www\.w3\.org\/1999\/xlink\b)/i;
 const extensions = new Set(['.js', '.html', '.css']);
 const violations = [];
 

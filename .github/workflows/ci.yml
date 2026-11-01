@@ -50,6 +50,20 @@ jobs:
       - name: Check settings migration and defaults
         run: node scripts/check-settings.mjs
 
+      - name: Check save migrations and future-version safety
+        run: node scripts/check-save-migrations.mjs
+
+      - name: Check combat actions for all playable classes
+        run: node scripts/check-combat-actions.mjs
+
+      - name: Check complete five-act campaign progression
+        run: |
+          node scripts/check-campaign-full.mjs
+          node scripts/check-campaign-playthrough.mjs
+
+      - name: Check offline-only runtime contract
+        run: node scripts/check-offline.mjs
+
       - name: Check inventory, affixes and crafting
         run: node scripts/check-inventory-affixes.mjs
 

@@ -117,5 +117,45 @@ const storagePathOk = loaded && state.game?.version === 17 && rewritten.version 
   storage.get('magic-rpg-settings') === '{"sentinel":"keep"}';
 console.log(`${storagePathOk ? 'PASS' : 'FAIL'} loadGameData migrates and rewrites v16 slot without changing settings`);
 assert.ok(storagePathOk);
-console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + real load path passed; 12 equipment slots verified.`);
+
+// Newer and malformed schema versions must be rejected without rewriting the slot.
+for (const unsupportedVersion of [18, 'future', 17.5, -1, true]) {
+  const original = JSON.stringify({
+    version: unsupportedVersion,
+    player: { name: 'Future Save', level: 20, inventory: [{ id: 'future-item', qty: 1 }] },
+    futureSchemaMarker: { preserve: true }
+  });
+  storage.set('magic-rpg-save-1', original);
+  state.game = null;
+  const realConsoleError = console.error;
+  console.error = () => {};
+  let rejected = false;
+  try {
+    rejected = loadGameData(1) === false;
+  } finally {
+    console.error = realConsoleError;
+  }
+  assert.equal(rejected, true, `unsupported schema ${unsupportedVersion} must be rejected`);
+  assert.equal(storage.get('magic-rpg-save-1'), original, `unsupported schema ${unsupportedVersion} must not be rewritten`);
+  assert.equal(state.game, null, `unsupported schema ${unsupportedVersion} must not replace active game state`);
+  console.log(`PASS future/malformed save version ${String(unsupportedVersion)} is rejected without mutation`);
+}
+
+const malformedSave = JSON.stringify({ version: 17, inventory: [{ id: 'health-potion', qty: 1 }] });
+storage.set('magic-rpg-save-1', malformedSave);
+state.game = null;
+const realConsoleError = console.error;
+console.error = () => {};
+let malformedRejected = false;
+try {
+  malformedRejected = loadGameData(1) === false;
+} finally {
+  console.error = realConsoleError;
+}
+assert.equal(malformedRejected, true, 'save without player object must be rejected');
+assert.equal(storage.get('magic-rpg-save-1'), malformedSave, 'malformed save must not be rewritten');
+assert.equal(state.game, null, 'malformed save must not replace active game state');
+console.log('PASS malformed save structure is rejected without mutation');
+
+console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + load path + future-version and malformed-save guards passed; 12 equipment slots verified.`);
 if (failures.length) process.exitCode = 1;
