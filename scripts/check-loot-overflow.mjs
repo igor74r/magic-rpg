@@ -16,13 +16,14 @@ const overflow = addItemOrStore('leather-armor', 1, { allowMythic: true });
 assert.deepEqual(overflow.created, []);
 assert.equal(overflow.stored, true);
 assert.equal(player.pendingLoot.length, 1);
-assert.deepEqual(
-  player.pendingLoot[0],
-  { id: 'leather-armor', qty: 1, allowMythic: true }
-);
+assert.equal(player.pendingLoot[0].id, 'leather-armor');
+assert.equal(player.pendingLoot[0].qty, 1);
+assert.equal(player.pendingLoot[0].allowMythic, true);
+assert.ok(Number.isFinite(player.pendingLoot[0].seed));
 
-// Pending rewards survive the same JSON round-trip used by game saves.
-state.game = JSON.parse(JSON.stringify(state.game));
+// Pending rewards survive saves and keep the same random item roll after reload.
+const savedPendingGame = JSON.stringify(state.game);
+state.game = JSON.parse(savedPendingGame);
 assert.equal(state.game.player.pendingLoot[0].id, 'leather-armor');
 
 const stillFull = claimPendingLoot(0);
@@ -37,6 +38,13 @@ assert.equal(claimed.entry.id, 'leather-armor');
 assert.equal(claimed.created.length, 1);
 assert.equal(state.game.player.inventory.at(-1).id, 'leather-armor');
 assert.equal(state.game.player.pendingLoot.length, 0);
+const firstRoll = JSON.stringify(claimed.created[0]);
+
+state.game = JSON.parse(savedPendingGame);
+state.game.player.inventory.pop();
+const claimedAfterReload = claimPendingLoot(0);
+assert.equal(claimedAfterReload.ok, true);
+assert.equal(JSON.stringify(claimedAfterReload.created[0]), firstRoll, 'reloading must not reroll pending equipment');
 
 // Stackable rewards are also preserved if the bag has no free slot.
 state.game.player.inventory = Array.from({ length: 30 }, () => ({
