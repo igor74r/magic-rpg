@@ -884,6 +884,9 @@ function tickEnemyEffects() {
 
     pushLog(`Р­С„С„РµРєС‚С‹ РЅР° РІСЂР°РіРµ: ${parts}`, 'damage');
   }
+
+  // Damage-over-time can cross a boss phase threshold just like direct damage.
+  if (enemy.hp > 0) checkBossPhase(enemy);
 }
 
 function tickPlayerEffects() {
