@@ -5,7 +5,7 @@ import { SPELLS } from '../../data/spells.js';
 import { CLASSES } from '../../data/classes.js';
 import { LOCATIONS } from '../../data/locations.js';
 import { getEffStats, resolveCriticalChance } from '../stats.js';
-import { addItem, removeItem } from '../inventory.js';
+import { addItemOrStore, removeItem } from '../inventory.js';
 import { addExp } from '../progression.js';
 import { checkAchievements } from '../achievements.js';
 import {
@@ -1428,12 +1428,13 @@ function combatVictory() {
       : Math.random() < dropChance;
 
     if (shouldDrop) {
-      const created = addItem(id, 1, { allowMythic: !!enemy.boss });
-      const instance = created[0];
-      if (!instance) {
-        pushLog('Сумка заполнена или превышен лимит веса: добыча осталась на месте.', 'warning');
+      const result = addItemOrStore(id, 1, { allowMythic: !!enemy.boss });
+      const instance = result.created[0];
+      if (result.stored) {
+        pushLog(`Сумка заполнена: ${ITEMS[id].name} отправлено в хранилище добычи.`, 'warning');
         return;
       }
+      if (!instance) return;
 
       const rarity =
         instance.rarity && instance.rarity !== 'common'
@@ -1461,11 +1462,11 @@ function combatVictory() {
         ? 'herb-life'
         : 'herb-moon';
 
-    const herbCreated = addItem(herbId, herbQty);
-    if (herbCreated.length) {
+    const herbResult = addItemOrStore(herbId, herbQty);
+    if (herbResult.created.length) {
       pushLog(`Трава: ${ITEMS[herbId].name} ×${herbQty}`, 'success');
-    } else {
-      pushLog('Сумка заполнена или превышен лимит веса: травы не подобраны.', 'warning');
+    } else if (herbResult.stored) {
+      pushLog(`Сумка заполнена: ${ITEMS[herbId].name} отправлено в хранилище добычи.`, 'warning');
     }
   }
 
@@ -1474,9 +1475,9 @@ function combatVictory() {
   if (dragonReward?.newlyDefeated) {
     const shardId = dragonReward.shardItemId;
     if (shardId && ITEMS[shardId]) {
-      addItem(shardId, 1);
+      const shardResult = addItemOrStore(shardId, 1);
       pushLog('🐉 Сюжетный дракон повержен!', 'success');
-      pushLog(`💎 Получен сюжетный осколок: ${ITEMS[shardId].name}`, 'success');
+      pushLog(`💎 Получен сюжетный осколок: ${ITEMS[shardId].name}`, shardResult.created.length || shardResult.stored ? 'success' : 'warning');
       if (dragonReward.dragon.id === 'blood-crown') {
         state.game.riftOpenedAt = Date.now();
         setTimeout(() => emit('rift:opened'), 900);
