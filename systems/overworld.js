@@ -75,9 +75,11 @@ export function exitOverworld() {
   emit('overworld:end');
 }
 
-export function advanceTowerFloor() {
+export function advanceTowerFloor(clearedFloor = null) {
   const ow = state.overworld;
   if (!ow || !ow.towerMode) return;
+  // Ignore delayed/duplicate completion events from a floor already left.
+  if (clearedFloor !== null && clearedFloor !== ow.towerFloor) return;
   recordTowerFloor(ow.towerFloor);
   if (ow.towerFloor >= 40) {
     const result = endTower(40);
@@ -93,9 +95,11 @@ export function advanceTowerFloor() {
   enterOverworld(`tower-floor-${String(nextFloor).padStart(2, '0')}`, { towerMode: true, towerFloor: nextFloor });
 }
 
-export function advanceRiftFloor() {
+export function advanceRiftFloor(clearedFloor = null) {
   const ow = state.overworld;
   if (!ow || !ow.rifMode) return;
+  // Ignore delayed/duplicate completion events from a floor already left.
+  if (clearedFloor !== null && clearedFloor !== ow.rifFloor) return;
   const nextFloor = ow.rifFloor + 1;
   const player = state.game?.player;
   if (player) {
@@ -113,8 +117,8 @@ export function advanceRiftFloor() {
   enterOverworld(locId, { rifMode: true, rifFloor: nextFloor });
 }
 
-on('rift:floor-cleared', () => advanceRiftFloor());
-on('tower:floor-cleared', () => advanceTowerFloor());
+on('rift:floor-cleared', payload => advanceRiftFloor(payload?.floor ?? null));
+on('tower:floor-cleared', payload => advanceTowerFloor(payload?.floor ?? null));
 on('rift:defeated', () => {
   const ow = state.overworld;
   if (ow && ow.rifMode) endRift();
