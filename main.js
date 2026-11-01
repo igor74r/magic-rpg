@@ -2,6 +2,7 @@ import { state } from './systems/state.js';
 import { on, emit } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
 import { addItemOrStore } from './systems/inventory.js';
+import { ITEMS } from './data/items.js';
 import { addExp } from './systems/progression.js';
 import {
   updateMainMenu, openSettings, backFromSettings, saveAndMenu,
@@ -389,7 +390,7 @@ function handleWorldEvent(eventId) {
   }
 
   saveGame();
-  emit('log', { channel: 'game', msg: logMsg, cls: 'success' });
+  emit('log', { channel: 'game', msg: logMsg, cls: ev.eventType === 'traveler' && state.game.player.pendingLoot?.length ? 'warning' : 'success' });
   toast(toastMsg);
 
   ow.events = ow.events.filter(e => e.id !== eventId);
