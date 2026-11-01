@@ -6,7 +6,6 @@ import { LOCATIONS } from '../../data/locations.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic } from './models.js';
 import { drawAtlasTile, drawAtlasProp } from './tile-atlas.js';
-import { drawVillageBuilding } from './village-atlas.js';
 import { getTileDanger } from '../../systems/overworld/hazards.js';
 import { getActiveCampaignMission } from '../../systems/campaign.js';
 import { renderCombatPanel } from './combat-panel.js';
@@ -204,12 +203,8 @@ function tick(ts) {
 }
 
 function drawTile(ctx, type, x, y, size, themeName, colors) {
-  // Aurora: modular shaded architecture replaces primitive repeated roof glyphs.
-  if (themeName === 'village' && type === 2) {
-    const cellX = Math.floor(x / size), cellY = Math.floor(y / size);
-    const variant = Math.abs((cellX * 7 + cellY * 11 + cellX * cellY) % 16);
-    if (drawVillageBuilding(ctx, x, y, size, variant)) return;
-  }
+  // Aurora has no small house sprites: skip legacy building tile completely.
+  if (themeName === 'village' && type === 2) return;
   if (drawAtlasTile(ctx, type, x, y, size, themeName)) {
     const hazard = getTileDanger(type, themeName);
     if (hazard) {

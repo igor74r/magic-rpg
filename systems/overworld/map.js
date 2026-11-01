@@ -72,15 +72,7 @@ export function generateVillageMap(cols, rows) {
   // The central plaza is a compact walkable space, not a giant rectangular road slab.
   putRect(cx - 4, cy - 4, 9, 9, 1);
 
-  // Compact landmark footprints: leave broad clear corridors and a readable plaza.
-  putRect(cx - 3, north + 1, 6, 4, 2);
-  putRect(left + 2, north + 4, 4, 4, 2);
-  putRect(right + 2, north + 4, 4, 4, 2);
-  putRect(left + 2, south + 1, 4, 4, 2);
-  putRect(right + 2, south + 1, 4, 4, 2);
-  putRect(cx - 3, rows - 7, 6, 3, 2);
-
-  // Residential micro-houses removed; keep clear plots and streets.
+  // All small residential buildings removed from Aurora.
 
   // Curved side lanes branch toward homes, workshops and garden gates.
   path([[left + 8, north + 7], [left + 7, north + 10], [left + 8, cy - 2], [left + 9, cy + 2]], 2);
@@ -140,6 +132,8 @@ export function generateVillageMap(cols, rows) {
   for (const [x, y] of clearCells) {
     if (grid[y]?.[x] !== undefined) grid[y][x] = 1;
   }
+  // Remove any legacy house tile IDs from this location.
+  for (let yy = 0; yy < rows; yy++) for (let xx = 0; xx < cols; xx++) if (grid[yy][xx] === 2) grid[yy][xx] = 0;
   return grid;
 }
 
