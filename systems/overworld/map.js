@@ -72,21 +72,15 @@ export function generateVillageMap(cols, rows) {
   // The central plaza is a compact walkable space, not a giant rectangular road slab.
   putRect(cx - 4, cy - 4, 9, 9, 1);
 
-  // Civic, craft, healing, alchemy, market and tavern districts.
-  putRect(cx - 5, north, 10, 7, 2);
-  putRect(left, north + 3, 8, 7, 2);
-  putRect(right, north + 3, 8, 7, 2);
-  putRect(left, south, 8, 7, 2);
-  putRect(right, south, 9, 7, 2);
-  putRect(cx - 5, rows - 8, 10, 6, 2);
+  // Compact landmark footprints: leave broad clear corridors and a readable plaza.
+  putRect(cx - 3, north + 1, 6, 4, 2);
+  putRect(left + 2, north + 4, 4, 4, 2);
+  putRect(right + 2, north + 4, 4, 4, 2);
+  putRect(left + 2, south + 1, 4, 4, 2);
+  putRect(right + 2, south + 1, 4, 4, 2);
+  putRect(cx - 3, rows - 7, 6, 3, 2);
 
-  // Six homes form two residential lanes around the village centre.
-  const homes = [
-    [left + 10, cy - 10, 5, 5], [cx - 12, north + 1, 5, 5],
-    [right - 8, north + 1, 5, 5], [cols - 9, cy - 8, 5, 5],
-    [left + 10, south + 1, 5, 5], [cx + 7, south + 1, 5, 5]
-  ];
-  for (const [x, y, w, h] of homes) putRect(x, y, w, h, 2);
+  // Residential micro-houses removed; keep clear plots and streets.
 
   // Curved side lanes branch toward homes, workshops and garden gates.
   path([[left + 8, north + 7], [left + 7, north + 10], [left + 8, cy - 2], [left + 9, cy + 2]], 2);
