@@ -4,11 +4,15 @@ import { addItem, canAddItem, STACKABLE_TYPES } from './inventory.js';
 import { saveGame } from './save.js';
 import { emit } from './events.js';
 import { getBuyPrice, getSellPrice } from './economy.js';
+import { NPCS } from '../data/npcs.js';
 
 export function buyItem(id) {
   const item = ITEMS[id];
-  const p = state.game.player;
-  if (!item || item.type === 'quest' || item.storyShard || item.bossOnly || RARITIES[item.rarity]?.bossOnly) return false;
+  const p = state.game?.player;
+  if (!p || !item || !NPCS.merchant.stock.includes(id) || item.type === 'quest' || item.storyShard || item.bossOnly || RARITIES[item.rarity]?.bossOnly) {
+    emit('toast', 'Этот предмет не продаётся у торговца');
+    return false;
+  }
   const price = getBuyPrice(id, p);
   if (p.gold < price) { emit('toast', 'Недостаточно золота'); return false; }
   const capacity = canAddItem(id, 1, p);

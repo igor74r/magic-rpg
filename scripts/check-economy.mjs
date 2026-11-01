@@ -3,6 +3,9 @@ import { ITEMS } from '../data/items.js';
 import { STORY } from '../data/story.js';
 import { getCurrentActIndex, getActPriceMultiplier, getBuyPrice, getSellPrice } from '../systems/economy.js';
 import { getMissionReward } from '../systems/campaign.js';
+import { state } from '../systems/state.js';
+import { buyItem } from '../systems/shop.js';
+import { NPCS } from '../data/npcs.js';
 
 const player = { campaignClaimed: {} };
 assert.equal(getCurrentActIndex(player), 0);
@@ -30,6 +33,26 @@ for (let act = 0; act < STORY.acts.length; act++) {
 assert.equal(getCurrentActIndex(player), 4);
 assert.equal(getBuyPrice('health-potion', player), Math.round(ITEMS['health-potion'].price * 1.8));
 assert.equal(getSellPrice({ id: 'health-potion', qty: 1 }, player), Math.floor(ITEMS['health-potion'].price * 1.8 * 0.35));
+
+
+// Direct purchase calls must respect the merchant's actual stock, not just item prices.
+const originalStorage = globalThis.localStorage;
+const saved = new Map();
+globalThis.localStorage = { setItem: (key, value) => saved.set(key, String(value)) };
+state.currentSlot = 1;
+state.game = { version: 17, player: { gold: 1000, str: 10, inventory: [], stats: { kills: {} } } };
+const buyer = state.game.player;
+assert.ok(getBuyPrice('steel-sword', buyer) > 0);
+assert.equal(NPCS.merchant.stock.includes('steel-sword'), false);
+assert.equal(buyItem('steel-sword'), false, 'unlisted gear must not be purchasable through the public API');
+assert.equal(buyer.gold, 1000);
+assert.equal(buyer.inventory.length, 0);
+assert.equal(buyItem('iron-sword'), true, 'listed stock must remain purchasable');
+assert.equal(buyer.gold, 1000 - getBuyPrice('iron-sword', buyer));
+assert.equal(buyer.inventory[0]?.id, 'iron-sword');
+state.game = null;
+if (originalStorage === undefined) delete globalThis.localStorage;
+else globalThis.localStorage = originalStorage;
 
 const rewards = [1, 2, 3, 4, 5].map(act => getMissionReward({ id: `a${act}-m1` }));
 assert.deepEqual(rewards.map(r => r.gold), [18, 32, 50, 72, 100]);
