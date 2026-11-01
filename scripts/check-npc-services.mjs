@@ -76,7 +76,7 @@ try {
     storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false },
     player: {
       name: 'Reward test', class: 'mage', level: 1, exp: 0, expNext: 100,
-      gold: 0, hp: 100, maxHp: 100, mp: 50, maxMp: 50, str: 1000,
+      gold: 0, hp: 100, maxHp: 100, mp: 50, maxMp: 50, str: 1,
       inventory: Array.from({ length: 30 }, (_, index) => ({ id: 'iron-sword', qty: 1, testIndex: index })),
       spells: [], equipped: {}, stats: { kills: {} }, effects: [], buffs: [],
       campaignKills: { 'a1-m1': 3 }, campaignClaimed: {}, activeCampaignMission: 'a1-m1'
