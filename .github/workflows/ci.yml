@@ -94,6 +94,9 @@ jobs:
       - name: Check safe save import
         run: node scripts/check-import-save.mjs
 
+      - name: Check safe rendering of player data
+        run: node scripts/check-safe-rendering.mjs
+
       - name: Install Playwright for real-browser checks
         run: |
           npm install --no-save playwright

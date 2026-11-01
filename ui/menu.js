@@ -1,5 +1,5 @@
 import { state } from '../systems/state.js';
-import { showScreen, toast } from './screens.js';
+import { showScreen, toast, escapeHtml } from './screens.js';
 import {
   loadGameData, saveSettings, deleteSave, getSlotInfo, getMaxSlot, saveGame, migrateGame, validateCurrentSaveShape
 } from '../systems/save.js';
@@ -342,7 +342,7 @@ function renderMenuAchievements() {
   const pct = total > 0 ? Math.round((got / total) * 100) : 0;
 
   content.innerHTML = `
-    <h3>${state.game.player.name} · ${got}/${total} <span style="color:#a89060;font-size:14px;">(${pct}%)</span></h3>
+    <h3>${escapeHtml(state.game.player.name)} · ${got}/${total} <span style="color:#a89060;font-size:14px;">(${pct}%)</span></h3>
     <div class="achievement-list">${items}</div>
   `;
 }

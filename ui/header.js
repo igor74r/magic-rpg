@@ -4,7 +4,7 @@ import { LOCATIONS } from '../data/locations.js';
 import { EFFECTS } from '../systems/status.js';
 import { getEffStats } from '../systems/stats.js';
 import { saveGame } from '../systems/save.js';
-import { toast } from './screens.js';
+import { toast, escapeHtml } from './screens.js';
 import { renderLocations } from './locations.js';
 import { renderInventory } from './inventory.js';
 import { renderSpells } from './spells.js';
@@ -108,7 +108,7 @@ export function renderHeader() {
     <div class="rpg-header-main">
       <div class="rpg-identity">
         <span class="rpg-player-name">
-          ${playerClass.emoji} ${p.name}
+          ${playerClass.emoji} ${escapeHtml(p.name)}
         </span>
 
         <span class="rpg-player-class">

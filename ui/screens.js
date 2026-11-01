@@ -1,3 +1,13 @@
+export function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>\"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '\"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+}
+
 export function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');

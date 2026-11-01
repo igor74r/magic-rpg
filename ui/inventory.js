@@ -10,7 +10,7 @@ import {
 } from '../systems/inventory.js';
 import { sellItemsByIndices, getSellPrice } from '../systems/shop.js';
 import { saveGame } from '../systems/save.js';
-import { toast } from './screens.js';
+import { toast, escapeHtml } from './screens.js';
 import { renderGame } from './header.js';
 
 let invFilter = 'bag';
@@ -302,7 +302,7 @@ function renderPaperdoll(p) {
     <section class="paperdoll-panel rpg-paperdoll">
       <div class="paperdoll-hero">
         <div class="paperdoll-silhouette">${CLASSES[p.class]?.emoji || '🧙'}</div>
-        <b>${p.name || 'Герой'}</b>
+        <b>${escapeHtml(p.name || 'Герой')}</b>
         <small>Уровень ${p.level || 1}</small>
       </div>
       <div class="equipment-slots">${slots}</div>
