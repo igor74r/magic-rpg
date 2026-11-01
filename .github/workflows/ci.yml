@@ -67,6 +67,9 @@ jobs:
           node scripts/check-campaign-full.mjs
           node scripts/check-campaign-playthrough.mjs
 
+      - name: Check New Game Plus gates and carry-over
+        run: node scripts/check-ngplus.mjs
+
       - name: Check offline-only runtime contract
         run: node scripts/check-offline.mjs
 

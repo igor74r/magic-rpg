@@ -4,6 +4,7 @@ import { STORY } from '../data/story.js';
 import { findTalentById } from '../data/talents.js';
 import { saveGame } from './save.js';
 import { emit } from './events.js';
+import { canCompleteMainQuest } from './campaign.js';
 
 function computeMaxHpFromTalents(baseHp, talents, classId) {
   let mult = 1;
@@ -25,15 +26,21 @@ function computeMaxMpFromTalents(baseMp, talents, classId) {
 
 export function startNGPlus() {
   const g = state.game;
-  if (!g) return;
+  if (!g?.player) return false;
   const p = g.player;
+  if (p.victoryAchieved !== true || !canCompleteMainQuest(g)) {
+    emit('toast', 'Новая игра+ доступна после полного завершения основной кампании.');
+    return false;
+  }
   const cls = CLASSES[p.class];
+  if (!cls?.baseStats) return false;
   const s = cls.baseStats;
   const newCycle = (p.ngPlus || 0) + 1;
 
   const carry = {
     inventory: p.inventory || [],
     equipped: p.equipped || { weapon: null, armor: null },
+    craftingJobs: Array.isArray(p.craftingJobs) ? p.craftingJobs : [],
     gold: p.gold || 0,
     achievements: p.achievements || [],
     stats: p.stats || { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 },
@@ -65,6 +72,7 @@ export function startNGPlus() {
     spells: [...cls.startingSpells],
     cooldowns: {},
     effects: [],
+    buffs: [],
     ngPlus: newCycle,
     victoryAchieved: false,
     ...carry
@@ -87,6 +95,7 @@ export function startNGPlus() {
   emit('toast', `🔄 NG+${newCycle}! Враги сильнее, награды больше.`);
   emit('log', { channel: 'game', msg: `🔄 NG+${newCycle}: сложность растёт, прогресс сохранён!`, cls: 'success' });
   emit('game:started', {});
+  return true;
 }
 
 // ⬇️ ВОЗВРАЩЁН: используется в spawn.js и combat.js
