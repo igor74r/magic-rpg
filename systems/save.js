@@ -462,6 +462,10 @@ export function loadGameData(slot) {
 
   try {
     const game = JSON.parse(data);
+    if (!game || typeof game !== 'object' || Array.isArray(game) ||
+        !game.player || typeof game.player !== 'object' || Array.isArray(game.player)) {
+      throw new Error('Invalid save structure: player data is missing');
+    }
 
     migrateGame(game);
 
