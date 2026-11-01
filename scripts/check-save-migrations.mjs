@@ -157,5 +157,5 @@ assert.equal(storage.get('magic-rpg-save-1'), malformedSave, 'malformed save mus
 assert.equal(state.game, null, 'malformed save must not replace active game state');
 console.log('PASS malformed save structure is rejected without mutation');
 
-console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + load path + future-version guards passed; 12 equipment slots verified.`);
+console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + load path + future-version and malformed-save guards passed; 12 equipment slots verified.`);
 if (failures.length) process.exitCode = 1;
