@@ -165,10 +165,11 @@ check('main quest waits for story campaign', !canCompleteMainQuest({ storyShards
 check('main quest requires the final dragon, all three shards and 25 missions', canCompleteMainQuest({ storyShards: completedShards, storyDragons: { 'blood-crown': true }, player: completedCampaignPlayer }));
 check('main quest remains locked before Blood Crown defeat', !canCompleteMainQuest({ storyShards: completedShards, storyDragons: { 'blood-crown': false }, player: completedCampaignPlayer }));
 const dragonGateGame = { player: { activeCampaignMission: null }, storyDragons: {} };
-const blockedDragon = recordStoryDragonDefeat(dragonGateGame, 'flame-lord');
+const blockedDragon = recordStoryDragonDefeat(dragonGateGame, 'flame-lord', 'obsidian-fields');
 dragonGateGame.player.activeCampaignMission = 'a3-m5';
-const acceptedDragon = recordStoryDragonDefeat(dragonGateGame, 'flame-lord');
-const repeatedDragon = recordStoryDragonDefeat(dragonGateGame, 'flame-lord');
+const wrongLocationDragon = recordStoryDragonDefeat(dragonGateGame, 'flame-lord', 'volcano');
+const acceptedDragon = recordStoryDragonDefeat(dragonGateGame, 'flame-lord', 'obsidian-fields');
+const repeatedDragon = recordStoryDragonDefeat(dragonGateGame, 'flame-lord', 'obsidian-fields');
 const dragonFinalesMatch = Object.values(STORY_DRAGONS).every(dragon => {
   const finale = STORY.acts[dragon.act - 1]?.missions?.[4];
   return finale?.id === dragon.missionId && finale.enemyId === dragon.enemyId && ENEMIES[dragon.enemyId]?.boss === true;
@@ -176,12 +177,13 @@ const dragonFinalesMatch = Object.values(STORY_DRAGONS).every(dragon => {
 check('exactly three canonical dragon bosses match act 3–5 finales', Object.keys(STORY_DRAGONS).length === 3 && dragonFinalesMatch);
 check('old act-one shard missions are removed', STORY.acts.every(act => act.missions.every(mission => !mission.shardId)));
 check('exactly three Crystal Rift shard items exist and no enemy/location can award another', Object.values(ITEMS).filter(item => item.storyShard === true).length === 3 && ['shard-flame','shard-ice','shard-blood'].every(id => ITEMS[id]?.storyShard === true) && !ITEMS['mana-crystal'] && Object.values(ENEMIES).every(enemy => !(enemy.drops || []).some(id => ['shard-flame','shard-ice','shard-blood'].includes(id))) && Object.values(LOCATIONS).every(location => !location.shardId && !location.shardDrop));
-check('story dragon flags require their accepted finale mission and award once', blockedDragon === null && acceptedDragon?.newlyDefeated === true && repeatedDragon?.newlyDefeated === false && dragonGateGame.storyDragons['ash-herald'] === true);
+check('story dragon flags require their accepted finale mission and canonical region, and award once', blockedDragon === null && wrongLocationDragon === null && acceptedDragon?.newlyDefeated === true && repeatedDragon?.newlyDefeated === false && dragonGateGame.storyDragons['ash-herald'] === true);
 const allShardClaimsValid = Object.values(STORY_DRAGONS).every(dragon => {
   const game = { player: { activeCampaignMission: dragon.missionId } };
-  const first = claimStoryDragonReward(game, dragon.enemyId);
-  const second = claimStoryDragonReward(game, dragon.enemyId);
-  return first?.newlyDefeated === true && first.shardItemId === dragon.shardItemId && game.storyShards?.[dragon.shardId] === true && second?.newlyDefeated === false && Object.keys(game.storyShards).length === 1;
+  const wrongRegion = claimStoryDragonReward(game, dragon.enemyId, 'wrong-location');
+  const first = claimStoryDragonReward(game, dragon.enemyId, dragon.locationId);
+  const second = claimStoryDragonReward(game, dragon.enemyId, dragon.locationId);
+  return wrongRegion === null && first?.newlyDefeated === true && first.shardItemId === dragon.shardItemId && game.storyShards?.[dragon.shardId] === true && second?.newlyDefeated === false && Object.keys(game.storyShards).length === 1;
 });
 check('all three designated dragon rewards set exactly one matching shard and cannot be claimed twice', allShardClaimsValid && claimStoryDragonReward({ player: { activeCampaignMission: 'a3-m5' } }, 'goblin') === null);
 const riftAreasLow = getRiftLocations(1);
