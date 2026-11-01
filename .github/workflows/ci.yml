@@ -88,6 +88,9 @@ jobs:
       - name: Check render and autosave lifecycle
         run: node scripts/check-render-lifecycle.mjs
 
+      - name: Check NPC service guards
+        run: node scripts/check-npc-services.mjs
+
       - name: Install Playwright for real-browser checks
         run: |
           npm install --no-save playwright

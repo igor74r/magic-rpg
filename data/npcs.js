@@ -55,7 +55,7 @@ export const NPCS = {
   bard: {
     id: 'bard', name: 'Бард Лютик', emoji: '🎵',
     greetings: ['Спою тебе о героях!', 'Скидка для смельчаков!', 'Монетку — и песня твоя!'],
-    cost: 4
+    cost: 15
   },
   guard: {
     id: 'guard', name: 'Стражник', emoji: '🛡️',

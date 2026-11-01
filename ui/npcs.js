@@ -28,6 +28,15 @@ function showNpcUI(html) {
 
 function getGreeting(npcId) { const npc = NPCS[npcId]; if (!npc || !npc.greetings) return '...'; return npc.greetings[Math.floor(Math.random() * npc.greetings.length)]; }
 
+function hasActiveEntry(entries, id) {
+  return Array.isArray(entries) && entries.some(entry => entry?.id === id && Number(entry.duration) > 0);
+}
+
+function canUseWell(player, now = Date.now()) {
+  const lastUse = Number(player?.stats?.lastWellUse) || 0;
+  return now - lastUse > 24 * 60 * 60 * 1000;
+}
+
 export function openBlacksmith() {
   collectCraftingJobs();
   const npc = NPCS.blacksmith; const p = state.game.player;
@@ -77,7 +86,7 @@ export function openMerchant() {
 
 export function openElder() {
   const p = state.game.player;
-  const hasBlessing = p.effects?.some(e => e.id === 'elderBlessing');
+  const hasBlessing = hasActiveEntry(p.effects, 'elderBlessing');
   const isFirstMeet = !p.stats?.metElder;
   const shardsCount = Object.values(state.game.storyShards || {}).filter(Boolean).length;
   const active = getActiveCampaignMission(p);
@@ -177,22 +186,66 @@ export function turnInElderQuestUI() {
 }
 
 export function openWell() {
-  const p = state.game.player; const now = Date.now(); const lastWell = p.stats?.lastWellUse || 0; const canUse = (now - lastWell) > 24 * 60 * 60 * 1000;
+  const p = state.game.player; const canUse = canUseWell(p);
   showNpcUI(`<div class="npc-header"><div class="npc-emoji">⛲</div><div><h3 style="margin:0;">Древний колодец</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('well')}»</p></div></div>${p.hp >= p.maxHp && p.mp >= p.maxMp ? `<p style="text-align:center; padding: 20px; color: #60ff60;">✨ Вы полностью здоровы.</p>` : canUse ? `<div style="text-align:center; margin: 20px 0;"><button onclick="GameAPI.useWell()" class="sell-btn" style="padding: 15px 30px;">💧 Испить воды (Полный хил)</button></div>` : `<p style="text-align:center; padding: 20px; color: #ff6060;">Колодец исцелит вас снова через 24 часа.</p>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openBard() {
-  const p = state.game.player; const hasBuff = p.buffs?.some(b => b.id === 'bardBuff');
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">🎵</div><div><h3 style="margin:0;">Бард Лютик</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('bard')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div>${hasBuff ? `<p style="text-align:center; padding: 20px; color: #ffd060;">🎵 Музыка барда вдохновляет вас (+10% опыта).</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Песня барда дает +10% к опыту на 3 боя.</p><button onclick="GameAPI.payBard()" ${p.gold < 15 ? 'disabled' : ''} class="sell-btn" style="padding: 15px 30px;">Заплатить 15💰</button></div>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  const p = state.game.player; const hasBuff = hasActiveEntry(p.buffs, 'bardBuff'); const cost = NPCS.bard.cost;
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">🎵</div><div><h3 style="margin:0;">Бард Лютик</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('bard')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div>${hasBuff ? `<p style="text-align:center; padding: 20px; color: #ffd060;">🎵 Музыка барда вдохновляет вас (+10% опыта).</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Песня барда дает +10% к опыту на 3 боя.</p><button onclick="GameAPI.payBard()" ${p.gold < cost ? 'disabled' : ''} class="sell-btn" style="padding: 15px 30px;">Заплатить ${cost}💰</button></div>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openGuard() { showNpcUI(`<div class="npc-header"><div class="npc-emoji">🛡️</div><div><h3 style="margin:0;">Стражник</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('guard')}»</p></div></div><div class="item-desc" style="padding:15px; line-height:1.7;"><b>Справка по локациям:</b><br>🌲 Тёмный лес — гоблины и скелеты (легко)<br>🏛️ Руины — нежить (средне)<br>🕳️ Пещера теней — тёмный рыцарь и маг (сложно)<br>🩸 Болото — волки и лучники<br>🪦 Кладбище — призраки и босс<br>🌋 Вулкан — элементали и босс</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`); }
-export function openCat() { const p = state.game.player; const hasBuff = p.buffs?.some(b => b.id === 'catLuck'); showNpcUI(`<div class="npc-header"><div class="npc-emoji">🐈</div><div><h3 style="margin:0;">Кошка</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('cat')}»</p></div></div>${hasBuff ? `<p style="text-align:center; padding: 20px; color: #ffd060;">🐈 Кошка мурчит рядом (+5% крита).</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Если погладить кошку, она принесет удачу (+5% крита на 1 бой).</p><button onclick="GameAPI.petCat()" class="sell-btn" style="padding: 15px 30px;">Погладить</button></div>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`); }
+export function openCat() { const p = state.game.player; const hasBuff = hasActiveEntry(p.buffs, 'catLuck'); showNpcUI(`<div class="npc-header"><div class="npc-emoji">🐈</div><div><h3 style="margin:0;">Кошка</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('cat')}»</p></div></div>${hasBuff ? `<p style="text-align:center; padding: 20px; color: #ffd060;">🐈 Кошка мурчит рядом (+5% крита).</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Если погладить кошку, она принесет удачу (+5% крита на 1 бой).</p><button onclick="GameAPI.petCat()" class="sell-btn" style="padding: 15px 30px;">Погладить</button></div>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`); }
 export function openKids() { showNpcUI(`<div class="npc-header"><div class="npc-emoji">👦</div><div><h3 style="margin:0;">Дети</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('kids')}»</p></div></div><div style="text-align:center; padding: 20px; color: #60ff60;">👦 Дети радостно бегают вокруг вас.</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`); }
 export function openHerald() { showNpcUI(`<div class="npc-header"><div class="npc-emoji">📢</div><div><h3 style="margin:0;">Глашатай</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('herald')}»</p></div></div><div style="text-align:center; padding: 20px; color: #ffd060;">📢 «Слушайте! В лесу замечен элитный гоблин, а в Разломе — сокровища!»</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`); }
 
-export function payBardUI() { const p = state.game.player; if (p.gold < 15) return; p.gold -= 15; if (!p.buffs) p.buffs = []; p.buffs.push({ id: 'bardBuff', duration: 3 }); saveGame(); openBard(); toast('🎵 Бард вдохновил вас! (+10% опыта)'); }
-export function petCatUI() { const p = state.game.player; if (!p.buffs) p.buffs = []; p.buffs.push({ id: 'catLuck', duration: 1 }); saveGame(); openCat(); toast('🐈 Кошка мурчит. Удача с вами! (+5% крита)'); }
+export function payBardUI() {
+  const p = state.game?.player;
+  const cost = NPCS.bard.cost;
+  if (!p || hasActiveEntry(p.buffs, 'bardBuff') || !Number.isFinite(p.gold) || p.gold < cost) return false;
+  if (!Array.isArray(p.buffs)) p.buffs = [];
+  p.gold -= cost;
+  p.buffs.push({ id: 'bardBuff', duration: 3 });
+  saveGame();
+  openBard();
+  toast(`🎵 Бард вдохновил вас! (+10% опыта, −${cost}💰)`);
+  return true;
+}
+
+export function petCatUI() {
+  const p = state.game?.player;
+  if (!p || hasActiveEntry(p.buffs, 'catLuck')) return false;
+  if (!Array.isArray(p.buffs)) p.buffs = [];
+  p.buffs.push({ id: 'catLuck', duration: 1 });
+  saveGame();
+  openCat();
+  toast('🐈 Кошка мурчит. Удача с вами! (+5% крита)');
+  return true;
+}
 export function closeNpcAndResumeUI() { import('./overworld.js').then(m => { m.closeDialogAndResume(); showScreen('screen-overworld'); }); }
-export function takeElderBlessingUI() { const p = state.game.player; if (!p.effects) p.effects = []; p.effects.push({ id: 'elderBlessing', duration: 10 }); saveGame(); openElder(); toast('✨ Вы получили благословение (+20% опыта)'); }
-export function useWellUI() { const p = state.game.player; p.hp = p.maxHp; if (p.class !== 'warrior') p.mp = p.maxMp; if (!p.stats) p.stats = {}; p.stats.lastWellUse = Date.now(); saveGame(); openWell(); toast('💧 Вы полностью исцелены!'); }
+export function takeElderBlessingUI() {
+  const p = state.game?.player;
+  if (!p || hasActiveEntry(p.effects, 'elderBlessing')) return false;
+  if (!Array.isArray(p.effects)) p.effects = [];
+  p.effects.push({ id: 'elderBlessing', duration: 10 });
+  saveGame();
+  openElder();
+  toast('✨ Вы получили благословение (+20% опыта)');
+  return true;
+}
+
+export function useWellUI() {
+  const p = state.game?.player;
+  const now = Date.now();
+  if (!p || !canUseWell(p, now)) return false;
+  if (p.hp >= p.maxHp && (p.class === 'warrior' || p.mp >= p.maxMp)) return false;
+  p.hp = p.maxHp;
+  if (p.class !== 'warrior') p.mp = p.maxMp;
+  if (!p.stats || typeof p.stats !== 'object') p.stats = {};
+  p.stats.lastWellUse = now;
+  saveGame();
+  openWell();
+  toast('💧 Вы полностью исцелены!');
+  return true;
+}
