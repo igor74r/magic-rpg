@@ -15,6 +15,7 @@ import {
   getDefMult,
   getLifesteal,
   isStunned,
+  consumeStun,
   clearDebuffs
 } from '../status.js';
 import { emit } from '../events.js';
@@ -958,6 +959,7 @@ function enemyCombatTurn() {
   }
 
   if (isStunned(enemy)) {
+    consumeStun(enemy);
     pushLog(`рџ’« ${name} РѕРіР»СѓС€С‘РЅ, РїСЂРѕРїСѓСЃРєР°РµС‚ С…РѕРґ`, 'info');
 
     tickEnemyEffects();
@@ -1278,6 +1280,17 @@ function enemyCombatTurn() {
   tickPlayerEffects();
 
   if (!ow.combat) return;
+
+  // A stun inflicted by the enemy must consume the player's upcoming turn.
+  // Keep skip-turn effects alive through the ordinary status tick above.
+  if (isStunned(p)) {
+    consumeStun(p);
+    pushLog('💫 Вы оглушены и пропускаете ход', 'info');
+    decreaseCooldowns();
+    ow.combat.turn = 'enemy';
+    setTimeout(enemyCombatTurn, 500);
+    return;
+  }
 
   const talent = getTalentBonus(p);
 
