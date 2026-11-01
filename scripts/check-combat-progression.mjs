@@ -64,18 +64,20 @@ try {
     f.ow.combat.turnCount = 2;
     if (enemyId === 'ghost') f.enemy.hp = 100;
     const hpBefore = f.p.hp;
-    const enemyHpBefore = f.enemy.hp;
     combatAttack();
+    const enemyHpAfterPlayerAttack = f.enemy.hp;
     runEnemyTurn();
     assert.ok(f.p.hp < hpBefore, `${enemyId} special must damage player`);
     assert.ok(f.p.effects.some(effect => effect.id === expectedEffect), `${enemyId} special must apply its configured effect`);
-    if (enemyId === 'ghost') assert.ok(f.enemy.hp > enemyHpBefore - 100, 'drain must restore enemy health after dealing damage');
+    if (enemyId === 'ghost') assert.ok(f.enemy.hp > enemyHpAfterPlayerAttack, 'drain must restore enemy health after dealing damage');
     console.log(`PASS ${enemyId} ${ENEMIES[enemyId].special.type} special and status effect`);
   }
 
   // Evasion prevents the next enemy action, including a special.
   let f = fixture('archer', 'skeleton-archer');
   f.ow.combat.turnCount = 2;
+  f.p.mp = f.p.maxMp;
+  f.ow.player.mp = f.p.mp;
   const evasionHp = f.p.hp;
   combatUseAbility('evasion');
   runEnemyTurn();
