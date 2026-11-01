@@ -1,6 +1,8 @@
-# Осколки Разлома / Shards of the Rift
+﻿# Осколки Разлома / Shards of the Rift
 
 [![CI](https://github.com/igor74r/magic-rpg/actions/workflows/ci.yml/badge.svg)](https://github.com/igor74r/magic-rpg/actions/workflows/ci.yml)
+[🎮 Играть в браузере](https://igor74r.github.io/magic-rpg/)
+
 
 Автономная браузерная 2D-RPG в жанре тёмного фэнтези. Игра запускается как статический сайт: без backend, серверной БД и сетевых игровых функций.
 
@@ -69,3 +71,4 @@ node scripts/browser-smoke-cdp.mjs
 ## Локальный статус
 
 Текущая локальная версия: **v0.27**, схема сохранений: **v17**. Резервная копия: `C:\Users\Igor\Desktop\magic-rpg-v0.27-backup.zip` (26.2 МБ, проверена). Изменения внесены в `C:\Users\Igor\Desktop\magic-rpg`. GitHub не изменялся; commit и push не выполнялись.
+
