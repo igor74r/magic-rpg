@@ -203,6 +203,41 @@ export function addItem(id, qty = 1, opts = {}) {
   return created;
 }
 
+export function addItemOrStore(id, qty = 1, opts = {}) {
+  const created = addItem(id, qty, opts);
+  if (created.length) return { created, stored: false };
+
+  const item = ITEMS[id];
+  const player = state.game?.player;
+  const amount = Number.isFinite(qty) ? Math.floor(qty) : 0;
+  if (!item || !player || amount < 1) return { created: [], stored: false };
+
+  if (!Array.isArray(player.pendingLoot)) player.pendingLoot = [];
+  player.pendingLoot.push({
+    id,
+    qty: amount,
+    allowMythic: opts.allowMythic === true,
+    ...(opts.rarity ? { rarity: opts.rarity } : {})
+  });
+  return { created: [], stored: true };
+}
+
+export function claimPendingLoot(index) {
+  const player = state.game?.player;
+  if (!player || !Array.isArray(player.pendingLoot)) return { ok: false, reason: 'empty' };
+  const entry = player.pendingLoot[index];
+  if (!entry || !ITEMS[entry.id]) return { ok: false, reason: 'invalid' };
+
+  const created = addItem(entry.id, entry.qty, {
+    allowMythic: entry.allowMythic === true,
+    ...(entry.rarity ? { rarity: entry.rarity } : {})
+  });
+  if (!created.length) return { ok: false, reason: 'capacity' };
+
+  player.pendingLoot.splice(index, 1);
+  return { ok: true, created, entry };
+}
+
 export function countItem(id) {
   const inv = state.game.player.inventory;
   return inv.reduce((total, it) => total + (it.id === id ? (it.qty || 1) : 0), 0);
