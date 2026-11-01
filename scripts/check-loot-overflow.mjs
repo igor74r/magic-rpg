@@ -46,14 +46,16 @@ const claimedAfterReload = claimPendingLoot(0);
 assert.equal(claimedAfterReload.ok, true);
 assert.equal(JSON.stringify(claimedAfterReload.created[0]), firstRoll, 'reloading must not reroll pending equipment');
 
-// Stackable rewards are also preserved if the bag has no free slot.
+// Stackable rewards are also preserved when weight capacity is exceeded.
+state.game.player.str = 10;
 state.game.player.inventory = Array.from({ length: 30 }, () => ({
   id: 'iron-sword', qty: 1, rarity: 'common', bonus: {}, affixes: [], runes: []
 }));
 const herbs = addItemOrStore('herb-life', 2);
 assert.equal(herbs.stored, true);
 assert.equal(state.game.player.pendingLoot.length, 1);
-state.game.player.inventory.pop();
+assert.equal(claimPendingLoot(0).reason, 'capacity');
+state.game.player.inventory = [];
 const claimedHerbs = claimPendingLoot(0);
 assert.equal(claimedHerbs.ok, true);
 assert.equal(state.game.player.inventory.at(-1).id, 'herb-life');
