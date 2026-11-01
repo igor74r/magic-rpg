@@ -1,5 +1,6 @@
 // Deterministic smoke coverage for the three playable classes' combat actions.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { state } from '../systems/state.js';
 import { createCharacter } from '../systems/character.js';
 import { ENEMIES } from '../data/enemies.js';
@@ -11,6 +12,10 @@ globalThis.localStorage = {
   setItem: (key, value) => storage.set(key, String(value)),
   removeItem: key => storage.delete(key)
 };
+const combatSource = readFileSync(new URL('../systems/overworld/combat.js', import.meta.url), 'utf8');
+// Narrow signature check catches common double-decoding artifacts without rejecting valid Cyrillic.
+assert.doesNotMatch(combatSource, /(?:Р[А-Я]|рџ|в[љњћЂџ\u0098])/, 'combat log must not contain UTF-8/Windows-1251 mojibake');
+
 const scheduled = [];
 const realSetTimeout = globalThis.setTimeout;
 globalThis.setTimeout = (fn, delay) => { scheduled.push({ fn, delay }); return scheduled.length; };
