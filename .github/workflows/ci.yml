@@ -56,6 +56,9 @@ jobs:
       - name: Check combat actions for all playable classes
         run: node scripts/check-combat-actions.mjs
 
+      - name: Check combat status effects and skipped turns
+        run: node scripts/check-combat-status.mjs
+
       - name: Check complete five-act campaign progression
         run: |
           node scripts/check-campaign-full.mjs
