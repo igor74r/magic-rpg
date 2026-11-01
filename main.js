@@ -1,7 +1,7 @@
 import { state } from './systems/state.js';
 import { on, emit } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
-import { addItem } from './systems/inventory.js';
+import { addItemOrStore } from './systems/inventory.js';
 import { addExp } from './systems/progression.js';
 import {
   updateMainMenu, openSettings, backFromSettings, saveAndMenu,
@@ -379,9 +379,13 @@ function handleWorldEvent(eventId) {
   } else if (ev.eventType === 'traveler') {
     const items = ['health-potion', 'mana-potion', 'herb-life', 'herb-moon'];
     const itemId = items[Math.floor(Math.random() * items.length)];
-    addItem(itemId, 1);
-    logMsg = `🧙 Странник дарит: ${itemId}`;
-    toastMsg = `🧙 Подарок странника!`;
+    const reward = addItemOrStore(itemId, 1);
+    logMsg = reward.stored
+      ? `🧙 ${ITEMS[itemId].name} отправлено в хранилище добычи — в сумке нет места.`
+      : `🧙 Странник дарит: ${ITEMS[itemId].name}`;
+    toastMsg = reward.stored
+      ? '🧙 Подарок сохранён в хранилище добычи.'
+      : '🧙 Подарок странника!';
   }
 
   saveGame();
