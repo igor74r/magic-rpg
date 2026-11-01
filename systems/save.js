@@ -68,6 +68,30 @@ function normalizeEquipped(player) {
   }
 }
 
+export function validateCurrentSaveShape(game) {
+  if (!game || typeof game !== 'object' || Array.isArray(game) ||
+      !game.player || typeof game.player !== 'object' || Array.isArray(game.player)) {
+    throw new Error('Invalid save structure: player data is missing');
+  }
+  const version = game.version == null ? 0 : Number(game.version);
+  if (version !== SAVE_VERSION) return true;
+  const player = game.player;
+  const isRecord = value => !!value && typeof value === 'object' && !Array.isArray(value);
+  if (typeof player.name !== 'string' || !player.name.trim() ||
+      !Number.isFinite(player.level) || player.level < 1 ||
+      !Number.isFinite(player.gold) || player.gold < 0 ||
+      !Array.isArray(player.inventory) ||
+      !player.inventory.every(item => item && typeof item === 'object' && !Array.isArray(item) && typeof item.id === 'string' && item.id.trim() && (item.qty == null || (Number.isSafeInteger(item.qty) && item.qty > 0))) ||
+      !Array.isArray(player.spells) || !player.spells.every(id => typeof id === 'string') ||
+      !isRecord(player.equipped) || !isRecord(player.stats) || !isRecord(player.stats.kills) ||
+      !isRecord(player.campaignKills) || !isRecord(player.campaignClaimed) ||
+      !isRecord(game.storyShards) || !isRecord(game.storyDragons) ||
+      !(player.activeCampaignMission === null || typeof player.activeCampaignMission === 'string')) {
+    throw new Error('Invalid current save structure');
+  }
+  return true;
+}
+
 export function migrateGame(game) {
   if (!game || !game.player) return game;
 
@@ -467,6 +491,7 @@ export function loadGameData(slot) {
       throw new Error('Invalid save structure: player data is missing');
     }
 
+    validateCurrentSaveShape(game);
     migrateGame(game);
 
     state.game = game;

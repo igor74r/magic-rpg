@@ -1,7 +1,7 @@
 import { state } from '../systems/state.js';
 import { showScreen, toast } from './screens.js';
 import {
-  loadGameData, saveSettings, deleteSave, getSlotInfo, getMaxSlot, saveGame, migrateGame
+  loadGameData, saveSettings, deleteSave, getSlotInfo, getMaxSlot, saveGame, migrateGame, validateCurrentSaveShape
 } from '../systems/save.js';
 import { renderClassSelection } from './character.js';
 import { emit } from '../systems/events.js';
@@ -410,6 +410,7 @@ function prepareImportedSave(raw) {
     throw new Error('Invalid save structure');
   }
 
+  validateCurrentSaveShape(raw);
   const candidate = JSON.parse(JSON.stringify(raw));
   migrateGame(candidate);
   const player = candidate.player;

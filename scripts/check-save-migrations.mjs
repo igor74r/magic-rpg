@@ -157,5 +157,20 @@ assert.equal(storage.get('magic-rpg-save-1'), malformedSave, 'malformed save mus
 assert.equal(state.game, null, 'malformed save must not replace active game state');
 console.log('PASS malformed save structure is rejected without mutation');
 
+const incompleteCurrentSave = JSON.stringify({ version: 17, player: { name: 'Incomplete Current Save', level: 10 } });
+storage.set('magic-rpg-save-1', incompleteCurrentSave);
+state.game = null;
+console.error = () => {};
+let incompleteCurrentRejected = false;
+try {
+  incompleteCurrentRejected = loadGameData(1) === false;
+} finally {
+  console.error = realConsoleError;
+}
+assert.equal(incompleteCurrentRejected, true, 'incomplete v17 save must be rejected');
+assert.equal(storage.get('magic-rpg-save-1'), incompleteCurrentSave, 'incomplete v17 save must not be rewritten');
+assert.equal(state.game, null, 'incomplete v17 save must not replace active game state');
+console.log('PASS incomplete current-version save is rejected without mutation');
+
 console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + load path + future-version and malformed-save guards passed; 12 equipment slots verified.`);
 if (failures.length) process.exitCode = 1;
