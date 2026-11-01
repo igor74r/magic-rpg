@@ -91,6 +91,9 @@ jobs:
       - name: Check NPC service guards
         run: node scripts/check-npc-services.mjs
 
+      - name: Check safe save import
+        run: node scripts/check-import-save.mjs
+
       - name: Install Playwright for real-browser checks
         run: |
           npm install --no-save playwright

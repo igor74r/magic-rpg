@@ -1,7 +1,7 @@
 import { state } from '../systems/state.js';
 import { showScreen, toast } from './screens.js';
 import {
-  loadGameData, saveSettings, deleteSave, getSlotInfo, getMaxSlot, saveGame
+  loadGameData, saveSettings, deleteSave, getSlotInfo, getMaxSlot, saveGame, migrateGame
 } from '../systems/save.js';
 import { renderClassSelection } from './character.js';
 import { emit } from '../systems/events.js';
@@ -403,6 +403,29 @@ export function saveAndMenu() {
 
 // ============ ЭКСПОРТ / ИМПОРТ ============
 
+function prepareImportedSave(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw) ||
+      !raw.player || typeof raw.player !== 'object' || Array.isArray(raw.player) ||
+      typeof raw.player.name !== 'string' || !raw.player.name.trim()) {
+    throw new Error('Invalid save structure');
+  }
+
+  const candidate = JSON.parse(JSON.stringify(raw));
+  migrateGame(candidate);
+  const player = candidate.player;
+  if (candidate.version !== 17 ||
+      !Array.isArray(player.inventory) ||
+      !player.inventory.every(item => item && typeof item === 'object' && !Array.isArray(item) && typeof item.id === 'string' && item.id.trim() && (item.qty == null || (Number.isSafeInteger(item.qty) && item.qty > 0))) ||
+      !Array.isArray(player.spells) ||
+      !player.equipped || typeof player.equipped !== 'object' || Array.isArray(player.equipped) ||
+      !player.stats || typeof player.stats !== 'object' || Array.isArray(player.stats) ||
+      !candidate.storyShards || typeof candidate.storyShards !== 'object' || Array.isArray(candidate.storyShards) ||
+      !candidate.storyDragons || typeof candidate.storyDragons !== 'object' || Array.isArray(candidate.storyDragons)) {
+    throw new Error('Incomplete save structure');
+  }
+  return candidate;
+}
+
 export function exportSave() {
   if (!state.game) { toast('Нет активной игры для экспорта. Загрузите слот.'); return; }
   const slot = state.currentSlot || 1;
@@ -428,12 +451,7 @@ export function importSave(event) {
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
-      const data = JSON.parse(e.target.result);
-      if (!data.player || !data.player.name) {
-        toast('❌ Неверный формат файла');
-        event.target.value = '';
-        return;
-      }
+      const data = prepareImportedSave(JSON.parse(e.target.result));
       const slot = state.currentSlot || 1;
       const pName = data.player.name;
       const pLvl = data.player.level || 1;
