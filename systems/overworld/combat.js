@@ -5,7 +5,7 @@ import { SPELLS } from '../../data/spells.js';
 import { CLASSES } from '../../data/classes.js';
 import { LOCATIONS } from '../../data/locations.js';
 import { getEffStats, resolveCriticalChance } from '../stats.js';
-import { addItem, countItem, removeItem } from '../inventory.js';
+import { addItemOrStore, countItem, removeItem } from '../inventory.js';
 import { addExp } from '../progression.js';
 import { checkAchievements } from '../achievements.js';
 import {
@@ -15,6 +15,7 @@ import {
   getDefMult,
   getLifesteal,
   isStunned,
+  consumeStun,
   clearDebuffs
 } from '../status.js';
 import { emit } from '../events.js';
@@ -102,7 +103,7 @@ function consumeBuffRound(p, id) {
 
 export function enterCombat(enemy) {
   const ow = state.overworld;
-  if (!ow) return;
+  if (!ow || !enemy || enemy.dead || enemy.hp <= 0 || ow.combat) return;
 
   enemy.state = 'combat';
 
@@ -884,8 +885,9 @@ function tickEnemyEffects() {
 
     pushLog(`Р­С„С„РµРєС‚С‹ РЅР° РІСЂР°РіРµ: ${parts}`, 'damage');
   }
-}
 
+  if (enemy.hp > 0) checkBossPhase(enemy);
+}
 function tickPlayerEffects() {
   const ow = state.overworld;
   if (!ow || !ow.combat) return;
@@ -958,6 +960,7 @@ function enemyCombatTurn() {
   }
 
   if (isStunned(enemy)) {
+    consumeStun(enemy);
     pushLog(`💫 ${name} оглушён, пропускает ход`, 'info');
 
     tickEnemyEffects();
@@ -1279,6 +1282,15 @@ function enemyCombatTurn() {
 
   if (!ow.combat) return;
 
+  if (isStunned(p)) {
+    consumeStun(p);
+    pushLog('💫 Вы оглушены и пропускаете ход', 'info');
+    decreaseCooldowns();
+    ow.combat.turn = 'enemy';
+    setTimeout(enemyCombatTurn, 500);
+    return;
+  }
+
   const talent = getTalentBonus(p);
 
   if (talent.hpRegen > 0 && p.hp < p.maxHp) {
@@ -1428,12 +1440,13 @@ function combatVictory() {
       : Math.random() < dropChance;
 
     if (shouldDrop) {
-      const created = addItem(id, 1, { allowMythic: !!enemy.boss });
-      const instance = created[0];
-      if (!instance) {
-        pushLog('Сумка заполнена или превышен лимит веса: добыча осталась на месте.', 'warning');
+      const result = addItemOrStore(id, 1, { allowMythic: !!enemy.boss });
+      const instance = result.created[0];
+      if (result.stored) {
+        pushLog(`Сумка заполнена: ${ITEMS[id].name} отправлено в хранилище добычи.`, 'warning');
         return;
       }
+      if (!instance) return;
 
       const rarity =
         instance.rarity && instance.rarity !== 'common'
@@ -1461,11 +1474,11 @@ function combatVictory() {
         ? 'herb-life'
         : 'herb-moon';
 
-    const herbCreated = addItem(herbId, herbQty);
-    if (herbCreated.length) {
+    const herbResult = addItemOrStore(herbId, herbQty);
+    if (herbResult.created.length) {
       pushLog(`Трава: ${ITEMS[herbId].name} ×${herbQty}`, 'success');
-    } else {
-      pushLog('Сумка заполнена или превышен лимит веса: травы не подобраны.', 'warning');
+    } else if (herbResult.stored) {
+      pushLog(`Сумка заполнена: ${ITEMS[herbId].name} отправлено в хранилище добычи.`, 'warning');
     }
   }
 
@@ -1474,9 +1487,9 @@ function combatVictory() {
   if (dragonReward?.newlyDefeated) {
     const shardId = dragonReward.shardItemId;
     if (shardId && ITEMS[shardId]) {
-      addItem(shardId, 1);
+      const shardResult = addItemOrStore(shardId, 1);
       pushLog('🐉 Сюжетный дракон повержен!', 'success');
-      pushLog(`💎 Получен сюжетный осколок: ${ITEMS[shardId].name}`, 'success');
+      pushLog(`💎 Получен сюжетный осколок: ${ITEMS[shardId].name}`, shardResult.created.length || shardResult.stored ? 'success' : 'warning');
       if (dragonReward.dragon.id === 'blood-crown') {
         state.game.riftOpenedAt = Date.now();
         setTimeout(() => emit('rift:opened'), 900);
@@ -1494,8 +1507,6 @@ function combatVictory() {
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 25);
     triggerShake(6, 0.3);
   }
-
-  saveGame();
 
   enemy.dead = true;
   enemy.respawnAt = performance.now() + getRespawnMs();
@@ -1518,6 +1529,8 @@ function combatVictory() {
     consumeBuffRound(p, 'bardBuff');
   }
 
+  // Save after temporary combat effects and cooldowns have been cleared.
+  saveGame();
   endCombat();
   checkAchievements();
 
@@ -1528,7 +1541,9 @@ function combatVictory() {
 
     if (alive === 0) {
       setTimeout(
-        () => emit(ow.towerMode ? 'tower:floor-cleared' : 'rift:floor-cleared'),
+        () => emit(ow.towerMode ? 'tower:floor-cleared' : 'rift:floor-cleared', {
+          floor: ow.towerMode ? ow.towerFloor : ow.rifFloor
+        }),
         900
       );
     }

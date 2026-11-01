@@ -1,7 +1,8 @@
 import { state } from './systems/state.js';
 import { on, emit } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
-import { addItem } from './systems/inventory.js';
+import { addItemOrStore } from './systems/inventory.js';
+import { ITEMS } from './data/items.js';
 import { addExp } from './systems/progression.js';
 import {
   updateMainMenu, openSettings, backFromSettings, saveAndMenu,
@@ -18,7 +19,7 @@ import {
   mapSelect, mapTravel, mapEnter,
   showInvTooltip, showEqTooltip, hideTooltip,
   spendStat, sellItemByIndexUI,
-  setInvFilter, setInvSort, invSlotClick, openSaleUI, toggleSaleItem, selectSaleTiersUI, selectSaleFilterUI, confirmSaleUI, cancelSaleUI,
+  setInvFilter, setInvSort, invSlotClick, claimPendingLootUI, openSaleUI, toggleSaleItem, selectSaleTiersUI, selectSaleFilterUI, confirmSaleUI, cancelSaleUI,
   openBlacksmith, openHealer, openAlchemist, backToVillage,
   openMerchant, openElder, openWell, closeNpcAndResumeUI,
   takeElderBlessingUI, useWellUI, acceptElderQuestUI, turnInElderQuestUI,
@@ -352,6 +353,7 @@ function handleWorldEvent(eventId) {
 
   let logMsg = '';
   let toastMsg = '';
+  let logClass = 'success';
 
   if (ev.eventType === 'altar') {
     const buffs = ['atkBuff', 'defBuff', 'lifesteal'];
@@ -379,13 +381,18 @@ function handleWorldEvent(eventId) {
   } else if (ev.eventType === 'traveler') {
     const items = ['health-potion', 'mana-potion', 'herb-life', 'herb-moon'];
     const itemId = items[Math.floor(Math.random() * items.length)];
-    addItem(itemId, 1);
-    logMsg = `🧙 Странник дарит: ${itemId}`;
-    toastMsg = `🧙 Подарок странника!`;
+    const reward = addItemOrStore(itemId, 1);
+    logMsg = reward.stored
+      ? `🧙 ${ITEMS[itemId].name} отправлено в хранилище добычи — в сумке нет места.`
+      : `🧙 Странник дарит: ${ITEMS[itemId].name}`;
+    toastMsg = reward.stored
+      ? '🧙 Подарок сохранён в хранилище добычи.'
+      : '🧙 Подарок странника!';
+    if (reward.stored) logClass = 'warning';
   }
 
   saveGame();
-  emit('log', { channel: 'game', msg: logMsg, cls: 'success' });
+  emit('log', { channel: 'game', msg: logMsg, cls: logClass });
   toast(toastMsg);
 
   ow.events = ow.events.filter(e => e.id !== eventId);
@@ -485,6 +492,7 @@ window.GameAPI = {
   spendStat,
   setInvFilter, setInvSort,
   invSlotClick,
+  claimPendingLoot: claimPendingLootUI,
   openSaleUI,
   toggleSaleItem,
   selectSaleTiers: selectSaleTiersUI,

@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { ITEMS, RARITIES } from '../../data/items.js';
-import { addItem } from '../inventory.js';
+import { addItemOrStore } from '../inventory.js';
 import { checkAchievements } from '../achievements.js';
 import { saveGame } from '../save.js';
 import { playSound } from '../audio.js';
@@ -169,19 +169,26 @@ export function openChest(chest) {
   const p = state.game.player;
   const pool = ['health-potion', 'mana-potion', 'iron-sword', 'apprentice-staff', 'leather-armor'];
   const id = pool[Math.floor(Math.random() * pool.length)];
-  const created = addItem(id);
-  const inst = created[0];
-  let msg = `📦 Сундук: ${ITEMS[id].name}`;
+  const result = addItemOrStore(id);
+  const inst = result.created[0];
+  let msg = result.stored
+    ? `📦 Сундук: ${ITEMS[id].name} отправлено в хранилище добычи — в сумке нет места.`
+    : `📦 Сундук: ${ITEMS[id].name}`;
   if (inst && inst.rarity && inst.rarity !== 'common') msg = `📦 Сундук: ${RARITIES[inst.rarity].name} ${ITEMS[id].name}`;
-  pushLog(msg, 'success');
+  pushLog(msg, result.stored ? 'warning' : 'success');
   ow.floatingNumbers.push({ x: chest.x, y: chest.y - 20, text: '📦', type: 'heal', life: 1.5 });
   spawnParticles(chest.x, chest.y, 'spark', 8);
   playSound('chest');
 
   if (Math.random() < CHEST_HERB_CHANCE) {
     const herbId = Math.random() < 0.5 ? 'herb-life' : 'herb-moon';
-    addItem(herbId, 1);
-    pushLog(`🌿 Сундук: ${ITEMS[herbId].name}`, 'success');
+    const herbResult = addItemOrStore(herbId, 1);
+    pushLog(
+      herbResult.stored
+        ? `🌿 ${ITEMS[herbId].name} отправлено в хранилище добычи.`
+        : `🌿 Сундук: ${ITEMS[herbId].name}`,
+      herbResult.stored ? 'warning' : 'success'
+    );
   }
 
   updateQuestProgress('chest', 'chest', 1);

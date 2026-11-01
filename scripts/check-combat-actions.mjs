@@ -91,8 +91,23 @@ try {
   assert.equal(f.ow.combat.turn, 'enemy');
   console.log('PASS Owned combat consumable applies once, is consumed, and advances the turn');
 
+
+  f = fixture('mage');
+  f.player.effects = [
+    { id: 'atkBuff', duration: 2 },
+    { id: 'poison', duration: 2 },
+    { id: 'elderBlessing', duration: 2 }
+  ];
+  f.player.cooldowns = { 'test-ability': 2 };
+  f.enemy.hp = 1;
+  combatAttack();
+  const persistedVictory = JSON.parse(storage.get('magic-rpg-save-1'));
+  assert.deepEqual(persistedVictory.player.effects, [{ id: 'elderBlessing', duration: 1 }]);
+  assert.deepEqual(persistedVictory.player.cooldowns, {});
+  console.log('PASS Victory save contains post-combat effects and cooldown state');
+
   assert.ok(scheduled.length >= 5, 'combat actions should schedule enemy responses');
-  console.log(`Combat action regression: 6/6 action checks passed; ${scheduled.length} enemy turns safely queued.`);
+  console.log(`Combat action regression: 7/7 action checks passed; ${scheduled.length} enemy turns safely queued.`);
 } finally {
   globalThis.setTimeout = realSetTimeout;
   state.overworld = null;

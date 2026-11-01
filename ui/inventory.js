@@ -6,7 +6,7 @@ import { FORGE_BONUS } from '../data/npcs.js';
 import {
   useItem, equipItemByIndex, unequipItemBySlot, equipBest,
   EQUIPMENT_SLOTS, EQUIPMENT_TYPES, SLOT_TYPES, socketRune,
-  getInventoryWeight, getInventoryCapacity, getInventorySlotCount
+  getInventoryWeight, getInventoryCapacity, getInventorySlotCount, claimPendingLoot
 } from '../systems/inventory.js';
 import { sellItemsByIndices, getSellPrice } from '../systems/shop.js';
 import { saveGame } from '../systems/save.js';
@@ -376,9 +376,43 @@ export function renderInventory() {
         ${filterBarHTML()}
         <div class="inv-grid rpg-inv-grid">${grid}</div>
         <p class="inv-hint">Нажми на предмет, чтобы надеть или использовать. Руна устанавливается в свободное гнездо. Наведи курсор для сравнения характеристик.</p>
+        ${renderPendingLoot(p)}
       </section>
     </div>
   `;
+}
+
+function renderPendingLoot(player) {
+  const pending = Array.isArray(player.pendingLoot) ? player.pendingLoot : [];
+  if (!pending.length) return '';
+  const rows = pending.map((entry, index) => {
+    const item = ITEMS[entry.id];
+    if (!item) return '';
+    const qty = Math.max(1, Math.floor(Number(entry.qty) || 1));
+    return `<div class="pending-loot-row">
+      <span class="pending-loot-item">${item.icon} ${item.name}${qty > 1 ? ` ×${qty}` : ''}</span>
+      <button type="button" onclick="GameAPI.claimPendingLoot(${index})">Забрать</button>
+    </div>`;
+  }).join('');
+  return `<section class="pending-loot-panel">
+    <h4>📦 Невостребованная добыча <small>(${pending.length})</small></h4>
+    <p>Награды сохранены здесь, потому что в сумке не хватило места. Освободите место и заберите их.</p>
+    <div class="pending-loot-list">${rows}</div>
+  </section>`;
+}
+
+export function claimPendingLootUI(index) {
+  const result = claimPendingLoot(index);
+  if (!result.ok) {
+    toast(result.reason === 'capacity'
+      ? 'В сумке всё ещё нет места. Освободите ячейку или вес.'
+      : 'Эта награда больше недоступна.');
+    return;
+  }
+  const item = ITEMS[result.entry.id];
+  toast(`Получено: ${item?.name || result.entry.id}`);
+  saveGame();
+  renderGame();
 }
 
 export function invSlotClick(idx) {

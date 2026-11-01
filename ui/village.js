@@ -1,6 +1,6 @@
 import { state } from '../systems/state.js';
 import { saveGame } from '../systems/save.js';
-import { addItem } from '../systems/inventory.js';
+import { addItemOrStore } from '../systems/inventory.js';
 import { checkAchievements } from '../systems/achievements.js';
 import { emit } from '../systems/events.js';
 import { playSound } from '../systems/audio.js';
@@ -45,11 +45,14 @@ export function openDailyChest() {
 
   const pool = ['health-potion', 'mana-potion', 'strong-health-potion', 'strong-mana-potion'];
   const id = pool[Math.floor(Math.random() * pool.length)];
-  addItem(id, 1);
+  const reward = addItemOrStore(id, 1);
 
   playSound('chest');
-  emit('log', { channel: 'game', msg: `🎁 Ежедневный сундук: +8💰, ${ITEMS[id].name}`, cls: 'success' });
-  emit('toast', `🎁 +8💰 и ${ITEMS[id].name}`);
+  const rewardText = reward.stored
+    ? `${ITEMS[id].name} отправлено в хранилище добычи — в сумке нет места`
+    : ITEMS[id].name;
+  emit('log', { channel: 'game', msg: `🎁 Ежедневный сундук: +8💰, ${rewardText}`, cls: reward.stored ? 'warning' : 'success' });
+  emit('toast', reward.stored ? `🎁 +8💰. ${ITEMS[id].name} сохранено в хранилище добычи.` : `🎁 +8💰 и ${ITEMS[id].name}`);
 
   saveGame();
   checkAchievements();

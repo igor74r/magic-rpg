@@ -31,7 +31,9 @@ export function tickEffects(target) {
       totalDamage += def.damage;
       messages.push({ icon: def.icon, name: def.name, damage: def.damage });
     }
-    e.duration -= 1;
+    // Skip-turn effects are consumed by the combat turn resolver, not by the
+    // ordinary end-of-turn damage tick that runs on the same action.
+    if (!def.skipTurn) e.duration -= 1;
   }
   target.effects = target.effects.filter(e => e.duration > 0);
   return { totalDamage, messages };
@@ -74,6 +76,14 @@ export function getLifesteal(target) {
 
 export function isStunned(target) {
   return hasEffect(target, 'stun');
+}
+
+export function consumeStun(target) {
+  if (!target || !Array.isArray(target.effects)) return false;
+  const index = target.effects.findIndex(effect => effect.id === 'stun');
+  if (index < 0) return false;
+  target.effects.splice(index, 1);
+  return true;
 }
 
 export function clearDebuffs(target) {

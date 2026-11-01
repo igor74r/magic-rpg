@@ -41,6 +41,12 @@ jobs:
       - name: Check item rarity distribution
         run: node scripts/check-rarity.mjs
 
+      - name: Check combat status effects and skipped turns
+        run: node scripts/check-combat-status.mjs
+
+      - name: Check combat specials, defeat, rewards and floor progression
+        run: node scripts/check-combat-progression.mjs
+
       - name: Check passive trees and respec
         run: node scripts/check-passives.mjs
 
@@ -66,6 +72,9 @@ jobs:
 
       - name: Check inventory, affixes and crafting
         run: node scripts/check-inventory-affixes.mjs
+
+      - name: Check overflow loot persistence and claiming
+        run: node scripts/check-loot-overflow.mjs
 
       - name: Check five-act story depth and enemy roster
         run: node scripts/check-story-depth.mjs
