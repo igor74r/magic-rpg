@@ -54,6 +54,11 @@ export function startAutosave() {
   autosaveAt = performance.now();
   autosaveTimer = setInterval(() => {
     const ow = state.overworld;
+    if (!ow || !ow.active) {
+      clearInterval(autosaveTimer);
+      autosaveTimer = null;
+      return;
+    }
     const interval = Math.max(15, Math.min(60, Number(state.settings?.autoSaveInterval) || 30)) * 1000;
     if (ow && ow.active && !ow.combat && !ow.defeated && !paused &&
         state.settings?.autoSave !== false && performance.now() - autosaveAt >= interval) {
@@ -64,6 +69,10 @@ export function startAutosave() {
 }
 
 function tick(ts) {
+  if (!state.overworld?.active) {
+    rafId = null;
+    return;
+  }
   const dt = Math.min(50, ts - lastTs) / 16.67; lastTs = ts;
   fpsFrames++;
   if (!fpsSampleAt) fpsSampleAt = ts;
