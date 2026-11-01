@@ -1,5 +1,6 @@
 // End-to-end regression coverage for combat specials, defensive actions,
 // resurrection/flee, duplicate victory prevention and tower/rift progression.
+// Deterministic timers and random values keep all combat branches reproducible.
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { createCharacter } from '../systems/character.js';
