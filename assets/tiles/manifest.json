@@ -1,9 +1,9 @@
 {
-  "name": "Shards of the Rift — high-detail original 2D terrain atlas",
+  "name": "Shards of the Rift вЂ” high-detail original 2D terrain atlas",
   "license": "Original project assets; created for this game",
   "tileSize": 96,
   "terrain": {
-    "file": "terrain/atlas.svg",
+    "file": "terrain/atlas.png",
     "columns": [
       "grass",
       "path",
@@ -25,14 +25,14 @@
     "sourceScale": 2
   },
   "dungeons": {
-    "file": "dungeons/atlas.svg",
+    "file": "dungeons/atlas.png",
     "tileSize": 48,
     "columns": 10,
     "rows": 4,
     "usage": "decorative dungeon floors, walls, doors, cracks and seals"
   },
   "props": {
-    "file": "props/atlas.svg",
+    "file": "props/atlas.png",
     "tileSize": 96,
     "displaySize": 48,
     "columns": 8,

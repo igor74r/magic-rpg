@@ -19,7 +19,7 @@ function requestAtlas() {
     atlasImage = new Image();
     atlasImage.onload = () => { atlasReady = true; };
     atlasImage.onerror = () => { atlasFailed = true; atlasImage = null; };
-    atlasImage.src = new URL('../../assets/tiles/terrain/atlas.svg', import.meta.url).href;
+    atlasImage.src = new URL('../../assets/tiles/terrain/atlas.png', import.meta.url).href;
   } catch (error) {
     atlasFailed = true;
     atlasImage = null;
@@ -56,14 +56,14 @@ function requestPropsAtlas() {
     propsImage = new Image();
     propsImage.onload = () => { propsReady = true; };
     propsImage.onerror = () => { propsFailed = true; propsImage = null; };
-    propsImage.src = new URL('../../assets/tiles/props/atlas.svg', import.meta.url).href;
+    propsImage.src = new URL('../../assets/tiles/props/atlas.png', import.meta.url).href;
   } catch (error) {
     propsFailed = true;
     propsImage = null;
   }
 }
 
-/** Draws one of the 32 environment props (8 columns × 4 rows). */
+/** Draws one of the 32 environment props (8 columns Г— 4 rows). */
 export function drawAtlasProp(ctx, index, x, y, width = 48, height = 48) {
   if (!Number.isInteger(index) || index < 0 || index >= 32 || propsFailed) return false;
   if (!propsRequested) requestPropsAtlas();
@@ -72,8 +72,8 @@ export function drawAtlasProp(ctx, index, x, y, width = 48, height = 48) {
   const row = Math.floor(index / 8);
   try {
     const previousSmoothing = ctx.imageSmoothingEnabled;
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingEnabled = false;
+    
     ctx.drawImage(propsImage, col * 96, row * 96, 96, 96, x, y, width, height);
     ctx.imageSmoothingEnabled = previousSmoothing;
     return true;
@@ -82,3 +82,4 @@ export function drawAtlasProp(ctx, index, x, y, width = 48, height = 48) {
     return false;
   }
 }
+
