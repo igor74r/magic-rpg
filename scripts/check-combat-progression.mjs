@@ -85,14 +85,41 @@ try {
   assert.equal(f.ow.combat.guaranteedDodge, false);
   console.log('PASS guaranteed evasion negates a special attack');
 
-  // Block reduces the incoming action and consumes the stance.
+  // Compare block against the same deterministic unblocked attack.
+  f = fixture('warrior', 'wolf');
+  const unblockedHp = f.p.hp;
+  combatAttack();
+  runEnemyTurn();
+  const unblockedLoss = unblockedHp - f.p.hp;
+
   f = fixture('warrior', 'wolf');
   const blockHp = f.p.hp;
   combatBlock();
   runEnemyTurn();
-  assert.ok(f.p.hp < blockHp, 'block test requires an incoming hit');
+  const blockedLoss = blockHp - f.p.hp;
+  assert.ok(blockedLoss > 0 && blockedLoss < unblockedLoss, 'block must reduce incoming damage');
   assert.equal(f.ow.combat.blocking, false, 'block stance must be consumed after the hit');
   console.log('PASS block stance reduces and consumes the incoming attack');
+
+  // Damage-over-time can cross a boss threshold even without a direct attack.
+  f = fixture('warrior', 'ancient-dragon');
+  f.enemy.maxHp = 450;
+  f.enemy.hp = 230;
+  f.enemy.effects = [{ id: 'burn', duration: 2 }];
+  combatBlock();
+  assert.equal(f.enemy.phase, 1, 'burn tick must advance the boss phase at the 50% threshold');
+  console.log('PASS boss phase advances when damage-over-time crosses a threshold');
+
+  // Enemy stun consumes exactly one player turn after the status tick.
+  f = fixture('warrior', 'book-guardian');
+  f.ow.combat.turnCount = 2;
+  combatAttack();
+  runEnemyTurn();
+  assert.equal(f.p.effects.some(effect => effect.id === 'stun'), false, 'stun must be consumed after skipping the player turn');
+  assert.equal(f.ow.combat.turn, 'enemy', 'enemy must receive its next turn after player stun');
+  runEnemyTurn();
+  assert.equal(f.ow.combat.turn, 'player', 'player must regain control after one skipped turn');
+  console.log('PASS enemy stun skips exactly one player turn');
 
   // Legacy priest resurrection works once; the next lethal hit ends combat.
   f = fixture('priest', 'goblin');
