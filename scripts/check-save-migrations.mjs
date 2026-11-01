@@ -119,7 +119,7 @@ console.log(`${storagePathOk ? 'PASS' : 'FAIL'} loadGameData migrates and rewrit
 assert.ok(storagePathOk);
 
 // Newer and malformed schema versions must be rejected without rewriting the slot.
-for (const unsupportedVersion of [18, 'future', 17.5]) {
+for (const unsupportedVersion of [18, 'future', 17.5, -1, true]) {
   const original = JSON.stringify({
     version: unsupportedVersion,
     player: { name: 'Future Save', level: 20, inventory: [{ id: 'future-item', qty: 1 }] },
