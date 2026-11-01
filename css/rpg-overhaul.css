@@ -582,3 +582,24 @@ button:focus-visible, a:focus-visible, .tab:focus-visible {
   .sale-item-list, .sale-summary-list { max-height:24vh; }
   .sale-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
+
+
+.pending-loot-panel {
+  margin-top:16px; padding:12px; border:1px solid rgba(201,162,39,.45);
+  border-radius:8px; background:rgba(18,13,8,.72);
+}
+.pending-loot-panel h4 { margin:0 0 5px; color:#e4c778; }
+.pending-loot-panel h4 small { color:#c69c60; font-weight:normal; }
+.pending-loot-panel p { margin:0 0 10px; color:#a89060; font-size:11px; line-height:1.5; }
+.pending-loot-list { display:grid; gap:6px; }
+.pending-loot-row {
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  padding:7px 9px; border:1px solid rgba(201,162,39,.2); border-radius:6px;
+  background:rgba(0,0,0,.2);
+}
+.pending-loot-item { min-width:0; color:#e7d8b8; font-size:12px; overflow-wrap:anywhere; }
+.pending-loot-row button { flex:0 0 auto; padding:6px 12px; font-size:11px; }
+@media (max-width:480px) {
+  .pending-loot-row { align-items:flex-start; }
+  .pending-loot-row button { padding:6px 9px; }
+}
