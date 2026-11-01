@@ -13,6 +13,7 @@ globalThis.localStorage = {
   removeItem: key => storage.delete(key)
 };
 const combatSource = readFileSync(new URL('../systems/overworld/combat.js', import.meta.url), 'utf8');
+// Narrow signature check catches common double-decoding artifacts without rejecting valid Cyrillic.
 assert.doesNotMatch(combatSource, /(?:Р[А-Я]|рџ|в[љњћЂџ\u0098])/, 'combat log must not contain UTF-8/Windows-1251 mojibake');
 
 const scheduled = [];
