@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { createCharacter } from '../systems/character.js';
 import { ENEMIES } from '../data/enemies.js';
-import { enterCombat, combatAttack, combatBlock, combatCastSpell, combatUseAbility } from '../systems/overworld/combat.js';
+import { enterCombat, combatAttack, combatBlock, combatCastSpell, combatUseAbility, combatUseItem } from '../systems/overworld/combat.js';
 
 const storage = new Map();
 globalThis.localStorage = {
@@ -67,8 +67,27 @@ try {
   assert.ok(f.player.cooldowns['aimed-shot'] > 0, 'Archer ability must enter cooldown');
   console.log('PASS Archer aimed shot damages the target and starts cooldown');
 
-  assert.ok(scheduled.length >= 4, 'combat actions should schedule enemy responses');
-  console.log(`Combat action regression: 4/4 action checks passed; ${scheduled.length} enemy turns safely queued.`);
+  f = fixture('warrior');
+  f.player.hp = Math.max(1, f.player.maxHp - 40);
+  f.ow.player.hp = f.player.hp;
+  const hpWithoutItem = f.player.hp;
+  const timersBeforeMissingItem = scheduled.length;
+  combatUseItem('health-potion');
+  assert.equal(f.player.hp, hpWithoutItem, 'Combat use must not apply an item that is not owned');
+  assert.equal(f.ow.combat.turn, 'player', 'Rejected item use must not consume the turn');
+  assert.equal(scheduled.length, timersBeforeMissingItem, 'Rejected item use must not schedule an enemy turn');
+  console.log('PASS Combat item use rejects consumables missing from inventory');
+
+  f.player.inventory.push({ id: 'health-potion', qty: 1 });
+  const hpBeforePotion = f.player.hp;
+  combatUseItem('health-potion');
+  assert.equal(f.player.hp, Math.min(f.player.maxHp, hpBeforePotion + 80), 'Owned health potion must apply its effect');
+  assert.equal(f.player.inventory.some(item => item.id === 'health-potion'), false, 'Used potion must be consumed exactly once');
+  assert.equal(f.ow.combat.turn, 'enemy');
+  console.log('PASS Owned combat consumable applies once, is consumed, and advances the turn');
+
+  assert.ok(scheduled.length >= 6, 'combat actions should schedule enemy responses');
+  console.log(`Combat action regression: 6/6 action checks passed; ${scheduled.length} enemy turns safely queued.`);
 } finally {
   globalThis.setTimeout = realSetTimeout;
   state.overworld = null;
