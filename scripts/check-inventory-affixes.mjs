@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { ITEMS, RARITIES, rollRarity, rollItemAffixes } from '../data/items.js';
-import { addItem, countItem, removeItem } from '../systems/inventory.js';
+import { addItem, countItem, removeItem, useItem } from '../systems/inventory.js';
 import { craftRecipe } from '../systems/crafting.js';
 import { NPCS } from '../data/npcs.js';
 
@@ -60,6 +60,26 @@ assert.equal(crafted.ok, true);
 assert.equal(countItem('root-fiber'), 0);
 assert.equal(countItem('herb-life'), 0);
 assert.equal(countItem('rune-root'), 1);
+
+// A consumable or scroll must be owned before its effect can be applied.
+state.game.player = {
+  hp: 20, maxHp: 100, mp: 0, maxMp: 100,
+  inventory: [], spells: [], equipped: {}
+};
+assert.equal(useItem('health-potion'), false, 'cannot use a potion that is not owned');
+assert.equal(state.game.player.hp, 20, 'missing potion must not apply its effect');
+assert.equal(countItem('health-potion'), 0);
+
+state.game.player.inventory = [{ id: 'health-potion', qty: 1 }];
+assert.equal(useItem('health-potion'), true, 'owned potion should be usable');
+assert.equal(state.game.player.hp, 100, 'owned potion should apply its effect');
+assert.equal(countItem('health-potion'), 0, 'using a potion must consume exactly one item');
+
+state.game.player.inventory = [{ id: 'health-potion', qty: 2 }];
+state.game.player.hp = 0;
+assert.equal(useItem('health-potion'), true);
+assert.equal(countItem('health-potion'), 1, 'using one potion from a stack must leave the remainder');
+assert.equal(state.game.player.hp, 80);
 
 state.game = null;
 console.log('Inventory, affix and crafting checks passed');

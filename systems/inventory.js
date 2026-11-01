@@ -345,17 +345,17 @@ export function unequipItemBySlot(slot) {
 }
 
 export function useItem(id) {
+  const player = state.game?.player;
   const item = ITEMS[id];
+  if (!player || !Array.isArray(player.inventory) || countItem(id) < 1) return false;
   if (!item || !['consumable', 'scroll'].includes(item.type)) return false;
   if (item.combatOnly) return false;
   if (item.type === 'scroll') {
-    const p = state.game.player;
-    if (item.spellId && p.spells.includes(item.spellId)) return false;
+    if (!Array.isArray(player.spells) || (item.spellId && player.spells.includes(item.spellId))) return false;
   }
   if (typeof item.use !== 'function') return false;
-  item.use(state.game.player);
-  removeItem(id);
-  return true;
+  item.use(player);
+  return removeItem(id, 1);
 }
 
 export function equipBest() {
