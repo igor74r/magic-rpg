@@ -26,8 +26,10 @@ Math.random = () => 0.99;
 
 function fixture(classId = 'warrior', enemyId = 'goblin') {
   state.currentSlot = 1;
-  assert.equal(createCharacter('Combat Regression', classId), true);
+  const createClass = classId === 'priest' ? 'warrior' : classId;
+  assert.equal(createCharacter('Combat Regression', createClass), true);
   const p = state.game.player;
+  if (classId === 'priest') p.class = 'priest';
   p.hp = p.maxHp = 5000;
   p.mp = p.maxMp;
   state.overworld = {
