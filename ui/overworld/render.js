@@ -205,6 +205,17 @@ function tick(ts) {
 function drawTile(ctx, type, x, y, size, themeName, colors) {
   // Aurora has no small house sprites: skip legacy building tile completely.
   if (themeName === 'village' && type === 2) return;
+  // Aurora: use a unified ground surface instead of mismatched biome atlas patches.
+  if (themeName === 'village' && (type === 0 || type === 1)) {
+    ctx.fillStyle = type === 1 ? '#766653' : '#34483b';
+    ctx.fillRect(x, y, size, size);
+    const seed = Math.abs(Math.floor(x / size) * 37 + Math.floor(y / size) * 71);
+    ctx.fillStyle = type === 1 ? 'rgba(222,196,150,0.07)' : 'rgba(175,198,154,0.06)';
+    ctx.fillRect(x + (seed % 17) + 4, y + ((seed * 3) % 19) + 5, 3, 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.06)';
+    ctx.fillRect(x, y + size - 2, size, 2);
+    return;
+  }
   if (drawAtlasTile(ctx, type, x, y, size, themeName)) {
     const hazard = getTileDanger(type, themeName);
     if (hazard) {
