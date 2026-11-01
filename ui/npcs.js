@@ -7,7 +7,7 @@ import { emit } from '../systems/events.js';
 import { showScreen, toast } from './screens.js';
 import { STORY } from '../data/story.js';
 import { LOCATIONS } from '../data/locations.js';
-import { addItem } from '../systems/inventory.js';
+import { addItemOrStore } from '../systems/inventory.js';
 import { canCraftRecipe, canReforgeItem, collectCraftingJobs, getCraftingJobs } from '../systems/crafting.js';
 import { getCurrentActIndex } from '../systems/economy.js';
 import { addExp } from '../systems/progression.js';
@@ -176,12 +176,16 @@ export function turnInElderQuestUI() {
   const reward = getMissionReward(completed.mission);
   p.gold = (p.gold || 0) + reward.gold;
   addExp(reward.exp);
-  if (reward.itemId) addItem(reward.itemId, 1);
-  if (!p.stats) p.stats = {};
+  const itemReward = reward.itemId ? addItemOrStore(reward.itemId, 1) : null;
+  const itemName = reward.itemId ? (ITEMS[reward.itemId]?.name || reward.itemId) : '';
+  const itemMessage = itemReward?.stored
+    ? ` Материал «${itemName}» отправлен в хранилище добычи.`
+    : itemReward?.created?.length ? ` Материал: ${itemName}.` : '';
+  if (!p.stats || typeof p.stats !== 'object') p.stats = {};
   p.stats.goldEarned = (p.stats.goldEarned || 0) + reward.gold;
   saveGame();
   openElder();
-  toast(`Награда получена: +${reward.gold} золота, +${reward.exp} опыта.`);
+  toast(`Награда получена: +${reward.gold} золота, +${reward.exp} опыта.${itemMessage}`);
   if (canCompleteMainQuest(state.game)) emit('victory');
 }
 

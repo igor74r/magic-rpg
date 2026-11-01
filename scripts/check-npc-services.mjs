@@ -24,7 +24,7 @@ globalThis.localStorage = {
 globalThis.setTimeout = () => 1;
 
 try {
-  const { payBardUI, petCatUI, takeElderBlessingUI, useWellUI } = await import('../ui/npcs.js');
+  const { payBardUI, petCatUI, takeElderBlessingUI, useWellUI, turnInElderQuestUI } = await import('../ui/npcs.js');
   state.currentSlot = 1;
   state.overworld = { active: true };
   state.game = {
@@ -70,7 +70,24 @@ try {
   assert.equal(useWellUI(), false, 'well cannot be reused within 24 hours');
   assert.equal(p.hp, 10);
   assert.equal(p.stats.lastWellUse, usedAt);
-  console.log('check-npc-services: PASS (bard, cat, elder blessing and well guards)');
+  state.game = {
+    location: 'village',
+    storyShards: { flame: false, ice: false, blood: false },
+    storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false },
+    player: {
+      name: 'Reward test', class: 'mage', level: 1, exp: 0, expNext: 100,
+      gold: 0, hp: 100, maxHp: 100, mp: 50, maxMp: 50, str: 1000,
+      inventory: Array.from({ length: 30 }, (_, index) => ({ id: 'iron-sword', qty: 1, testIndex: index })),
+      spells: [], equipped: {}, stats: { kills: {} }, effects: [], buffs: [],
+      campaignKills: { 'a1-m1': 3 }, campaignClaimed: {}, activeCampaignMission: 'a1-m1'
+    }
+  };
+  const rewardPlayer = state.game.player;
+  turnInElderQuestUI();
+  assert.equal(rewardPlayer.campaignClaimed['a1-m1'], true, 'completed campaign mission should be claimed');
+  assert.equal(rewardPlayer.inventory.length, 30, 'full inventory should remain unchanged');
+  assert.ok(rewardPlayer.pendingLoot?.some(entry => entry.id === 'root-fiber' && entry.qty === 1), 'campaign material reward must be preserved in pending loot');
+  console.log('check-npc-services: PASS (NPC service guards and campaign reward overflow storage)');
 } finally {
   state.game = null;
   state.overworld = null;
