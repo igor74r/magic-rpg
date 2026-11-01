@@ -5,7 +5,7 @@ import { SPELLS } from '../../data/spells.js';
 import { CLASSES } from '../../data/classes.js';
 import { LOCATIONS } from '../../data/locations.js';
 import { getEffStats, resolveCriticalChance } from '../stats.js';
-import { addItem, removeItem } from '../inventory.js';
+import { addItem, countItem, removeItem } from '../inventory.js';
 import { addExp } from '../progression.js';
 import { checkAchievements } from '../achievements.js';
 import {
@@ -751,7 +751,7 @@ export function combatUseItem(itemId) {
 
   const item = ITEMS[itemId];
 
-  if (!item || item.type !== 'consumable') {
+  if (!item || item.type !== 'consumable' || typeof item.use !== 'function' || countItem(itemId) < 1) {
     return;
   }
 
