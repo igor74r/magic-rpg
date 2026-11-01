@@ -67,8 +67,30 @@ try {
   assert.ok(f.player.cooldowns['aimed-shot'] > 0, 'Archer ability must enter cooldown');
   console.log('PASS Archer aimed shot damages the target and starts cooldown');
 
+  f = fixture('mage');
+  f.player.effects = [
+    { id: 'atkBuff', duration: 2 },
+    { id: 'poison', duration: 2 },
+    { id: 'elderBlessing', duration: 2 }
+  ];
+  f.player.cooldowns = { 'test-ability': 2 };
+  f.enemy.hp = 1;
+  combatAttack();
+  const persistedVictory = JSON.parse(storage.get('magic-rpg-save-1'));
+  assert.deepEqual(
+    persistedVictory.player.effects,
+    [{ id: 'elderBlessing', duration: 1 }],
+    'Victory save must not restore temporary combat buffs or debuffs'
+  );
+  assert.deepEqual(
+    persistedVictory.player.cooldowns,
+    {},
+    'Victory save must persist cleared ability cooldowns'
+  );
+  console.log('PASS Victory save contains post-combat effects and cooldown state');
+
   assert.ok(scheduled.length >= 4, 'combat actions should schedule enemy responses');
-  console.log(`Combat action regression: 4/4 action checks passed; ${scheduled.length} enemy turns safely queued.`);
+  console.log(`Combat action regression: 5/5 action checks passed; ${scheduled.length} enemy turns safely queued.`);
 } finally {
   globalThis.setTimeout = realSetTimeout;
   state.overworld = null;
