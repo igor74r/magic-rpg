@@ -73,6 +73,7 @@ try {
   console.log('PASS Archer aimed shot damages the target and starts cooldown');
 
   f = fixture('warrior');
+  f.player.inventory = f.player.inventory.filter(item => item.id !== 'health-potion');
   f.player.hp = Math.max(1, f.player.maxHp - 40);
   f.ow.player.hp = f.player.hp;
   const hpWithoutItem = f.player.hp;
