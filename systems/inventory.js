@@ -203,6 +203,16 @@ export function addItem(id, qty = 1, opts = {}) {
   return created;
 }
 
+function createSeededRandom(seed) {
+  let value = Math.floor(Math.max(0, Math.min(1, Number(seed) || 0)) * 0xffffffff) || 1;
+  return () => {
+    value ^= value << 13;
+    value ^= value >>> 17;
+    value ^= value << 5;
+    return (value >>> 0) / 0x100000000;
+  };
+}
+
 export function addItemOrStore(id, qty = 1, opts = {}) {
   const created = addItem(id, qty, opts);
   if (created.length) return { created, stored: false };
@@ -217,6 +227,7 @@ export function addItemOrStore(id, qty = 1, opts = {}) {
     id,
     qty: amount,
     allowMythic: opts.allowMythic === true,
+    seed: Math.random(),
     ...(opts.rarity ? { rarity: opts.rarity } : {})
   });
   return { created: [], stored: true };
@@ -230,6 +241,7 @@ export function claimPendingLoot(index) {
 
   const created = addItem(entry.id, entry.qty, {
     allowMythic: entry.allowMythic === true,
+    random: Number.isFinite(entry.seed) ? createSeededRandom(entry.seed) : Math.random,
     ...(entry.rarity ? { rarity: entry.rarity } : {})
   });
   if (!created.length) return { ok: false, reason: 'capacity' };
