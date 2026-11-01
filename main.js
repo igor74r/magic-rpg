@@ -353,6 +353,7 @@ function handleWorldEvent(eventId) {
 
   let logMsg = '';
   let toastMsg = '';
+  let logClass = 'success';
 
   if (ev.eventType === 'altar') {
     const buffs = ['atkBuff', 'defBuff', 'lifesteal'];
@@ -387,10 +388,11 @@ function handleWorldEvent(eventId) {
     toastMsg = reward.stored
       ? '🧙 Подарок сохранён в хранилище добычи.'
       : '🧙 Подарок странника!';
+    if (reward.stored) logClass = 'warning';
   }
 
   saveGame();
-  emit('log', { channel: 'game', msg: logMsg, cls: ev.eventType === 'traveler' && state.game.player.pendingLoot?.length ? 'warning' : 'success' });
+  emit('log', { channel: 'game', msg: logMsg, cls: logClass });
   toast(toastMsg);
 
   ow.events = ow.events.filter(e => e.id !== eventId);
