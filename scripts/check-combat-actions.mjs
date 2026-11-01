@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { createCharacter } from '../systems/character.js';
 import { ENEMIES } from '../data/enemies.js';
+import { applyEffect } from '../systems/status.js';
 import { enterCombat, combatAttack, combatBlock, combatCastSpell, combatUseAbility } from '../systems/overworld/combat.js';
 
 const storage = new Map();
@@ -67,8 +68,20 @@ try {
   assert.ok(f.player.cooldowns['aimed-shot'] > 0, 'Archer ability must enter cooldown');
   console.log('PASS Archer aimed shot damages the target and starts cooldown');
 
-  assert.ok(scheduled.length >= 4, 'combat actions should schedule enemy responses');
-  console.log(`Combat action regression: 4/4 action checks passed; ${scheduled.length} enemy turns safely queued.`);
+  f = fixture('warrior');
+  f.enemy.enemyId = 'ancient-dragon';
+  f.enemy.boss = true;
+  f.enemy.maxHp = 450;
+  f.enemy.hp = 115;
+  f.enemy.phase = 0;
+  applyEffect(f.enemy, 'burn');
+  combatBlock();
+  assert.equal(f.enemy.hp, 107, 'Burn should tick on the enemy turn');
+  assert.equal(f.enemy.phase, 2, 'Damage-over-time crossing both thresholds must advance the boss through both phases');
+  console.log('PASS Boss phase transitions are checked after damage-over-time ticks');
+
+  assert.ok(scheduled.length >= 5, 'combat actions should schedule enemy responses');
+  console.log(`Combat action regression: 5/5 action checks passed; ${scheduled.length} enemy turns safely queued.`);
 } finally {
   globalThis.setTimeout = realSetTimeout;
   state.overworld = null;
