@@ -54,12 +54,6 @@ export const LOCATIONS = {
       { id: 'alchemy-building', name: 'Алхимическая мастерская', x: 11, y: 37, buildingStyle: 'alchemy', decorative: true },
       { id: 'market-building', name: 'Рыночный дом', x: 50, y: 37, buildingStyle: 'market', decorative: true },
       { id: 'tavern-building', name: 'Таверна «Тихий угол»', x: 32, y: 43, buildingStyle: 'tavern', decorative: true },
-      { id: 'home-building-1', name: 'Дом жителей', x: 19, y: 16, buildingStyle: 'home', decorative: true },
-      { id: 'home-building-2', name: 'Дом жителей', x: 22, y: 7, buildingStyle: 'home', decorative: true },
-      { id: 'home-building-3', name: 'Дом жителей', x: 41, y: 7, buildingStyle: 'home', decorative: true },
-      { id: 'home-building-4', name: 'Дом жителей', x: 57, y: 17, buildingStyle: 'home', decorative: true },
-      { id: 'home-building-5', name: 'Дом жителей', x: 19, y: 37, buildingStyle: 'home', decorative: true },
-      { id: 'home-building-6', name: 'Дом жителей', x: 41, y: 37, buildingStyle: 'home', decorative: true }
     ]
   },
 
