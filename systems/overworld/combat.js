@@ -103,7 +103,8 @@ function consumeBuffRound(p, id) {
 
 export function enterCombat(enemy) {
   const ow = state.overworld;
-  if (!ow) return;
+  // A defeated enemy must never start a second encounter or pay out twice.
+  if (!ow || !enemy || enemy.dead || enemy.hp <= 0 || ow.combat) return;
 
   enemy.state = 'combat';
 
@@ -885,6 +886,8 @@ function tickEnemyEffects() {
 
     pushLog(`Р­С„С„РµРєС‚С‹ РЅР° РІСЂР°РіРµ: ${parts}`, 'damage');
   }
+
+  if (enemy.hp > 0) checkBossPhase(enemy);
 }
 
 function tickPlayerEffects() {
@@ -1541,7 +1544,9 @@ function combatVictory() {
 
     if (alive === 0) {
       setTimeout(
-        () => emit(ow.towerMode ? 'tower:floor-cleared' : 'rift:floor-cleared'),
+        () => emit(ow.towerMode ? 'tower:floor-cleared' : 'rift:floor-cleared', {
+          floor: ow.towerMode ? ow.towerFloor : ow.rifFloor
+        }),
         900
       );
     }
