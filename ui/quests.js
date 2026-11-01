@@ -13,6 +13,21 @@ import { renderGame, renderHeader } from './header.js';
 
 export function openQuestBoard() {
   const quests = getDailyQuests();
+  const dragons = state.game?.storyDragons || {};
+  const shards = state.game?.storyShards || {};
+  const villageNews = [];
+  if (dragons['blood-crown']) {
+    villageNews.push('Разлом открыт. По ночам над площадью видны далёкие огни за трещиной, а стража просит жителей держаться ближе к фонарям.');
+  } else if (dragons['ice-grasp']) {
+    villageNews.push('Северные ветра стали мягче после падения Ледяной Хватки. Путники говорят, что снег перестал идти даже у старого тракта.');
+  } else if (dragons['ash-herald']) {
+    villageNews.push('Пепельные бури ослабли. На кузнице Борина снова работают допоздна — деревня ждёт новых поставок металла.');
+  } else {
+    villageNews.push('Старейшина Эдвин ищет надёжного путника. Говорят, три дракона удерживают древнюю печать у границы мира.');
+  }
+  const shardCount = ['flame', 'ice', 'blood'].filter(id => shards[id] === true).length;
+  if (shardCount > 0) villageNews.push(`В хронике деревни отмечено сюжетных осколков: ${shardCount}/3. Каждый получен после победы над своим драконом.`);
+  const newsHtml = villageNews.map(line => `<div class="npc-slot"><div style="color:#d8c39a;line-height:1.55;">🕯️ ${line}</div></div>`).join('');
 
   const html = quests.map(quest => {
     const pct = Math.min(100, (quest.current / quest.max) * 100);
@@ -60,7 +75,10 @@ export function openQuestBoard() {
       </div>
     </div>
 
-    <div class="item-list" style="margin-top:15px;">
+    <h3 style="margin:16px 0 8px;color:#d8c39a;">Новости Авроры</h3>
+    <div class="item-list">${newsHtml}</div>
+    <h3 style="margin:16px 0 8px;color:#d8c39a;">Ежедневные поручения</h3>
+    <div class="item-list">
       ${html}
     </div>
 
@@ -218,11 +236,12 @@ export function renderQuests() {
     `;
   }).join('');
 
-  const shards = Object.values(state.game.shards || {})
+  const shards = Object.values(state.game.storyShards || {})
     .filter(Boolean).length;
 
   const shardItems = STORY.quests.map(quest => {
-    const complete = !!state.game.quests?.[quest.id];
+    const shardId = quest.id.replace('shard-', '');
+    const complete = state.game.storyShards?.[shardId] === true;
 
     return `
       <div class="item ${complete ? 'campaign-shard-done' : ''}">
@@ -268,7 +287,7 @@ export function renderQuests() {
           <div class="campaign-current-objective campaign-finished">
             <span>Кампания завершена</span>
             <b>Все пять актов пройдены</b>
-            <p>История о пяти печатях завершена. Теперь можно продолжить исследование мира и испытать себя в Разломе.</p>
+            <p>Три дракона повержены, три осколка собраны. Разлом открыт — теперь можно исследовать его области и покорять Башню.</p>
           </div>
         `
     }
@@ -278,7 +297,7 @@ export function renderQuests() {
     </div>
 
     <section class="campaign-shards">
-      <h3>Осколки Кристалла Маны: ${shards}/3</h3>
+      <h3>Осколки Кристалла Разлома: ${shards}/3</h3>
       <div class="item-list">${shardItems}</div>
     </section>
   `;
@@ -359,6 +378,7 @@ export function renderStatistics() {
   const eliteKills = stats.eliteKills || 0;
   const bossKills = stats.bossKills || 0;
   const riftBest = player.riftBest || 0;
+  const towerBest = player.towerBest || 0;
   const ngPlus = player.ngPlus || 0;
   const achievementsCount = (player.achievements || []).length;
 
@@ -422,6 +442,11 @@ export function renderStatistics() {
       <div class="stat-card">
         <div class="stat-label">🌀 Разлом</div>
         <div class="stat-value">${riftBest}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">🏰 Башня</div>
+        <div class="stat-value">${towerBest}/40</div>
       </div>
 
       <div class="stat-card">

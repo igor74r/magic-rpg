@@ -2,59 +2,89 @@ export const LOCATIONS = {
   village: {
     name: 'Деревня Аврора',
     emoji: '🏘️',
-    desc: 'Укреплённый торговый посёлок у подножия старого тракта. Центральная площадь, мастерские, лечебный дом, рынок и квартал жителей.',
+    desc: 'Живая деревня на краю пепельных земель: тёплая площадь, ремесленный и жилые кварталы, рынок, сады и сторожевые окраины.',
     enemies: [],
     safe: true,
     shop: true,
     theme: 'village',
-    mapCols: 40,
-    mapRows: 32,
+    mapCols: 64,
+    mapRows: 48,
     npcs: [
-      { id: 'cat', emoji: '🐈', name: 'Кошка', x: 18, y: 18 },
-      { id: 'kids', emoji: '👦', name: 'Дети', x: 23, y: 18 }
+      { id: 'cat', emoji: '🐈', name: 'Кошка', x: 34, y: 27 },
+      { id: 'kids', emoji: '👦', name: 'Дети', x: 36, y: 26 },
+      { id: 'villager-1', emoji: '🧑', name: 'Житель Авроры', x: 23, y: 18, ambient: true, wanderRadius: 105 },
+      { id: 'villager-2', emoji: '🧑‍🌾', name: 'Садовник', x: 19, y: 35, ambient: true, wanderRadius: 90 },
+      { id: 'villager-3', emoji: '🧕', name: 'Торговка', x: 43, y: 27, ambient: true, wanderRadius: 110 },
+      { id: 'villager-4', emoji: '🧑‍🌾', name: 'Помощник кузнеца', x: 23, y: 17, ambient: true, wanderRadius: 75 },
+      { id: 'villager-5', emoji: '🧔', name: 'Плотник', x: 42, y: 28, ambient: true, wanderRadius: 100 }
     ],
     statics: [
-      { id: 'well', emoji: '⛲', name: 'Фонтан площади', x: 20, y: 16 },
-      { id: 'questBoard', emoji: '📋', name: 'Доска объявлений', x: 18, y: 13 },
-      { id: 'herald', emoji: '📢', name: 'Глашатай', x: 16, y: 13 },
-      { id: 'bard', emoji: '🎵', name: 'Бард', x: 24, y: 13 },
-      { id: 'blacksmith', emoji: '⚒️', name: 'Кузнец', x: 11, y: 8 },
-      { id: 'healer', emoji: '💚', name: 'Лекарь', x: 29, y: 8 },
-      { id: 'alchemist', emoji: '⚗️', name: 'Алхимик', x: 11, y: 23 },
-      { id: 'merchant', emoji: '🛒', name: 'Торговец', x: 29, y: 23 },
-      { id: 'elder', emoji: '👴', name: 'Старейшина', x: 20, y: 5 },
-      { id: 'guard', emoji: '🛡️', name: 'Стражник', x: 20, y: 27 }
+      { id: 'well', name: 'Фонтан площади', x: 32, y: 24, propStyle: 'fountain', decorative: true },
+      { id: 'questBoard', emoji: '📋', name: 'Доска объявлений', x: 27, y: 21 },
+      { id: 'herald', emoji: '📢', name: 'Глашатай', x: 29, y: 21 },
+      { id: 'bard', emoji: '🎵', name: 'Бард', x: 35, y: 21 },
+      { id: 'blacksmith', emoji: '⚒️', name: 'Кузнец Борин', x: 15, y: 15 },
+      { id: 'healer', emoji: '💚', name: 'Лекарь Мирра', x: 46, y: 15 },
+      { id: 'alchemist', emoji: '⚗️', name: 'Алхимик Кир', x: 15, y: 37 },
+      { id: 'merchant', emoji: '🛒', name: 'Торговец', x: 50, y: 37 },
+      { id: 'elder', emoji: '👴', name: 'Старейшина Эдвин', x: 32, y: 11 },
+      { id: 'guard', emoji: '🛡️', name: 'Страж у южных ворот', x: 32, y: 38 },
+      { id: 'memorial', name: 'Памятный камень', x: 27, y: 27, propStyle: 'memorial', decorative: true },
+      { id: 'lantern-west', name: 'Фонарь площади', x: 25, y: 24, propStyle: 'lantern', decorative: true },
+      { id: 'lantern-east', name: 'Фонарь площади', x: 39, y: 24, propStyle: 'lantern', decorative: true },
+      { id: 'bench-north', name: 'Скамья у фонтана', x: 32, y: 18, propStyle: 'bench', decorative: true },
+      { id: 'bench-south', name: 'Скамья площади', x: 32, y: 30, propStyle: 'bench', decorative: true },
+      { id: 'planter-nw', name: 'Цветочная клумба', x: 28, y: 19, propStyle: 'planter', decorative: true },
+      { id: 'planter-ne', name: 'Цветочная клумба', x: 36, y: 19, propStyle: 'planter', decorative: true },
+      { id: 'planter-sw', name: 'Цветочная клумба', x: 28, y: 29, propStyle: 'planter', decorative: true },
+      { id: 'planter-se', name: 'Цветочная клумба', x: 36, y: 29, propStyle: 'planter', decorative: true },
+      { id: 'banner-west', name: 'Знамя Авроры', x: 25, y: 18, propStyle: 'banner', decorative: true },
+      { id: 'banner-east', name: 'Знамя Авроры', x: 39, y: 18, propStyle: 'banner', decorative: true },
+      { id: 'brazier-west', name: 'Жаровня площади', x: 25, y: 30, propStyle: 'brazier', decorative: true },
+      { id: 'brazier-east', name: 'Жаровня площади', x: 39, y: 30, propStyle: 'brazier', decorative: true },
+      { id: 'notice-stall', name: 'Рыночный прилавок', x: 43, y: 34, propStyle: 'stall', decorative: true },
+      { id: 'forge-anvil', name: 'Наковальня кузницы', x: 18, y: 15, propStyle: 'anvil', decorative: true },
+      { id: 'forge-woodpile', name: 'Запас дров', x: 18, y: 18, propStyle: 'woodpile', decorative: true },
+      { id: 'ore-cart', name: 'Тележка с рудой', x: 20, y: 18, propStyle: 'cart', decorative: true },
+      { id: 'market-barrels', name: 'Бочки с товаром', x: 47, y: 33, propStyle: 'barrels', decorative: true },
+      { id: 'herb-rack', name: 'Сушёные травы', x: 18, y: 37, propStyle: 'herb-rack', decorative: true },
+      { id: 'hall-building', name: 'Дом старейшины', x: 32, y: 7, buildingStyle: 'hall', decorative: true },
+      { id: 'forge-building', name: 'Кузница Авроры', x: 11, y: 11, buildingStyle: 'forge', decorative: true },
+      { id: 'healer-building', name: 'Лечебный дом', x: 50, y: 11, buildingStyle: 'healer', decorative: true },
+      { id: 'alchemy-building', name: 'Алхимическая мастерская', x: 11, y: 37, buildingStyle: 'alchemy', decorative: true },
+      { id: 'market-building', name: 'Рыночный дом', x: 50, y: 37, buildingStyle: 'market', decorative: true },
+      { id: 'tavern-building', name: 'Таверна «Тихий угол»', x: 32, y: 43, buildingStyle: 'tavern', decorative: true },
+      { id: 'home-building-1', name: 'Дом жителей', x: 19, y: 16, buildingStyle: 'home', decorative: true },
+      { id: 'home-building-2', name: 'Дом жителей', x: 22, y: 7, buildingStyle: 'home', decorative: true },
+      { id: 'home-building-3', name: 'Дом жителей', x: 41, y: 7, buildingStyle: 'home', decorative: true },
+      { id: 'home-building-4', name: 'Дом жителей', x: 57, y: 17, buildingStyle: 'home', decorative: true },
+      { id: 'home-building-5', name: 'Дом жителей', x: 19, y: 37, buildingStyle: 'home', decorative: true },
+      { id: 'home-building-6', name: 'Дом жителей', x: 41, y: 37, buildingStyle: 'home', decorative: true }
     ]
   },
 
   forest: {
     name: 'Тёмный лес',
     emoji: '🌲',
-    desc: 'Древний лес, кишащий гоблинами. Здесь спрятан первый осколок.',
+    desc: 'Древний лес, кишащий гоблинами. Под корнями сохранились следы первой печати.',
     theme: 'forest',
     enemies: ['goblin', 'goblin', 'skeleton', 'thorn-stalker'],
-    shard: 'forest',
-    shardFrom: 'skeleton'
   },
 
   ruins: {
     name: 'Руины павшего храма',
     emoji: '🏛️',
-    desc: 'Древние руины, где обитает нежить. Второй осколок здесь.',
+    desc: 'Древние руины, где обитает нежить и сохранились записи первых хранителей.',
     theme: 'ruins',
     enemies: ['skeleton', 'skeleton', 'dark-knight', 'grave-scout'],
-    shard: 'ruins',
-    shardFrom: 'dark-knight'
   },
 
   shadow: {
     name: 'Пещера теней',
     emoji: '🕳️',
-    desc: 'Здесь царит вечная тьма. Обиталище теневого мага.',
+    desc: 'Здесь царит вечная тьма. Теневой маг охраняет древний знак на границе мира.',
     theme: 'shadow',
     enemies: ['dark-knight', 'shadow-mage'],
-    shard: 'shadow',
-    shardFrom: 'shadow-mage'
   },
 
   swamp: {
@@ -188,5 +218,14 @@ export const LOCATIONS = {
     chestsCount: 6,
     mapCols: 46,
     mapRows: 36
+  },
+
+  rift: {
+    name: 'Разлом',
+    emoji: '🌀',
+    desc: 'Рана между мирами. Три осколка стабилизируют её края, но за гранью ещё остаётся неизвестное.',
+    theme: 'void-crater',
+    safe: true,
+    enemies: []
   }
 };

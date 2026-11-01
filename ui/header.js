@@ -182,41 +182,28 @@ export function renderHeader() {
       ${endgameHtml}
     </div>
 
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
+      <button onclick="GameAPI.enterTower()" style="padding:6px 12px;font-size:12px">🏰 Башня</button>
+      <button onclick="GameAPI.enterRift()" style="padding:6px 12px;font-size:12px">🌀 Разлом</button>
+    </div>
+
     ${statBlock}
   `;
 }
 
 function renderEndgameHint(p) {
-  const shards = state.game.shards || {};
-
-  const shardCount = Object.values(shards)
-    .filter(Boolean)
-    .length;
-
+  const shards = state.game.storyShards || {};
+  const shardCount = Object.values(shards).filter(Boolean).length;
   const riftBest = p.riftBest || 0;
-
-  if (riftBest > 0) {
-    return `
-      <div class="endgame-hint rift">
-        🌀 Рекорд Разлома: <b>этаж ${riftBest}</b>
-      </div>
-    `;
-  }
-
-  if (shardCount === 3) {
-    return `
-      <div class="endgame-hint rift">
-        🌀 <b>Разлом открыт!</b>
-        Зайди в деревню и войди в портал
-      </div>
-    `;
-  }
-
+  const towerBest = p.towerBest || 0;
+  const riftOpen = state.game.storyDragons?.['blood-crown'] === true && state.game.riftEnding !== 'closed';
+  const riftSealedForever = state.game.riftEnding === 'closed';
   return `
-    <div class="endgame-hint">
-      💎 Осколки Кристалла:
-      <b>${shardCount}/3</b>
-      · собери все — откроется Разлом
+    <div class="endgame-hint ${riftOpen ? 'rift' : ''}">
+      ${riftSealedForever ? '🔒 Разлом запечатан навсегда' : riftOpen ? '🌀 Разлом открыт' : '🔒 Разлом закрыт — пока живы три дракона'}
+      · Осколки: <b>${shardCount}/3</b>
+      ${riftBest > 0 ? `· Рекорд Разлома: ${riftBest}` : ''}
+      ${towerBest > 0 ? `· Башня: ${towerBest}/40` : ''}
     </div>
   `;
 }

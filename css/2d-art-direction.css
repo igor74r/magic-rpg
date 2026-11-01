@@ -1,0 +1,175 @@
+/* Shards of the Rift — 2D art direction layer.
+   Presentation-only: does not alter game state, controls or save data. */
+:root {
+  --art-gold: #c9a66b;
+  --art-gold-soft: rgba(201, 166, 107, .34);
+  --art-ink: #090d13;
+  --art-panel: rgba(15, 20, 28, .96);
+  --art-edge: rgba(202, 169, 112, .48);
+}
+#screen-overworld {
+  background:
+    radial-gradient(ellipse at 50% 8%, rgba(90, 75, 55, .22), transparent 58%),
+    linear-gradient(145deg, #080d12 0%, #14151a 52%, #090b11 100%);
+}
+#screen-overworld .game-container {
+  max-width: 1240px !important;
+  padding: clamp(12px, 2vw, 24px);
+  border: 1px solid var(--art-edge);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(31, 34, 38, .96), rgba(10, 14, 20, .98));
+  box-shadow: 0 24px 70px rgba(0,0,0,.58), inset 0 1px rgba(255,255,255,.055);
+}
+#screen-overworld h2 {
+  color: #f0d69c;
+  letter-spacing: .035em;
+  text-shadow: 0 2px 10px rgba(0,0,0,.85), 0 0 22px rgba(201,166,107,.18);
+}
+#overworld-canvas {
+  border: 3px solid #8c693d !important;
+  border-radius: 10px !important;
+  background: #101820 !important;
+  image-rendering: auto !important;
+  box-shadow: 0 12px 34px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,238,190,.18);
+}
+#combat-panel, #npc-panel {
+  border-color: #b28b50 !important;
+  background:
+    linear-gradient(135deg, rgba(35, 29, 26, .97), rgba(9, 13, 20, .98)) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.52), inset 0 1px rgba(255,255,255,.06);
+}
+#npc-panel {
+  border-radius: 0 0 10px 10px !important;
+}
+#screen-game .dashboard-layout {
+  gap: 12px;
+}
+#screen-game .dashboard-sidebar,
+#screen-game .dashboard-log,
+#screen-game .dashboard-main {
+  border: 1px solid var(--art-edge);
+  border-radius: 10px;
+  background: linear-gradient(160deg, rgba(29, 31, 35, .98), rgba(10, 14, 20, .98));
+  box-shadow: 0 10px 28px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.04);
+}
+#screen-game .sidebar-title,
+#screen-game .log-header {
+  color: #f0d69c;
+  border-bottom: 1px solid var(--art-gold-soft);
+  text-shadow: 0 1px 8px rgba(201,166,107,.2);
+}
+#screen-game .tab {
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+#screen-game .tab:hover {
+  background: rgba(201,166,107,.12);
+  border-color: rgba(201,166,107,.42);
+  transform: translateX(2px);
+}
+#screen-game .tab.active {
+  background: linear-gradient(90deg, rgba(153,112,55,.28), rgba(153,112,55,.06));
+  border-left: 3px solid #d8b878;
+  box-shadow: inset 0 0 18px rgba(201,166,107,.08);
+}
+#screen-game .panel,
+#screen-game .dashboard-content .panel {
+  border-color: var(--art-edge);
+  background: linear-gradient(145deg, rgba(31,34,38,.96), rgba(13,17,23,.98));
+  box-shadow: inset 0 1px rgba(255,255,255,.045), 0 8px 22px rgba(0,0,0,.2);
+}
+#screen-main {
+  background:
+    radial-gradient(ellipse at 50% 36%, rgba(123, 77, 48, .28), transparent 42%),
+    radial-gradient(ellipse at 50% 100%, rgba(111, 50, 34, .16), transparent 55%),
+    linear-gradient(145deg, #080b12, #17151a 55%, #090b10);
+}
+#screen-main .game-title {
+  color: #f2dfb5;
+  text-shadow: 0 3px 0 #241a15, 0 0 24px rgba(201,166,107,.28);
+}
+#screen-main .mm-btn,
+#screen-main button {
+  border-color: var(--art-edge);
+  background: linear-gradient(180deg, rgba(62,49,38,.96), rgba(22,20,20,.98));
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 5px 14px rgba(0,0,0,.32);
+}
+#screen-main .mm-btn:hover,
+#screen-main button:hover {
+  border-color: #e4c27f;
+  filter: brightness(1.16);
+}
+@media (max-width: 720px) {
+  #screen-overworld .game-container { padding: 8px; border-radius: 9px; }
+  #overworld-canvas { border-width: 2px !important; border-radius: 7px !important; }
+  #screen-game .dashboard-layout { gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #screen-game .tab { transition: none; }
+}
+
+/* Keep the world map readable: names appear only for the current, selected or hovered location. */
+.world-map .wnode-name {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 50%;
+  z-index: 25;
+  max-width: 170px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 3px);
+  transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+}
+.world-map .wnode.village .wnode-name {
+  top: auto;
+  bottom: calc(100% + 3px);
+}
+.world-map .wnode:hover .wnode-name,
+.world-map .wnode:focus-visible .wnode-name,
+.world-map .wnode.selected .wnode-name,
+.world-map .wnode.current .wnode-name,
+.world-map .wnode.village .wnode-name {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+/* Aurora: key-building interior scenes */
+#npc-dialog-modal .npc-modal-content { width:calc(100% - 24px); max-width:600px; box-sizing:border-box; }
+#npc-dialog-content { min-width:0; overflow-x:hidden; }
+.village-interior-view { color:#eadfc7; padding:4px 0 8px; min-width:0; max-width:100%; box-sizing:border-box; }
+.village-interior-view * { box-sizing:border-box; max-width:100%; }
+.village-room-prop { overflow-wrap:anywhere; }
+.village-interior-heading { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:12px; min-width:0; }
+.village-interior-heading > div { min-width:0; flex:1 1 180px; }
+.village-interior-heading > span { flex:0 1 auto; }
+.village-interior-heading h3 { margin:0; color:#f0d6a1; }
+.village-interior-heading p { margin:5px 0 0; color:#b7a68a; font-size:12px; }
+.village-interior-heading > span { color:#c9a66b; font-size:10px; letter-spacing:2px; white-space:nowrap; }
+.village-room-art { position:relative; height:260px; overflow:hidden; border:3px solid #604638; border-radius:10px; background:linear-gradient(180deg,#4b3a34 0 38%,#795a42 38% 42%,#49372d 42% 100%); box-shadow:inset 0 0 45px #160f12,0 8px 24px #0008; }
+.village-room-art:before { content:""; position:absolute; inset:0 0 58% 0; background:repeating-linear-gradient(90deg,transparent 0 74px,#2b2020 75px 79px),linear-gradient(180deg,#5b4640,#80604b); opacity:.75; }
+.village-room-art:after { content:""; position:absolute; left:0; right:0; bottom:0; height:42%; background:repeating-linear-gradient(0deg,#6d4b35 0 13px,#382a25 14px 16px); border-top:5px solid #30231f; }
+.village-room-window { position:absolute; z-index:1; top:17px; left:calc(50% - 34px); width:68px; height:58px; border:7px solid #332722; border-radius:5px; background:linear-gradient(135deg,#e6bd76,#6c7881 55%,#34485b); box-shadow:0 0 22px #e7b96a88; }
+.village-room-hearth { position:absolute; z-index:2; right:7%; bottom:17%; width:78px; height:86px; border:8px solid #4a3028; border-radius:10px 10px 2px 2px; background:radial-gradient(ellipse at 50% 75%,#ffb45b 0 13%,#c74c28 30%,#241a1b 72%); box-shadow:0 0 22px #e8793c55; }
+.village-room-prop { position:absolute; z-index:3; bottom:14%; width:28%; min-height:58px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; padding:7px; border:2px solid #b18a54; border-radius:7px; color:#f0d9ad; background:linear-gradient(145deg,#76543b,#392a26); box-shadow:0 6px 12px #0008; text-align:center; }
+.village-room-prop span { font-size:25px; }
+.village-room-prop small { font-size:10px; line-height:1.25; }
+.village-room-prop.prop-1 { left:7%; }
+.village-room-prop.prop-2 { left:36%; bottom:20%; }
+.village-room-prop.prop-3 { left:65%; bottom:13%; }
+.village-room-floor-mark { position:absolute; z-index:2; left:50%; bottom:8%; color:#e4bd7d; opacity:.5; font-size:26px; }
+.room-forge .village-room-art { background:linear-gradient(180deg,#322b2c 0 40%,#694331 40% 44%,#3a2924 44%); }
+.room-forge .village-room-hearth { background:radial-gradient(ellipse at 50% 75%,#ffe08a 0 9%,#ff7a32 25%,#2a1716 70%); box-shadow:0 0 35px #ff713c99; }
+.room-healer .village-room-art { background:linear-gradient(180deg,#5a6250 0 40%,#927d60 40% 44%,#554534 44%); }
+.room-healer .village-room-hearth { background:radial-gradient(ellipse at 50% 75%,#d8efaa 0 10%,#8ca96c 28%,#2b342b 70%); }
+.room-alchemy .village-room-art { background:linear-gradient(180deg,#493e59 0 40%,#81654f 40% 44%,#352b3d 44%); }
+.room-alchemy .village-room-hearth { background:radial-gradient(ellipse at 50% 75%,#c7a6ff 0 10%,#8b5ab7 28%,#251c35 70%); }
+.room-market .village-room-art { background:linear-gradient(180deg,#76513e 0 40%,#a17b50 40% 44%,#49342b 44%); }
+.room-hall .village-room-art { background:linear-gradient(180deg,#59463b 0 40%,#92734f 40% 44%,#403129 44%); }
+.room-tavern .village-room-art { background:linear-gradient(180deg,#6d4833 0 40%,#9c7044 40% 44%,#493027 44%); }
+.village-room-caption { margin:10px 0; color:#b7a68a; font-size:12px; text-align:center; }
+.village-interior-enter,.village-interior-exit { width:100%; margin-top:12px; padding:11px 14px; border:1px solid #b18a54; border-radius:7px; color:#f3dfb8; background:linear-gradient(180deg,#60452f,#342820); font-weight:700; cursor:pointer; }
+.village-interior-enter:hover,.village-interior-exit:hover { filter:brightness(1.18); }
+@media(max-width:480px) { .village-room-art { height:210px; } .village-room-prop { width:30%; min-height:50px; padding:4px; } .village-room-prop small { font-size:9px; } }

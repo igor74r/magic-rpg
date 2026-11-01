@@ -5,8 +5,8 @@ const SLOT_PREFIX = 'magic-rpg-save-';
 const LEGACY_KEY = 'magic-rpg-save';
 const SETTINGS_KEY = 'magic-rpg-settings';
 
-const SAVE_VERSION = 13;
-const SETTINGS_VERSION = 4;
+const SAVE_VERSION = 17;
+const SETTINGS_VERSION = 5;
 const MAX_SLOT = 3;
 
 let lastSaveTime = null;
@@ -362,6 +362,85 @@ export function migrateGame(game) {
     game.version = 13;
   }
 
+  // Version 14: initialize canonical Shards of the Rift dragon flags.
+  if (game.version < 14) {
+    game.storyDragons = game.storyDragons && typeof game.storyDragons === 'object' && !Array.isArray(game.storyDragons)
+      ? game.storyDragons
+      : {};
+    for (const id of ['ash-herald', 'ice-grasp', 'blood-crown']) {
+      if (game.storyDragons[id] !== true) game.storyDragons[id] = false;
+    }
+    game.storyShards = game.storyShards && typeof game.storyShards === 'object' && !Array.isArray(game.storyShards)
+      ? game.storyShards
+      : {};
+    for (const id of ['flame', 'ice', 'blood']) {
+      if (game.storyShards[id] !== true) game.storyShards[id] = false;
+    }
+    game.version = 14;
+  }
+
+  // Version 15: Luck starts at 5 and grows by 0.5 per character level.
+  if (game.version < 15) {
+    const level = Math.max(1, Math.floor(Number(game.player.level) || 1));
+    if (!Number.isFinite(game.player.luck)) {
+      game.player.luck = 5 + (level - 1) * 0.5;
+    }
+    game.player.luck = Math.max(0, Math.min(100, game.player.luck));
+    game.version = 15;
+  }
+
+  // Version 16: normalize the 12 canonical equipment slots (including shield, boots and cloak).
+  if (game.version < 16) {
+    const player = game.player;
+    if (!Array.isArray(player.inventory)) player.inventory = [];
+    if (!player.equipped || typeof player.equipped !== 'object') player.equipped = {};
+    const moves = [
+      ['back', 'cloak'],
+      ['wrists', 'gloves'],
+      ['seal', 'amulet']
+    ];
+    for (const [oldSlot, newSlot] of moves) {
+      const instance = player.equipped[oldSlot];
+      if (!instance) { delete player.equipped[oldSlot]; continue; }
+      if (!player.equipped[newSlot]) player.equipped[newSlot] = instance;
+      else player.inventory.push(instance);
+      delete player.equipped[oldSlot];
+    }
+    for (const oldSlot of ['hands', 'legs']) {
+      const instance = player.equipped[oldSlot];
+      if (!instance) { delete player.equipped[oldSlot]; continue; }
+      const id = typeof instance === 'string' ? instance : instance.id;
+      const newSlot = oldSlot === 'hands'
+        ? (id === 'tower-shield' ? 'shield' : 'gloves')
+        : (id === 'windstep-boots' ? 'boots' : 'legs');
+      if (!player.equipped[newSlot]) player.equipped[newSlot] = instance;
+      else player.inventory.push(instance);
+      delete player.equipped[oldSlot];
+    }
+    const slots = ['weapon', 'head', 'shoulders', 'chest', 'gloves', 'legs', 'boots', 'shield', 'ring1', 'ring2', 'amulet', 'cloak'];
+    for (const slot of slots) {
+      if (player.equipped[slot] === undefined) player.equipped[slot] = null;
+      const instance = player.equipped[slot];
+      if (typeof instance === 'string') player.equipped[slot] = { id: instance, qty: 1, runes: [], sockets: 0 };
+      else if (instance && typeof instance === 'object' && !Array.isArray(instance)) {
+        if (!Array.isArray(instance.runes)) instance.runes = [];
+      }
+    }
+    game.version = 16;
+  }
+
+  // Version 17: rename the obsolete Mana Crystal quest token so the world has exactly three Rift shards.
+  if (game.version < 17) {
+    if (!Array.isArray(game.player.inventory)) game.player.inventory = [];
+    const inventory = game.player.inventory;
+    for (let index = 0; index < inventory.length; index++) {
+      const entry = inventory[index];
+      if (entry === 'mana-crystal') inventory[index] = { id: 'old-archive-seal', qty: 1 };
+      else if (entry && typeof entry === 'object' && entry.id === 'mana-crystal') entry.id = 'old-archive-seal';
+    }
+    game.version = 17;
+  }
+
   return game;
 }
 
@@ -478,6 +557,10 @@ export function migrateSettings(settings) {
   if (typeof settings.damageNumbers !== 'boolean') settings.damageNumbers = true;
   if (typeof settings.lowHealthEffects !== 'boolean') settings.lowHealthEffects = true;
   if (typeof settings.reducedMotion !== 'boolean') settings.reducedMotion = false;
+  if (!['low', 'balanced', 'high'].includes(settings.graphicsQuality)) settings.graphicsQuality = 'high';
+  if (typeof settings.weatherEffects !== 'boolean') settings.weatherEffects = true;
+  if (typeof settings.ambientFog !== 'boolean') settings.ambientFog = true;
+  if (typeof settings.bloomEffects !== 'boolean') settings.bloomEffects = true;
 
   if (!['easy', 'normal', 'hard'].includes(settings.difficulty)) {
     settings.difficulty = 'normal';

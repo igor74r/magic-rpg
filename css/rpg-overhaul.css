@@ -357,7 +357,7 @@
 .inv-title-row small { display:block; margin-top:3px; color:#a89060; font-size:10px; }
 .inv-wallet { color:#ffd060; font-weight:700; white-space:nowrap; }
 .inv-sort-label { align-self:center; color:#a89060; font-size:11px; }
-.rpg-inv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(54px,1fr)); gap:7px; }
+.rpg-inv-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:7px; }
 .rpg-inv-grid button.inv-slot {
   position:relative; width:100%; min-width:0; min-height:58px; aspect-ratio:1;
   display:grid; place-items:center; padding:2px; cursor:pointer;
@@ -444,7 +444,7 @@
 @media (max-width:650px) {
   .equipment-slots { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .passive-tree-viewport { height:470px; }
-  .rpg-inv-grid { grid-template-columns:repeat(auto-fill,minmax(48px,1fr)); }
+  .rpg-inv-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
 }
 
 
@@ -546,4 +546,39 @@ button:focus-visible, a:focus-visible, .tab:focus-visible {
 }
 @media (prefers-reduced-motion:reduce) {
   .logo-gem img { animation:none; }
+}
+
+/* ---------- Окно продажи предметов ---------- */
+.inventory-sale-overlay {
+  position:fixed; inset:0; z-index:10060; display:grid; place-items:center;
+  padding:16px; background:rgba(0,0,0,.82); backdrop-filter:blur(5px);
+}
+.sale-dialog {
+  width:min(900px,100%); max-height:88vh; overflow:hidden; display:flex; flex-direction:column;
+  padding:16px; border:1px solid rgba(201,162,39,.65); border-radius:9px;
+  background:linear-gradient(145deg,#302216,#100b08); color:#ded1b6;
+  box-shadow:0 20px 60px rgba(0,0,0,.65);
+}
+.sale-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.sale-heading h3 { margin:0 0 12px; color:#e8cf8c; }
+.sale-heading button { min-width:32px; padding:3px 8px; }
+.sale-columns { min-height:0; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:12px; }
+.sale-inventory, .sale-display { min-width:0; padding:10px; border:1px solid rgba(201,162,39,.22); border-radius:6px; background:rgba(0,0,0,.2); }
+.sale-inventory > b, .sale-display > b { display:block; margin-bottom:8px; color:#e1c77f; }
+.sale-item-list, .sale-summary-list { min-width:0; max-height:48vh; overflow-y:auto; overflow-x:hidden; display:grid; grid-template-columns:minmax(0,1fr); gap:5px; }
+.sale-item { box-sizing:border-box; min-width:0; display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; padding:8px; border:1px solid rgba(177,145,82,.2); border-radius:4px; background:rgba(22,16,10,.85); color:#d8c8a5; text-align:left; }
+.sale-item.selected { border-color:#d4b45e; background:rgba(115,83,34,.35); }
+.sale-item span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sale-item small { flex-shrink:0; color:#a89060; white-space:nowrap; }
+.sale-summary-row { display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px solid rgba(177,145,82,.15); font-size:11px; }
+.sale-summary-row b { color:#e8cf8c; white-space:nowrap; }
+.sale-total { margin-top:12px; padding-top:10px; border-top:1px solid rgba(201,162,39,.35); color:#ffd36e; font-weight:700; text-align:right; }
+.sale-warning { padding:8px; border-left:3px solid #d18b4b; background:rgba(180,93,43,.12); color:#f0bd82; font-size:11px; line-height:1.5; }
+.sale-actions { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin-top:12px; }
+.sale-actions button { padding:9px 7px; font-size:11px; }
+@media (max-width:650px) {
+  .sale-dialog { padding:10px; }
+  .sale-columns { grid-template-columns:1fr; }
+  .sale-item-list, .sale-summary-list { max-height:24vh; }
+  .sale-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }

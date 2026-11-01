@@ -1,16 +1,19 @@
 import { state } from '../systems/state.js';
 import { NPCS, FORGE_BONUS } from '../data/npcs.js';
 import { ITEMS, RARITIES } from '../data/items.js';
-import { countItem } from '../systems/inventory.js';
+import { countItem, EQUIPMENT_TYPES, EQUIPMENT_SLOTS } from '../systems/inventory.js';
 import { saveGame } from '../systems/save.js';
+import { emit } from '../systems/events.js';
 import { showScreen, toast } from './screens.js';
 import { STORY } from '../data/story.js';
 import { LOCATIONS } from '../data/locations.js';
 import { addItem } from '../systems/inventory.js';
+import { canCraftRecipe, canReforgeItem, collectCraftingJobs, getCraftingJobs } from '../systems/crafting.js';
+import { getCurrentActIndex } from '../systems/economy.js';
 import { addExp } from '../systems/progression.js';
 import {
   getActiveCampaignMission, getNextCampaignMission, getMissionProgress,
-  getMissionReward, acceptCampaignMission, claimCampaignMission
+  getMissionReward, acceptCampaignMission, claimCampaignMission, canCompleteMainQuest
 } from '../systems/campaign.js';
 
 function showNpcUI(html) {
@@ -26,17 +29,27 @@ function showNpcUI(html) {
 function getGreeting(npcId) { const npc = NPCS[npcId]; if (!npc || !npc.greetings) return '...'; return npc.greetings[Math.floor(Math.random() * npc.greetings.length)]; }
 
 export function openBlacksmith() {
+  collectCraftingJobs();
   const npc = NPCS.blacksmith; const p = state.game.player;
+  const finalForgeRecipes = getCurrentActIndex(p) === 4 ? npc.recipes.map(recipe => {
+    const check = canCraftRecipe(recipe.id);
+    const ingList = recipe.ingredients.map(ing => `<span style="color:${countItem(ing.id) >= ing.qty ? '#60ff60' : '#ff6060'};">${ITEMS[ing.id].icon} ${ITEMS[ing.id].name} (${countItem(ing.id)}/${ing.qty})</span>`).join(' + ');
+    return `<div class="recipe"><div class="recipe-result" style="color:${RARITIES.legendary.color};">✦ ${ITEMS[recipe.result].name} · T5</div><div class="recipe-ingredients">${ingList}</div><button onclick="GameAPI.craftRecipe('${recipe.id}')" ${check.ok ? '' : 'disabled'} class="sell-btn">⚒️ Создать в финальной кузнице</button>${!check.ok ? `<small>${check.msg}</small>` : ''}</div>`;
+  }).join('') : '';
+  const pendingJobs = getCraftingJobs();
+  const jobsHTML = pendingJobs.length ? `<div class="recipe"><b>Заказы в работе: ${pendingJobs.length}</b>${pendingJobs.map(job => `<div>${ITEMS[job.result]?.name || job.result} — готовность ${new Date(job.readyAt).toLocaleString('ru-RU')}</div>`).join('')}</div>` : '';
   const renderSlot = (slot, label) => {
     const inst = p.equipped[slot]; if (!inst) return `<div class="npc-slot"><div class="npc-slot-title">${label}</div><div class="npc-slot-empty">Слот пуст</div></div>`;
     const obj = typeof inst === 'string' ? { id: inst, qty: 1 } : inst; const item = ITEMS[obj.id]; if (!item) return '';
     const rar = obj.rarity ? RARITIES[obj.rarity] : null; const color = rar ? rar.color : '#c9a227'; const lvl = obj.forgeLevel || 0; const maxLvl = npc.maxLevel; const forgeBonus = FORGE_BONUS[lvl] || 0;
     let upgradeBlock = '';
     if (lvl >= maxLvl) upgradeBlock = `<div style="color:#60ff60;">Максимальный уровень: +${maxLvl}</div>`;
-    else { const next = npc.upgrades[lvl]; const can = p.gold >= next.cost; upgradeBlock = `<div style="color:#a89060;font-size:12px;margin-bottom:6px;">Следующий уровень: <b style="color:#c9a227;">+${lvl + 1}</b> — <b style="color:#60ff60;">+${next.forgeBonus}</b> к ${slot === 'weapon' ? 'атаке/магии' : 'защите'}</div><button onclick="GameAPI.upgradeEquipment('${slot}')" ${can ? '' : 'disabled'} class="sell-btn">⚒️ Улучшить за ${next.cost}💰</button>`; }
+    else { const next = npc.upgrades[lvl]; const can = p.gold >= next.cost; upgradeBlock = `<div style="color:#a89060;font-size:12px;margin-bottom:6px;">Следующий уровень: <b style="color:#c9a227;">+${lvl + 1}</b> — <b style="color:#60ff60;">+5% к характеристикам</b> и +${next.forgeBonus} к ковке</div><button onclick="GameAPI.upgradeEquipment('${slot}')" ${can ? '' : 'disabled'} class="sell-btn">⚒️ Улучшить за ${next.cost}💰</button>`; }
     return `<div class="npc-slot"><div class="npc-slot-title">${label}</div><div class="npc-slot-item" style="border-color:${color};"><div style="color:${color};font-weight:bold;">${item.icon} ${item.name}${lvl > 0 ? ` <span style="color:#ffd060;">+${lvl}</span>` : ''}</div><div style="color:#a89060;font-size:12px;margin-top:2px;">Бонус ковки: +${forgeBonus}</div></div>${upgradeBlock}</div>`;
   };
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('blacksmith')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div>${renderSlot('weapon', '⚔️ Оружие')}${renderSlot('armor', '🥋 Броня')}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  const slotLabels = { weapon: '⚔️ Оружие', head: '⛑️ Голова', shoulders: '🛡️ Плечи', chest: '🥋 Броня', gloves: '🧤 Перчатки', legs: '🥾 Поножи', boots: '👢 Сапоги', shield: '🛡️ Щит', ring1: '💍 Кольцо 1', ring2: '💍 Кольцо 2', amulet: '🔮 Амулет', cloak: '🧥 Плащ' };
+  const equipmentHtml = EQUIPMENT_SLOTS.filter(slot => p.equipped?.[slot]).map(slot => renderSlot(slot, slotLabels[slot] || slot)).join('') || '<p>Сначала экипируйте предметы, чтобы улучшить их у кузнеца.</p>';
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('blacksmith')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><h3>Экипировка</h3><div class="recipes-list">${equipmentHtml}</div>${jobsHTML}${finalForgeRecipes ? `<h3>🔥 Кузница пятого акта</h3><div class="recipes-list">${finalForgeRecipes}</div>` : ''}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openHealer() {
@@ -45,10 +58,14 @@ export function openHealer() {
 }
 
 export function openAlchemist() {
+  collectCraftingJobs();
   const npc = NPCS.alchemist;
+  const pendingJobs = getCraftingJobs();
+  const jobsHTML = pendingJobs.length ? `<div class="recipe"><b>Заказы в работе: ${pendingJobs.length}</b>${pendingJobs.map(job => `<div>${ITEMS[job.result]?.name || job.result} — готовность ${new Date(job.readyAt).toLocaleString('ru-RU')}</div>`).join('')}</div>` : '';
   const herbsList = ['herb-life', 'herb-moon'].map(id => { const count = countItem(id); const it = ITEMS[id]; return `<div class="herb-item ${count > 0 ? '' : 'empty'}"><span class="herb-icon">${it.icon}</span><span class="herb-name">${it.name}</span><span class="herb-count">×${count}</span></div>`; }).join('');
   const recipesHTML = npc.recipes.map(r => { const result = ITEMS[r.result]; const canCraft = r.ingredients.every(ing => countItem(ing.id) >= ing.qty); const ingList = r.ingredients.map(ing => `<span style="color:${countItem(ing.id) >= ing.qty ? '#60ff60' : '#ff6060'};">${ITEMS[ing.id].icon} ${ITEMS[ing.id].name} (${countItem(ing.id)}/${ing.qty})</span>`).join(' + '); return `<div class="recipe"><div class="recipe-result">${result.icon} ${result.name}</div><div class="recipe-ingredients">${ingList}</div><button onclick="GameAPI.craftRecipe('${r.id}')" ${canCraft ? '' : 'disabled'} class="sell-btn">⚗️ Скрафтить</button></div>`; }).join('');
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('alchemist')}»</p></div></div><h3 style="margin-top:15px;">🌿 Ваши травы</h3><div class="herbs-list">${herbsList}</div><h3 style="margin-top:15px;">⚗️ Рецепты</h3><div class="recipes-list">${recipesHTML}</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  const reforgeHTML = state.game.player.inventory.map((inst, index) => { const item = ITEMS[inst.id]; if (!item || !EQUIPMENT_TYPES.has(item.type)) return ''; const check = canReforgeItem(index); const rarity = RARITIES[inst.rarity || 'common']; return `<div class="recipe"><div class="recipe-result" style="color:${rarity?.color || '#c9a227'};">${item.icon} ${item.name} · ${rarity?.name || 'Обычный'}</div><button onclick="GameAPI.reforgeItem(${index})" ${check.ok ? '' : 'disabled'} class="sell-btn">⚒️ Перековать за эссенцию</button>${!check.ok ? `<small>${check.msg}</small>` : ''}</div>`; }).join('');
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('alchemist')}»</p></div></div>${jobsHTML}<h3 style="margin-top:15px;">🌿 Ваши травы</h3><div class="herbs-list">${herbsList}</div><h3 style="margin-top:15px;">⚗️ Рецепты</h3><div class="recipes-list">${recipesHTML}</div><h3 style="margin-top:15px;">⚒️ Перековка экипировки</h3><div class="recipes-list">${reforgeHTML || '<small>В сумке пока нет экипировки для перековки.</small>'}</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openMerchant() {
@@ -62,17 +79,17 @@ export function openElder() {
   const p = state.game.player;
   const hasBlessing = p.effects?.some(e => e.id === 'elderBlessing');
   const isFirstMeet = !p.stats?.metElder;
-  const shardsCount = Object.values(state.game.shards || {}).filter(Boolean).length;
+  const shardsCount = Object.values(state.game.storyShards || {}).filter(Boolean).length;
   const active = getActiveCampaignMission(p);
   const next = active || getNextCampaignMission(p);
 
   let dialogue = '';
   if (isFirstMeet) {
-    dialogue = `<div class="elder-lore"><p>«Я думал, что осколки — единственная беда. Но трещина Кристалла разбудила пять древних печатей. Их следы ведут в земли, которых нет на старых картах.</p><p>В чаще корни помнят звёзды. Под водой лежит город свидетелей. В обсидиане спит кузница клятв. Лёд хранит признание королевы. А за гранью мира ждёт тот, кого называют Немым.</p><p>Я буду поручать тебе дела по одному. Выполни их и возвращайся ко мне: за каждым ответом откроется следующая часть правды».</p></div>`;
+    dialogue = `<div class="elder-lore"><p>«Я думал, что осколки — единственная беда. Но трещина Кристалла ослабила границу мира. Её удерживают три дракона-печати — каждый хранит один осколок. Их следы ведут в земли, которых нет на старых картах.</p><p>В чаще корни помнят звёзды. Под водой лежит город свидетелей. В обсидиане спит кузница клятв. Лёд хранит признание королевы. А за гранью мира ждёт тот, кого называют Немым.</p><p>Я буду поручать тебе дела по одному. Выполни их и возвращайся ко мне: за каждым ответом откроется следующая часть правды».</p></div>`;
   } else if (shardsCount === 3) {
-    dialogue = `<p class="elder-notice">💎 Все три осколка найдены. Но печати ещё требуют внимания — заверши поручения, чтобы узнать истинную причину Раскола.</p>`;
+    dialogue = `<p class="elder-notice">💎 Все три осколка собраны. Последняя печать разрушена, Разлом открыт. Заверши оставшиеся поручения, чтобы определить судьбу мира.</p>`;
   } else if (shardsCount > 0) {
-    dialogue = `<p class="elder-notice">Осколков Кристалла собрано: <b>${shardsCount}/3</b>. Их история переплетена с пятью печатями.</p>`;
+    dialogue = `<p class="elder-notice">Сюжетных осколков собрано: <b>${shardsCount}/3</b>. Каждый из них можно получить только после победы над своим драконом-печатью.</p>`;
   }
 
   let missionBlock = '';
@@ -107,7 +124,7 @@ export function openElder() {
         ${action}
       </section>`;
   } else {
-    missionBlock = `<section class="elder-quest-card elder-campaign-finished"><h3>Пять печатей восстановлены</h3><p>«Ты узнал, почему Кристалл раскололся. Теперь Аврора должна решить, как жить без страха перед общей силой. Я больше не стану хранить эту правду в одиночку».</p></section>`;
+    missionBlock = `<section class="elder-quest-card elder-campaign-finished"><h3>Пять актов завершены</h3><p>«Три дракона повержены, все три осколка собраны, а Разлом открыт. Теперь решение за тобой: закрыть его навсегда или оставить открытым под новым общим договором».</p></section>`;
   }
 
   showNpcUI(`
@@ -156,6 +173,7 @@ export function turnInElderQuestUI() {
   saveGame();
   openElder();
   toast(`Награда получена: +${reward.gold} золота, +${reward.exp} опыта.`);
+  if (canCompleteMainQuest(state.game)) emit('victory');
 }
 
 export function openWell() {

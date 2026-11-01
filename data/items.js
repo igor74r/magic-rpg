@@ -93,14 +93,14 @@ export const ITEMS = {
   'tower-shield': {
     name: 'Башенный щит', icon: '🛡️',
     desc: '+8 к защите, +12% к шансу блока и +15% к силе блока.',
-    price: 85, type: 'hands',
+    price: 85, type: 'shield',
     bonus: { defense: 8, blockChance: 0.12, blockPower: 0.15 }
   },
 
   'ranger-cloak': {
     name: 'Плащ следопыта', icon: '🧥',
     desc: '+4 к защите, +4 к ловкости и +6% к уклонению.',
-    price: 75, type: 'back',
+    price: 75, type: 'cloak',
     bonus: { defense: 4, dex: 4, dodgeChance: 0.06 }
   },
 
@@ -192,9 +192,9 @@ export const ITEMS = {
     price: 3, type: 'material'
   },
 
-  'mana-crystal': {
-    name: 'Осколок маны', icon: '💎',
-    desc: 'Кусочек древнего кристалла. Квестовый предмет.',
+  'old-archive-seal': {
+    name: 'Печать старого архива', icon: '🔖',
+    desc: 'Старая архивная метка из прежних времён. Не является осколком Кристалла Разлома.',
     type: 'quest', price: 0
   },
 
@@ -284,19 +284,19 @@ export const ITEMS = {
   'duelist-grips': {
     name: 'Перчатки точного удара', icon: '🥊',
     desc: '+3 к атаке и +3% к критическому шансу.',
-    price: 55, type: 'hands', sockets: 1,
+    price: 55, type: 'gloves', sockets: 1,
     bonus: { attack: 3, critChance: 0.03 }
   },
   'gravebinder-gloves': {
     name: 'Перчатки хранителя праха', icon: '🧤',
     desc: '+4 к магии и +2% к силе блока.',
-    price: 58, type: 'hands', sockets: 1,
+    price: 58, type: 'gloves', sockets: 1,
     bonus: { magic: 4, blockPower: 0.02 }
   },
   'windstep-boots': {
     name: 'Сапоги быстрого следа', icon: '👢',
     desc: '+3 к защите, +3 к ловкости и +5% к уклонению.',
-    price: 65, type: 'legs', sockets: 1,
+    price: 65, type: 'boots', sockets: 1,
     bonus: { defense: 3, dex: 3, dodgeChance: 0.05 }
   },
   'glacier-greaves': {
@@ -400,43 +400,46 @@ export const ITEMS = {
   'obsidian-mantle': {
     name: 'Мантия чёрного стекла', icon: '🧥',
     desc: '+7 к защите и +3 к магии. На ткани проступают знаки пяти орденов.',
-    price: 95, type: 'back', sockets: 1,
+    price: 95, type: 'cloak', sockets: 1,
     bonus: { defense: 7, magic: 3 }
   },
   'oath-bracers': {
     name: 'Наручи последней клятвы', icon: '🔗',
     desc: '+4 к защите, +2 к атаке и +2% к силе блока.',
-    price: 75, type: 'wrists', sockets: 1,
+    price: 75, type: 'gloves', sockets: 1,
     bonus: { defense: 4, attack: 2, blockPower: 0.02 }
   },
   'seal-five-orders': {
     name: 'Печать пяти орденов', icon: '🔰',
     desc: 'Реликвия пяти хранителей. +5 к магии, +4 к защите и +2% к критическому шансу.',
-    price: 140, type: 'seal', sockets: 1,
+    price: 140, type: 'amulet', sockets: 1,
     bonus: { magic: 5, defense: 4, critChance: 0.02 }
   },
-  'shard-forest': {
-    name: 'Осколок Корневого сердца', icon: '💚',
-    desc: 'Первый осколок Кристалла Маны. Внутри него движется свет, похожий на дыхание древнего леса.',
-    price: 0, type: 'quest'
+  'shard-flame': {
+    name: 'Осколок Пламени', icon: '🔥',
+    desc: 'Сюжетный осколок Пепельного Вестника. Нельзя продать или использовать в ремесле.',
+    price: 0, type: 'quest', storyShard: true
   },
-  'shard-ruins': {
-    name: 'Осколок Последней памяти', icon: '🔷',
-    desc: 'Второй осколок. В его гранях звучат имена первых хранителей.',
-    price: 0, type: 'quest'
+  'shard-ice': {
+    name: 'Осколок Льда', icon: '❄️',
+    desc: 'Сюжетный осколок Ледяной Хватки. Нельзя продать или использовать в ремесле.',
+    price: 0, type: 'quest', storyShard: true
   },
-  'shard-shadow': {
-    name: 'Осколок Сумеречного узла', icon: '💜',
-    desc: 'Третий осколок. Он удерживает тонкую нить между миром и Тишиной.',
-    price: 0, type: 'quest'
+  'shard-blood': {
+    name: 'Осколок Крови', icon: '🩸',
+    desc: 'Сюжетный осколок Кровавой Короны. Нельзя продать или использовать в ремесле.',
+    price: 0, type: 'quest', storyShard: true
   }
 };
 
+// Six equipment tiers. Weights are relative rolls and sum to 100.
 export const RARITIES = {
-  common: { name: 'Обычный', color: '#a89060', multiplier: 1, weight: 60 },
-  rare: { name: 'Редкий', color: '#4a9eff', multiplier: 1.5, weight: 25 },
-  epic: { name: 'Эпический', color: '#b060ff', multiplier: 2.2, weight: 12 },
-  legendary: { name: 'Легендарный', color: '#ffa500', multiplier: 3.5, weight: 3 }
+  common:    { name: 'Обычный',     tier: 1, color: '#9a9a9a', multiplier: 1,    weight: 60, statRange: [1, 5],     mods: 0, price: 10 },
+  uncommon:  { name: 'Необычный',   tier: 2, color: '#55b96b', multiplier: 1.25, weight: 25, statRange: [6, 15],    mods: 1, price: 25 },
+  rare:      { name: 'Редкий',      tier: 3, color: '#4a9eff', multiplier: 1.5,  weight: 10, statRange: [16, 30],   mods: 2, price: 60 },
+  epic:      { name: 'Эпический',   tier: 4, color: '#b060ff', multiplier: 2.2,  weight: 4,  statRange: [31, 55],   mods: 3, price: 150 },
+  legendary: { name: 'Легендарный', tier: 5, color: '#ffa500', multiplier: 3.5,  weight: 0.9,statRange: [56, 90],   mods: 4, price: 400 },
+  mythic:    { name: 'Мифический',  tier: 6, color: '#e34d5b', multiplier: 4.5,  weight: 0.1,statRange: [91, 150],  mods: 5, price: 1000, bossOnly: true }
 };
 
 export const ITEM_AFFIXES = [
@@ -445,17 +448,16 @@ export const ITEM_AFFIXES = [
   { id: 'piercing', name: 'Пробивающий', types: ['weapon'], bonus: { armorPen: 2 } },
   { id: 'precise', name: 'Меткий', types: ['weapon', 'ring', 'amulet'], bonus: { critChance: 0.02, dex: 1 } },
   { id: 'balanced', name: 'Сбалансированный', types: ['weapon'], bonus: { attack: 1, dex: 2 } },
-  { id: 'warded', name: 'Защищённый', types: ['head', 'shoulders', 'chest', 'back', 'wrists', 'hands', 'legs', 'seal'], bonus: { defense: 2, blockPower: 0.02 } },
-  { id: 'swift', name: 'Стремительный', types: ['head', 'back', 'wrists', 'hands', 'legs', 'ring', 'amulet'], bonus: { dex: 2, dodgeChance: 0.02 } },
-  { id: 'fortified', name: 'Укреплённый', types: ['shoulders', 'chest', 'wrists', 'hands', 'legs', 'seal'], bonus: { defense: 3, blockChance: 0.01 } },
-  { id: 'vigilant', name: 'Бдительный', types: ['head', 'shoulders', 'chest', 'back', 'wrists', 'hands', 'legs', 'ring', 'amulet', 'seal'], bonus: { critChance: 0.01, blockChance: 0.01 } },
-  { id: 'resolute', name: 'Непоколебимый', types: ['head', 'shoulders', 'chest', 'back', 'wrists', 'hands', 'legs', 'ring', 'amulet', 'seal'], bonus: { defense: 1, blockPower: 0.04 } },
-  { id: 'focused', name: 'Сосредоточенный', types: ['weapon', 'ring', 'amulet', 'seal'], bonus: { magic: 1, critChance: 0.01 } }
+  { id: 'warded', name: 'Защищённый', types: ['head', 'shoulders', 'chest', 'cloak', 'gloves', 'legs', 'boots', 'shield', 'amulet'], bonus: { defense: 2, blockPower: 0.02 } },
+  { id: 'swift', name: 'Стремительный', types: ['head', 'shoulders', 'chest', 'cloak', 'gloves', 'legs', 'boots', 'shield', 'ring', 'amulet'], bonus: { dex: 2, dodgeChance: 0.02 } },
+  { id: 'fortified', name: 'Укреплённый', types: ['head', 'shoulders', 'chest', 'cloak', 'gloves', 'legs', 'boots', 'shield', 'amulet'], bonus: { defense: 3, blockChance: 0.01 } },
+  { id: 'vigilant', name: 'Бдительный', types: ['head', 'shoulders', 'chest', 'cloak', 'gloves', 'legs', 'boots', 'shield', 'ring', 'amulet'], bonus: { critChance: 0.01, blockChance: 0.01 } },
+  { id: 'resolute', name: 'Непоколебимый', types: ['head', 'shoulders', 'chest', 'cloak', 'gloves', 'legs', 'boots', 'shield', 'ring', 'amulet'], bonus: { defense: 1, blockPower: 0.04 } },
+  { id: 'focused', name: 'Сосредоточенный', types: ['weapon', 'ring', 'amulet'], bonus: { magic: 1, critChance: 0.01 } }
 ];
 
 export function rollItemAffixes(item, rarity, random = Math.random) {
-  const countByRarity = { common: 0, rare: 1, epic: 2, legendary: 3 };
-  const count = countByRarity[rarity] || 0;
+  const count = RARITIES[rarity]?.mods || 0;
   if (!item || count === 0) return [];
 
   const pool = ITEM_AFFIXES.filter(affix => affix.types.includes(item.type));
@@ -473,7 +475,7 @@ export function rollItemAffixes(item, rarity, random = Math.random) {
     if (affix) selected.push(affix);
   }
 
-  const rarityScale = { common: 1, rare: 1, epic: 1.25, legendary: 1.5 }[rarity] || 1;
+  const rarityScale = { common: 1, uncommon: 1, rare: 1.1, epic: 1.25, legendary: 1.5, mythic: 1.8 }[rarity] || 1;
   return selected.map(affix => ({
     id: affix.id,
     name: affix.name,
@@ -486,16 +488,34 @@ export function rollItemAffixes(item, rarity, random = Math.random) {
   }));
 }
 
-export function rollRarity(random = Math.random) {
-  const total = Object.values(RARITIES).reduce((sum, rarity) => sum + rarity.weight, 0);
+export function getRarityWeights(options = {}) {
+  const entries = Object.entries(RARITIES).filter(([key, rarity]) =>
+    key !== 'mythic' || options.allowMythic === true || rarity.bossOnly !== true
+  );
+  const player = options.player || null;
+  const cleared = Array.isArray(player?.riftClearedLocations)
+    ? new Set(player.riftClearedLocations).size
+    : 0;
+  const riftTierBonus = options.isRift
+    ? Math.min(0.30, cleared * 0.10)
+    : 0;
+  return Object.fromEntries(entries.map(([key, rarity]) => [
+    key,
+    rarity.weight * (rarity.tier >= 4 ? 1 + riftTierBonus : 1)
+  ]));
+}
+
+export function rollRarity(random = Math.random, options = {}) {
+  const weights = Object.entries(getRarityWeights(options));
+  const total = weights.reduce((sum, [, weight]) => sum + weight, 0);
   const sample = typeof random === 'function' ? random() : Math.random();
   const normalized = Number.isFinite(sample)
     ? Math.max(0, Math.min(1 - Number.EPSILON, sample))
     : Math.random();
   let roll = normalized * total;
 
-  for (const [key, rarity] of Object.entries(RARITIES)) {
-    roll -= rarity.weight;
+  for (const [key, weight] of weights) {
+    roll -= weight;
     if (roll < 0) return key;
   }
 

@@ -24,8 +24,8 @@ export const EFFECTS_DATA = {
   elderBlessing: { name: 'Благословение', icon: '✨', color: '#ffd060' }
 };
 
-export function drawPlayerByClass(ctx, x, y, playerClass, shadowColor) {
-  drawHero(ctx, x, y, playerClass, shadowColor);
+export function drawPlayerByClass(ctx, x, y, playerClass, shadowColor, moving = false) {
+  drawHero(ctx, x, y, playerClass, shadowColor, moving);
 }
 
 export function drawEnemyByType(ctx, e, x, y, shadowColor) {

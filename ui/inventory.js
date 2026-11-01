@@ -5,20 +5,29 @@ import { SPELLS } from '../data/spells.js';
 import { FORGE_BONUS } from '../data/npcs.js';
 import {
   useItem, equipItemByIndex, unequipItemBySlot, equipBest,
-  EQUIPMENT_SLOTS, EQUIPMENT_TYPES, SLOT_TYPES, socketRune
+  EQUIPMENT_SLOTS, EQUIPMENT_TYPES, SLOT_TYPES, socketRune,
+  getInventoryWeight, getInventoryCapacity, getInventorySlotCount
 } from '../systems/inventory.js';
-import { sellItemByIndex, getSellPrice } from '../systems/shop.js';
+import { sellItemsByIndices, getSellPrice } from '../systems/shop.js';
 import { saveGame } from '../systems/save.js';
 import { toast } from './screens.js';
 import { renderGame } from './header.js';
 
-let invFilter = 'all';
+let invFilter = 'bag';
 let invSort = 'default';
+let saleSelection = [];
+let saleConfirmState = false;
 
 const FILTER_TYPES = {
+  equipment: [...EQUIPMENT_TYPES],
   weapon: ['weapon'],
-  armor: ['armor', 'chest', 'head', 'helmet', 'shoulders', 'back', 'wrists', 'bracers', 'hands', 'gloves', 'legs', 'boots'],
-  accessory: ['amulet', 'ring', 'seal'],
+  armor: ['armor', 'chest', 'head', 'helmet', 'shoulders', 'cloak', 'back', 'gloves', 'bracers', 'wrists', 'legs', 'boots', 'shield'],
+  accessory: ['amulet', 'ring'],
+  shield: ['shield'],
+  cloak: ['cloak'],
+  gloves: ['gloves'],
+  boots: ['boots'],
+  legs: ['legs'],
   consumable: ['consumable'],
   material: ['material'],
   rune: ['rune'],
@@ -29,22 +38,24 @@ const SLOT_INFO = [
   ['head', 'Голова', '⛑️'],
   ['shoulders', 'Плечи', '🛡️'],
   ['chest', 'Грудь', '🥋'],
-  ['back', 'Спина', '🧥'],
-  ['wrists', 'Запястья', '🔗'],
-  ['hands', 'Кисти рук', '🧤'],
-  ['legs', 'Ноги', '🥾'],
+  ['gloves', 'Перчатки и наручи', '🧤'],
+  ['legs', 'Поножи', '🥾'],
+  ['boots', 'Сапоги', '👢'],
   ['weapon', 'Оружие', '⚔️'],
+  ['shield', 'Щит', '🛡️'],
   ['ring1', 'Палец 1', '💍'],
   ['ring2', 'Палец 2', '💍'],
-  ['amulet', 'Амулет', '🔮'],
-  ['seal', 'Печать', '🔰']
+  ['amulet', 'Амулет / реликвия', '🔮'],
+  ['cloak', 'Плащ', '🧥']
 ];
-const RARITY_ORDER = { common: 0, rare: 1, epic: 2, legendary: 3 };
+const RARITY_ORDER = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, mythic: 5 };
 
 function getItemValue(inst) {
   const item = ITEMS[inst.id];
-  const mult = inst.rarity ? (RARITIES[inst.rarity]?.multiplier || 1) : 1;
-  return (item?.price || 0) * mult * (inst.qty || 1);
+  const tierPrice = inst.rarity && RARITIES[inst.rarity]?.price
+    ? RARITIES[inst.rarity].price
+    : (item?.price || 0) * (inst.rarity ? (RARITIES[inst.rarity]?.multiplier || 1) : 1);
+  return tierPrice * (inst.qty || 1);
 }
 
 function itemScore(inst) {
@@ -93,7 +104,13 @@ function getJunkCount() {
 
 function filterAndSort(entries) {
   let list = entries;
-  if (invFilter !== 'all') {
+  if (invFilter === 'bag') {
+    list = list.filter(({ inst }) => !['quest', 'material'].includes(ITEMS[inst.id]?.type));
+  } else if (invFilter === 'quest') {
+    list = list.filter(({ inst }) => ITEMS[inst.id]?.type === 'quest' && !ITEMS[inst.id]?.storyShard);
+  } else if (invFilter === 'rift-shards') {
+    list = list.filter(({ inst }) => !!ITEMS[inst.id]?.storyShard);
+  } else if (invFilter !== 'all') {
     const types = FILTER_TYPES[invFilter] || [invFilter];
     list = list.filter(({ inst }) => types.includes(ITEMS[inst.id]?.type));
   }
@@ -128,12 +145,85 @@ export function setInvSort(sort) {
   }
 }
 
+function renderSaleModal() {
+  const overlay = document.getElementById('inventory-sale-overlay');
+  if (!overlay) return;
+  const p = state.game.player;
+  const valid = p.inventory.map((inst, index) => ({ inst, index, item: ITEMS[inst.id] }))
+    .filter(entry => entry.item && entry.item.type !== 'quest' && !entry.item.storyShard && !RARITIES[entry.inst.rarity]?.bossOnly);
+  saleSelection = saleSelection.filter(index => valid.some(entry => entry.index === index));
+  const selected = valid.filter(entry => saleSelection.includes(entry.index));
+  const total = selected.reduce((sum, entry) => sum + getSellPrice(entry.inst, p), 0);
+  const hasHighTier = selected.some(entry => (RARITIES[entry.inst.rarity]?.tier || 1) >= 4);
+  const needsConfirm = hasHighTier || total > 500;
+  const left = valid.map(entry => {
+    const rarity = RARITIES[entry.inst.rarity || 'common'];
+    const checked = saleSelection.includes(entry.index);
+    return '<button class="sale-item ' + (checked ? 'selected' : '') + '" onclick="GameAPI.toggleSaleItem(' + entry.index + ')"><span>' + entry.item.icon + ' ' + entry.item.name + '</span><small>' + (rarity?.name || 'Обычный') + ' · ' + getSellPrice(entry.inst, p) + ' зол.</small></button>';
+  }).join('');
+  const right = selected.length ? selected.map(entry => '<div class="sale-summary-row"><span>' + entry.item.name + '</span><b>' + getSellPrice(entry.inst, p) + '💰</b></div>').join('') : '<small>Выбери предметы слева.</small>';
+  const warning = saleConfirmState && needsConfirm
+    ? '<p class="sale-warning">Внимание: выбраны предметы T4+ или сумма выше 500 золота. Подтверди продажу ещё раз.</p>'
+    : needsConfirm ? '<p class="sale-warning">Для продажи T4+ или на сумму свыше 500 золота потребуется дополнительное подтверждение.</p>' : '';
+  overlay.innerHTML = '<div class="sale-dialog"><div class="sale-heading"><h3>Продажа предметов</h3><button onclick="GameAPI.cancelSale()">×</button></div><div class="sale-columns"><section class="sale-inventory"><b>Инвентарь</b><div class="sale-item-list">' + (left || '<small>Нет предметов для продажи.</small>') + '</div></section><section class="sale-display"><b>К продаже: ' + selected.length + '</b><div class="sale-summary-list">' + right + '</div><div class="sale-total">Итого: ' + total + '💰</div>' + warning + '</section></div><div class="sale-actions"><button onclick="GameAPI.selectSaleTiers()">Продать все T1–T2</button><button onclick="GameAPI.selectSaleFilter()">Выбрать по фильтру</button><button class="sell-btn" onclick="GameAPI.confirmSale()">' + (saleConfirmState && needsConfirm ? 'Подтвердить продажу' : 'Продать выбранное') + '</button><button onclick="GameAPI.cancelSale()">Отмена</button></div></div>';
+}
+
+export function openSaleUI(initialSelection = []) {
+  saleSelection = Array.isArray(initialSelection) ? [...initialSelection] : [];
+  saleConfirmState = false;
+  document.getElementById('inventory-sale-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'inventory-sale-overlay';
+  overlay.className = 'inventory-sale-overlay';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', event => { if (event.target === overlay) cancelSaleUI(); });
+  renderSaleModal();
+}
+
+export function toggleSaleItem(index) {
+  saleSelection = saleSelection.includes(index) ? saleSelection.filter(value => value !== index) : [...saleSelection, index];
+  saleConfirmState = false;
+  renderSaleModal();
+}
+
+export function selectSaleTiersUI() {
+  saleSelection = state.game.player.inventory.map((inst, index) => ({ inst, index, item: ITEMS[inst.id] }))
+    .filter(({ inst, item }) => item && EQUIPMENT_TYPES.has(item.type) && (RARITIES[inst.rarity || 'common']?.tier || 1) <= 2 && !RARITIES[inst.rarity]?.bossOnly)
+    .map(entry => entry.index);
+  saleConfirmState = false;
+  renderSaleModal();
+}
+
+export function selectSaleFilterUI() {
+  saleSelection = filterAndSort(state.game.player.inventory.map((inst, index) => ({ inst, idx: index })))
+    .filter(({ inst }) => ITEMS[inst.id] && ITEMS[inst.id].type !== 'quest' && !ITEMS[inst.id].storyShard && !RARITIES[inst.rarity]?.bossOnly)
+    .map(entry => entry.idx);
+  saleConfirmState = false;
+  renderSaleModal();
+}
+
+export function confirmSaleUI() {
+  const result = sellItemsByIndices(saleSelection, { confirmed: saleConfirmState });
+  if (result.requiresConfirmation) {
+    saleConfirmState = true;
+    renderSaleModal();
+    return;
+  }
+  if (!result.ok) { toast('Нет выбранных предметов для продажи.'); return; }
+  cancelSaleUI();
+  renderGame();
+}
+
+export function cancelSaleUI() {
+  saleSelection = [];
+  saleConfirmState = false;
+  document.getElementById('inventory-sale-overlay')?.remove();
+}
 function filterBarHTML() {
   const filters = [
-    ['all', 'Все'], ['weapon', '⚔️ Оружие'], ['armor', '🛡️ Броня'],
-    ['accessory', '💍 Украшения'], ['consumable', '🧪 Расходники'],
-    ['material', '🌿 Материалы'], ['rune', 'ᛉ Руны'],
-    ['scroll', '📜 Свитки'], ['quest', '💎 Квесты']
+    ['bag', '🎒 Сумка'], ['equipment', '⚔️ Экипировка'],
+    ['material', '🌿 Материалы'], ['quest', '📜 Квесты'],
+    ['rift-shards', '💎 Осколки']
   ];
   const f = ([key, label]) =>
     `<button class="inv-filter-btn ${invFilter === key ? 'active' : ''}" onclick="GameAPI.setInvFilter('${key}')">${label}</button>`;
@@ -230,21 +320,25 @@ export function renderInventory() {
   const visible = filterAndSort(entries);
   const counts = {
     all: entries.length,
+    bag: entries.filter(({ inst }) => !['quest', 'material'].includes(ITEMS[inst.id]?.type)).length,
     equipment: entries.filter(({ inst }) => EQUIPMENT_TYPES.has(ITEMS[inst.id]?.type)).length,
-    consumable: entries.filter(({ inst }) => ITEMS[inst.id]?.type === 'consumable').length
+    materials: entries.filter(({ inst }) => ITEMS[inst.id]?.type === 'material').length,
+    quests: entries.filter(({ inst }) => ITEMS[inst.id]?.type === 'quest' && !ITEMS[inst.id]?.storyShard).length,
+    shards: entries.filter(({ inst }) => !!ITEMS[inst.id]?.storyShard).length
   };
+  const weight = getInventoryWeight(p);
+  const capacity = getInventoryCapacity(p);
+  const usedSlots = getInventorySlotCount(p);
 
-  let actions = '';
-  if (hasBetter || junkCount) {
-    actions = `
-      <div class="inv-top-actions">
-        ${hasBetter ? '<button onclick="GameAPI.equipBest()" class="equip-best-btn">⚡ Экипировать лучшее</button>' : ''}
-        ${junkCount ? `<button onclick="GameAPI.sellJunk()" class="inv-sell-junk">💰 Продать слабое (${junkCount})</button>` : ''}
-      </div>`;
-  }
+  const actions = `
+    <div class="inv-top-actions">
+      ${hasBetter ? '<button onclick="GameAPI.equipBest()" class="equip-best-btn">⚡ Экипировать лучшее</button>' : ''}
+      ${junkCount ? `<button onclick="GameAPI.sellJunk()" class="inv-sell-junk">💰 Продать слабое (${junkCount})</button>` : ''}
+      <button onclick="GameAPI.openSaleUI()" class="inv-sell-junk">💰 Продажа</button>
+    </div>`;
 
   let grid = '';
-  const minSlots = Math.max(32, Math.ceil(visible.length / 8) * 8);
+  const minSlots = invFilter === 'bag' ? 30 : Math.max(6, Math.ceil(visible.length / 6) * 6);
   for (let i = 0; i < minSlots; i++) {
     if (i < visible.length) {
       const { inst, idx } = visible[i];
@@ -276,7 +370,7 @@ export function renderInventory() {
       <section class="backpack-panel rpg-backpack">
         ${actions}
         <div class="inv-title-row">
-          <div><h3>🎒 Сумка героя</h3><small>${counts.all} предметов · ${counts.equipment} экипировки · ${counts.consumable} расходников</small></div>
+          <div><h3>🎒 Сумка героя</h3><small>${usedSlots}/30 ячеек · ${weight.toFixed(1)}/${capacity} веса · ${counts.equipment} экипировки · ${counts.materials} материалов · ${counts.quests} квестов · ${counts.shards}/3 осколка</small></div>
           <div class="inv-wallet">💰 ${p.gold || 0}</div>
         </div>
         ${filterBarHTML()}
@@ -296,7 +390,7 @@ export function invSlotClick(idx) {
 
   if (EQUIPMENT_TYPES.has(item.type)) {
     const slot = equipItemByIndex(idx);
-    if (!slot) return;
+    if (!slot) { toast('Не хватает места или грузоподъёмности, чтобы снять старую экипировку.'); return; }
     toast(`Надето: ${item.name}`);
     saveGame();
     renderGame();
@@ -385,7 +479,7 @@ export function useItemOutside(id) {
 
 export function equipItemByIndexUI(idx) {
   const slot = equipItemByIndex(idx);
-  if (!slot) return;
+  if (!slot) { toast('Сумка заполнена или превышен лимит веса.'); return; }
   toast('Экипировка обновлена.');
   saveGame();
   renderGame();
@@ -403,20 +497,18 @@ export function equipBestUI() {
 }
 
 export function unequipItemUI(slot) {
-  if (!unequipItemBySlot(slot)) return;
+  if (!unequipItemBySlot(slot)) { toast('Нельзя снять предмет: в сумке нет места или превышен лимит веса.'); return; }
   saveGame();
   renderGame();
 }
 
 export function sellItemByIndexUI(idx) {
-  const ok = sellItemByIndex(idx);
-  if (ok) renderGame();
+  openSaleUI([idx]);
 }
 
 export function sellJunkUI() {
   const p = state.game.player;
-  let totalGold = 0;
-  let count = 0;
+  const indices = [];
   for (let i = p.inventory.length - 1; i >= 0; i--) {
     const inst = p.inventory[i];
     const item = ITEMS[inst.id];
@@ -425,28 +517,20 @@ export function sellJunkUI() {
     const slots = EQUIPMENT_SLOTS.filter(slot => (SLOT_TYPES[slot] || []).includes(item.type));
     const weakest = Math.min(...slots.map(slot => itemScore(p.equipped?.[slot])));
     if (itemScore(inst) > weakest) continue;
-    const price = getSellPrice(inst, p);
-    if (price > 0) {
-      totalGold += price;
-      count++;
-      p.inventory.splice(i, 1);
-    }
+    if (getSellPrice(inst, p) > 0) indices.push(i);
   }
-  if (!count) {
+  if (!indices.length) {
     toast('Нет обычных слабых предметов для продажи.');
     return;
   }
-  p.gold += totalGold;
-  saveGame();
-  toast(`Продано: ${count} предметов (+${totalGold}💰)`);
-  renderGame();
+  openSaleUI(indices);
 }
 
 const TYPE_LABELS = {
-  weapon: 'Оружие', armor: 'Доспех', chest: 'Нагрудник', helmet: 'Головной убор',
-  head: 'Головной убор', shoulders: 'Наплечье', back: 'Плащ', wrists: 'Наручи',
-  bracers: 'Наручи', gloves: 'Перчатки', hands: 'Перчатки', boots: 'Обувь',
-  legs: 'Поножи', amulet: 'Амулет', ring: 'Кольцо', seal: 'Печать', consumable: 'Расходник',
+  weapon: 'Оружие', shield: 'Щит', armor: 'Доспех', chest: 'Нагрудник', helmet: 'Головной убор',
+  head: 'Головной убор', shoulders: 'Наплечье', back: 'Плащ', cloak: 'Плащ', wrists: 'Наручи',
+  bracers: 'Наручи', gloves: 'Перчатки', hands: 'Перчатки', boots: 'Сапоги',
+  legs: 'Поножи', amulet: 'Амулет / реликвия', ring: 'Кольцо', seal: 'Печать', consumable: 'Расходник',
   material: 'Материал', rune: 'Руна', scroll: 'Свиток', quest: 'Квестовый предмет'
 };
 

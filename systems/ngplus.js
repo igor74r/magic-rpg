@@ -51,11 +51,16 @@ export function startNGPlus() {
     level: 1, exp: 0, expNext: 100,
     hp: newMaxHp, maxHp: newMaxHp,
     mp: p.class === 'warrior' ? 0 : newMaxMp, maxMp: newMaxMp,   // ⬅️ Воин — с 0 Ярости
-    str: s.str, int: s.int, wis: s.wis, con: s.con, dex: s.dex || 10,
+    str: s.str, int: s.int, wis: s.wis, con: s.con, dex: s.dex || 10, luck: 5,
     statPoints: 0,
+    craftedHighTierByAct: {},
+    craftingJobs: [],
+    buyback: [],
     campaignKills: {},
     campaignClaimed: {},
     campaignShards: {},
+    storyShards: { flame: false, ice: false, blood: false },
+    storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false },
     activeCampaignMission: null,
     spells: [...cls.startingSpells],
     cooldowns: {},
@@ -66,6 +71,14 @@ export function startNGPlus() {
   });
 
   g.location = 'village';
+  g.storyDragons = { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false };
+  g.storyShards = { flame: false, ice: false, blood: false };
+  g.riftEnding = null;
+  g.riftOpeningSeen = false;
+  g.riftOpenedAt = null;
+  g.player.riftClearedLocations = [];
+  g.player.craftedHighTierByAct = {};
+  g.player.craftingJobs = [];
   g.shards = { forest: false, ruins: false, shadow: false };
   g.quests = {};
   STORY.quests.forEach(q => g.quests[q.id] = false);

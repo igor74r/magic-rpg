@@ -1,6 +1,4 @@
 import { state } from './systems/state.js';
-import { LOCATIONS } from './data/locations.js';
-import { STORY } from './data/story.js';
 import { on, emit } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
 import { addItem } from './systems/inventory.js';
@@ -8,42 +6,46 @@ import { addExp } from './systems/progression.js';
 import {
   updateMainMenu, openSettings, backFromSettings, saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
-  continueGame, startNewGame, enterRiftFromMenu, exitApplication,
   switchSettingsTab, applySettings, resetAllSettings, deleteAllSaves,
   openAchievementsMenu, openHelp,
   exportSave, importSave
 } from './ui/menu.js';
 import { selectClass, confirmClassSelection } from './ui/character.js';
 import {
-  renderGame, switchTab, travelTo, useItemOutside, renderSidebarVitals,
+  renderGame, switchTab, travelTo, useItemOutside,
   equipItemByIndexUI, unequipItemUI, openShop, buyItemUI,
   enterOverworldFromUI,
   mapSelect, mapTravel, mapEnter,
   showInvTooltip, showEqTooltip, hideTooltip,
   spendStat, sellItemByIndexUI,
-  setInvFilter, setInvSort, invSlotClick,
+  setInvFilter, setInvSort, invSlotClick, openSaleUI, toggleSaleItem, selectSaleTiersUI, selectSaleFilterUI, confirmSaleUI, cancelSaleUI,
   openBlacksmith, openHealer, openAlchemist, backToVillage,
   openMerchant, openElder, openWell, closeNpcAndResumeUI,
   takeElderBlessingUI, useWellUI, acceptElderQuestUI, turnInElderQuestUI,
   openBard, openGuard, openCat, openKids, openHerald, openQuestBoard,
   payBardUI, petCatUI, claimQuestUI,
-  upgradeEquipmentUI, healAtHealerUI, craftRecipeUI,
+  upgradeEquipmentUI, healAtHealerUI, craftRecipeUI, reforgeItemUI, setShopPreset, buybackItemUI,
   showShopTooltip, equipBestUI, sellJunkUI, socketRuneUI,
   allocatePassiveUI, resetPassivesUI, passiveTreePointerDown, passiveTreePointerMove, passiveTreePointerUp
 } from './ui/game.js';
 import {
   initOverworld, owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
   owAttack, owCast, owUseItem, owBlock, owUseAbility, owFlee,
-  owPauseResume, owPauseSaveVillage, owPauseExit, setOverworldPaused
+  owPauseResume, owPauseSaveVillage, owPauseExit
 } from './ui/overworld.js';
 import { openDailyChest } from './ui/village.js';
 import { exitOverworld, enterOverworld } from './systems/overworld.js';
-import { isRiftReady } from './systems/rift.js';
-import { getNextCampaignMission } from './systems/campaign.js';
+import { isRiftReady, getRiftLocations } from './systems/rift.js';
+import { getTowerBest, getTowerStartFloor, TOWER_MAX_FLOOR } from './systems/tower.js';
 import { startNGPlus } from './systems/ngplus.js';
 import { showScreen, toast, logTo } from './ui/screens.js';
-import { initAudio, playSound, playBGM, updateVolume, resumeContext } from './systems/audio.js';
-import * as InterfaceV2 from './ui/interface-v2.js';
+import {
+  initAudio, playSound, playBGM, updateVolume, resumeContext
+} from './systems/audio.js';
+import {
+  speak as speakVoice, stop as stopVoice,
+  isVoiceSupported, initVoices
+} from './systems/voice.js';
 
 const ALWAYS_SHOW_PROLOGUE = false;
 
@@ -51,62 +53,22 @@ on('toast', toast);
 on('log', ({ channel, msg, cls }) => logTo('game-log', msg, cls));
 
 on('game:started', () => {
-  const log=document.getElementById('game-log'); if(log) log.innerHTML='';
-  state.currentTab='locations';
-  document.getElementById('rpg-interface-overlay')?.setAttribute('hidden','');
-  document.getElementById('rpg-pause-overlay')?.setAttribute('hidden','');
-  showScreen('screen-game'); renderGame(); initAudio(); updateVolume(); playBGM('explore');
-  const first=getNextCampaignMission(state.game.player);
-  // Старт без промежуточного хаба: персонаж появляется у ворот Авроры.
-  // Первое поручение выдаётся только после личного разговора со Старейшиной Эдвином.
-  const startLocation='village';
-  state.game.location=startLocation; saveGame(); enterOverworld(startLocation);
-  setTimeout(()=>toast('АКТ I · '+(first?.act?.title||'Корни, помнящие звёзды')+' — поговорите со Старейшиной Эдвином'),450);
-});
-on('game:loaded', (payload={}) => {
-  if(!state.game) return;
-  const log=document.getElementById('game-log'); if(log) log.innerHTML='';
-  state.currentTab='locations';
-  showScreen('screen-game'); renderGame(); initAudio(); updateVolume();
-  const destination=LOCATIONS[state.game.location] ? state.game.location : 'village';
-  enterOverworld(destination);
-  playBGM(destination==='village'?'village':'explore');
-  if(payload.openRift) setTimeout(()=>InterfaceV2.openRpgWindow('rift'),180);
+  stopVoice();
+  const log = document.getElementById('game-log');
+  if (log) log.innerHTML = '';
+  showScreen('screen-game');
+  renderGame();
+  initAudio();
+  updateVolume();
+  playBGM('village');
 });
 on('game:update', renderGame);
-on('overworld:hud-refresh', renderSidebarVitals);
 
-function mountOverworldInDashboard() {
-  const host=document.getElementById('dashboard-overworld-host');
-  const source=document.querySelector('#screen-overworld > .game-container');
-  if(!host||!source)return;
-  if(source.parentElement!==host)host.appendChild(source);
-  host.hidden=false; showScreen('screen-game');
-}
-function toggleGameMenu() {
-  const layer=document.getElementById('rpg-interface-overlay');
-  if(layer&&!layer.hidden) InterfaceV2.closeRpgWindow();
-  else InterfaceV2.openRpgWindow('inventory');
-}
-function openGameMenuTab(tab) {
-  const aliases={quests:'journal',statistics:'character',chronicles:'journal',talents:'character',spells:'character'};
-  InterfaceV2.openRpgWindow(aliases[tab]||tab);
-}
-function closeGamePanel(){InterfaceV2.closeRpgWindow();}
-function enterRift(){
-  if(!isRiftReady()){toast('Разлом откроется после победы над тремя драконами.');return;}
-  if(state.game?.player) InterfaceV2.openRpgWindow('rift');
-  else enterRiftFromMenu();
-}
 on('overworld:start', () => {
-  mountOverworldInDashboard();
-  const title = document.getElementById('overworld-title');
-  if (title) title.textContent = LOCATIONS[state.overworld?.locationId]?.name || 'Локация';
-  renderGame();
+  showScreen('screen-overworld');
   initOverworld();
   if (state.overworld.locationId === 'village') playBGM('village');
   else playBGM('explore');
-  InterfaceV2.renderHotbar();
 });
 on('overworld:end', () => {
   showScreen('screen-game');
@@ -120,45 +82,7 @@ on('overworld:defeat', () => {
 on('combat:start', () => playBGM('combat'));
 on('combat:end', () => playBGM('explore'));
 
-let levelUpBanner = null;
-let levelUpBannerTimer = null;
-
-on('progression:level-up', ({ level } = {}) => {
-  if (!levelUpBanner) {
-    levelUpBanner = document.createElement('div');
-    levelUpBanner.className = 'level-up-banner';
-    levelUpBanner.setAttribute('role', 'status');
-    levelUpBanner.setAttribute('aria-live', 'polite');
-
-    const kicker = document.createElement('span');
-    kicker.className = 'level-up-kicker';
-    kicker.textContent = '✦ НОВЫЙ УРОВЕНЬ ✦';
-
-    const value = document.createElement('strong');
-    value.className = 'level-up-value';
-
-    const reward = document.createElement('span');
-    reward.className = 'level-up-reward';
-    reward.textContent = '+1 характеристика · +1 очко талантов';
-
-    levelUpBanner.appendChild(kicker);
-    levelUpBanner.appendChild(value);
-    levelUpBanner.appendChild(reward);
-    document.body.appendChild(levelUpBanner);
-  }
-
-  const value = levelUpBanner.querySelector('.level-up-value');
-  if (value) value.textContent = `Уровень ${Number(level) || ''}`;
-
-  levelUpBanner.classList.remove('is-visible');
-  void levelUpBanner.offsetWidth;
-  levelUpBanner.classList.add('is-visible');
-
-  clearTimeout(levelUpBannerTimer);
-  levelUpBannerTimer = setTimeout(() => {
-    levelUpBanner?.classList.remove('is-visible');
-  }, 2400);
-});
+on('rift:opened', showRiftOpeningCutscene);
 
 on('victory', () => {
   if (state.game && state.game.player) {
@@ -167,7 +91,26 @@ on('victory', () => {
   }
   playSound('victory');
   showScreen('screen-victory');
+  updateEndingChoiceUI();
 });
+
+function updateEndingChoiceUI() {
+  const status = document.getElementById('ending-choice-status');
+  if (!status || !state.game) return;
+  status.textContent = state.game.riftEnding === 'closed'
+    ? 'Разлом закрыт навсегда. Мир больше не соприкоснётся с тем, что лежит за гранью.'
+    : state.game.riftEnding === 'open'
+      ? 'Разлом оставлен открытым. Его края стабилизированы тремя осколками.'
+      : 'Выберите судьбу Разлома.';
+}
+
+function chooseRiftEnding(choice) {
+  if (!state.game?.player?.victoryAchieved || !['closed', 'open'].includes(choice)) return;
+  state.game.riftEnding = choice;
+  saveGame();
+  updateEndingChoiceUI();
+  toast(choice === 'closed' ? '🔒 Разлом запечатан навсегда.' : '🌀 Разлом оставлен открытым и стабилизирован.');
+}
 
 function showErrorToast(msg) {
   const el = document.createElement('div');
@@ -201,7 +144,7 @@ document.addEventListener('click', (e) => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { hideTooltip(); }
+  if (document.hidden) { hideTooltip(); stopVoice(); }
 });
 window.addEventListener('scroll', () => hideTooltip(), true);
 
@@ -212,14 +155,13 @@ function respawnInVillage() {
   p.mp = p.class === 'warrior' ? 0 : Math.ceil(p.maxMp / 2);
   p.effects = [];
   p.cooldowns = {};
-  const firstMission=STORY.acts[0]?.missions?.[0];
-  const checkpoint=p.checkpointLocation||firstMission?.locationId||'briar-hollow';
-  state.game.location=LOCATIONS[checkpoint]?checkpoint:'briar-hollow';
-  state.overworld=null;
+  state.game.location = 'village';
+  state.overworld = null;
   saveGame();
-  enterOverworld(state.game.location);
-  playBGM('explore');
-  toast('Вы вернулись к последнему рубежу. Путь продолжается.');
+  showScreen('screen-game');
+  renderGame();
+  playBGM('village');
+  toast('Вы возродились в деревне');
 }
 
 function deathToMenu() {
@@ -229,12 +171,109 @@ function deathToMenu() {
   p.mp = p.class === 'warrior' ? 0 : Math.ceil(p.maxMp / 2);
   p.effects = [];
   p.cooldowns = {};
-  const firstMission=STORY.acts[0]?.missions?.[0];
-  state.game.location=p.checkpointLocation||firstMission?.locationId||'briar-hollow';
   state.overworld = null;
   saveGame();
   showScreen('screen-main');
   updateMainMenu();
+}
+
+function enterRift() {
+  if (!state.game) return;
+  if (!isRiftReady()) {
+    const message = state.game.riftEnding === 'closed'
+      ? 'Разлом запечатан навсегда вашим решением.'
+      : 'Разлом закрыт. Печать держится, пока живы три дракона';
+    toast(message);
+    return;
+  }
+  openRiftMap();
+}
+
+function openRiftMap() {
+  if (!state.game || !isRiftReady()) return;
+  document.getElementById('rift-map-overlay')?.remove();
+  const player = state.game.player;
+  const level = player.level || 1;
+  const locations = getRiftLocations(level);
+  const kills = Object.values(player.stats?.kills || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const deaths = player.stats?.deaths || 0;
+  const kd = deaths > 0 ? (kills / deaths).toFixed(2) : kills.toFixed(2);
+  const cleared = new Set(player.riftClearedLocations || []).size;
+  const shards = Object.values(state.game.storyShards || {}).filter(Boolean).length;
+  const crystalStatus = shards === 3 && state.game.storyDragons?.['blood-crown'] ? 'Стабилизирован' : 'Нестабилен';
+  const overlay = document.createElement('div');
+  overlay.id = 'rift-map-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10050;background:rgba(7,5,13,.96);color:#f4e9e9;padding:24px;overflow:auto;font-family:inherit;';
+  overlay.innerHTML = `
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+        <div><div style="color:#c66b79;letter-spacing:.18em;font-size:12px">ПОСЛЕСЮЖЕТНОЕ ИСПЫТАНИЕ</div><h1 style="margin:6px 0">Карта Разлома</h1><p style="color:#c7b8c0">30 областей · 10 областей требуют 50 уровень · Ваш уровень: ${level}</p></div>
+        <button type="button" data-rift-close style="padding:10px 18px">Закрыть</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:18px 0">
+        <div style="background:#1c1721;border:1px solid #45303e;border-radius:8px;padding:10px"><small style="color:#bd9aa8">Убийства</small><div style="font-size:22px">${kills}</div></div>
+        <div style="background:#1c1721;border:1px solid #45303e;border-radius:8px;padding:10px"><small style="color:#bd9aa8">Смерти</small><div style="font-size:22px">${deaths}</div></div>
+        <div style="background:#1c1721;border:1px solid #45303e;border-radius:8px;padding:10px"><small style="color:#bd9aa8">K/D</small><div style="font-size:22px">${kd}</div></div>
+        <div style="background:#1c1721;border:1px solid #45303e;border-radius:8px;padding:10px"><small style="color:#bd9aa8">Очищено</small><div style="font-size:22px">${cleared}/30</div></div>
+        <div style="background:#1c1721;border:1px solid #45303e;border-radius:8px;padding:10px"><small style="color:#bd9aa8">Осколки</small><div style="font-size:22px">${shards}/3</div></div>
+        <div style="background:#1c1721;border:1px solid #45303e;border-radius:8px;padding:10px"><small style="color:#bd9aa8">Кристалл</small><div style="font-size:16px;margin-top:5px">${crystalStatus}</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:22px">
+        ${locations.map((loc,index)=>`<button type="button" data-rift-id="${loc.id}" ${loc.unlocked?'':'disabled'} style="text-align:left;padding:14px;border:1px solid ${loc.unlocked?'#75434f':'#39323c'};background:${loc.unlocked?'linear-gradient(135deg,#261923,#121019)':'#17151b'};color:${loc.unlocked?'#f3e5e7':'#77717b'};border-radius:10px;min-height:82px;opacity:${loc.unlocked?1:.7}"><strong>${String(index+1).padStart(2,'0')}. ${loc.name}</strong><div style="font-size:12px;margin-top:8px">${loc.unlocked?'Доступна · Войти в область':`Требуется уровень ${loc.minLevel}`}</div></button>`).join('')}
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('[data-rift-close]')?.addEventListener('click',()=>overlay.remove());
+  overlay.querySelectorAll('[data-rift-id]:not(:disabled)').forEach(button=>button.addEventListener('click',()=>{
+    const id=button.getAttribute('data-rift-id');
+    overlay.remove();
+    enterOverworld(id,{rifMode:true,rifFloor:1});
+  }));
+}
+
+function openTowerMenu() {
+  if (!state.game) return;
+  document.getElementById('tower-map-overlay')?.remove();
+  const best = getTowerBest();
+  const startFloor = getTowerStartFloor();
+  const overlay = document.createElement('div');
+  overlay.id = 'tower-map-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10040;background:rgba(8,7,12,.97);color:#f4e9e9;padding:24px;overflow:auto;';
+  overlay.innerHTML = `<div style="max-width:1000px;margin:0 auto"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><small style="color:#d2a66c;letter-spacing:.18em">ОДИНОЧНОЕ ИСПЫТАНИЕ</small><h1 style="margin:6px 0">Башня · 40 этажей</h1><p style="color:#c7b8c0">Лучший результат: ${best}/40 · Следующий старт: ${startFloor} этаж</p></div><button type="button" data-tower-close>Закрыть</button></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin:22px 0">${Array.from({length:TOWER_MAX_FLOOR},(_,i)=>{const floor=i+1;const reached=floor<=best;const guardian=floor%5===0;return `<div style="padding:12px 8px;text-align:center;border:1px solid ${reached?'#94714b':'#39323c'};border-radius:8px;background:${reached?'#2a2119':'#17151b'}"><strong>${String(floor).padStart(2,'0')}</strong><div style="font-size:11px;margin-top:5px;color:${guardian?'#d99a78':'#9b929d'}">${guardian?'СТРАЖ':'ЭТАЖ'}</div><div style="font-size:11px;margin-top:4px">${reached?'Пройден':'Впереди'}</div></div>`}).join('')}</div><button type="button" data-tower-start style="display:block;width:100%;padding:15px;border:1px solid #bd8d58;background:linear-gradient(135deg,#3b2a1b,#211810);color:#fff;border-radius:9px;font-size:16px">${best>=40?'Начать заново с 1 этажа':`Продолжить с ${startFloor} этажа`}</button></div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('[data-tower-close]')?.addEventListener('click',()=>overlay.remove());
+  overlay.querySelector('[data-tower-start]')?.addEventListener('click',()=>{
+    overlay.remove();
+    enterOverworld(`tower-floor-${String(startFloor).padStart(2,'0')}`,{towerMode:true,towerFloor:startFloor});
+  });
+}
+
+function showRiftOpeningCutscene() {
+  if (!state.game || state.game.riftOpeningSeen) return;
+  state.game.riftOpeningSeen = true;
+  saveGame();
+  if (state.overworld) {
+    state.overworld.riftCutsceneWasActive = state.overworld.active;
+    state.overworld.active = false;
+  }
+  const overlay = document.createElement('div');
+  overlay.id = 'rift-opening-cutscene';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10060;display:flex;align-items:center;justify-content:center;text-align:center;padding:28px;background:radial-gradient(circle at center,#51202c 0%,#160d19 45%,#030207 100%);color:#f8e9ec;overflow:hidden;';
+  overlay.innerHTML = `<div style="max-width:760px;animation:riftAwaken 12s ease both"><div style="font-size:64px;filter:drop-shadow(0 0 22px #d43c61)">🌀</div><div style="letter-spacing:.28em;color:#e58b9a;font-size:12px;margin:18px 0">ПОСЛЕДНЯЯ ПЕЧАТЬ РАЗРУШЕНА</div><h1 style="font-size:clamp(32px,6vw,64px);margin:0 0 20px">Разлом открыт</h1><p style="font-size:18px;line-height:1.8;color:#e5d3d9">Кровавая Корона пал. Три осколка отозвались друг другу — и граница между мирами вспыхнула алым светом. То, что было заперто за гранью, теперь может быть услышано.</p><p style="color:#c77c8b;letter-spacing:.12em">МИР УЖЕ НЕ БУДЕТ ПРЕЖНИМ</p><button type="button" data-rift-continue style="margin-top:24px;padding:12px 28px;border:1px solid #c66b79;background:#301722;color:#fff;border-radius:8px">Продолжить</button></div><style>@keyframes riftAwaken{0%{opacity:0;transform:scale(.88);filter:blur(12px)}18%{opacity:1;transform:scale(1);filter:blur(0)}82%{opacity:1}100%{opacity:1}}</style>`;
+  document.body.appendChild(overlay);
+  let closed = false;
+  const finish = () => {
+    if (closed) return;
+    closed = true;
+    overlay.remove();
+    if (state.overworld) {
+      state.overworld.active = state.overworld.riftCutsceneWasActive !== false;
+      delete state.overworld.riftCutsceneWasActive;
+    }
+    toast('🌀 Разлом открыт. На карте доступно 30 областей.');
+  };
+  overlay.querySelector('[data-rift-continue]')?.addEventListener('click',finish);
+  setTimeout(finish,12000);
 }
 
 function interactNpc(npcId) {
@@ -243,18 +282,63 @@ function interactNpc(npcId) {
 
   if (npcId.startsWith('event-')) { handleWorldEvent(npcId); return; }
 
-  if (npcId === 'blacksmith') openBlacksmith();
-  else if (npcId === 'healer') openHealer();
-  else if (npcId === 'alchemist') openAlchemist();
-  else if (npcId === 'merchant') openMerchant();
-  else if (npcId === 'elder') openElder();
+  if (npcId === 'blacksmith') { openBlacksmith(); addVillageInteriorButton('forge'); }
+  else if (npcId === 'healer') { openHealer(); addVillageInteriorButton('healer'); }
+  else if (npcId === 'alchemist') { openAlchemist(); addVillageInteriorButton('alchemy'); }
+  else if (npcId === 'merchant') { openMerchant(); addVillageInteriorButton('market'); }
+  else if (npcId === 'elder') { openElder(); addVillageInteriorButton('hall'); }
   else if (npcId === 'well') openWell();
-  else if (npcId === 'bard') openBard();
+  else if (npcId === 'bard') { openBard(); addVillageInteriorButton('tavern'); }
   else if (npcId === 'guard') openGuard();
   else if (npcId === 'cat') openCat();
   else if (npcId === 'kids') openKids();
   else if (npcId === 'herald') openHerald();
   else if (npcId === 'questBoard') openQuestBoard();
+}
+
+const VILLAGE_INTERIORS = {
+  forge: { title: 'Кузница Борина', subtitle: 'Жар горна, запах угля и звон молота', room: 'Кузнечный горн', details: ['Наковальня у раскалённого очага', 'Стойка с клинками и щитами', 'Полки с инструментами'] },
+  healer: { title: 'Лечебный дом Мирры', subtitle: 'Травяные настои и мягкий свет свечей', room: 'Лечебная комната', details: ['Кровать для раненых путников', 'Шкаф с лекарствами', 'Сушёные травы под потолком'] },
+  alchemy: { title: 'Алхимическая мастерская', subtitle: 'Колбы тихо светятся в полумраке', room: 'Стол алхимика', details: ['Рабочий стол с колбами', 'Печь для настоев', 'Стеллажи с эссенциями'] },
+  market: { title: 'Торговый дом', subtitle: 'Тёплый свет, тканевые тюки и редкие товары', room: 'Торговый зал', details: ['Прилавок с товарами', 'Весы и сундуки', 'Полки с припасами'] },
+  hall: { title: 'Дом старейшины', subtitle: 'Карты старых земель и хроники трёх драконов', room: 'Зал совета', details: ['Большой стол с картой мира', 'Камин и кресла', 'Книжные полки'] },
+  tavern: { title: 'Таверна «Тихий угол»', subtitle: 'Музыка, горячая похлёбка и разговоры путников', room: 'Общий зал', details: ['Столики у камина', 'Стойка хозяина', 'Уголок барда'] }
+};
+
+function addVillageInteriorButton(interiorId) {
+  if (state.overworld?.locationId !== 'village') return;
+  const content = document.getElementById('npc-dialog-content');
+  if (!content || content.innerHTML.includes('data-village-interior')) return;
+  content.innerHTML +=
+    `<button data-village-interior onclick="GameAPI.enterVillageInterior('${interiorId}')" class="village-interior-enter">🚪 Войти внутрь</button>`;
+}
+
+function enterVillageInterior(interiorId) {
+  const ow = state.overworld;
+  const room = VILLAGE_INTERIORS[interiorId];
+  if (!ow || ow.locationId !== 'village' || !room) return;
+  ow.interior = interiorId;
+  const content = document.getElementById('npc-dialog-content');
+  const modal = document.getElementById('npc-dialog-modal');
+  const decor = room.details.map((item, index) => `<div class="village-room-prop prop-${index + 1}"><span>${['⚒️','🛏️','⚗️','📦'][index] || '🪑'}</span><small>${item}</small></div>`).join('');
+  content.innerHTML = `
+    <div class="village-interior-view">
+      <div class="village-interior-heading"><div><h3>${room.title}</h3><p>${room.subtitle}</p></div><span>🏠 АВРОРА</span></div>
+      <div class="village-room-art room-${interiorId}">
+        <div class="village-room-window"></div><div class="village-room-hearth"></div>
+        <div class="village-room-furniture">${decor}</div>
+        <div class="village-room-floor-mark">✦</div>
+      </div>
+      <p class="village-room-caption">${room.room} · Можно осмотреться, затем вернуться во двор.</p>
+      <button onclick="GameAPI.exitVillageInterior()" class="village-interior-exit">← Выйти во двор</button>
+    </div>`;
+  if (modal) modal.style.display = 'flex';
+}
+
+function exitVillageInterior() {
+  if (state.overworld) state.overworld.interior = null;
+  const modal = document.getElementById('npc-dialog-modal');
+  if (modal) modal.style.display = 'none';
 }
 
 function handleWorldEvent(eventId) {
@@ -290,7 +374,7 @@ function handleWorldEvent(eventId) {
   } else if (ev.eventType === 'crystal') {
     p.gold = (p.gold || 0) + 8;
     addExp(30);
-    logMsg = `💎 Кристалл маны: +8💰, +30 EXP`;
+    logMsg = `💎 Кристалл сырой магии: +8💰, +30 EXP`;
     toastMsg = `💎 +8💰, +30 EXP`;
   } else if (ev.eventType === 'traveler') {
     const items = ['health-potion', 'mana-potion', 'herb-life', 'herb-moon'];
@@ -311,9 +395,71 @@ function handleWorldEvent(eventId) {
 }
 
 function skipPrologue() {
-  localStorage.setItem('magic-rpg-prologue-seen','1');
+  stopVoice();
+  localStorage.setItem('magic-rpg-prologue-seen', '1');
   showScreen('screen-main');
   updateMainMenu();
+}
+
+// ==== ОЗВУЧКА ПРОЛОГА: русская TTS-легенда ====
+function getPrologueText(screen) {
+  if (!screen) return '';
+  const parts = [];
+  screen.querySelectorAll('h1, h2, h3, p, li').forEach(el => {
+    if (el.closest('button')) return;
+    const t = (el.textContent || '').trim();
+    if (t) parts.push(t);
+  });
+  return parts.join('. ');
+}
+
+function resetPrologueBtn(btn) {
+  btn.textContent = '🔊 Озвучить пролог';
+}
+
+function playTtsPrologue(screen, btn) {
+  if (!isVoiceSupported()) {
+    btn.textContent = '🔇 Голос недоступен';
+    return;
+  }
+  if (window.speechSynthesis.speaking) {
+    stopVoice();
+    resetPrologueBtn(btn);
+    return;
+  }
+  const text = getPrologueText(screen);
+  const ok = speakVoice(text, { rate: 0.82, pitch: 0.78, volume: 1 });
+  if (ok) {
+    btn.textContent = '⏹ Остановить';
+    const check = setInterval(() => {
+      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+        clearInterval(check);
+        resetPrologueBtn(btn);
+      }
+    }, 400);
+  } else {
+    btn.textContent = '🔇 Голос недоступен';
+  }
+}
+
+function setupPrologueVoice() {
+  const screen = document.getElementById('screen-prologue');
+  if (!screen || document.getElementById('prologue-voice-btn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'prologue-voice-btn';
+  btn.type = 'button';
+  btn.className = 'btn secondary';
+  btn.textContent = '🔊 Прослушать легенду';
+  btn.style.cssText = 'display:block; margin:14px auto 8px; padding:10px 18px;';
+  const startButton = screen.querySelector('.center-flex > button');
+  if (startButton) startButton.before(btn);
+  else screen.appendChild(btn);
+
+  btn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    playTtsPrologue(screen, btn);
+  });
 }
 
 window.GameAPI = {
@@ -328,12 +474,10 @@ window.GameAPI = {
   equipByIndex: equipItemByIndexUI, unequip: unequipItemUI,
   sellByIndex: sellItemByIndexUI,
   sellJunk: sellJunkUI,
-  openShop, buy: buyItemUI,
+  openShop, buy: buyItemUI, setShopPreset, buybackItem: buybackItemUI,
   enterOverworld: enterOverworldFromUI,
   mapSelect, mapTravel, mapEnter,
   exitOverworld,
-
-  toggleGameMenu, openGameMenuTab, closeGamePanel,
   owAttack, owCast, owUseItem, owBlock, owUseAbility, owFlee,
   owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
   owPauseResume, owPauseSaveVillage, owPauseExit,
@@ -341,6 +485,12 @@ window.GameAPI = {
   spendStat,
   setInvFilter, setInvSort,
   invSlotClick,
+  openSaleUI,
+  toggleSaleItem,
+  selectSaleTiers: selectSaleTiersUI,
+  selectSaleFilter: selectSaleFilterUI,
+  confirmSale: confirmSaleUI,
+  cancelSale: cancelSaleUI,
   respawnInVillage, deathToMenu,
   openDailyChest,
   openBlacksmith, openHealer, openAlchemist, backToVillage,
@@ -354,9 +504,12 @@ window.GameAPI = {
   petCat: petCatUI,
   claimQuest: claimQuestUI,
   interactNpc,
+  enterVillageInterior,
+  exitVillageInterior,
   upgradeEquipment: upgradeEquipmentUI,
   healAtHealer: healAtHealerUI,
   craftRecipe: craftRecipeUI,
+  reforgeItem: reforgeItemUI,
   showShopTooltip,
   equipBest: equipBestUI,
   socketRune: socketRuneUI,
@@ -365,17 +518,25 @@ window.GameAPI = {
   passiveTreePointerDown, passiveTreePointerMove, passiveTreePointerUp,
   startNGPlus,
   enterRift,
+  openRiftMap,
+  enterTower: openTowerMenu,
+  chooseRiftEnding,
   showScreen,
   skipPrologue,
   exportSave,
   importSave,
-  continueGame, startNewGame, enterRiftFromMenu, exitApplication,
-  ...InterfaceV2,
-  setOverworldPaused,
-  openGameMenuTab, closeGamePanel, toggleGameMenu
+  stopVoice,
+  resetPrologue: () => {
+    localStorage.removeItem('magic-rpg-prologue-seen');
+    location.reload();
+  },
+  voiceInfo: () => {
+    if (!window.speechSynthesis) return 'Web Speech API не поддерживается';
+    const voices = window.speechSynthesis.getVoices();
+    console.table(voices.map(v => ({ name: v.name, lang: v.lang, default: v.default })));
+    return { count: voices.length, speaking: window.speechSynthesis.speaking };
+  },
 };
-
-InterfaceV2.initInterfaceV2();
 
 migrateLegacySave();
 loadSettings();
@@ -384,15 +545,17 @@ const prologueSeen = localStorage.getItem('magic-rpg-prologue-seen');
 const hasAnySave = !!(localStorage.getItem('magic-rpg-save-1') || localStorage.getItem('magic-rpg-save-2') || localStorage.getItem('magic-rpg-save-3'));
 const prologueEl = document.getElementById('screen-prologue');
 
-const showPrologue = false; // V2: первый запуск — сразу в главное меню и выбор архетипа.
+const showPrologue = ALWAYS_SHOW_PROLOGUE || (!prologueSeen && !hasAnySave);
 
 if (showPrologue && prologueEl) {
   showScreen('screen-prologue');
+  setupPrologueVoice();
 } else {
   showScreen('screen-main');
   updateMainMenu();
 }
 
 window.addEventListener('beforeunload', () => {
-if (state.game) saveGame();
+  stopVoice();
+  if (state.game) saveGame();
 });

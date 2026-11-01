@@ -25,8 +25,8 @@ export function tryMovePlayer(dx, dy) {
   const speed = 3.2, p = ow.player, r = 12;
   let moved = false;
   const nx = p.x + dx * speed, ny = p.y + dy * speed;
-  if (isWalkable(ow.map, ow.cols, ow.rows, nx - r, p.y, ow.locationId) && isWalkable(ow.map, ow.cols, ow.rows, nx + r, p.y, ow.locationId)) { p.x = nx; moved = true; }
-  if (isWalkable(ow.map, ow.cols, ow.rows, p.x, ny - r, ow.locationId) && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny + r, ow.locationId)) { p.y = ny; moved = true; }
+  if (isWalkable(ow.map, ow.cols, ow.rows, nx - r, p.y, (ow.sourceLocationId || ow.locationId)) && isWalkable(ow.map, ow.cols, ow.rows, nx + r, p.y, (ow.sourceLocationId || ow.locationId))) { p.x = nx; moved = true; }
+  if (isWalkable(ow.map, ow.cols, ow.rows, p.x, ny - r, (ow.sourceLocationId || ow.locationId)) && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny + r, (ow.sourceLocationId || ow.locationId))) { p.y = ny; moved = true; }
   p.x = Math.max(TILE / 2, Math.min(ow.cols * TILE - TILE / 2, p.x));
   p.y = Math.max(TILE / 2, Math.min(ow.rows * TILE - TILE / 2, p.y));
   if (moved) playSound('step');
@@ -68,14 +68,15 @@ export function updateOverworld(dt) {
       npc.wanderDy = Math.sin(a);
     }
     const dHome = Math.hypot(npc.x - npc.homeX, npc.y - npc.homeY);
-    if (dHome > 80) {
+    const wanderRadius = Number.isFinite(npc.wanderRadius) ? npc.wanderRadius : 80;
+    if (dHome > wanderRadius) {
       npc.wanderDx = (npc.homeX - npc.x) / (dHome || 1);
       npc.wanderDy = (npc.homeY - npc.y) / (dHome || 1);
     }
-    const spd = 0.5 * dt;
+    const spd = (npc.wanderSpeed || 0.5) * dt;
     const nx = npc.x + npc.wanderDx * spd, ny = npc.y + npc.wanderDy * spd;
-    if (isWalkable(ow.map, ow.cols, ow.rows, nx, npc.y, ow.locationId)) npc.x = nx; else npc.wanderDx = -npc.wanderDx;
-    if (isWalkable(ow.map, ow.cols, ow.rows, npc.x, ny, ow.locationId)) npc.y = ny; else npc.wanderDy = -npc.wanderDy;
+    if (isWalkable(ow.map, ow.cols, ow.rows, nx, npc.y, (ow.sourceLocationId || ow.locationId))) npc.x = nx; else npc.wanderDx = -npc.wanderDx;
+    if (isWalkable(ow.map, ow.cols, ow.rows, npc.x, ny, (ow.sourceLocationId || ow.locationId))) npc.y = ny; else npc.wanderDy = -npc.wanderDy;
   }
 
   for (const e of ow.enemies) {
@@ -89,8 +90,8 @@ export function updateOverworld(dt) {
       const dx = ow.player.x - e.x, dy = ow.player.y - e.y;
       const ln = Math.hypot(dx, dy) || 1, spd = 2.2 * dt;
       const nx = e.x + (dx / ln) * spd, ny = e.y + (dy / ln) * spd;
-      if (isWalkable(ow.map, ow.cols, ow.rows, nx, e.y, ow.locationId)) e.x = nx;
-      if (isWalkable(ow.map, ow.cols, ow.rows, e.x, ny, ow.locationId)) e.y = ny;
+      if (isWalkable(ow.map, ow.cols, ow.rows, nx, e.y, (ow.sourceLocationId || ow.locationId))) e.x = nx;
+      if (isWalkable(ow.map, ow.cols, ow.rows, e.x, ny, (ow.sourceLocationId || ow.locationId))) e.y = ny;
     } else {
       e.wanderTimer -= dt * 0.02;
       if (e.wanderTimer <= 0) {
@@ -105,8 +106,8 @@ export function updateOverworld(dt) {
       }
       const spd = 0.9 * dt;
       const nx = e.x + e.wanderDx * spd, ny = e.y + e.wanderDy * spd;
-      if (isWalkable(ow.map, ow.cols, ow.rows, nx, e.y, ow.locationId)) e.x = nx; else e.wanderDx = -e.wanderDx;
-      if (isWalkable(ow.map, ow.cols, ow.rows, e.x, ny, ow.locationId)) e.y = ny; else e.wanderDy = -e.wanderDy;
+      if (isWalkable(ow.map, ow.cols, ow.rows, nx, e.y, (ow.sourceLocationId || ow.locationId))) e.x = nx; else e.wanderDx = -e.wanderDx;
+      if (isWalkable(ow.map, ow.cols, ow.rows, e.x, ny, (ow.sourceLocationId || ow.locationId))) e.y = ny; else e.wanderDy = -e.wanderDy;
     }
   }
 

@@ -8,16 +8,18 @@ import { emit } from '../systems/events.js';
 import { saveGame } from '../systems/save.js';
 import { renderGame } from './header.js';
 import { enterOverworld } from '../systems/overworld.js';
+import { isRiftReady } from '../systems/rift.js';
 
 const MAP_SPEED_X = 26;
 const MAP_SPEED_Y = 20;
-const MAP_CLUSTER_RADIUS_MIN = 18;
-const MAP_CLUSTER_RADIUS_MAX = 28;
-const MAP_NODE_MIN_DISTANCE = 9.5;
+const MAP_CLUSTER_RADIUS_MIN = 25;
+const MAP_CLUSTER_RADIUS_MAX = 39;
+const MAP_NODE_MIN_DISTANCE = 12;
 
 let selected = null;
 let keysBound = false;
 let worldLayout = null;
+let worldLayoutKey = '';
 const map = { raf: 0, keys: new Set(), x: 50, y: 50, nodes: [] };
 
 export function createWorldMapLayout(ids, random = Math.random) {
@@ -62,7 +64,13 @@ export function createWorldMapLayout(ids, random = Math.random) {
 }
 
 function ringNodes() {
-  if (!worldLayout) worldLayout = createWorldMapLayout(Object.keys(LOCATIONS));
+  const ids = Object.keys(LOCATIONS).filter(id => id !== 'rift' || isRiftReady());
+  const key = ids.join('|');
+  if (!worldLayout || worldLayoutKey !== key) {
+    worldLayout = createWorldMapLayout(ids);
+    worldLayoutKey = key;
+    if (selected && !ids.includes(selected)) selected = null;
+  }
   return worldLayout.map(node => ({ ...node }));
 }
 
@@ -70,15 +78,18 @@ function panelHtml(id) {
   const loc = LOCATIONS[id];
   const here = id === state.game.location;
   const actions = [];
-  if (here) {
+  if (id === 'rift') {
+    actions.push(`<button onclick="GameAPI.enterRift()">Войти в Разлом</button>`);
+  } else if (here) {
     if (loc.safe || loc.enemies?.length) actions.push(`<button onclick="GameAPI.enterOverworld()">Исследовать</button>`);
     if (loc.shop) actions.push(`<button onclick="GameAPI.openShop()">Магазин</button>`);
     if (id === 'village') {
       const canOpen = canOpenDaily();
       actions.push(`<button onclick="GameAPI.openDailyChest()" ${canOpen ? '' : 'disabled'}>${canOpen ? 'Ежедневный сундук' : `Сундук через ${formatRemaining(timeUntilDaily())}`}</button>`);
-      const riftReady = !!(state.game.shards.forest && state.game.shards.ruins && state.game.shards.shadow);
+      const riftReady = isRiftReady();
       const best = state.game.player.riftBest || 0;
       actions.push(`<button onclick="GameAPI.enterRift()" ${riftReady ? '' : 'disabled'}>Разлом${best > 0 ? ` · рекорд ${best}` : ''}</button>`);
+      actions.push(`<button onclick="GameAPI.enterTower()">🏰 Башня · 40 этажей</button>`);
     }
   } else {
     // Если локация не текущая, кнопка "Перейти" всё ещё нужна для тех, кто хочет сначала прочитать описание
@@ -120,7 +131,10 @@ function selectNode(id) {
 // ===== ИЗМЕНЕНО: клик сразу перемещает, если это другая локация =====
 export function mapSelect(id) {
   if (!LOCATIONS[id]) return;
-  
+  if (id === 'rift') {
+    selectNode(id);
+    return;
+  }
   if (id !== state.game.location) {
     mapTravel(id);
   } else {
@@ -129,6 +143,7 @@ export function mapSelect(id) {
 }
 
 export function mapTravel(id) {
+  if (id === 'rift') { selectNode(id); return; }
   if (!LOCATIONS[id] || id === state.game.location) return;
   selected = id;
   travelTo(id);
@@ -136,6 +151,7 @@ export function mapTravel(id) {
 
 export function mapEnter() {
   if (!selected) return;
+  if (selected === 'rift') { window.GameAPI?.enterRift?.(); return; }
   if (selected !== state.game.location) travelTo(selected);
   if (state.game.location === 'village' || LOCATIONS[state.game.location]?.enemies?.length) enterOverworldFromUI();
 }

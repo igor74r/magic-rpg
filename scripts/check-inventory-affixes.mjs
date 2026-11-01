@@ -5,24 +5,27 @@ import { addItem, countItem, removeItem } from '../systems/inventory.js';
 import { craftRecipe } from '../systems/crafting.js';
 import { NPCS } from '../data/npcs.js';
 
-assert.deepEqual(Object.keys(RARITIES), ['common', 'rare', 'epic', 'legendary']);
+assert.deepEqual(Object.keys(RARITIES), ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']);
+assert.deepEqual(Object.values(RARITIES).map(rarity => rarity.weight), [60, 25, 10, 4, 0.9, 0.1]);
 assert.equal(rollRarity(() => 0), 'common');
-assert.equal(rollRarity(() => 0.61), 'rare');
-assert.equal(rollRarity(() => 0.86), 'epic');
-assert.equal(rollRarity(() => 0.98), 'legendary');
+assert.equal(rollRarity(() => 0.61), 'uncommon');
+assert.equal(rollRarity(() => 0.86), 'rare');
+assert.equal(rollRarity(() => 0.96), 'epic');
+assert.equal(rollRarity(() => 0.995), 'legendary');
+assert.equal(rollRarity(() => 0.9999, { allowMythic: true }), 'mythic');
 
 const sword = ITEMS['iron-sword'];
-assert.equal(rollItemAffixes(sword, 'common', () => 0).length, 0);
-assert.equal(rollItemAffixes(sword, 'rare', () => 0).length, 1);
-assert.equal(rollItemAffixes(sword, 'epic', () => 0).length, 2);
-assert.equal(rollItemAffixes(sword, 'legendary', () => 0).length, 3);
-assert.equal(new Set(rollItemAffixes(sword, 'legendary', () => 0).map(x => x.id)).size, 3);
+assert.deepEqual(Object.values(RARITIES).map(rarity => rollItemAffixes(sword, Object.keys(RARITIES)[rarity.tier - 1], () => 0).length), [0, 1, 2, 3, 4, 5]);
+assert.equal(new Set(rollItemAffixes(sword, 'mythic', () => 0).map(x => x.id)).size, 5);
+for (const type of ['weapon','head','shoulders','chest','gloves','legs','boots','shield','ring','amulet','cloak']) {
+  assert.equal(rollItemAffixes({ type }, 'mythic', () => 0).length, 5, `T6 affix pool missing for ${type}`);
+}
 
 state.game = { player: { inventory: [], gold: 0, equipped: {} } };
 const legendary = addItem('iron-sword', 1, { rarity: 'legendary', random: () => 0 })[0];
 assert.equal(legendary.rarity, 'legendary');
-assert.equal(legendary.affixes.length, 3);
-assert.ok(legendary.bonus.attack >= Math.round(sword.bonus.attack * RARITIES.legendary.multiplier));
+assert.equal(legendary.affixes.length, 4);
+assert.ok(legendary.bonus.attack >= sword.bonus.attack);
 
 state.game.player.inventory = [
   { id: 'herb-life', qty: 2 },

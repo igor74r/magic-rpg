@@ -8,9 +8,13 @@ const player = { campaignClaimed: {} };
 assert.equal(getCurrentActIndex(player), 0);
 assert.equal(getActPriceMultiplier(player), 1);
 assert.equal(getBuyPrice('health-potion', player), ITEMS['health-potion'].price);
-assert.equal(getBuyPrice('mana-crystal', player), 0);
+assert.equal(getBuyPrice('old-archive-seal', player), 0);
 assert.equal(getBuyPrice('missing-item', player), 0);
-assert.equal(getSellPrice({ id: 'mana-crystal', qty: 1 }, player), 0);
+assert.equal(getSellPrice({ id: 'old-archive-seal', qty: 1 }, player), 0);
+assert.equal(getBuyPrice('shard-flame', player), 0);
+assert.equal(getSellPrice({ id: 'shard-flame', qty: 1 }, player), 0);
+assert.equal(getSellPrice({ id: 'iron-sword', rarity: 'mythic' }, player), 0);
+assert.equal(getSellPrice({ id: 'iron-sword', rarity: 'epic' }, player), Math.floor(150 * 0.35));
 assert.ok(getSellPrice({ id: 'health-potion', qty: 3 }, player) >= 3);
 
 for (let act = 0; act < STORY.acts.length; act++) {

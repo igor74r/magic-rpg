@@ -6,7 +6,9 @@ import { LOCATIONS } from '../../data/locations.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic } from './models.js';
 import { drawAtlasTile, drawAtlasProp } from './tile-atlas.js';
+import { drawVillageBuilding } from './village-atlas.js';
 import { getTileDanger } from '../../systems/overworld/hazards.js';
+import { getActiveCampaignMission } from '../../systems/campaign.js';
 import { renderCombatPanel } from './combat-panel.js';
 import {
   VIEW_W, VIEW_H, getTheme, MOD_LABEL,
@@ -23,6 +25,9 @@ let footprints = [], lastFootprintPos = { x: 0, y: 0 }, hurtFlash = 0, worldTime
 let deathParticles = [], bloodSplats = [], lowHpPulse = 0, corpses = [], snowAccum = 0;
 let lastTileKey = null, tileDamageTimer = 0, _weatherEffectApplied = null;
 let mapTooltipEl = null;
+
+// Reuse the darkness/light-mask surface instead of allocating a full canvas every frame.
+let darknessCanvas = null, darknessCtx = null;
 
 const EVENT_PROP_COLUMN = Object.freeze({ mimic: 0, crystal: 1, altar: 2 });
 
@@ -199,6 +204,12 @@ function tick(ts) {
 }
 
 function drawTile(ctx, type, x, y, size, themeName, colors) {
+  // Aurora: modular shaded architecture replaces primitive repeated roof glyphs.
+  if (themeName === 'village' && type === 2) {
+    const cellX = Math.floor(x / size), cellY = Math.floor(y / size);
+    const variant = Math.abs((cellX * 7 + cellY * 11 + cellX * cellY) % 16);
+    if (drawVillageBuilding(ctx, x, y, size, variant)) return;
+  }
   if (drawAtlasTile(ctx, type, x, y, size, themeName)) {
     const hazard = getTileDanger(type, themeName);
     if (hazard) {
@@ -301,6 +312,9 @@ function render() {
   const isLowHp = player.hp / player.maxHp < 0.25;
   const settings = state.settings || {};
   const reduceMotion = settings.reducedMotion === true;
+  const graphicsQuality = settings.graphicsQuality || 'high';
+  const allowWeather = settings.weatherEffects !== false && graphicsQuality !== 'low' && !settings.reducedMotion;
+  const allowAmbientFog = settings.ambientFog !== false && graphicsQuality !== 'low' && !settings.reducedMotion;
   const allowShake = settings.screenShake !== false && !reduceMotion;
   const showLowHealth = settings.lowHealthEffects !== false && !reduceMotion;
   let shakeX = 0, shakeY = 0;
@@ -321,6 +335,9 @@ function render() {
   const startCol = Math.max(0, Math.floor(cam.x / ow.tile)), startRow = Math.max(0, Math.floor(cam.y / ow.tile));
   const endCol = Math.min(ow.cols, startCol + Math.ceil(VIEW_W / ow.tile) + 2), endRow = Math.min(ow.rows, startRow + Math.ceil(VIEW_H / ow.tile) + 2);
 
+  // Smooth atlas artwork in one batch instead of changing Canvas state per tile.
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   for (let y = startRow; y < endRow; y++) {
     if (!ow.map[y]) continue;
     for (let x = startCol; x < endCol; x++) {
@@ -328,6 +345,8 @@ function render() {
       if (tile !== undefined) drawTile(ctx, tile, x * ow.tile - cam.x, y * ow.tile - cam.y, ow.tile, ow.locationId, theme.colors);
     }
   }
+  // Keep pixel-art characters and effects crisp after the terrain pass.
+  ctx.imageSmoothingEnabled = false;
 
   // ============= СЕКРЕТНЫЕ СТЕНЫ: МЕРЦАНИЕ =============
   if (!ow.combat && ow.secretWalls) {
@@ -395,14 +414,16 @@ function render() {
     const sx = obj.x - cam.x, sy = obj.y - cam.y;
     if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
     const dist = Math.hypot(obj.x - p.x, obj.y - p.y);
-    if (dist < obj.interactionRadius && !ow.combat) {
+    if (!obj.decorative && dist < obj.interactionRadius && !ow.combat) {
       nearNpc = obj;
       ctx.fillStyle = 'rgba(255, 215, 0, 0.15)'; ctx.beginPath(); ctx.arc(sx, sy, 32, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; ctx.lineWidth = 2; ctx.stroke();
     }
     drawStatic(ctx, obj, sx, sy, theme.shadow);
-    ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
-    ctx.strokeText(obj.name, sx, sy - 30); ctx.fillStyle = '#d4c8a8'; ctx.fillText(obj.name, sx, sy - 30);
+    if (!obj.decorative) {
+      ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
+      ctx.strokeText(obj.name, sx, sy - 30); ctx.fillStyle = '#d4c8a8'; ctx.fillText(obj.name, sx, sy - 30);
+    }
   }
 
   for (const npc of ow.npcs || []) {
@@ -438,8 +459,11 @@ function render() {
     ctx.strokeText(ev.name, sx, sy - 24); ctx.fillStyle = '#ffd060'; ctx.fillText(ev.name, sx, sy - 24);
   }
 
-  const loc = LOCATIONS[ow.locationId];
-  const questEnemyId = loc?.shard && !state.game.shards[loc.shard] ? loc.shardFrom : null;
+  const activeMission = getActiveCampaignMission(state.game.player);
+  const missionLocationId = activeMission?.mission.locationId || activeMission?.act.locationId;
+  const questEnemyId = activeMission && missionLocationId === (ow.sourceLocationId || ow.locationId)
+    ? activeMission.mission.enemyId
+    : null;
   const now = performance.now();
 
   for (const e of ow.enemies) {
@@ -507,7 +531,9 @@ function render() {
     if (pulse > 0) pLungeX = 5; 
   }
 
-  drawPlayerByClass(ctx, p.x - cam.x + pLungeX, p.y - cam.y + pLungeY, state.game.player.class, theme.shadow);
+  const heroKeys = ow.keys || {};
+  const heroMoving = !ow.combat && !ow.defeated && !!(heroKeys.w || heroKeys.a || heroKeys.s || heroKeys.d || heroKeys.arrowup || heroKeys.arrowdown || heroKeys.arrowleft || heroKeys.arrowright);
+  drawPlayerByClass(ctx, p.x - cam.x + pLungeX, p.y - cam.y + pLungeY, state.game.player.class, theme.shadow, heroMoving);
 
   const px = p.x - cam.x, py = p.y - cam.y;
   const bw = 50;
@@ -578,7 +604,7 @@ function render() {
     ctx.strokeStyle = 'rgba(201,162,39,0.6)'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]);
   }
 
-  if (!reduceMotion) drawBloom(ctx);
+  if (!reduceMotion && settings.bloomEffects !== false && graphicsQuality === 'high') drawBloom(ctx);
 
   const dayPhase = (worldTime % 120) / 120;
   let nightAlpha = 0;
@@ -597,22 +623,33 @@ function render() {
     nightColor = `rgba(50, 20, 50, `;
   }
 
-  if (nightAlpha > 0 && !['village', 'library'].includes(ow.locationId)) {
-    ctx.fillStyle = nightColor + nightAlpha + ')';
+  if (nightAlpha > 0 && ow.locationId !== 'library') {
+    const villageNightAlpha = ow.locationId === 'village' ? nightAlpha * 0.34 : nightAlpha;
+    ctx.fillStyle = nightColor + villageNightAlpha + ')';
     ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
   }
 
-  const fogIntensity = ow.combat ? 0.2 : theme.fog;
+  const fogIntensity = !allowAmbientFog ? 0 : (ow.combat ? 0.2 : theme.fog * (graphicsQuality === 'balanced' ? 0.72 : 1));
   if (fogIntensity > 0) {
-    const fogCanvas = document.createElement('canvas');
-    fogCanvas.width = VIEW_W; fogCanvas.height = VIEW_H;
-    const fctx = fogCanvas.getContext('2d');
+    if (!darknessCanvas) {
+      darknessCanvas = document.createElement('canvas');
+      darknessCanvas.width = VIEW_W; darknessCanvas.height = VIEW_H;
+      darknessCtx = darknessCanvas.getContext('2d', { alpha: true });
+    }
+    const fogCanvas = darknessCanvas;
+    const fctx = darknessCtx;
+    fctx.setTransform(1, 0, 0, 1, 0, 0);
+    fctx.globalCompositeOperation = 'source-over';
+    fctx.globalAlpha = 1;
+    fctx.clearRect(0, 0, VIEW_W, VIEW_H);
     fctx.fillStyle = `rgba(0,0,0,${fogIntensity})`;
     fctx.fillRect(0, 0, VIEW_W, VIEW_H);
 
     fctx.globalCompositeOperation = 'destination-out';
-    let lightGrad = fctx.createRadialGradient(px, py, 20, px, py, 180);
-    lightGrad.addColorStop(0, 'rgba(0,0,0,1)'); lightGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    let lightGrad = fctx.createRadialGradient(px, py, 12, px, py, 190);
+    lightGrad.addColorStop(0, 'rgba(0,0,0,1)');
+    lightGrad.addColorStop(0.42, 'rgba(0,0,0,0.82)');
+    lightGrad.addColorStop(1, 'rgba(0,0,0,0)');
     fctx.fillStyle = lightGrad; fctx.beginPath(); fctx.arc(px, py, 180, 0, Math.PI * 2); fctx.fill();
 
     // Секретные стены подсвечивают вокруг себя маленькую зону (только когда близко)
@@ -649,12 +686,20 @@ function render() {
       fctx.fillStyle = lightGrad; fctx.beginPath(); fctx.arc(ex, ey, 150, 0, Math.PI * 2); fctx.fill();
     }
     ctx.drawImage(fogCanvas, 0, 0);
+
+    // Subtle warm/cool bounce at the edge of the hero light keeps the scene readable.
+    const glowColor = state.game.player.class === 'mage' ? '100, 185, 255' : '220, 164, 92';
+    const edgeGlow = ctx.createRadialGradient(px, py, 42, px, py, 150);
+    edgeGlow.addColorStop(0, `rgba(${glowColor}, 0)`);
+    edgeGlow.addColorStop(0.72, `rgba(${glowColor}, 0.035)`);
+    edgeGlow.addColorStop(1, `rgba(${glowColor}, 0)`);
+    ctx.fillStyle = edgeGlow;
+    ctx.fillRect(px - 150, py - 150, 300, 300);
   }
 
   if (!reduceMotion) {
-    drawFireflies(ctx, worldTime);
-    drawFogLayers(ctx);
-    drawWeather(ctx);
+    if (allowWeather) drawWeather(ctx);
+    if (allowAmbientFog) { drawFireflies(ctx, worldTime); drawFogLayers(ctx); }
   }
 
   if (getLightningFlash() > 0) {

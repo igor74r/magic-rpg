@@ -18,6 +18,7 @@ export function addExp(amount) {
   while (p.level < MAX_LEVEL && p.exp >= p.expNext) {
     p.exp -= p.expNext;
     p.level++;
+    p.luck = Math.min(100, (Number.isFinite(p.luck) ? p.luck : 5) + 0.5);
     p.expNext = getExpNext(p.level);
 
     // Прирост специализируется под выбранный класс.

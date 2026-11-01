@@ -53,8 +53,8 @@ export function speak(text, opts = {}) {
 
     const u = new SpeechSynthesisUtterance(clean);
     u.lang = 'ru-RU';
-    u.rate = opts.rate ?? 0.9;
-    u.pitch = opts.pitch ?? 0.85;
+    u.rate = opts.rate ?? 0.86;
+    u.pitch = opts.pitch ?? 0.92;
     u.volume = opts.volume ?? 1;
 
     const v = pickRussianVoice();

@@ -3,11 +3,16 @@ export const NPCS = {
     id: 'blacksmith', name: 'Кузнец Борин', emoji: '⚒️',
     greetings: ['Клинок тупой? Принеси, наточу.', 'Быстро и недёшево.', 'Эх, раньше сталь была лучше...'],
     maxLevel: 3,
-    upgrades: [{ cost: 30, forgeBonus: 2 }, { cost: 75, forgeBonus: 4 }, { cost: 140, forgeBonus: 7 }]
+    upgrades: [{ cost: 30, forgeBonus: 2, statPercent: 0.05 }, { cost: 75, forgeBonus: 4, statPercent: 0.05 }, { cost: 140, forgeBonus: 7, statPercent: 0.05 }],
+    recipes: [
+      { id: 'r5-dragon-blade', result: 'dragon-blade', qty: 1, rarity: 'legendary', craftTier: 5, station: 'final-forge', ingredients: [{ id: 'ember-core', qty: 3 }, { id: 'void-dust', qty: 2 }, { id: 'grave-salt', qty: 1 }] },
+      { id: 'r5-dragon-plate', result: 'dragon-scale-armor', qty: 1, rarity: 'legendary', craftTier: 5, station: 'final-forge', ingredients: [{ id: 'ember-core', qty: 2 }, { id: 'frost-essence', qty: 2 }, { id: 'root-fiber', qty: 2 }] },
+      { id: 'r5-astral-staff', result: 'astral-staff', qty: 1, rarity: 'legendary', craftTier: 5, station: 'final-forge', ingredients: [{ id: 'void-dust', qty: 3 }, { id: 'frost-essence', qty: 2 }, { id: 'ember-core', qty: 1 }] }
+    ]
   },
   healer: {
     id: 'healer', name: 'Лекарь Мирра', emoji: '💚',
-    greetings: ['Раны глубоки, но свет сильнее.', 'Полное исцеление — 50 золота.', 'Не умирай, странник.'],
+    greetings: ['Раны глубоки, но свет сильнее.', 'Полное исцеление — 8 золота.', 'Не умирай, странник.'],
     cost: 8
   },
   alchemist: {
@@ -31,8 +36,9 @@ export const NPCS = {
     stock: [
       "health-potion", "mana-potion", "strong-health-potion", "strong-mana-potion", "antidote",
       "strength-elixir", "mana-elixir", "scroll-lightning", "scroll-shield", "restorative-potion",
-      "rootbound-hood", "cinder-visor", "duelist-grips", "gravebinder-gloves",
-      "windstep-boots", "glacier-greaves", "amulet-first-light", "pendant-last-oath",
+      "iron-sword", "apprentice-staff", "leather-armor",
+      "rootbound-hood", "cinder-visor", "briar-shoulders", "duelist-grips", "gravebinder-gloves", "oath-bracers",
+      "windstep-boots", "glacier-greaves", "tower-shield", "ranger-cloak", "obsidian-mantle", "amulet-first-light", "pendant-last-oath",
       "ring-wolf-eye", "ring-quiet-tide",
       "rune-root", "rune-ember", "rune-tide", "rune-frost", "rune-void"
     ]

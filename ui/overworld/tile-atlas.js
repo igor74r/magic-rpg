@@ -1,4 +1,4 @@
-const TILE_SIZE = 48;
+const TILE_SIZE = 96;
 const BIOME_ROW = Object.freeze({
   village: 0, forest: 1, ruins: 2, shadow: 3,
   swamp: 4, graveyard: 3, volcano: 5, dragon: 5,
@@ -26,7 +26,7 @@ function requestAtlas() {
   }
 }
 
-/** Draws an atlas tile; returns false until loaded or when Canvas cannot draw it. */
+/** Draws a 96px source tile downsampled to the game's 48px world grid. */
 export function drawAtlasTile(ctx, type, x, y, size, themeName) {
   if (!Number.isInteger(type) || type < 0 || type > 4) return false;
   const row = BIOME_ROW[themeName];
@@ -34,6 +34,8 @@ export function drawAtlasTile(ctx, type, x, y, size, themeName) {
   if (!atlasRequested) requestAtlas();
   if (!atlasReady || !atlasImage) return false;
   try {
+    // Smoothing is configured once by the renderer for the whole terrain pass.
+    // Avoid save/restore and state changes for every single tile.
     ctx.drawImage(atlasImage, type * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE, x, y, size, size);
     return true;
   } catch (error) {
@@ -41,7 +43,6 @@ export function drawAtlasTile(ctx, type, x, y, size, themeName) {
     return false;
   }
 }
-
 
 let propsImage = null;
 let propsRequested = false;
@@ -51,7 +52,6 @@ let propsFailed = false;
 function requestPropsAtlas() {
   if (propsRequested || typeof Image === 'undefined') return;
   propsRequested = true;
-
   try {
     propsImage = new Image();
     propsImage.onload = () => { propsReady = true; };
@@ -64,26 +64,18 @@ function requestPropsAtlas() {
 }
 
 /** Draws one of the 32 environment props (8 columns × 4 rows). */
-export function drawAtlasProp(ctx, index, x, y, width = TILE_SIZE, height = TILE_SIZE) {
+export function drawAtlasProp(ctx, index, x, y, width = 48, height = 48) {
   if (!Number.isInteger(index) || index < 0 || index >= 32 || propsFailed) return false;
   if (!propsRequested) requestPropsAtlas();
   if (!propsReady || !propsImage) return false;
-
   const col = index % 8;
   const row = Math.floor(index / 8);
-
   try {
-    ctx.drawImage(
-      propsImage,
-      col * TILE_SIZE,
-      row * TILE_SIZE,
-      TILE_SIZE,
-      TILE_SIZE,
-      x,
-      y,
-      width,
-      height
-    );
+    const previousSmoothing = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(propsImage, col * 96, row * 96, 96, 96, x, y, width, height);
+    ctx.imageSmoothingEnabled = previousSmoothing;
     return true;
   } catch (error) {
     propsFailed = true;

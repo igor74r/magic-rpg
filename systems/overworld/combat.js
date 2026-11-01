@@ -23,7 +23,10 @@ import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
 import { getRiftMult } from '../rift.js';
+import { getTowerMult } from '../tower.js';
+import { claimStoryDragonReward } from '../story-dragons.js';
 import { getActPriceMultiplier } from '../economy.js';
+import { getLootDropChance } from '../loot.js';
 import { updateQuestProgress } from '../dailyQuests.js';
 import { canCompleteMainQuest, recordCampaignKill, recordCampaignShard } from '../campaign.js';
 import { pushLog } from './log.js';
@@ -37,7 +40,6 @@ import {
 
 const HERB_DROP_CHANCE = 0.30;
 const HERB_DROP_CHANCE_ELITE = 0.70;
-const LEGENDARY_DROP_CHANCE = 0.01;
 
 export function triggerShake(mag, dur = 0.25) {
   const ow = state.overworld;
@@ -60,8 +62,8 @@ export function clearPlayerEffects() {
 function enemyDisplayName(e) {
   const def = ENEMIES[e.enemyId];
 
-  if (e.boss) return `☠ ${def.name}`;
-  if (e.elite) return `★ ${def.name}`;
+  if (e.boss) return `в  ${def.name}`;
+  if (e.elite) return `в… ${def.name}`;
 
   if (e.modifier) {
     const modifier = MODIFIERS[e.modifier];
@@ -115,7 +117,7 @@ export function enterCombat(enemy) {
     playerResurrectionUsed: false
   };
 
-  pushLog(`⚔️ Бой: ${enemyDisplayName(enemy)}`, 'info');
+  pushLog(`вљ”пёЏ Р‘РѕР№: ${enemyDisplayName(enemy)}`, 'info');
   emit('combat:start');
 }
 
@@ -130,7 +132,7 @@ function checkBossPhase(enemy) {
     if (enemy.hp / enemy.maxHp <= phase.atHp) {
       enemy.phase = i + 1;
 
-      pushLog(`⚠️ ${phase.msg}`, 'damage');
+      pushLog(`вљ пёЏ ${phase.msg}`, 'damage');
       playSound('cast');
       triggerShake(10, 0.4);
     }
@@ -182,7 +184,7 @@ export function combatAttack() {
     damage = Math.floor(damage * 2);
     ow.combat.playerChargeNext = false;
 
-    pushLog('⚡ Рывок: двойной урон!', 'damage');
+    pushLog('вљЎ Р С‹РІРѕРє: РґРІРѕР№РЅРѕР№ СѓСЂРѕРЅ!', 'damage');
     spawnParticles(enemy.x, enemy.y, 'spark', 8);
   }
 
@@ -205,7 +207,7 @@ export function combatAttack() {
       life: 1.2
     });
 
-    pushLog(`🩸 Кровожадность: +${heal} HP`, 'heal');
+    pushLog(`рџ©ё РљСЂРѕРІРѕР¶Р°РґРЅРѕСЃС‚СЊ: +${heal} HP`, 'heal');
   }
 
   enemy.hp -= damage;
@@ -219,7 +221,7 @@ export function combatAttack() {
   });
 
   pushLog(
-    `Вы нанесли ${damage} урона (${enemyDisplayName(enemy)})${isCrit ? ' КРИТ!' : ''}`,
+    `Р’С‹ РЅР°РЅРµСЃР»Рё ${damage} СѓСЂРѕРЅР° (${enemyDisplayName(enemy)})${isCrit ? ' РљР РРў!' : ''}`,
     'damage'
   );
 
@@ -228,7 +230,7 @@ export function combatAttack() {
     ow.player.mp = p.mp;
 
     pushLog(
-      `🔥 Ярость: +15 (${p.mp}/${p.maxMp})`,
+      `рџ”Ґ РЇСЂРѕСЃС‚СЊ: +15 (${p.mp}/${p.maxMp})`,
       'info'
     );
   } else if (p.class === 'archer') {
@@ -236,7 +238,7 @@ export function combatAttack() {
     ow.player.mp = p.mp;
 
     pushLog(
-      `🎯 Концентрация: +10 (${p.mp}/${p.maxMp})`,
+      `рџЋЇ РљРѕРЅС†РµРЅС‚СЂР°С†РёСЏ: +10 (${p.mp}/${p.maxMp})`,
       'info'
     );
   }
@@ -273,7 +275,7 @@ export function combatCastSpell(spellId) {
   if (!spell) return;
 
   if (p.class === 'warrior') {
-    pushLog('Воин не умеет колдовать!', 'info');
+    pushLog('Р’РѕРёРЅ РЅРµ СѓРјРµРµС‚ РєРѕР»РґРѕРІР°С‚СЊ!', 'info');
     return;
   }
 
@@ -281,7 +283,7 @@ export function combatCastSpell(spellId) {
     const hpCost = Math.ceil(p.maxHp * spell.selfDamagePct);
 
     if (p.hp <= hpCost) {
-      pushLog('Недостаточно HP для Жертвы!', 'info');
+      pushLog('РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ HP РґР»СЏ Р–РµСЂС‚РІС‹!', 'info');
       return;
     }
 
@@ -308,7 +310,7 @@ export function combatCastSpell(spellId) {
     });
 
     pushLog(
-      `🩸 Жертва: потрачено ${hpCost} HP, восстановлено ${spell.restoreMp} MP`,
+      `рџ©ё Р–РµСЂС‚РІР°: РїРѕС‚СЂР°С‡РµРЅРѕ ${hpCost} HP, РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРѕ ${spell.restoreMp} MP`,
       'heal'
     );
 
@@ -324,7 +326,7 @@ export function combatCastSpell(spellId) {
   );
 
   if (!freeMana && p.mp < spell.cost) {
-    pushLog('Мало маны', 'info');
+    pushLog('РњР°Р»Рѕ РјР°РЅС‹', 'info');
     return;
   }
 
@@ -332,7 +334,7 @@ export function combatCastSpell(spellId) {
     p.mp -= spell.cost;
     ow.player.mp = p.mp;
   } else {
-    pushLog('💧 Эликсир маны: мана не тратится', 'success');
+    pushLog('рџ’§ Р­Р»РёРєСЃРёСЂ РјР°РЅС‹: РјР°РЅР° РЅРµ С‚СЂР°С‚РёС‚СЃСЏ', 'success');
   }
 
   const stats = getEffStats();
@@ -367,7 +369,7 @@ export function combatCastSpell(spellId) {
       life: 1.2
     });
 
-    pushLog(`${spell.name}: нанесено ${damage} урона`, 'damage');
+    pushLog(`${spell.name}: РЅР°РЅРµСЃРµРЅРѕ ${damage} СѓСЂРѕРЅР°`, 'damage');
 
     playSound('cast');
     spawnParticles(enemy.x, enemy.y, 'spark', 5);
@@ -395,7 +397,7 @@ export function combatCastSpell(spellId) {
       life: 1.2
     });
 
-    pushLog(`${spell.name}: восстановлено ${heal} HP`, 'heal');
+    pushLog(`${spell.name}: РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРѕ ${heal} HP`, 'heal');
 
     playSound('heal');
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 6);
@@ -403,12 +405,12 @@ export function combatCastSpell(spellId) {
 
   if (spell.effect) {
     applyEffect(enemy, spell.effect);
-    pushLog(`☠️ Наложен эффект: ${spell.effect}`, 'damage');
+    pushLog(`в пёЏ РќР°Р»РѕР¶РµРЅ СЌС„С„РµРєС‚: ${spell.effect}`, 'damage');
   }
 
   if (spell.selfEffect) {
     applyEffect(p, spell.selfEffect);
-    pushLog(`🛡️ Эффект на вас: ${spell.selfEffect}`, 'success');
+    pushLog(`рџ›ЎпёЏ Р­С„С„РµРєС‚ РЅР° РІР°СЃ: ${spell.selfEffect}`, 'success');
   }
 
   tickEnemyEffects();
@@ -438,7 +440,7 @@ export function combatUseAbility(abilityId) {
   const cooldown = p.cooldowns?.[abilityId] || 0;
 
   if (cooldown > 0) {
-    pushLog(`${ability.name}: перезарядка (${cooldown})`, 'info');
+    pushLog(`${ability.name}: РїРµСЂРµР·Р°СЂСЏРґРєР° (${cooldown})`, 'info');
     return;
   }
 
@@ -449,10 +451,10 @@ export function combatUseAbility(abilityId) {
   if (!freeMana && p.mp < (ability.cost || 0)) {
     pushLog(
       p.class === 'warrior'
-        ? 'Недостаточно Ярости!'
+        ? 'РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РЇСЂРѕСЃС‚Рё!'
         : p.class === 'archer'
-          ? 'Недостаточно концентрации!'
-          : 'Мало маны',
+          ? 'РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РєРѕРЅС†РµРЅС‚СЂР°С†РёРё!'
+          : 'РњР°Р»Рѕ РјР°РЅС‹',
       'info'
     );
     return;
@@ -463,7 +465,7 @@ export function combatUseAbility(abilityId) {
   }
 
   if (freeMana && ability.cost > 0) {
-    pushLog('💧 Эликсир маны: мана не тратится', 'success');
+    pushLog('рџ’§ Р­Р»РёРєСЃРёСЂ РјР°РЅС‹: РјР°РЅР° РЅРµ С‚СЂР°С‚РёС‚СЃСЏ', 'success');
   }
 
   ow.player.mp = p.mp;
@@ -505,13 +507,13 @@ export function combatUseAbility(abilityId) {
     ow.floatingNumbers.push({
       x: enemy.x,
       y: enemy.y - 20,
-      text: '◎-' + damage,
+      text: 'в—Ћ-' + damage,
       type: 'crit',
       life: 1.3
     });
 
     pushLog(
-      `🎯 Прицельный выстрел: ${damage} урона — гарантированный крит!`,
+      `рџЋЇ РџСЂРёС†РµР»СЊРЅС‹Р№ РІС‹СЃС‚СЂРµР»: ${damage} СѓСЂРѕРЅР° вЂ” РіР°СЂР°РЅС‚РёСЂРѕРІР°РЅРЅС‹Р№ РєСЂРёС‚!`,
       'damage'
     );
 
@@ -528,7 +530,7 @@ export function combatUseAbility(abilityId) {
     ow.combat.guaranteedDodge = true;
 
     pushLog(
-      '💨 Уклонение: следующая атака противника будет полностью отбита',
+      'рџ’Ё РЈРєР»РѕРЅРµРЅРёРµ: СЃР»РµРґСѓСЋС‰Р°СЏ Р°С‚Р°РєР° РїСЂРѕС‚РёРІРЅРёРєР° Р±СѓРґРµС‚ РїРѕР»РЅРѕСЃС‚СЊСЋ РѕС‚Р±РёС‚Р°',
       'success'
     );
 
@@ -555,7 +557,7 @@ export function combatUseAbility(abilityId) {
     });
 
     pushLog(
-      `☠️ Отравленный наконечник: ${damage} урона и яд на 3 хода`,
+      `в пёЏ РћС‚СЂР°РІР»РµРЅРЅС‹Р№ РЅР°РєРѕРЅРµС‡РЅРёРє: ${damage} СѓСЂРѕРЅР° Рё СЏРґ РЅР° 3 С…РѕРґР°`,
       'damage'
     );
 
@@ -571,31 +573,31 @@ export function combatUseAbility(abilityId) {
   } else if (abilityId === 'charge') {
     ow.combat.playerChargeNext = true;
 
-    pushLog('⚡ Рывок: следующая атака ×2', 'damage');
+    pushLog('вљЎ Р С‹РІРѕРє: СЃР»РµРґСѓСЋС‰Р°СЏ Р°С‚Р°РєР° Г—2', 'damage');
   } else if (abilityId === 'war-cry') {
     applyEffect(p, 'atkBuff');
 
     pushLog(
-      '📢 Боевой клич: +30% атаки (2 хода)',
+      'рџ“ў Р‘РѕРµРІРѕР№ РєР»РёС‡: +30% Р°С‚Р°РєРё (2 С…РѕРґР°)',
       'success'
     );
   } else if (abilityId === 'bloodthirst') {
     applyEffect(p, 'lifesteal');
 
     pushLog(
-      '🩸 Кровожадность: вампиризм 50% (2 хода)',
+      'рџ©ё РљСЂРѕРІРѕР¶Р°РґРЅРѕСЃС‚СЊ: РІР°РјРїРёСЂРёР·Рј 50% (2 С…РѕРґР°)',
       'success'
     );
   } else if (abilityId === 'mana-shield') {
     applyEffect(p, 'defBuff');
 
     pushLog(
-      '🛡️ Щит маны: +50% защиты (2 хода)',
+      'рџ›ЎпёЏ Р©РёС‚ РјР°РЅС‹: +50% Р·Р°С‰РёС‚С‹ (2 С…РѕРґР°)',
       'success'
     );
   } else if (abilityId === 'teleport') {
     pushLog(
-      '💨 Телепорт: враг пропускает ход',
+      'рџ’Ё РўРµР»РµРїРѕСЂС‚: РІСЂР°Рі РїСЂРѕРїСѓСЃРєР°РµС‚ С…РѕРґ',
       'success'
     );
 
@@ -608,7 +610,7 @@ export function combatUseAbility(abilityId) {
       if (!ow2 || !ow2.combat) return;
 
       pushLog(
-        '💨 Враг дезориентирован и пропускает ход',
+        'рџ’Ё Р’СЂР°Рі РґРµР·РѕСЂРёРµРЅС‚РёСЂРѕРІР°РЅ Рё РїСЂРѕРїСѓСЃРєР°РµС‚ С…РѕРґ',
         'info'
       );
 
@@ -655,7 +657,7 @@ export function combatUseAbility(abilityId) {
     });
 
     pushLog(
-      `☄️ Метеор: ${damage} урона + ожог`,
+      `в„пёЏ РњРµС‚РµРѕСЂ: ${damage} СѓСЂРѕРЅР° + РѕР¶РѕРі`,
       'damage'
     );
 
@@ -690,7 +692,7 @@ export function combatUseAbility(abilityId) {
     });
 
     pushLog(
-      `🙏 Молитва: +${heal} HP, дебаффы сняты`,
+      `рџ™Џ РњРѕР»РёС‚РІР°: +${heal} HP, РґРµР±Р°С„С„С‹ СЃРЅСЏС‚С‹`,
       'heal'
     );
 
@@ -714,7 +716,7 @@ export function combatUseAbility(abilityId) {
     });
 
     pushLog(
-      `☀️ Освящение: ${damage} урона + ожог`,
+      `вЂпёЏ РћСЃРІСЏС‰РµРЅРёРµ: ${damage} СѓСЂРѕРЅР° + РѕР¶РѕРі`,
       'damage'
     );
 
@@ -763,10 +765,10 @@ export function combatUseItem(itemId) {
 
   if (item.effect === 'antidote') {
     clearDebuffs(p);
-    pushLog('🧪 Антидот: дебаффы сняты', 'heal');
+    pushLog('рџ§Є РђРЅС‚РёРґРѕС‚: РґРµР±Р°С„С„С‹ СЃРЅСЏС‚С‹', 'heal');
   } else if (item.effect) {
     applyEffect(p, item.effect);
-    pushLog(`✨ Эффект: ${item.name}`, 'success');
+    pushLog(`вњЁ Р­С„С„РµРєС‚: ${item.name}`, 'success');
   }
 
   updateQuestProgress('potion-used', 'any', 1);
@@ -787,7 +789,7 @@ export function combatUseItem(itemId) {
     });
 
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 5);
-    pushLog(`Вы восстановили ${healed} HP`, 'heal');
+    pushLog(`Р’С‹ РІРѕСЃСЃС‚Р°РЅРѕРІРёР»Рё ${healed} HP`, 'heal');
   } else if (mana > 0) {
     ow.floatingNumbers.push({
       x: ow.player.x,
@@ -798,7 +800,7 @@ export function combatUseItem(itemId) {
     });
 
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 5);
-    pushLog(`Вы восстановили ${mana} MP`, 'heal');
+    pushLog(`Р’С‹ РІРѕСЃСЃС‚Р°РЅРѕРІРёР»Рё ${mana} MP`, 'heal');
   }
 
   removeItem(itemId);
@@ -826,7 +828,7 @@ export function combatBlock() {
   const blockPower = getEffStats().blockPower || 0.6;
 
   pushLog(
-    `🛡️ Защитная стойка: следующий удар будет ослаблен на ${Math.round(Math.max(0.5, blockPower) * 100)}%`,
+    `рџ›ЎпёЏ Р—Р°С‰РёС‚РЅР°СЏ СЃС‚РѕР№РєР°: СЃР»РµРґСѓСЋС‰РёР№ СѓРґР°СЂ Р±СѓРґРµС‚ РѕСЃР»Р°Р±Р»РµРЅ РЅР° ${Math.round(Math.max(0.5, blockPower) * 100)}%`,
     'info'
   );
 
@@ -847,13 +849,13 @@ export function combatFlee(forced = false) {
   if (!ow || !ow.combat) return;
 
   if (!forced && Math.random() >= 0.6) {
-    pushLog('Побег не удался!', 'info');
+    pushLog('РџРѕР±РµРі РЅРµ СѓРґР°Р»СЃСЏ!', 'info');
     ow.combat.turn = 'enemy';
     setTimeout(enemyCombatTurn, 700);
     return;
   }
 
-  pushLog('Вы сбежали', 'info');
+  pushLog('Р’С‹ СЃР±РµР¶Р°Р»Рё', 'info');
   clearPlayerEffects();
   endCombat();
 }
@@ -880,7 +882,7 @@ function tickEnemyEffects() {
       .map(message => `${message.icon} ${message.name} ${message.damage}`)
       .join(', ');
 
-    pushLog(`Эффекты на враге: ${parts}`, 'damage');
+    pushLog(`Р­С„С„РµРєС‚С‹ РЅР° РІСЂР°РіРµ: ${parts}`, 'damage');
   }
 }
 
@@ -907,7 +909,7 @@ function tickPlayerEffects() {
       .map(message => `${message.icon} ${message.name} ${message.damage}`)
       .join(', ');
 
-    pushLog(`Эффекты на вас: ${parts}`, 'damage');
+    pushLog(`Р­С„С„РµРєС‚С‹ РЅР° РІР°СЃ: ${parts}`, 'damage');
     playSound('hurt');
   }
 
@@ -956,7 +958,7 @@ function enemyCombatTurn() {
   }
 
   if (isStunned(enemy)) {
-    pushLog(`💫 ${name} оглушён, пропускает ход`, 'info');
+    pushLog(`рџ’« ${name} РѕРіР»СѓС€С‘РЅ, РїСЂРѕРїСѓСЃРєР°РµС‚ С…РѕРґ`, 'info');
 
     tickEnemyEffects();
 
@@ -998,7 +1000,7 @@ function enemyCombatTurn() {
 
   const rift = ow.rifMode
     ? getRiftMult(ow.rifFloor)
-    : { atkMult: 1 };
+    : ow.towerMode ? getTowerMult(ow.towerFloor) : { atkMult: 1 };
 
   const attack =
     def.attack *
@@ -1018,7 +1020,7 @@ function enemyCombatTurn() {
 
   ow.combat.turnCount = (ow.combat.turnCount || 0) + 1;
 
-  // Уклонение: полностью отменяет одну атаку, включая специальную атаку босса.
+  // РЈРєР»РѕРЅРµРЅРёРµ: РїРѕР»РЅРѕСЃС‚СЊСЋ РѕС‚РјРµРЅСЏРµС‚ РѕРґРЅСѓ Р°С‚Р°РєСѓ, РІРєР»СЋС‡Р°СЏ СЃРїРµС†РёР°Р»СЊРЅСѓСЋ Р°С‚Р°РєСѓ Р±РѕСЃСЃР°.
   const dodgeChance = Math.max(
     0,
     Math.min(0.65, stats.dodgeChance || 0)
@@ -1032,7 +1034,7 @@ function enemyCombatTurn() {
 
   if (dodged) {
     pushLog(
-      '💨 Вы уклонились от атаки — урон полностью предотвращён!',
+      'рџ’Ё Р’С‹ СѓРєР»РѕРЅРёР»РёСЃСЊ РѕС‚ Р°С‚Р°РєРё вЂ” СѓСЂРѕРЅ РїРѕР»РЅРѕСЃС‚СЊСЋ РїСЂРµРґРѕС‚РІСЂР°С‰С‘РЅ!',
       'success'
     );
 
@@ -1070,7 +1072,7 @@ function enemyCombatTurn() {
     return;
   }
 
-  // Автоматический блок от экипировки и пассивных характеристик.
+  // РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРёР№ Р±Р»РѕРє РѕС‚ СЌРєРёРїРёСЂРѕРІРєРё Рё РїР°СЃСЃРёРІРЅС‹С… С…Р°СЂР°РєС‚РµСЂРёСЃС‚РёРє.
   const automaticBlock =
     !ow.combat.blocking &&
     Math.random() < Math.max(
@@ -1092,8 +1094,8 @@ function enemyCombatTurn() {
 
     pushLog(
       ow.combat.blocking
-        ? '🛡️ Вы приняли удар в защитную стойку'
-        : '🛡️ Сработал автоматический блок',
+        ? 'рџ›ЎпёЏ Р’С‹ РїСЂРёРЅСЏР»Рё СѓРґР°СЂ РІ Р·Р°С‰РёС‚РЅСѓСЋ СЃС‚РѕР№РєСѓ'
+        : 'рџ›ЎпёЏ РЎСЂР°Р±РѕС‚Р°Р» Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРёР№ Р±Р»РѕРє',
       'success'
     );
   }
@@ -1150,13 +1152,13 @@ function enemyCombatTurn() {
     });
 
     pushLog(
-      `${name} использовал ${special.name} и нанёс вам ${damage1}+${damage2} урона`,
+      `${name} РёСЃРїРѕР»СЊР·РѕРІР°Р» ${special.name} Рё РЅР°РЅС‘СЃ РІР°Рј ${damage1}+${damage2} СѓСЂРѕРЅР°`,
       'damage'
     );
 
     if (special.effect) {
       applyEffect(p, special.effect);
-      pushLog(`☠️ Наложен эффект: ${special.effect}`, 'damage');
+      pushLog(`в пёЏ РќР°Р»РѕР¶РµРЅ СЌС„С„РµРєС‚: ${special.effect}`, 'damage');
     }
   } else if (useSpecial && special.type === 'snipe') {
     const mult = special.mult || 2;
@@ -1177,13 +1179,13 @@ function enemyCombatTurn() {
     });
 
     pushLog(
-      `${name} использовал ${special.name} и нанёс вам ${damage} урона`,
+      `${name} РёСЃРїРѕР»СЊР·РѕРІР°Р» ${special.name} Рё РЅР°РЅС‘СЃ РІР°Рј ${damage} СѓСЂРѕРЅР°`,
       'damage'
     );
 
     if (special.effect) {
       applyEffect(p, special.effect);
-      pushLog(`☠️ Наложен эффект: ${special.effect}`, 'damage');
+      pushLog(`в пёЏ РќР°Р»РѕР¶РµРЅ СЌС„С„РµРєС‚: ${special.effect}`, 'damage');
     }
   } else if (useSpecial && special.type === 'drain') {
     const damage = baseDamage;
@@ -1210,13 +1212,13 @@ function enemyCombatTurn() {
     });
 
     pushLog(
-      `${name} использовал ${special.name} (${damage} урона) и восстановил ${damage} HP`,
+      `${name} РёСЃРїРѕР»СЊР·РѕРІР°Р» ${special.name} (${damage} СѓСЂРѕРЅР°) Рё РІРѕСЃСЃС‚Р°РЅРѕРІРёР» ${damage} HP`,
       'damage'
     );
 
     if (special.effect) {
       applyEffect(p, special.effect);
-      pushLog(`☠️ Наложен эффект: ${special.effect}`, 'damage');
+      pushLog(`в пёЏ РќР°Р»РѕР¶РµРЅ СЌС„С„РµРєС‚: ${special.effect}`, 'damage');
     }
   } else {
     p.hp -= baseDamage;
@@ -1231,7 +1233,7 @@ function enemyCombatTurn() {
     });
 
     pushLog(
-      `${name} нанёс вам ${baseDamage} урона`,
+      `${name} РЅР°РЅС‘СЃ РІР°Рј ${baseDamage} СѓСЂРѕРЅР°`,
       'damage'
     );
   }
@@ -1263,7 +1265,7 @@ function enemyCombatTurn() {
     ow.player.mp = p.mp;
 
     pushLog(
-      `🔥 Ярость: +10 (${p.mp}/${p.maxMp})`,
+      `рџ”Ґ РЇСЂРѕСЃС‚СЊ: +10 (${p.mp}/${p.maxMp})`,
       'info'
     );
   }
@@ -1313,7 +1315,7 @@ function combatVictory() {
 
   const rift = ow.rifMode
     ? getRiftMult(ow.rifFloor)
-    : { goldMult: 1, expMult: 1 };
+    : ow.towerMode ? getTowerMult(ow.towerFloor) : { goldMult: 1, expMult: 1 };
 
   const gold = Math.round(
     def.gold * 0.15 *
@@ -1352,7 +1354,7 @@ function combatVictory() {
       );
 
       pushLog(
-        '✨ Благословение старейшины закончилось.',
+        'вњЁ Р‘Р»Р°РіРѕСЃР»РѕРІРµРЅРёРµ СЃС‚Р°СЂРµР№С€РёРЅС‹ Р·Р°РєРѕРЅС‡РёР»РѕСЃСЊ.',
         'info'
       );
     }
@@ -1360,11 +1362,11 @@ function combatVictory() {
 
   if (hasBuff(p, 'bardBuff')) {
     exp = Math.round(exp * 1.1);
-    pushLog('🎵 Вдохновение барда: +10% опыта', 'info');
+    pushLog('рџЋµ Р’РґРѕС…РЅРѕРІРµРЅРёРµ Р±Р°СЂРґР°: +10% РѕРїС‹С‚Р°', 'info');
   }
 
   pushLog(
-    `🏆 Победа! +${exp} опыта, +${gold} золота`,
+    `рџЏ† РџРѕР±РµРґР°! +${exp} РѕРїС‹С‚Р°, +${gold} Р·РѕР»РѕС‚Р°`,
     'success'
   );
 
@@ -1417,57 +1419,33 @@ function combatVictory() {
 
   // Elites have a high chance for each listed drop. Bosses guarantee
   // their first signature drop; additional drops still use normal difficulty odds.
-  const dropChance = enemy.elite ? 0.85 : getDropChance();
+  const baseDropChance = enemy.elite ? 0.85 : getDropChance();
+  const dropChance = getLootDropChance(baseDropChance, p);
 
   def.drops.forEach((id, index) => {
     const shouldDrop = enemy.boss
-      ? index === 0 || Math.random() < getDropChance()
+      ? index === 0 || Math.random() < getLootDropChance(getDropChance(), p)
       : Math.random() < dropChance;
 
     if (shouldDrop) {
-      const created = addItem(id);
+      const created = addItem(id, 1, { allowMythic: !!enemy.boss });
       const instance = created[0];
+      if (!instance) {
+        pushLog('Сумка заполнена или превышен лимит веса: добыча осталась на месте.', 'warning');
+        return;
+      }
 
       const rarity =
-        instance &&
-        instance.rarity &&
-        instance.rarity !== 'common'
+        instance.rarity && instance.rarity !== 'common'
           ? `${RARITIES[instance.rarity].name} `
           : '';
 
       pushLog(
-        `Дроп: ${rarity}${ITEMS[id].name}`,
+        `Добыча: ${rarity}${ITEMS[id].name}`,
         'success'
       );
     }
   });
-
-  if (
-    !enemy.elite &&
-    !enemy.boss &&
-    Math.random() < LEGENDARY_DROP_CHANCE
-  ) {
-    const pool = [
-      'iron-sword',
-      'apprentice-staff',
-      'leather-armor',
-      'steel-sword',
-      'mithril-armor'
-    ];
-
-    const id = pool[
-      Math.floor(Math.random() * pool.length)
-    ];
-
-    addItem(id, 1, { rarity: 'legendary' });
-
-    pushLog(
-      `✨ Легендарный дроп: ${ITEMS[id].name}!`,
-      'success'
-    );
-
-    playSound('chest');
-  }
 
   const herbChance = enemy.boss
     ? Math.min(1, HERB_DROP_CHANCE_ELITE * 1.25)
@@ -1483,37 +1461,27 @@ function combatVictory() {
         ? 'herb-life'
         : 'herb-moon';
 
-    addItem(herbId, herbQty);
-
-    pushLog(
-      `🌿 Дроп: ${ITEMS[herbId].name} ×${herbQty}`,
-      'success'
-    );
+    const herbCreated = addItem(herbId, herbQty);
+    if (herbCreated.length) {
+      pushLog(`Трава: ${ITEMS[herbId].name} ×${herbQty}`, 'success');
+    } else {
+      pushLog('Сумка заполнена или превышен лимит веса: травы не подобраны.', 'warning');
+    }
   }
 
-  const loc = LOCATIONS[ow.locationId];
-
-  if (
-    loc?.shard &&
-    loc.shardFrom === enemy.enemyId &&
-    !state.game.shards[loc.shard]
-  ) {
-    state.game.shards[loc.shard] = true;
-    recordCampaignShard(p, loc.shard);
-
-    const shardItems = {
-      forest: 'shard-forest',
-      ruins: 'shard-ruins',
-      shadow: 'shard-shadow'
-    };
-    addItem(shardItems[loc.shard] || 'mana-crystal');
-
-    state.game.quests[`shard-${loc.shard}`] = true;
-
-    pushLog(
-      '💎 Осколок Кристалла Маны!',
-      'success'
-    );
+  // Legacy location-based shard rewards disabled; canonical shards come from story dragons.
+  const dragonReward = claimStoryDragonReward(state.game, enemy.enemyId);
+  if (dragonReward?.newlyDefeated) {
+    const shardId = dragonReward.shardItemId;
+    if (shardId && ITEMS[shardId]) {
+      addItem(shardId, 1);
+      pushLog('🐉 Сюжетный дракон повержен!', 'success');
+      pushLog(`💎 Получен сюжетный осколок: ${ITEMS[shardId].name}`, 'success');
+      if (dragonReward.dragon.id === 'blood-crown') {
+        state.game.riftOpenedAt = Date.now();
+        setTimeout(() => emit('rift:opened'), 900);
+      }
+    }
   }
 
   p.gold += gold;
@@ -1553,14 +1521,14 @@ function combatVictory() {
   endCombat();
   checkAchievements();
 
-  if (ow.rifMode) {
+  if (ow.rifMode || ow.towerMode) {
     const alive = ow.enemies.filter(
       currentEnemy => !currentEnemy.dead
     ).length;
 
     if (alive === 0) {
       setTimeout(
-        () => emit('rift:floor-cleared'),
+        () => emit(ow.towerMode ? 'tower:floor-cleared' : 'rift:floor-cleared'),
         900
       );
     }
@@ -1602,7 +1570,7 @@ function combatDefeat() {
     ow.player.hp = restore;
 
     pushLog(
-      `✨ Воскрешение! Возрождение с ${restore} HP`,
+      `вњЁ Р’РѕСЃРєСЂРµС€РµРЅРёРµ! Р’РѕР·СЂРѕР¶РґРµРЅРёРµ СЃ ${restore} HP`,
       'success'
     );
 
@@ -1616,7 +1584,7 @@ function combatDefeat() {
 
   const enemy = ow.combat.enemy;
 
-  pushLog('💀 Поражение...', 'damage');
+  pushLog('рџ’Ђ РџРѕСЂР°Р¶РµРЅРёРµ...', 'damage');
   playSound('defeat');
   spawnParticles(ow.player.x, ow.player.y, 'hurt', 25);
 

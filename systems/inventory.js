@@ -3,9 +3,8 @@ import { ITEMS, RARITIES, rollRarity, rollItemAffixes } from '../data/items.js';
 import { FORGE_BONUS } from '../data/npcs.js';
 
 export const EQUIPMENT_SLOTS = [
-  'weapon',
-  'head', 'shoulders', 'chest', 'back', 'wrists', 'hands', 'legs',
-  'ring1', 'ring2', 'amulet', 'seal'
+  'weapon', 'head', 'shoulders', 'chest', 'gloves', 'legs',
+  'boots', 'shield', 'ring1', 'ring2', 'amulet', 'cloak'
 ];
 
 export const SLOT_TYPES = {
@@ -13,14 +12,14 @@ export const SLOT_TYPES = {
   head: ['head', 'helmet'],
   shoulders: ['shoulders'],
   chest: ['chest', 'armor'],
-  back: ['back', 'cloak'],
-  wrists: ['wrists', 'bracers'],
-  hands: ['hands', 'gloves'],
-  legs: ['legs', 'boots'],
+  gloves: ['gloves', 'bracers', 'wrists'],
+  legs: ['legs', 'greaves'],
+  boots: ['boots'],
+  shield: ['shield', 'offhand'],
   ring1: ['ring'],
   ring2: ['ring'],
-  amulet: ['amulet'],
-  seal: ['seal']
+  amulet: ['amulet', 'seal'],
+  cloak: ['cloak', 'back']
 };
 
 export const EQUIPMENT_TYPES = new Set(
@@ -40,14 +39,29 @@ export function normalizeEquipment(player) {
   const legacySlots = {
     armor: 'chest',
     helmet: 'head',
-    gloves: 'hands',
-    boots: 'legs'
+    back: 'cloak',
+    wrists: 'gloves',
+    hands: 'gloves',
+    seal: 'amulet'
   };
+
+  if (equipped.legs) {
+    const legId = typeof equipped.legs === 'string' ? equipped.legs : equipped.legs.id;
+    if (legId === 'windstep-boots' && !equipped.boots) {
+      equipped.boots = equipped.legs;
+      equipped.legs = null;
+    }
+  }
 
   for (const [oldSlot, newSlot] of Object.entries(legacySlots)) {
     if (!equipped[oldSlot]) continue;
-    if (!equipped[newSlot]) equipped[newSlot] = equipped[oldSlot];
-    else player.inventory.push(equipped[oldSlot]);
+    const instance = equipped[oldSlot];
+    const id = typeof instance === 'string' ? instance : instance.id;
+    const destination = oldSlot === 'hands' && id === 'tower-shield' ? 'shield'
+      : oldSlot === 'legs' && id === 'windstep-boots' ? 'boots'
+      : newSlot;
+    if (!equipped[destination]) equipped[destination] = instance;
+    else player.inventory.push(instance);
     delete equipped[oldSlot];
   }
 
@@ -72,6 +86,78 @@ function getItemBySlot(item, slot) {
   return (SLOT_TYPES[slot] || []).includes(item.type);
 }
 
+function scaleBonusesToTier(baseBonus, rarity, random = Math.random) {
+  const bonus = { ...(baseBonus || {}) };
+  const range = RARITIES[rarity]?.statRange;
+  if (!range) return bonus;
+
+  const keys = Object.keys(bonus).filter(key =>
+    ['attack', 'magic', 'defense', 'armor', 'dex', 'armorPen'].includes(key) &&
+    Number.isFinite(bonus[key]) && bonus[key] > 0
+  );
+  const total = keys.reduce((sum, key) => sum + bonus[key], 0);
+  if (!total || !keys.length) return bonus;
+
+  const rawSample = random();
+  const sample = Number.isFinite(rawSample) ? rawSample : Math.random();
+  const normalized = Math.max(0, Math.min(1 - Number.EPSILON, sample));
+  const target = range[0] + Math.floor(normalized * (range[1] - range[0] + 1));
+  const parts = keys.map(key => {
+    const exact = bonus[key] / total * target;
+    return { key, value: Math.floor(exact), fraction: exact - Math.floor(exact) };
+  });
+  let remainder = target - parts.reduce((sum, part) => sum + part.value, 0);
+  parts.sort((a, b) => b.fraction - a.fraction);
+  for (let i = 0; i < parts.length && remainder > 0; i++, remainder--) {
+    parts[i].value++;
+  }
+  for (const part of parts) bonus[part.key] = part.value;
+  return bonus;
+}
+
+function getItemUnitWeight(item) {
+  if (Number.isFinite(item?.weight)) return Math.max(0, item.weight);
+  if (item?.type === 'quest') return 0;
+  if (EQUIPMENT_TYPES.has(item?.type)) return 5;
+  if (item?.type === 'material') return 0.5;
+  if (item?.type === 'consumable') return 0.5;
+  if (item?.type === 'rune' || item?.type === 'scroll') return 0.2;
+  return 1;
+}
+
+export function getInventoryWeight(player = state.game?.player) {
+  return (player?.inventory || []).reduce((total, inst) => {
+    const item = ITEMS[inst.id];
+    return total + getItemUnitWeight(item) * (inst.qty || 1);
+  }, 0);
+}
+
+export function getInventoryCapacity(player = state.game?.player) {
+  const strength = Number.isFinite(player?.str) ? player.str : 10;
+  return Math.max(10, strength * 5);
+}
+
+export function getInventorySlotCount(player = state.game?.player) {
+  return (player?.inventory || []).filter(inst => !['quest', 'material'].includes(ITEMS[inst.id]?.type)).length;
+}
+
+export function canAddItem(id, qty = 1, player = state.game?.player) {
+  const item = ITEMS[id];
+  if (!item || !player || !Number.isFinite(qty) || qty < 1) return { ok: false, reason: 'invalid' };
+  if (item.type === 'quest') return { ok: true, weight: getInventoryWeight(player), capacity: getInventoryCapacity(player) };
+  const amount = Math.floor(qty);
+  const nextWeight = getInventoryWeight(player) + getItemUnitWeight(item) * amount;
+  const stackable = STACKABLE_TYPES.has(item.type);
+  const existing = stackable && (player.inventory || []).some(inst => inst.id === id && !inst.rarity);
+  const addedSlots = ['quest', 'material'].includes(item.type) || existing ? 0 : stackable ? 1 : amount;
+  const nextSlots = getInventorySlotCount(player) + addedSlots;
+  if (nextSlots > 30) return { ok: false, reason: 'slots', slots: nextSlots, maxSlots: 30 };
+  if (nextWeight > getInventoryCapacity(player) + 1e-9) {
+    return { ok: false, reason: 'weight', weight: nextWeight, capacity: getInventoryCapacity(player) };
+  }
+  return { ok: true, weight: nextWeight, capacity: getInventoryCapacity(player), slots: nextSlots };
+}
+
 export function addItem(id, qty = 1, opts = {}) {
   const inv = state.game.player.inventory;
   const item = ITEMS[id];
@@ -79,6 +165,7 @@ export function addItem(id, qty = 1, opts = {}) {
 
   const amount = Math.floor(qty);
   if (amount < 1) return [];
+  if (!canAddItem(id, amount, state.game.player).ok) return [];
 
   if (STACKABLE_TYPES.has(item.type)) {
     const existing = inv.find(i => i.id === id && !i.rarity);
@@ -90,18 +177,15 @@ export function addItem(id, qty = 1, opts = {}) {
   const created = [];
   const random = typeof opts.random === 'function' ? opts.random : Math.random;
   for (let i = 0; i < amount; i++) {
-    const rarity = opts.rarity === undefined ? rollRarity(random) : opts.rarity;
-    if (!RARITIES[rarity]) continue;
-    const mult = RARITIES[rarity].multiplier;
-    const bonus = {};
-    for (const k in (item.bonus || {})) {
-      const value = item.bonus[k];
-      bonus[k] = typeof value === 'number'
-        ? (['dodgeChance', 'blockChance', 'blockPower', 'critChance'].includes(k)
-          ? Number((value * mult).toFixed(3))
-          : Math.round(value * mult))
-        : value;
-    }
+    const rarity = opts.rarity === undefined
+      ? rollRarity(random, {
+          allowMythic: opts.allowMythic === true,
+          player: state.game.player,
+          isRift: !!state.overworld?.rifMode
+        })
+      : opts.rarity;
+    if (!RARITIES[rarity] || (RARITIES[rarity].bossOnly && opts.allowMythic !== true)) continue;
+    const bonus = scaleBonusesToTier(item.bonus || {}, rarity, random);
     const affixes = rollItemAffixes(item, rarity, random);
     for (const affix of affixes) {
       for (const [key, value] of Object.entries(affix.bonus)) {
@@ -187,8 +271,16 @@ export function equipItemByIndex(idx) {
   if (inst.sockets === undefined) inst.sockets = item.sockets || 0;
   if (!Array.isArray(inst.runes)) inst.runes = [];
 
+  const previous = p.equipped[slot];
   p.inventory.splice(idx, 1);
-  if (p.equipped[slot]) p.inventory.push(p.equipped[slot]);
+  if (previous) {
+    const previousId = typeof previous === 'string' ? previous : previous.id;
+    if (!canAddItem(previousId, 1, p).ok) {
+      p.inventory.splice(idx, 0, inst);
+      return null;
+    }
+    p.inventory.push(previous);
+  }
   p.equipped[slot] = inst;
   return slot;
 }
@@ -198,6 +290,8 @@ export function unequipItemBySlot(slot) {
   normalizeEquipment(p);
   const inst = p.equipped?.[slot];
   if (!inst) return false;
+  const itemId = typeof inst === 'string' ? inst : inst.id;
+  if (!canAddItem(itemId, 1, p).ok) return false;
   p.inventory.push(inst);
   p.equipped[slot] = null;
   return true;
@@ -239,8 +333,14 @@ export function equipBest() {
 
     if (bestIdx >= 0) {
       const inst = inv[bestIdx];
+      const previous = p.equipped?.[slot];
+      if (previous) {
+        const previousId = typeof previous === 'string' ? previous : previous.id;
+        const projectedInventory = inv.filter((_, index) => index !== bestIdx);
+        if (!canAddItem(previousId, 1, { ...p, inventory: projectedInventory }).ok) continue;
+      }
       inv.splice(bestIdx, 1);
-      if (p.equipped?.[slot]) inv.push(p.equipped[slot]);
+      if (previous) inv.push(previous);
       p.equipped[slot] = inst;
       anyChange = true;
     }

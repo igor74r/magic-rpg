@@ -28,20 +28,24 @@ export function getActPriceMultiplier(player) {
 
 export function getBuyPrice(id, player) {
   const item = ITEMS[id];
-  if (!item || item.type === 'quest' || !Number.isFinite(item.price) || item.price <= 0) return 0;
+  if (!item || item.type === 'quest' || item.storyShard || item.bossOnly || RARITIES[item.rarity]?.bossOnly || !Number.isFinite(item.price) || item.price <= 0) return 0;
   return Math.max(1, Math.round(item.price * getActPriceMultiplier(player)));
 }
 
 export function getSellPrice(instance, player) {
   const item = ITEMS[instance?.id];
-  if (!item || item.type === 'quest' || !Number.isFinite(item.price) || item.price <= 0) return 0;
+  if (!item || item.type === 'quest' || item.storyShard || instance?.storyShard || item.bossOnly || !Number.isFinite(item.price) || item.price <= 0) return 0;
   const rarity = instance?.rarity;
+  if (RARITIES[rarity]?.bossOnly) return 0;
   const rarityMultiplier = rarity && RARITIES[rarity]?.multiplier
     ? RARITIES[rarity].multiplier
     : 1;
   const quantity = item.type === 'consumable' || item.type === 'material' || item.type === 'rune'
     ? Math.max(1, Math.floor(Number(instance.qty) || 1))
     : 1;
-  const base = Math.floor(item.price * getActPriceMultiplier(player) * rarityMultiplier * 0.35);
+  const tierPrice = rarity && RARITIES[rarity]?.price
+    ? RARITIES[rarity].price
+    : item.price * rarityMultiplier;
+  const base = Math.floor(tierPrice * getActPriceMultiplier(player) * 0.35);
   return Math.max(1, base) * quantity;
 }

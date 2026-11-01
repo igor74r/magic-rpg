@@ -7,6 +7,7 @@ import { saveGame } from '../save.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
+import { getTowerMult } from '../tower.js';
 import { findFreeCell, TILE } from './map.js';
 import { spawnParticles } from './particles.js';
 import { pushLog } from './log.js';
@@ -52,7 +53,7 @@ export function createSpawnRoster(enemyIds, count, random = Math.random) {
 export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locationId = null) {
   if (loc.safe) return [];
   const ng = getNGPlusMult();
-  const riftM = opts.rifMode ? getRiftMult(opts.rifFloor || 1) : { hpMult: 1 };
+  const riftM = opts.rifMode ? getRiftMult(opts.rifFloor || 1) : opts.towerMode ? getTowerMult(opts.towerFloor || 1) : { hpMult: 1 };
   const enemies = [];
   const count = Math.min(Math.max(loc.enemies.length, 4), 7);
   const spawnRoster = createSpawnRoster(loc.enemies, count);
@@ -93,7 +94,7 @@ export function spawnNPCs(loc) {
     y: npc.y * TILE + TILE / 2,
     homeX: npc.x * TILE + TILE / 2,
     homeY: npc.y * TILE + TILE / 2,
-    interactionRadius: 65,
+    interactionRadius: npc.ambient ? 0 : 65,
     wanderTimer: Math.random() * 3,
     wanderDx: 0, wanderDy: 0,
     facing: 'down'
@@ -102,12 +103,26 @@ export function spawnNPCs(loc) {
 
 export function spawnStatics(loc) {
   if (!loc.statics) return [];
-  return loc.statics.map(obj => ({
+  const objects = loc.statics.map(obj => ({
     ...obj,
     x: obj.x * TILE + TILE / 2,
     y: obj.y * TILE + TILE / 2,
-    interactionRadius: 65
+    interactionRadius: obj.decorative ? 0 : 65
   }));
+
+  // Aurora visibly records the campaign's victories without changing the
+  // three-dragon story rules or creating new combat encounters.
+  if (loc.theme === 'village') {
+    const dragons = state.game?.storyDragons || {};
+    const addStoryProp = (id, name, x, y, propStyle) => objects.push({
+      id, name, x: x * TILE + TILE / 2, y: y * TILE + TILE / 2,
+      propStyle, decorative: true, interactionRadius: 0, storyDecoration: true
+    });
+    if (dragons['ash-herald']) addStoryProp('aurora-ash-victory', 'Знамя победы над Пепельным Вестником', 31, 16, 'banner');
+    if (dragons['ice-grasp']) addStoryProp('aurora-ice-victory', 'Ледяной фонарь северного тракта', 40, 18, 'frost-lantern');
+    if (dragons['blood-crown']) addStoryProp('aurora-rift-ward', 'Памятный знак открытого Разлома', 32, 3, 'rift-ward');
+  }
+  return objects;
 }
 
 export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId = null) {
@@ -127,7 +142,7 @@ export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null, 
   const events = [];
   const count = 1 + Math.floor(Math.random() * 2);
   const types = ['altar', 'mimic', 'crystal', 'traveler'];
-  const NAMES = { altar: 'Древний алтарь', mimic: 'Подозрительный сундук', crystal: 'Кристалл маны', traveler: 'Странник' };
+  const NAMES = { altar: 'Древний алтарь', mimic: 'Подозрительный сундук', crystal: 'Кристалл сырой магии', traveler: 'Странник' };
   const EMOJIS = { altar: '⛩️', mimic: '🎁', crystal: '💎', traveler: '🧙' };
 
   for (let i = 0; i < count; i++) {

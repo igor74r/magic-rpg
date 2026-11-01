@@ -207,13 +207,21 @@ try {
     api.switchTab(tab);
   }
   check('вкладки дашборда рендерятся', true);
+  check('HUD exposes compact Tower and Rift shortcuts', byId('game-header').innerHTML.includes('GameAPI.enterTower()') && byId('game-header').innerHTML.includes('GameAPI.enterRift()'));
   check('хроники мира рендерятся', byId('tab-content').innerHTML.includes('chronicles-page'));
   api.switchTab('talents');
   const talentHtml = byId('tab-content').innerHTML;
   check('дерево талантов можно перемещать мышью и касанием', talentHtml.includes('passive-tree-viewport') && talentHtml.includes('passiveTreePointerDown'));
   api.switchTab('inventory');
   const inventoryHtml = byId('tab-content').innerHTML;
-  check('инвентарь рендерит 12 слотов экипировки и категории', inventoryHtml.includes('rpg-inventory-layout') && inventoryHtml.includes('Голова') && inventoryHtml.includes('Палец 2') && inventoryHtml.includes('Руны') && (inventoryHtml.match(/class="gear-slot /g) || []).length === 12);
+  check('инвентарь рендерит 12 слотов экипировки, 30 ячеек сумки и отдельные вкладки', inventoryHtml.includes('rpg-inventory-layout') && inventoryHtml.includes('Голова') && inventoryHtml.includes('Палец 2') && inventoryHtml.includes('Сумка') && inventoryHtml.includes('Материалы') && inventoryHtml.includes('Осколки') && inventoryHtml.includes('GameAPI.openSaleUI()') && (inventoryHtml.match(/class="gear-slot /g) || []).length === 12 && (inventoryHtml.match(/class="inv-slot/g) || []).length === 30);
+  api.openSaleUI();
+  const saleHtml = byId('inventory-sale-overlay')?.innerHTML || '';
+  check('окно продажи показывает инвентарь, список выбранного и массовые действия', saleHtml.includes('Продажа предметов') && saleHtml.includes('Продать все T1–T2') && saleHtml.includes('Выбрать по фильтру') && saleHtml.includes('Итого:'));
+  api.cancelSale();
+  api.openShop();
+  const shopHtml = byId('tab-content').innerHTML;
+  check('магазин имеет пять пресетов и раздел обратного выкупа', shopHtml.includes('Дешёвое') && shopHtml.includes('Сборка') && shopHtml.includes('Материалы крафта') && shopHtml.includes('Редкое') && shopHtml.includes('Всё') && typeof api.buybackItem === 'function');
 } catch (e) {
   check('вкладки дашборда рендерятся', false, String(e && e.message));
 }
@@ -231,7 +239,9 @@ try {
   api.switchTab('locations');
   const html = byId('tab-content').innerHTML;
   const nodes = (html.match(/class="wnode(?=[\s"])/g) || []).length;
-  check('карта: все локации отображаются', nodes === Object.keys(LOCATIONS).length, `${nodes}/${Object.keys(LOCATIONS).length} узлов`);
+  const expectedNodes = Object.keys(LOCATIONS).length - 1;
+  check('карта: все доступные локации отображаются', nodes === expectedNodes, `${nodes}/${expectedNodes} узлов`);
+  check('Rift marker is hidden before the final dragon', !html.includes('data-loc="rift"'));
   api.mapSelect('forest');
   check('карта: выбор узла', true);
 } catch (e) {
@@ -249,6 +259,19 @@ try {
   check('NPC-диалоги открываются/закрываются', true);
 } catch (e) {
   check('NPC-диалоги открываются/закрываются', false, String(e && e.message));
+}
+
+// Важные здания Авроры имеют отдельные интерьерные сцены и выход обратно во двор.
+try {
+  api.interactNpc('blacksmith');
+  check('Кузница предлагает вход в интерьер', byId('npc-dialog-content').innerHTML.includes('Войти внутрь'));
+  api.enterVillageInterior('forge');
+  check('Интерьер кузницы открывается', state.overworld.interior === 'forge' && byId('npc-dialog-content').innerHTML.includes('Кузница Борина'));
+  api.exitVillageInterior();
+  check('Из интерьера можно вернуться во двор', state.overworld.interior === null);
+  api.closeNpcAndResume();
+} catch (e) {
+  check('Интерьеры важных зданий Авроры', false, String(e && e.message));
 }
 
 // Бой: деревня безопасна, поэтому переходим в лес
@@ -312,8 +335,60 @@ try {
 try {
   api.saveAndMenu();
   check('сохранение в слот 1', storage.has('magic-rpg-save-1'));
+  state.game.riftEnding = 'closed';
+  state.game.riftOpeningSeen = true;
+  state.game.player.riftClearedLocations = ['rift-01'];
   api.startNGPlus();
   check('NG+ начинает кампанию заново', Object.keys(state.game.player.campaignKills || {}).length === 0 && Object.keys(state.game.player.campaignClaimed || {}).length === 0 && state.game.player.activeCampaignMission === null && state.game.player.dex === (state.game.player.class === 'mage' ? 8 : state.game.player.class === 'archer' ? 18 : 6));
+  check('NG+ resets the Rift ending and cleared-area cycle', state.game.riftEnding === null && state.game.riftOpeningSeen === false && state.game.player.riftClearedLocations.length === 0);
+  state.game.storyDragons['blood-crown'] = true;
+  const { emit } = await import(new URL('systems/events.js', ROOT).href);
+  const realSetTimeout = globalThis.setTimeout;
+  let finishRiftCutscene = null;
+  globalThis.setTimeout = callback => { finishRiftCutscene = callback; return 1; };
+  emit('rift:opened');
+  globalThis.setTimeout = realSetTimeout;
+  check('Blood Crown opening event launches the Rift cutscene once', state.game.riftOpeningSeen === true && body.children.some(child => child.id === 'rift-opening-cutscene'));
+  finishRiftCutscene?.();
+  api.switchTab('locations');
+  const unlockedWorldMap = byId('tab-content').innerHTML;
+  check('Rift marker appears on the world map only after opening', unlockedWorldMap.includes('data-loc="rift"'));
+  api.mapSelect('rift');
+  check('Rift map marker opens the dedicated entry panel', byId('map-panel').innerHTML.includes('Войти в Разлом'));
+  api.openRiftMap();
+  const riftMap = body.children.find(child => child.id === 'rift-map-overlay');
+  check('post-game Rift map renders 30 areas with 10 level gates', !!riftMap && (riftMap.innerHTML.match(/data-rift-id=/g) || []).length === 30 && (riftMap.innerHTML.match(/Требуется уровень 50/g) || []).length === 10);
+  const { enterOverworld } = await import(new URL('systems/overworld.js', ROOT).href);
+  enterOverworld('rift-01', { rifMode: true, rifFloor: 1 });
+  check('Rift area aliases load unique map and real enemy roster', state.overworld?.locationId === 'rift-01' && state.overworld?.locationName === 'Пепельный порог' && state.overworld?.rifMode === true && state.overworld.enemies.length > 0);
+  api.exitOverworld();
+  api.enterTower();
+  const towerMap = body.children.find(child => child.id === 'tower-map-overlay');
+  check('Tower menu displays all 40 floors and guardian milestones', !!towerMap && (towerMap.innerHTML.match(/СТРАЖ/g) || []).length === 8 && towerMap.innerHTML.includes('Башня · 40 этажей'));
+  enterOverworld('tower-floor-01', { towerMode: true, towerFloor: 1 });
+  check('Tower starts with floor-specific enemies and scaling mode', state.overworld?.towerMode === true && state.overworld?.towerFloor === 1 && state.overworld.enemies.length >= 4);
+  state.overworld.enemies.forEach(enemy => { enemy.dead = true; });
+  emit('tower:floor-cleared');
+  check('clearing a Tower floor advances to the next floor and records progress', state.overworld?.towerMode === true && state.overworld?.towerFloor === 2 && state.game.player.towerBest === 1);
+  api.exitOverworld();
+  state.game.player.towerBest = 39;
+  enterOverworld('tower-floor-40', { towerMode: true, towerFloor: 40 });
+  state.overworld.enemies.forEach(enemy => { enemy.dead = true; });
+  emit('tower:floor-cleared');
+  check('Tower final floor completes the 40-floor challenge', state.overworld === null && state.game.player.towerBest === 40);
+  const finalMission = STORY.acts[4].missions[4];
+  state.game.player.campaignClaimed = Object.fromEntries(STORY.acts.flatMap(act => act.missions).map(mission => [mission.id, mission.id !== finalMission.id]));
+  state.game.player.campaignKills[finalMission.id] = finalMission.count;
+  state.game.player.activeCampaignMission = finalMission.id;
+  state.game.storyShards = { flame: true, ice: true, blood: true };
+  state.game.storyDragons = { 'ash-herald': true, 'ice-grasp': true, 'blood-crown': true };
+  api.turnInElderQuest();
+  check('final campaign turn-in triggers the ending after all 25 missions', state.game.player.victoryAchieved === true);
+  const { isRiftReady } = await import(new URL('systems/rift.js', ROOT).href);
+  api.chooseRiftEnding('closed');
+  check('ending choice can permanently seal the Rift', state.game.riftEnding === 'closed' && !isRiftReady());
+  api.chooseRiftEnding('open');
+  check('ending choice can leave the stabilized Rift open', state.game.riftEnding === 'open' && isRiftReady());
 } catch (e) {
   check('сохранение в слот 1', false, String(e && e.message));
 }

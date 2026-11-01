@@ -3,28 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shards of the Rift — Осколки Разлома</title>
+<title>Осколки Разлома</title>
 <link rel="icon" type="image/svg+xml" href="assets/branding/mana-crystal.svg">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/rpg-overhaul.css" id="rpg-overhaul-css">
-<link rel="stylesheet" href="css/ui-polish.css">
-<link rel="stylesheet" href="css/shards-rift-v2.css">
+<link rel="stylesheet" href="css/2d-art-direction.css">
 </head>
 <body>
 
 <!-- ================== ПРОЛОГ ================== -->
 <div id="screen-prologue" class="screen">
-  <div class="rift-prologue-scene">
-    <div class="rift-prologue-eyebrow">ХРОНИКИ РАЗЛОМАННОГО МИРА · ГЛАВА I</div>
-    <div class="rift-prologue-mark">⟡</div>
-    <h1>Мир не погиб.<br><span>Он был разорван.</span></h1>
-    <p class="rift-prologue-lead">Когда пал последний дракон-хранитель, небеса раскрылись трещиной. Из неё вышли существа, которым не было имени, а земля покрылась пеплом и стеклом.</p>
-    <div class="rift-prologue-divider"></div>
-    <p class="rift-prologue-copy">Три дракона удерживали границу между мирами. Их падение открыло Разлом. Осколки древнего Кристалла всё ещё скрыты в пяти землях — и каждый из них хранит часть ответа.</p>
-    <p class="rift-prologue-quote">«Не ищи путь назад. Найди то, что сможет удержать этот мир целым».</p>
-    <p class="rift-prologue-author">Последняя запись Серых Плащей</p>
-    <button class="rift-prologue-continue" onclick="GameAPI.skipPrologue()">ПРИНЯТЬ СУДЬБУ <span>→</span></button>
+  <div class="center-flex" style="max-width:700px;text-align:center;">
+    <div style="font-size:80px;margin-bottom:20px;filter:drop-shadow(0 0 30px rgba(177,55,70,0.75));animation:gemPulse 3s ease-in-out infinite;">🔮</div>
+    <h1>Осколки Разлома</h1>
+    <p class="subtitle" style="font-size:16px;line-height:1.85;max-width:620px;color:#cbb89d;">
+      Когда-то драконьи империи правили этим миром. Теперь от них остались пепел, руины и бледное солнце, едва пробивающееся сквозь серое небо.<br><br>
+      В самом сердце земель зияет Разлом — рана в самой ткани реальности. Три дракона удерживают его закрытым. Не боги и не чудовища, а последние живые печати древнего мира.
+    </p>
+    <div class="divider" style="width:100%;max-width:440px;"></div>
+    <p style="color:#b99a87;font-size:14px;line-height:1.8;max-width:600px;">
+      Первые кровавые маги создали Кристалл Разлома, отдав за него собственные жизни. Кристалл раскололся, и три его осколка оказались у драконов.<br><br>
+      Пока жив хотя бы один из них, Разлом останется закрытым. Но если падут все трое, печать исчезнет — и то, что ждёт по ту сторону, сможет войти в наш мир.<br><br>
+      Тебе предстоит пройти пять земель, раскрыть правду о древней печати и решить, что заслуживает спасения: мир, каким он был, или мир, который ещё можно создать.
+    </p>
+    <button onclick="GameAPI.skipPrologue()" style="min-width:280px;margin-top:26px;border-color:#b85b65;font-size:16px;padding:14px 30px;">
+      ⚔️ Начать путь
+    </button>
   </div>
 </div>
 
@@ -32,24 +37,24 @@
 <div id="screen-main" class="screen">
   <div class="main-menu">
     <div class="logo-block">
-      <div class="logo-gem"><img src="assets/branding/mana-crystal.svg" alt="Кристалл Маны" width="88" height="88"></div>
-      <h1 class="game-title">Осколки<br><span>Кристалла Маны</span></h1>
+      <div class="logo-gem"><img src="assets/branding/mana-crystal.svg" alt="Кристалл Разлома" width="88" height="88"></div>
+      <h1 class="game-title">Осколки<br><span>Разлома</span></h1>
       <p class="subtitle">Тёмное фэнтези · Магия · RPG</p>
     </div>
 
-    <div class="rift-main-menu-copy">
-      <span class="rift-menu-kicker">ASHEN FRONTIER · ACT I</span>
-      <h2>За гранью пепла<br>начинается путь.</h2>
-      <p id="menu-save-detail">Новый путь начинается у края Разлома</p>
+    <div class="slots-area">
+      <div class="slots-grid" id="slots-grid"></div>
     </div>
-    <div class="rift-main-actions">
-      <button id="menu-continue" class="rift-menu-primary" onclick="GameAPI.continueGame()" hidden><span>▶</span><b>ПРОДОЛЖИТЬ</b><small>Вернуться в последний регион</small></button>
-      <button onclick="GameAPI.startNewGame()"><span>✦</span><b>НОВАЯ ИГРА</b><small>Выбрать архетип путника</small></button>
-      <button id="menu-rift" onclick="GameAPI.enterRiftFromMenu()" hidden><span>🌀</span><b>РАЗЛОМ</b><small>Открыть карту 30 граней</small></button>
-      <button onclick="GameAPI.openSettings()"><span>⚙</span><b>НАСТРОЙКИ</b><small>Игра · видео · звук · интерфейс</small></button>
-      <button onclick="GameAPI.exitApplication()"><span>⏻</span><b>ВЫХОД</b><small>Завершить путь</small></button>
+
+    <div class="main-menu-buttons">
+      <button onclick="GameAPI.openSettings()" class="mm-btn">⚙️ Настройки</button>
+      <button onclick="GameAPI.openAchievementsMenu()" class="mm-btn">🏆 Достижения</button>
+      <button onclick="GameAPI.openHelp()" class="mm-btn">❓ Как играть</button>
     </div>
-    <div class="menu-footer"><span>SHARDS OF THE RIFT · V2.0</span><span>ОФЛАЙН · ОДИНОЧНОЕ ПРИКЛЮЧЕНИЕ</span></div>
+
+    <div class="menu-footer">
+      <span>v0.27 · Осколки Разлома</span>
+    </div>
   </div>
 </div>
 
@@ -58,12 +63,11 @@
   <div class="game-container" style="max-width:660px;">
     <h1>⚙️ Настройки</h1>
     <div class="settings-tabs">
-      <div class="settings-tab active" data-tab="game" onclick="GameAPI.switchSettingsTab('game')">🎮 Игра</div>
-      <div class="settings-tab" data-tab="video" onclick="GameAPI.switchSettingsTab('video')">🖥 Видео</div>
-      <div class="settings-tab" data-tab="sound" onclick="GameAPI.switchSettingsTab('sound')">🔊 Звук</div>
-      <div class="settings-tab" data-tab="controls" onclick="GameAPI.switchSettingsTab('controls')">⌨ Управление</div>
-      <div class="settings-tab" data-tab="ui" onclick="GameAPI.switchSettingsTab('ui')">◫ Интерфейс</div>
+      <div class="settings-tab active" data-tab="sound" onclick="GameAPI.switchSettingsTab('sound')">🔊 Звук</div>
+      <div class="settings-tab" data-tab="game" onclick="GameAPI.switchSettingsTab('game')">🎮 Игра</div>
+      <div class="settings-tab" data-tab="graphics" onclick="GameAPI.switchSettingsTab('graphics')">🎨 Графика</div>
       <div class="settings-tab" data-tab="accessibility" onclick="GameAPI.switchSettingsTab('accessibility')">♿ Доступность</div>
+      <div class="settings-tab" data-tab="data" onclick="GameAPI.switchSettingsTab('data')">💾 Данные</div>
     </div>
     <div class="panel" id="settings-content"></div>
     <button onclick="GameAPI.backFromSettings()" class="settings-back-btn">← Назад</button>
@@ -76,7 +80,7 @@
     <h1>❓ Как играть</h1>
     <div class="panel help-panel">
       <h3>🎯 Цель</h3>
-      <p>Соберите <b>три осколка Кристалла Маны</b>. Победите мини-боссов в <b>Тёмном лесу</b>, <b>Руинах</b> и <b>Пещере теней</b>. После сбора всех осколков откроется эндгейм — <b>Бесконечный Разлом</b> и режим <b>NG+</b>.</p>
+      <p>Пройдите пять актов и победите трёх драконов-печатей: Пепельного Вестника, Ледяную Хватку и Кровавую Корону. Каждый хранит один осколок Кристалла Разлома. Разлом откроется после гибели последнего дракона, а осколки помогут стабилизировать его. После финала доступны 30 областей Разлома, Башня на 40 этажей и режим NG+.</p>
       <div class="divider"></div>
       <h3>🎮 Управление</h3>
       <div class="help-keys">
@@ -91,10 +95,9 @@
       </div>
       <div class="divider"></div>
       <h3>⚔️ Классы</h3>
-      <p><b>⚔️ Пепельный страж</b> — сила и живучесть, тяжёлое оружие, щит и удержание линии.</p>
-      <p><b>🏹 Тень пепла</b> — ловкость и удача, дистанция, уклонение и критические удары.</p>
-      <p><b>🩸 Кровавый адепт</b> — интеллект и мудрость, магия крови, посохи и ремесло.</p>
-      <p>Любой архетип может пользоваться магией, ремеслом и всеми ветками предметов.</p>
+      <p><b>⚔️ Воин</b> — не знает заклинаний, но копит <b>Ярость</b> от ударов и полученного урона. Тратит её на мощные способности.</p>
+      <p><b>🧙 Маг</b> — слаб физически (урон от оружия вдвое ниже), но его заклинания сокрушительны. Полностью зависит от маны.</p>
+      <p><b>🏹 Лучник</b> — ловкий боец дальнего боя с высоким шансом уклонения и критического удара. Накапливает <b>Концентрацию</b> обычными атаками, использует ядовитые стрелы и способности «Прицельный выстрел», «Уклонение» и «Отравленный наконечник».</p>
     </div>
     <button onclick="GameAPI.showScreen('screen-main')" class="settings-back-btn">← Назад</button>
   </div>
@@ -111,30 +114,21 @@
 
 <!-- ================== ВЫБОР КЛАССА ================== -->
 <div id="screen-char" class="screen">
-  <div class="rift-class-screen">
-    <header><span>ПЕРВЫЙ ВХОД · АКТ I</span><h1>Выбери, кем станешь у края Разлома</h1><p>Архетип задаёт начало пути, но не закрывает доступ к магии, ремеслу или экипировке.</p></header>
+  <div class="game-container" style="align-items:center;">
+    <h1>Выбор класса</h1>
+    <p class="subtitle">Каждый класс — свой путь через тьму</p>
     <div class="classes-grid" id="classes-grid"></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="char-name" placeholder="Имя героя" value="Герой" style="max-width:250px;">
+      <button onclick="GameAPI.confirmClassSelection()">Начать путь →</button>
+    </div>
+    <button onclick="GameAPI.showScreen('screen-main');GameAPI.updateMainMenu();" style="margin-top:15px;">← Назад</button>
   </div>
 </div>
 
 <!-- ================== ИГРА (ДАШБОРД) ================== -->
 <div id="screen-game" class="screen screen-dashboard">
-  <div class="game-top-ui">
-    <section class="sidebar-vitals game-player-hud" id="sidebar-player-vitals" aria-label="Здоровье, ресурс и опыт героя"></section>
-    <button id="game-menu-toggle" class="game-menu-toggle" type="button" onclick="GameAPI.openRpgWindow('inventory')"><span>☰</span><b>МЕНЮ</b></button>
-  </div>
-  <div id="rpg-hotbar" class="rift-hotbar" aria-label="Панель быстрых действий"></div>
-  <div id="rpg-loot-feed" class="rift-loot-feed" aria-live="polite"></div>
-  <section id="rpg-interface-overlay" class="rift-interface-overlay" hidden aria-label="Игровое меню">
-    <div class="rift-window-frame"><div id="rpg-window-content"></div></div>
-  </section>
-  <section id="rpg-pause-overlay" class="rift-pause-overlay" hidden>
-    <div class="rift-pause-card"><span class="rift-window-kicker">SHARDS OF THE RIFT</span><h2>Путь приостановлен</h2>
-      <button class="rift-pause-primary" onclick="GameAPI.closePause()">ПРОДОЛЖИТЬ</button>
-      <button onclick="GameAPI.pauseSettings()">НАСТРОЙКИ</button>
-      <button class="danger" onclick="GameAPI.pauseExit()">ВЫЙТИ В ГЛАВНОЕ МЕНЮ</button>
-    </div>
-  </section>  <div class="dashboard-layout">
+  <div class="dashboard-layout">
     
     <!-- ЛЕВАЯ ПАНЕЛЬ (ВКЛАДКИ) -->
     <aside class="dashboard-sidebar">
@@ -157,7 +151,7 @@
     <!-- ЦЕНТРАЛЬНАЯ ПАНЕЛЬ (КОНТЕНТ) -->
     <main class="dashboard-main">
       <header class="dashboard-header" id="game-header"></header>
-      <section class="dashboard-overworld-host" id="dashboard-overworld-host" hidden aria-label="Текущая локация"></section>
+      <div class="dashboard-content" id="tab-content"></div>
     </main>
 
     <!-- ПРАВАЯ ПАНЕЛЬ (ЖУРНАЛ) -->
@@ -174,6 +168,7 @@
   <div class="game-container" style="max-width:1000px; width: 100%;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;">
       <h2 id="overworld-title" style="margin:0;">Локация</h2>
+      <button onclick="GameAPI.exitOverworld()">← Выйти</button>
     </div>
     <div style="position:relative;">
       <canvas id="overworld-canvas" width="800" height="500" style="border:2px solid #5a4a3a;border-radius:8px;width:100%;height:auto;display:block;background:#1a2e1a;image-rendering:pixelated;"></canvas>
@@ -186,7 +181,7 @@
         <div id="npc-panel-info" style="color:#d4c8a8; font-size:14px; margin-bottom:8px;"></div>
         <div class="actions" id="npc-panel-actions"></div>
       </div>
-      <!-- Модальное окно NPC -->
+      <!-- Модальное окно NPC — отдельный слой поверх карты -->
       <div id="npc-dialog-modal" class="npc-modal" style="display:none;">
         <div class="npc-modal-content">
           <button class="npc-modal-close" onclick="GameAPI.closeNpcAndResume()">✖</button>
@@ -209,7 +204,9 @@
         </div>
       </div>
     </div>
-
+    <p style="color:#a89060;font-size:13px;text-align:center;margin-top:8px;">
+      WASD / стрелки — движение · Пробел / 1 — атака · 2 — магия · 3 — предмет · 4 — побег · 5 — блок · 6 — способность · Esc — выход
+    </p>
   </div>
 </div>
 
@@ -233,9 +230,12 @@
   <div class="center-flex">
     <h1 style="font-size:50px;">🏆 Победа!</h1>
     <p class="subtitle" style="font-size:16px;max-width:600px;line-height:1.7;">
-      Вы собрали все три осколка Кристалла Маны и восстановили его. Свет вернулся в мир, тьма отступила.<br><br>Вы — истинный герой!
+      Вы победили трёх драконов-печатей и открыли Разлом. Три осколка стабилизировали его края. Теперь решите судьбу раны между мирами.<br><br>Ваш выбор определит, останется ли Разлом частью этого мира.
     </p>
+    <div id="ending-choice-status" style="max-width:620px;margin:10px auto;color:#c8aab4;">Выберите судьбу Разлома.</div>
     <div class="menu">
+      <button onclick="GameAPI.chooseRiftEnding('closed')" style="min-width:320px;border-color:#b060ff;">🔒 Закрыть Разлом навсегда</button>
+      <button onclick="GameAPI.chooseRiftEnding('open')" style="min-width:320px;border-color:#b060ff;">🌀 Оставить Разлом открытым</button>
       <button onclick="GameAPI.startNGPlus()" style="min-width:320px;border-color:#b060ff;">🔄 Начать NG+ (сохранить экипировку)</button>
       <button onclick="GameAPI.showScreen('screen-main');GameAPI.updateMainMenu();" style="min-width:320px;">← В главное меню</button>
     </div>

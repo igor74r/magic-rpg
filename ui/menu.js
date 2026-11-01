@@ -138,6 +138,39 @@ function renderSettingsTab(tab) {
       </div>
       <p class="settings-note">Сложность влияет на игровой баланс. Автосохранение выполняется в безопасные моменты исследования, вне боя.</p>
     `;
+  } else if (tab === 'graphics') {
+    content.innerHTML = `
+      <div class="settings-row">
+        <label>🎨 Качество графики</label>
+        <select id="set-graphics-quality" onchange="GameAPI.applySettings()">
+          <option value="low" ${s.graphicsQuality === 'low' ? 'selected' : ''}>Низкое — для слабых ПК</option>
+          <option value="balanced" ${s.graphicsQuality === 'balanced' ? 'selected' : ''}>Сбалансированное</option>
+          <option value="high" ${s.graphicsQuality !== 'low' && s.graphicsQuality !== 'balanced' ? 'selected' : ''}>Высокое — все эффекты</option>
+        </select><span></span>
+      </div>
+      <div class="settings-row">
+        <label>🌧️ Погодные эффекты</label>
+        <select id="set-weather-effects" onchange="GameAPI.applySettings()">
+          <option value="on" ${s.weatherEffects !== false ? 'selected' : ''}>Включены</option>
+          <option value="off" ${s.weatherEffects === false ? 'selected' : ''}>Выключены</option>
+        </select><span></span>
+      </div>
+      <div class="settings-row">
+        <label>🌫️ Атмосферный туман</label>
+        <select id="set-ambient-fog" onchange="GameAPI.applySettings()">
+          <option value="on" ${s.ambientFog !== false ? 'selected' : ''}>Включён</option>
+          <option value="off" ${s.ambientFog === false ? 'selected' : ''}>Выключен</option>
+        </select><span></span>
+      </div>
+      <div class="settings-row">
+        <label>✨ Свечение (Bloom)</label>
+        <select id="set-bloom-effects" onchange="GameAPI.applySettings()">
+          <option value="on" ${s.bloomEffects !== false ? 'selected' : ''}>Включено</option>
+          <option value="off" ${s.bloomEffects === false ? 'selected' : ''}>Выключено</option>
+        </select><span></span>
+      </div>
+      <p class="settings-note">Настройки сохраняются автоматически. Низкое качество отключает тяжёлые декоративные эффекты; сбалансированное сохраняет основную атмосферу с меньшей нагрузкой. Изменения не затрагивают камеру, управление и игровую механику.</p>
+    `;
   } else if (tab === 'accessibility') {
     content.innerHTML = `
       <div class="settings-row">
@@ -214,6 +247,11 @@ export function applySettings() {
   setBool('set-screen-shake', 'screenShake');
   setBool('set-low-health', 'lowHealthEffects');
   setBool('set-reduced-motion', 'reducedMotion');
+  const quality = value('set-graphics-quality');
+  if (quality && ['low', 'balanced', 'high'].includes(quality)) s.graphicsQuality = quality;
+  setBool('set-weather-effects', 'weatherEffects');
+  setBool('set-ambient-fog', 'ambientFog');
+  setBool('set-bloom-effects', 'bloomEffects');
   const interval = Number(value('set-autosave-interval'));
   if ([15, 30, 60].includes(interval)) s.autoSaveInterval = interval;
 
@@ -236,7 +274,8 @@ export function resetAllSettings() {
     soundEnabled: true, autoSave: true, autoSaveInterval: 30,
     showHotkeys: true, showFps: false, screenShake: true,
     damageNumbers: true, lowHealthEffects: true, reducedMotion: false,
-    settingsVersion: 4
+    graphicsQuality: 'high', weatherEffects: true, ambientFog: true, bloomEffects: true,
+    settingsVersion: 5
   };
   saveSettings();
   updateVolume();

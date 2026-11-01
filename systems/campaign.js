@@ -29,8 +29,8 @@ export function getMissionProgress(player, mission) {
     current: Math.min(kills, required),
     required,
     shardRequired: mission.shardId || null,
-    shardFound: mission.shardId ? player?.campaignShards?.[mission.shardId] === true : true,
-    complete: kills >= required && (!mission.shardId || player?.campaignShards?.[mission.shardId] === true),
+    shardFound: mission.shardId ? player?.storyShards?.[mission.shardId] === true : true,
+    complete: kills >= required && (!mission.shardId || player?.storyShards?.[mission.shardId] === true),
     claimed,
     active: player?.activeCampaignMission === mission.id
   };
@@ -75,10 +75,12 @@ export function acceptCampaignMission(player, missionId = null) {
 }
 
 export function recordCampaignShard(player, shardId) {
-  if (!player || !['forest', 'ruins', 'shadow'].includes(shardId)) return false;
+  if (!player || !['flame', 'ice', 'blood'].includes(shardId)) return false;
   ensureCampaignState(player);
-  if (!player.campaignShards || typeof player.campaignShards !== 'object') player.campaignShards = {};
-  player.campaignShards[shardId] = true;
+  if (!player.storyShards || typeof player.storyShards !== 'object' || Array.isArray(player.storyShards)) {
+    player.storyShards = {};
+  }
+  player.storyShards[shardId] = true;
   return true;
 }
 
@@ -154,10 +156,10 @@ export function isCampaignComplete(player) {
 }
 
 export function canCompleteMainQuest(game) {
-  const shards = game?.shards;
+  const shards = game?.storyShards;
   const allShardsFound =
-    shards?.forest === true &&
-    shards?.ruins === true &&
-    shards?.shadow === true;
-  return Boolean(allShardsFound && isCampaignComplete(game?.player));
+    shards?.flame === true &&
+    shards?.ice === true &&
+    shards?.blood === true;
+  return Boolean(allShardsFound && game?.storyDragons?.['blood-crown'] === true && isCampaignComplete(game?.player));
 }

@@ -15,7 +15,7 @@ export function createCharacter(name, className) {
   const stats = cls.baseStats;
 
   state.game = {
-    version: 13,
+    version: 15,
 
     player: {
       name,
@@ -36,6 +36,7 @@ export function createCharacter(name, className) {
       wis: stats.wis,
       con: stats.con,
       dex: stats.dex || 0,
+      luck: 5,
 
       statPoints: 0,
       passivePoints: 0,
@@ -107,11 +108,9 @@ export function createCharacter(name, className) {
 
     location: 'village',
 
-    shards: {
-      forest: false,
-      ruins: false,
-      shadow: false
-    },
+    storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false },
+    storyShards: { flame: false, ice: false, blood: false },
+    shards: { forest: false, ruins: false, shadow: false },
 
     quests: {}
   };

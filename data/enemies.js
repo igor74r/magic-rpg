@@ -68,11 +68,11 @@ export const ENEMIES = {
   },
 
   'flame-lord': {
-    name: 'Владыка пламени', emoji: '👹',
+    name: 'Пепельный Вестник', emoji: '🐉',
     hp: 220, attack: 38, defense: 10, exp: 250, gold: 220,
     drops: ['mithril-armor', 'strong-mana-potion', 'cinder-visor', 'rune-ember'], boss: true,
     special: { type: 'snipe', every: 2, mult: 2.2, name: 'Адское пламя', effect: 'burn' },
-    phases: [{ atHp: 0.5, atkMult: 1.4, msg: 'Владыка пламени пылает ярче!', specialEvery: 1 }]
+    phases: [{ atHp: 0.5, atkMult: 1.4, msg: 'Пепельный Вестник раскрывает крылья пепельного пламени!', specialEvery: 1 }]
   },
 
   'frost-wolf': {
@@ -90,11 +90,11 @@ export const ENEMIES = {
   },
 
   'ice-queen': {
-    name: 'Королева стужи', emoji: '👸',
+    name: 'Ледяная Хватка', emoji: '🐉',
     hp: 260, attack: 42, defense: 14, exp: 320, gold: 280,
     drops: ['ice-staff', 'frost-armor', 'glacier-greaves', 'pendant-last-oath'], boss: true,
     special: { type: 'snipe', every: 3, mult: 2.2, name: 'Ледяная стрела', effect: 'bleed' },
-    phases: [{ atHp: 0.5, atkMult: 1.4, msg: 'Королева впадает в ярость!', specialEvery: 2 }]
+    phases: [{ atHp: 0.5, atkMult: 1.4, msg: 'Ледяная Хватка сковывает арену вечным льдом!', specialEvery: 2 }]
   },
 
   'sand-worm': {
@@ -151,7 +151,7 @@ export const ENEMIES = {
   'fire-drake': {
     name: 'Огнедышащий дракон', emoji: '🐲',
     hp: 180, attack: 34, defense: 10, exp: 220, gold: 180,
-    drops: ['strong-health-potion', 'scroll-shield'], boss: true,
+    drops: ['strong-health-potion', 'scroll-shield'],
     special: { type: 'snipe', every: 3, mult: 2, name: 'Огненное дыхание', effect: 'burn' },
     phases: [{ atHp: 0.4, atkMult: 1.5, msg: 'Дракон впадает в ярость!', specialEvery: 2 }]
   },
@@ -164,13 +164,13 @@ export const ENEMIES = {
   },
 
   'ancient-dragon': {
-    name: 'Древний дракон', emoji: '🐲',
+    name: 'Кровавая Корона', emoji: '🐉',
     hp: 450, attack: 52, defense: 16, exp: 600, gold: 600,
     drops: ['dragon-blade', 'dragon-scale-armor', 'scroll-poison-cloud'], boss: true,
     special: { type: 'snipe', every: 2, mult: 2.4, name: 'Пламя древних', effect: 'burn' },
     phases: [
-      { atHp: 0.5, atkMult: 1.4, msg: 'Древний дракон раскрывает крылья!', specialEvery: 2 },
-      { atHp: 0.25, atkMult: 1.6, msg: 'Древний дракон в ярости!', specialEvery: 1 }
+      { atHp: 0.5, atkMult: 1.4, msg: 'Кровавая Корона раскрывает крылья!', specialEvery: 2 },
+      { atHp: 0.25, atkMult: 1.6, msg: 'Кровавая Корона обрушивает ярость на героя!', specialEvery: 1 }
     ]
   },
 

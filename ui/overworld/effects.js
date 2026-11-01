@@ -7,6 +7,8 @@ let weatherParticles = [];
 let fireflies = [];
 
 let fogLayers = [];
+// Reusable pre-rendered fog sprites: radial gradients are expensive to rebuild every frame.
+let fogSpriteCache = [];
 
 let lightning = { timer: 0, flash: 0 };
 
@@ -14,7 +16,7 @@ let bloomCanvas = null, bloomCtx = null;
 
 export const THEMES = {
   default:   { colors: { 0: '#0c1a1c', 1: '#22323a', 2: '#071014', 3: '#0c2230', 4: '#22303a' }, vignette: 0.7, shadow: 'rgba(0,0,0,0.55)', fog: 0.88, weather: 'none', tint: 'rgba(30, 90, 100, 0.16)' },
-  village:   { colors: { 0: '#1b2f2c', 1: '#3a4a3f', 2: '#2a2420', 3: '#1b3a4a', 4: '#3d4a45' }, vignette: 0.35, shadow: 'rgba(0,0,0,0.35)', fog: 0.55, weather: 'none', tint: 'rgba(140, 230, 210, 0.06)' },
+  village:   { colors: { 0: '#1b2b29', 1: '#51483c', 2: '#2a2420', 3: '#1b3a4a', 4: '#3d4a45' }, vignette: 0.42, shadow: 'rgba(0,0,0,0.4)', fog: 0.62, weather: 'ash', tint: 'rgba(190, 150, 112, 0.09)' },
   forest:    { colors: { 0: '#08140f', 1: '#18241a', 2: '#040a08', 3: '#0a2230', 4: '#141f19' }, vignette: 0.75, shadow: 'rgba(0,0,0,0.6)', fog: 0.9, weather: 'rain', tint: 'rgba(20, 80, 60, 0.2)' },
   ruins:     { colors: { 0: '#1c2028', 1: '#2e3440', 2: '#10141c', 3: '#1c2c3c', 4: '#3a404a' }, vignette: 0.68, shadow: 'rgba(0,0,0,0.55)', fog: 0.85, weather: 'none', tint: 'rgba(70, 90, 120, 0.12)' },
   shadow:    { colors: { 0: '#08040e', 1: '#181028', 2: '#040208', 3: '#22103a', 4: '#14101c' }, vignette: 0.95, shadow: 'rgba(0,0,0,0.9)', fog: 0.98, weather: 'ash', tint: 'rgba(90, 40, 120, 0.22)' },
@@ -59,8 +61,8 @@ export function initWeather(themeName) {
     });
   }
 
-  if (['forest', 'swamp', 'briar-hollow'].includes(themeName)) {
-    for (let i = 0; i < 12; i++) {
+  if (['forest', 'swamp', 'briar-hollow', 'village'].includes(themeName)) {
+    for (let i = 0; i < (themeName === 'village' ? 7 : 12); i++) {
       fireflies.push({
         x: Math.random() * VIEW_W, y: Math.random() * VIEW_H,
         phase: Math.random() * Math.PI * 2,
@@ -79,11 +81,32 @@ export function initWeather(themeName) {
     });
   }
 
+  // Build soft fog textures once per location instead of creating three gradients every frame.
+  fogSpriteCache = fogLayers.map(layer => {
+    if (typeof document === 'undefined') return null;
+    const diameter = Math.ceil(layer.size * 2);
+    const sprite = document.createElement('canvas');
+    sprite.width = diameter;
+    sprite.height = diameter;
+    const spriteCtx = sprite.getContext('2d');
+    if (!spriteCtx) return null;
+    const gradient = spriteCtx.createRadialGradient(layer.size, layer.size, 0, layer.size, layer.size, layer.size);
+    gradient.addColorStop(0, 'rgba(200, 200, 220, 1)');
+    gradient.addColorStop(1, 'rgba(200, 200, 220, 0)');
+    spriteCtx.fillStyle = gradient;
+    spriteCtx.fillRect(0, 0, diameter, diameter);
+    return sprite;
+  });
+
   if (!bloomCanvas) {
+    // Bloom is a soft light pass: render it at half resolution to cut fill cost
+    // by 75%, then scale it smoothly when compositing onto the main canvas.
+    const bloomScale = 0.5;
     bloomCanvas = document.createElement('canvas');
-    bloomCanvas.width = VIEW_W;
-    bloomCanvas.height = VIEW_H;
-    bloomCtx = bloomCanvas.getContext('2d');
+    bloomCanvas.width = Math.ceil(VIEW_W * bloomScale);
+    bloomCanvas.height = Math.ceil(VIEW_H * bloomScale);
+    bloomCtx = bloomCanvas.getContext('2d', { alpha: true });
+    bloomCtx.setTransform(bloomScale, 0, 0, bloomScale, 0, 0);
   }
 
   lightning = { timer: 5 + Math.random() * 5, flash: 0 };
@@ -109,7 +132,7 @@ export function updateWeather(dt) {
 
 export function updateFireflies(dt, worldTime) {
   const biome = state.overworld?.theme || state.overworld?.locationId;
-  if (!['forest', 'swamp', 'briar-hollow'].includes(biome)) return;
+  if (!['forest', 'swamp', 'briar-hollow', 'village'].includes(biome)) return;
   const dayPhase = (worldTime % 120) / 120;
   const isNight = dayPhase >= 0.5 && dayPhase < 0.8;
 
@@ -150,21 +173,28 @@ export function drawWeather(ctx) {
   if (theme.weather === 'rain') {
     ctx.strokeStyle = 'rgba(150, 180, 255, 0.3)'; ctx.lineWidth = 1; ctx.beginPath();
     for (let p of weatherParticles) { ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - 4, p.y + 12); } ctx.stroke();
-  } else if (theme.weather === 'snow') {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    for (let p of weatherParticles) { ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); }
-  } else if (theme.weather === 'embers') {
-    ctx.fillStyle = 'rgba(255, 100, 0, 0.8)'; ctx.shadowBlur = 8; ctx.shadowColor = '#ff4000';
-    for (let p of weatherParticles) { ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); }
-  } else if (theme.weather === 'ash') {
-    ctx.fillStyle = 'rgba(80, 60, 80, 0.4)';
-    for (let p of weatherParticles) { ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); }
+  } else if (theme.weather === 'snow' || theme.weather === 'embers' || theme.weather === 'ash') {
+    // Batch particle circles into one path/fill instead of one draw call per particle.
+    ctx.beginPath();
+    for (const p of weatherParticles) ctx.moveTo(p.x + p.size, p.y), ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    if (theme.weather === 'snow') {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    } else if (theme.weather === 'embers') {
+      ctx.fillStyle = 'rgba(255, 100, 0, 0.8)';
+      ctx.shadowBlur = 5;
+      ctx.shadowColor = '#ff4000';
+    } else {
+      ctx.fillStyle = getCurrentBiome() === 'village'
+        ? 'rgba(190, 166, 135, 0.22)'
+        : 'rgba(80, 60, 80, 0.4)';
+    }
+    ctx.fill();
   }
   ctx.restore();
 }
 
 export function drawFireflies(ctx, worldTime) {
-  if (!['forest', 'swamp', 'briar-hollow'].includes(getCurrentBiome())) return;
+  if (!['forest', 'swamp', 'briar-hollow', 'village'].includes(getCurrentBiome())) return;
   const dayPhase = (worldTime % 120) / 120;
   const isNight = dayPhase >= 0.5 && dayPhase < 0.8;
   if (!isNight) return;
@@ -173,8 +203,8 @@ export function drawFireflies(ctx, worldTime) {
   for (let f of fireflies) {
     const flicker = 0.4 + 0.6 * Math.abs(Math.sin(f.phase * 3));
     ctx.globalAlpha = flicker * 0.9;
-    ctx.fillStyle = '#a0ff60';
-    ctx.shadowBlur = 12; ctx.shadowColor = '#80ff40';
+    ctx.fillStyle = getCurrentBiome() === 'village' ? '#f3c879' : '#a0ff60';
+    ctx.shadowBlur = 12; ctx.shadowColor = getCurrentBiome() === 'village' ? '#e6b75f' : '#80ff40';
     ctx.beginPath(); ctx.arc(f.x, f.y, 2.5, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
@@ -183,14 +213,23 @@ export function drawFireflies(ctx, worldTime) {
 export function drawFogLayers(ctx) {
   const theme = getCurrentTheme();
   const baseAlpha = theme.fog > 0.85 ? 1.5 : 0.8;
-  
+
   ctx.save();
-  for (let layer of fogLayers) {
-    const grad = ctx.createRadialGradient(layer.x, layer.y, 0, layer.x, layer.y, layer.size);
-    grad.addColorStop(0, `rgba(200, 200, 220, ${layer.alpha * baseAlpha})`);
-    grad.addColorStop(1, 'rgba(200, 200, 220, 0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(layer.x - layer.size, layer.y - layer.size, layer.size * 2, layer.size * 2);
+  for (let i = 0; i < fogLayers.length; i++) {
+    const layer = fogLayers[i];
+    const sprite = fogSpriteCache[i];
+    ctx.globalAlpha = Math.min(1, layer.alpha * baseAlpha);
+    if (sprite) {
+      ctx.drawImage(sprite, layer.x - layer.size, layer.y - layer.size);
+    } else {
+      // Fallback for environments without an offscreen canvas.
+      const grad = ctx.createRadialGradient(layer.x, layer.y, 0, layer.x, layer.y, layer.size);
+      grad.addColorStop(0, `rgba(200, 200, 220, ${layer.alpha * baseAlpha})`);
+      grad.addColorStop(1, 'rgba(200, 200, 220, 0)');
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = grad;
+      ctx.fillRect(layer.x - layer.size, layer.y - layer.size, layer.size * 2, layer.size * 2);
+    }
   }
   ctx.restore();
 }
@@ -260,7 +299,7 @@ export function drawBloom(ctx) {
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
   ctx.filter = 'blur(8px)';
-  ctx.drawImage(bloomCanvas, 0, 0);
+  ctx.drawImage(bloomCanvas, 0, 0, VIEW_W, VIEW_H);
   ctx.filter = 'none';
   ctx.restore();
 }

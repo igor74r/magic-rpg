@@ -1,8 +1,8 @@
 // scripts/check-imports.mjs
-// Проверяет два инварианта ES-модулей проекта:
-//   1) все относительные импорты резолвятся в существующие файлы;
-//   2) все именованные импорты реально экспортируются целевым модулем.
-// Синтаксис проверяет node --check, здесь — только связность графа.
+// РџСЂРѕРІРµСЂСЏРµС‚ РґРІР° РёРЅРІР°СЂРёР°РЅС‚Р° ES-РјРѕРґСѓР»РµР№ РїСЂРѕРµРєС‚Р°:
+//   1) РІСЃРµ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅС‹Рµ РёРјРїРѕСЂС‚С‹ СЂРµР·РѕР»РІСЏС‚СЃСЏ РІ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРµ С„Р°Р№Р»С‹;
+//   2) РІСЃРµ РёРјРµРЅРѕРІР°РЅРЅС‹Рµ РёРјРїРѕСЂС‚С‹ СЂРµР°Р»СЊРЅРѕ СЌРєСЃРїРѕСЂС‚РёСЂСѓСЋС‚СЃСЏ С†РµР»РµРІС‹Рј РјРѕРґСѓР»РµРј.
+// РЎРёРЅС‚Р°РєСЃРёСЃ РїСЂРѕРІРµСЂСЏРµС‚ node --check, Р·РґРµСЃСЊ вЂ” С‚РѕР»СЊРєРѕ СЃРІСЏР·РЅРѕСЃС‚СЊ РіСЂР°С„Р°.
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -12,7 +12,7 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 function walk(dir, out = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+    if (entry.name.startsWith('.') || entry.name === 'node_modules' || entry.name.startsWith('p0_backup_')) continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
     else if (entry.isFile() && entry.name.endsWith('.js')) out.push(full);
@@ -37,7 +37,7 @@ function extractSpecs(src) {
   return specs;
 }
 
-// Делит строку по разделителю на верхнем уровне вложенности (скобки/кавычки).
+// Р”РµР»РёС‚ СЃС‚СЂРѕРєСѓ РїРѕ СЂР°Р·РґРµР»РёС‚РµР»СЋ РЅР° РІРµСЂС…РЅРµРј СѓСЂРѕРІРЅРµ РІР»РѕР¶РµРЅРЅРѕСЃС‚Рё (СЃРєРѕР±РєРё/РєР°РІС‹С‡РєРё).
 function splitTopLevel(str, sep) {
   const out = [];
   let depth = 0, quote = null, cur = '';
@@ -59,7 +59,7 @@ function splitTopLevel(str, sep) {
   return out;
 }
 
-// Имена, которые модуль отдаёт наружу: export function/const/class и export { ... }.
+// РРјРµРЅР°, РєРѕС‚РѕСЂС‹Рµ РјРѕРґСѓР»СЊ РѕС‚РґР°С‘С‚ РЅР°СЂСѓР¶Сѓ: export function/const/class Рё export { ... }.
 function collectExports(text) {
   const names = new Set();
   let star = false;
@@ -68,7 +68,7 @@ function collectExports(text) {
   for (const m of text.matchAll(/export\s+(?:async\s+)?function\s*\*?\s*([A-Za-z_$][\w$]*)/g)) names.add(m[1]);
   for (const m of text.matchAll(/export\s+class\s+([A-Za-z_$][\w$]*)/g)) names.add(m[1]);
 
-  // export const A = 1, B = 2;  — разбираем деклараторы до ';' верхнего уровня
+  // export const A = 1, B = 2;  вЂ” СЂР°Р·Р±РёСЂР°РµРј РґРµРєР»Р°СЂР°С‚РѕСЂС‹ РґРѕ ';' РІРµСЂС…РЅРµРіРѕ СѓСЂРѕРІРЅСЏ
   for (const m of text.matchAll(/export\s+(?:const|let|var)\s+/g)) {
     const start = m.index + m[0].length;
     let i = start, depth = 0, quote = null, end = text.length;
@@ -90,7 +90,7 @@ function collectExports(text) {
     }
   }
 
-  // export { a, b as c } [from '...'] — экспортируемое имя стоит справа от as
+  // export { a, b as c } [from '...'] вЂ” СЌРєСЃРїРѕСЂС‚РёСЂСѓРµРјРѕРµ РёРјСЏ СЃС‚РѕРёС‚ СЃРїСЂР°РІР° РѕС‚ as
   for (const m of text.matchAll(/export\s*\{([\s\S]*?)\}/g)) {
     for (const part of splitTopLevel(m[1], ',')) {
       const bits = part.trim().split(/\s+as\s+/);
@@ -133,10 +133,10 @@ for (const file of files) {
     const named = clause.match(/\{([\s\S]*?)\}/);
     if (!named) continue;
     const target = resolveSpec(file, spec);
-    if (!target) continue; // уже попадёт в unresolved
+    if (!target) continue; // СѓР¶Рµ РїРѕРїР°РґС‘С‚ РІ unresolved
 
     const ex = exportsOf(target);
-    if (ex.star) continue; // export * — состав неизвестен, не проверяем
+    if (ex.star) continue; // export * вЂ” СЃРѕСЃС‚Р°РІ РЅРµРёР·РІРµСЃС‚РµРЅ, РЅРµ РїСЂРѕРІРµСЂСЏРµРј
 
     for (const part of splitTopLevel(named[1], ',')) {
       const imported = part.trim().split(/\s+as\s+/)[0].trim();

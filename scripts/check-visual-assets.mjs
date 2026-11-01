@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 
 const manifest = JSON.parse(readFileSync(new URL('../assets/tiles/manifest.json', import.meta.url), 'utf8'));
-assert.equal(manifest.tileSize, 48);
+assert.equal(manifest.tileSize, 96);
+assert.equal(manifest.terrain.displaySize, 48);
 assert.deepEqual(manifest.terrain.columns, ['grass', 'path', 'biome-object', 'liquid', 'rock']);
 assert.equal(manifest.terrain.rows.length, 8);
 for (const [biome, row] of Object.entries(manifest.biomeRows)) {
@@ -14,15 +15,14 @@ for (const asset of [
   'assets/tiles/dungeons/atlas.svg',
   'assets/tiles/props/atlas.svg',
   'assets/branding/mana-crystal.svg',
-  'audio/prologue.mp3'
-]) {
-  assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing asset: ${asset}`);
-}
+  'audio/prologue.mp3',
+  'css/2d-art-direction.css'
+]) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing asset: ${asset}`);
 
 const dimensions = [
-  ['assets/tiles/terrain/atlas.svg', 240, 384],
+  ['assets/tiles/terrain/atlas.svg', 480, 768],
   ['assets/tiles/dungeons/atlas.svg', 480, 192],
-  ['assets/tiles/props/atlas.svg', 384, 192]
+  ['assets/tiles/props/atlas.svg', 768, 384]
 ];
 for (const [path, width, height] of dimensions) {
   const svg = readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
@@ -32,14 +32,19 @@ for (const [path, width, height] of dimensions) {
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 assert.ok(html.includes('assets/branding/mana-crystal.svg'));
-assert.ok(html.includes('Тысячу лет Кристалл Маны хранил равновесие мира.'));
-assert.ok(html.includes('assets/branding/mana-crystal.svg" alt="Кристалл Маны"'));
+assert.ok(html.includes('Три дракона удерживают его закрытым.'));
+assert.ok(html.includes('Первые кровавые маги создали Кристалл Разлома'));
+assert.ok(html.includes('assets/branding/mana-crystal.svg" alt="Кристалл Разлома"'));
+assert.ok(html.includes('css/2d-art-direction.css'));
 
 const renderer = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
 assert.ok(renderer.includes('getEventPropIndex'));
 assert.ok(renderer.includes('drawAtlasProp(ctx, eventPropIndex'));
+const atlasRenderer = readFileSync(new URL('../ui/overworld/tile-atlas.js', import.meta.url), 'utf8');
+assert.ok(atlasRenderer.includes('const TILE_SIZE = 96'));
+assert.ok(atlasRenderer.includes("ctx.imageSmoothingQuality = 'high'"));
 const styles = readFileSync(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8');
 assert.ok(styles.includes('#mobile-dpad .dpad-btn'));
 assert.ok(styles.includes('prefers-reduced-motion'));
 
-console.log('Visual assets, tile manifests, branding and responsive UI checks passed');
+console.log('2D art assets, high-resolution terrain atlas, tile manifest and responsive UI checks passed');

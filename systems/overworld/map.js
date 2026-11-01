@@ -23,133 +23,129 @@ export function hashString(str) {
 
 export function generateVillageMap(cols, rows) {
   const grid = Array.from({ length: rows }, () => Array(cols).fill(0));
-
   const putRect = (x, y, width, height, tile) => {
     for (let yy = y; yy < y + height; yy++) {
       for (let xx = x; xx < x + width; xx++) {
-        if (grid[yy] && grid[yy][xx] !== undefined) {
-          grid[yy][xx] = tile;
-        }
+        if (grid[yy]?.[xx] !== undefined) grid[yy][xx] = tile;
       }
     }
   };
-
-  const road = (x1, y1, x2, y2, width = 1) => {
-    const dx = Math.sign(x2 - x1);
-    const dy = Math.sign(y2 - y1);
-    let x = x1;
-    let y = y1;
-
+  const road = (x1, y1, x2, y2, width = 2) => {
+    let x = x1, y = y1;
+    const stamp = () => {
+      const radius = Math.floor(width / 2);
+      for (let oy = -radius; oy <= radius; oy++) {
+        for (let ox = -radius; ox <= radius; ox++) {
+          if (grid[y + oy]?.[x + ox] !== undefined) grid[y + oy][x + ox] = 1;
+        }
+      }
+    };
     for (let step = 0; step < cols + rows + 5; step++) {
-      for (
-        let ox = -Math.floor(width / 2);
-        ox <= Math.floor(width / 2);
-        ox++
-      ) {
-        for (
-          let oy = -Math.floor(width / 2);
-          oy <= Math.floor(width / 2);
-          oy++
-        ) {
-          if (grid[y + oy] && grid[y + oy][x + ox] !== undefined) {
-            grid[y + oy][x + ox] = 1;
-          }
-        }
-      }
-
+      stamp();
       if (x === x2 && y === y2) break;
-
-      if (x !== x2) x += dx;
-      else if (y !== y2) y += dy;
+      if (x !== x2) x += Math.sign(x2 - x);
+      else y += Math.sign(y2 - y);
     }
   };
 
-  // Центральная площадь и главные улицы.
-  const cx = Math.floor(cols / 2);
-  const cy = Math.floor(rows / 2);
+  // District layout scales from the requested 64x48 map.
+  const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
+  const left = Math.max(3, Math.floor(cols * 0.12));
+  const right = Math.min(cols - 10, Math.floor(cols * 0.72));
+  const north = Math.max(3, Math.floor(rows * 0.10));
+  const south = Math.min(rows - 9, Math.floor(rows * 0.72));
 
-  putRect(cx - 1, 0, 3, rows, 1);
-  putRect(0, cy - 1, cols, 3, 1);
-  putRect(cx - 4, cy - 3, 9, 7, 1);
+  // Organic main roads: a gently winding north-south route and a curved
+  // east-west lane replace the old rigid cross. Coordinates are clamped by road().
+  const path = (points, width = 2) => {
+    for (let i = 0; i < points.length - 1; i++) {
+      const [ax, ay] = points[i], [bx, by] = points[i + 1];
+      road(ax, ay, bx, by, width);
+    }
+  };
+  path([[cx - 2, 0], [cx - 2, Math.floor(rows * .22)], [cx + 1, Math.floor(rows * .34)],
+    [cx + 2, Math.floor(rows * .47)], [cx - 1, Math.floor(rows * .61)],
+    [cx - 2, Math.floor(rows * .78)], [cx + 1, rows - 1]], 2);
+  path([[0, cy + 2], [Math.floor(cols * .18), cy + 1], [Math.floor(cols * .32), cy - 2],
+    [Math.floor(cols * .48), cy - 1], [Math.floor(cols * .64), cy + 2],
+    [Math.floor(cols * .82), cy + 1], [cols - 1, cy - 2]], 2);
+  // The central plaza is a compact walkable space, not a giant rectangular road slab.
+  putRect(cx - 4, cy - 4, 9, 9, 1);
 
-  // Улицы к ремесленным кварталам и жилым домам.
-  road(11, 8, 29, 8, 2);
-  road(11, 23, 29, 23, 2);
-  road(11, 8, 11, 23, 2);
-  road(29, 8, 29, 23, 2);
-  road(cx, 5, cx, cy - 3, 2);
-  road(cx, cy + 4, cx, 27, 2);
-  road(5, cy, 11, cy, 2);
-  road(29, cy, 35, cy, 2);
+  // Civic, craft, healing, alchemy, market and tavern districts.
+  putRect(cx - 5, north, 10, 7, 2);
+  putRect(left, north + 3, 8, 7, 2);
+  putRect(right, north + 3, 8, 7, 2);
+  putRect(left, south, 8, 7, 2);
+  putRect(right, south, 9, 7, 2);
+  putRect(cx - 5, rows - 8, 10, 6, 2);
 
-  // Главные здания: кузница, лечебный дом, ратуша,
-  // караулка, алхимическая лавка и торговые ряды.
-  // 2 — непроходимые стены и здания.
-  // 4 — деревья и плотные клумбы.
-  putRect(7, 5, 4, 3, 2);
-  putRect(28, 5, 4, 3, 2);
-  putRect(18, 2, 5, 3, 2);
-  putRect(18, 28, 5, 3, 2);
-  putRect(7, 24, 4, 3, 2);
-  putRect(28, 24, 4, 3, 2);
-  putRect(3, 13, 4, 5, 2);
-  putRect(33, 13, 4, 5, 2);
+  // Six homes form two residential lanes around the village centre.
+  const homes = [
+    [left + 10, cy - 10, 5, 5], [cx - 12, north + 1, 5, 5],
+    [right - 8, north + 1, 5, 5], [cols - 9, cy - 8, 5, 5],
+    [left + 10, south + 1, 5, 5], [cx + 7, south + 1, 5, 5]
+  ];
+  for (const [x, y, w, h] of homes) putRect(x, y, w, h, 2);
 
-  // Небольшие постройки на окраинах.
-  putRect(3, 3, 3, 2, 2);
-  putRect(34, 3, 3, 2, 2);
-  putRect(3, 27, 3, 2, 2);
-  putRect(34, 27, 3, 2, 2);
+  // Curved side lanes branch toward homes, workshops and garden gates.
+  path([[left + 8, north + 7], [left + 7, north + 10], [left + 8, cy - 2], [left + 9, cy + 2]], 2);
+  path([[right, north + 7], [right - 1, north + 10], [right + 1, cy - 2], [right, cy + 2]], 2);
+  path([[left + 8, south], [left + 7, south + 3], [left + 8, rows - 1]], 2);
+  path([[right + 4, south], [right + 5, south + 3], [right + 4, rows - 1]], 2);
+  path([[cx - 5, north + 7], [cx - 4, north + 9], [cx - 5, cy - 5]], 1);
+  path([[cx + 5, north + 7], [cx + 4, north + 9], [cx + 5, cy - 5]], 1);
 
-  // Проходы к входам домов.
-  road(11, 8, 12, 8, 1);
-  road(27, 8, 29, 8, 1);
-  road(11, 23, 12, 23, 1);
-  road(27, 23, 29, 23, 1);
-  road(cx, 5, cx, 6, 1);
-  road(cx, 27, cx, 28, 1);
-
-  // Сады, изгороди и зелёные зоны по краям.
+  // Garden plots, orchard strips and dark overgrown boundary corners.
   const gardens = [
-    [1, 1, 2, 5],
-    [1, 8, 2, 3],
-    [1, 22, 2, 5],
-    [37, 1, 2, 5],
-    [37, 8, 2, 3],
-    [37, 22, 2, 5],
-    [13, 2, 3, 2],
-    [24, 2, 3, 2],
-    [13, 28, 3, 2],
-    [24, 28, 3, 2]
+    [1, 2, 3, 8], [1, rows - 12, 3, 8],
+    [cols - 4, 2, 3, 8], [cols - 4, rows - 12, 3, 8],
+    [left + 10, 2, 4, 3], [right - 2, 2, 4, 3],
+    [left + 10, rows - 5, 4, 3], [right - 2, rows - 5, 4, 3],
+    [cx - 12, cy - 9, 3, 2], [cx + 9, cy + 7, 3, 2]
   ];
+  for (const [x, y, w, h] of gardens) putRect(x, y, w, h, 4);
 
-  for (const [x, y, width, height] of gardens) {
-    putRect(x, y, width, height, 4);
-  }
-
-  // NPC и точки взаимодействия должны стоять на проходимых клетках.
-  const clearCells = [
-    [20, 16],
-    [18, 13],
-    [16, 13],
-    [24, 13],
-    [11, 8],
-    [29, 8],
-    [11, 23],
-    [29, 23],
-    [20, 5],
-    [20, 27],
-    [18, 18],
-    [23, 18],
-    [20, 20]
+  // Irregular greenery breaks the rigid rectangular silhouette at Aurora's edge.
+  // These patches are deterministic and only occupy empty ground, never roads or buildings.
+  const edgePatches = [
+    { x: 5, y: 4, rx: 3, ry: 2 }, { x: 9, y: 13, rx: 2, ry: 3 },
+    { x: 5, y: 25, rx: 3, ry: 2 }, { x: 8, y: 40, rx: 2, ry: 3 },
+    { x: 57, y: 5, rx: 3, ry: 2 }, { x: 55, y: 16, rx: 2, ry: 3 },
+    { x: 58, y: 29, rx: 3, ry: 2 }, { x: 55, y: 41, rx: 2, ry: 3 },
+    { x: 22, y: 5, rx: 3, ry: 2 }, { x: 42, y: 5, rx: 3, ry: 2 },
+    { x: 21, y: 43, rx: 3, ry: 2 }, { x: 43, y: 43, rx: 3, ry: 2 }
   ];
-
-  for (const [x, y] of clearCells) {
-    if (grid[y] && grid[y][x] !== undefined) {
-      grid[y][x] = 1;
+  for (const patch of edgePatches) {
+    for (let yy = patch.y - patch.ry; yy <= patch.y + patch.ry; yy++) {
+      for (let xx = patch.x - patch.rx; xx <= patch.x + patch.rx; xx++) {
+        const dx = (xx - patch.x) / patch.rx, dy = (yy - patch.y) / patch.ry;
+        if (dx * dx + dy * dy > 1.15) continue;
+        if (grid[yy]?.[xx] === 0) grid[yy][xx] = 4;
+      }
     }
   }
 
+  // Interaction spots and the player arrival point must stay walkable.
+  const clearCells = [
+    [cx, cy + 4], [cx, cy - 7], [cx - 3, cy - 2], [cx + 3, cy - 2],
+    [left + 8, north + 8], [right, north + 8],
+    [left + 8, south - 1], [right + 4, south - 1],
+    [cx - 1, rows - 9], [cx + 1, rows - 9],
+    [cx - 3, cy + 1], [cx + 3, cy + 1],
+    [cx - 2, cy + 4], [cx + 2, cy + 4],
+    [cx - 5, cy], [cx + 5, cy], [left + 8, cy], [right + 4, cy],
+    [27, 21], [29, 21], [35, 21], [15, 15], [46, 15],
+    [15, 37], [50, 37], [32, 11], [32, 38], [27, 27],
+    [25, 24], [39, 24], [32, 18], [43, 34],
+    [34, 27], [36, 26], [23, 18], [19, 35], [43, 27],
+    [32, 30], [28, 19], [36, 19], [28, 29], [36, 29],
+    [25, 18], [39, 18], [25, 30], [39, 30],
+    [23, 17], [18, 15], [18, 18], [20, 18], [47, 33], [18, 37]
+  ];
+  for (const [x, y] of clearCells) {
+    if (grid[y]?.[x] !== undefined) grid[y][x] = 1;
+  }
   return grid;
 }
 
