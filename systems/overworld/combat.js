@@ -1495,8 +1495,6 @@ function combatVictory() {
     triggerShake(6, 0.3);
   }
 
-  saveGame();
-
   enemy.dead = true;
   enemy.respawnAt = performance.now() + getRespawnMs();
   enemy.effects = [];
@@ -1517,6 +1515,9 @@ function combatVictory() {
   if (hasBuff(p, 'bardBuff')) {
     consumeBuffRound(p, 'bardBuff');
   }
+
+  // Persist the post-combat state, after temporary effects and cooldowns are cleared.
+  saveGame();
 
   endCombat();
   checkAchievements();
