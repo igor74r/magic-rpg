@@ -71,6 +71,16 @@ function normalizeEquipped(player) {
 export function migrateGame(game) {
   if (!game || !game.player) return game;
 
+  // Never downgrade or rewrite saves created by a newer game schema.
+  const sourceVersion = game.version == null ? 0 : Number(game.version);
+  if (typeof game.version === 'boolean' || !Number.isSafeInteger(sourceVersion) || sourceVersion < 0) {
+    throw new Error(`Unsupported save version: ${String(game.version)}`);
+  }
+  if (sourceVersion > SAVE_VERSION) {
+    throw new Error(`Save version ${sourceVersion} is newer than supported version ${SAVE_VERSION}`);
+  }
+  game.version = sourceVersion;
+
   normalizeEquipped(game.player);
 
   if (!game.version || game.version < 2) {
