@@ -33,9 +33,10 @@ for (const act of STORY.acts) {
     if (Object.values(STORY_DRAGONS).some(dragon => dragon.missionId === mission.id)) {
       const dragon = Object.values(STORY_DRAGONS).find(item => item.missionId === mission.id);
       check(`finale enemy ${mission.id}`, dragon.enemyId === mission.enemyId && ENEMIES[mission.enemyId]?.boss === true);
-      const reward = claimStoryDragonReward(game, mission.enemyId);
+      check(`wrong location rejected ${dragon.shardId}`, claimStoryDragonReward(game, mission.enemyId, 'wrong-location') === null);
+      const reward = claimStoryDragonReward(game, mission.enemyId, locationId);
       check(`one-time shard ${dragon.shardId}`, reward?.newlyDefeated === true && reward.shardItemId === dragon.shardItemId && game.storyShards[dragon.shardId] === true);
-      const duplicate = claimStoryDragonReward(game, mission.enemyId);
+      const duplicate = claimStoryDragonReward(game, mission.enemyId, locationId);
       check(`no duplicate shard ${dragon.shardId}`, duplicate?.newlyDefeated === false);
       dragonRewards++;
     }

@@ -1483,7 +1483,7 @@ function combatVictory() {
   }
 
   // Legacy location-based shard rewards disabled; canonical shards come from story dragons.
-  const dragonReward = claimStoryDragonReward(state.game, enemy.enemyId);
+  const dragonReward = claimStoryDragonReward(state.game, enemy.enemyId, ow.locationId);
   if (dragonReward?.newlyDefeated) {
     const shardId = dragonReward.shardItemId;
     if (shardId && ITEMS[shardId]) {

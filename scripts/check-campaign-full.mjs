@@ -39,11 +39,13 @@ for (const act of STORY.acts) {
     const dragon = Object.values(STORY_DRAGONS).find(entry => entry.enemyId === mission.enemyId);
     if (dragon) {
       assert.equal(dragon.missionId, mission.id, mission.id + ': dragon mapped to wrong finale mission');
-      const reward = claimStoryDragonReward(game, mission.enemyId);
+      assert.equal(dragon.locationId, locationId, mission.id + ': dragon mapped to wrong finale location');
+      assert.equal(claimStoryDragonReward(game, mission.enemyId, 'wrong-location'), null, mission.id + ': dragon awarded a shard outside its canonical location');
+      const reward = claimStoryDragonReward(game, mission.enemyId, locationId);
       assert.equal(reward?.newlyDefeated, true, mission.id + ': designated dragon did not award its shard');
       assert.equal(reward.shardItemId, dragon.shardItemId, mission.id + ': wrong shard item awarded');
       assert.equal(game.storyShards[dragon.shardId], true, mission.id + ': story shard flag missing');
-      assert.equal(claimStoryDragonReward(game, mission.enemyId)?.newlyDefeated, false, mission.id + ': dragon shard could be claimed twice');
+      assert.equal(claimStoryDragonReward(game, mission.enemyId, locationId)?.newlyDefeated, false, mission.id + ': dragon shard could be claimed twice');
       if (dragon.id !== 'blood-crown') assert.equal(isRiftReady(), false, mission.id + ': Rift opened before the final dragon');
     } else {
       assert.equal(claimStoryDragonReward(game, mission.enemyId), null, mission.id + ': non-dragon awarded a story shard');

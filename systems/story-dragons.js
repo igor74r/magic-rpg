@@ -5,6 +5,7 @@ export const STORY_DRAGONS = Object.freeze({
   ashHerald: Object.freeze({
     id: 'ash-herald',
     enemyId: 'flame-lord',
+    locationId: 'obsidian-fields',
     act: 3,
     missionId: 'a3-m5',
     shardId: 'flame',
@@ -13,6 +14,7 @@ export const STORY_DRAGONS = Object.freeze({
   iceGrasp: Object.freeze({
     id: 'ice-grasp',
     enemyId: 'ice-queen',
+    locationId: 'frost-citadel',
     act: 4,
     missionId: 'a4-m5',
     shardId: 'ice',
@@ -21,6 +23,7 @@ export const STORY_DRAGONS = Object.freeze({
   bloodCrown: Object.freeze({
     id: 'blood-crown',
     enemyId: 'ancient-dragon',
+    locationId: 'dragon-lair',
     act: 5,
     missionId: 'a5-m5',
     shardId: 'blood',
@@ -49,9 +52,9 @@ export function isStoryDragonDefeated(game, dragonId) {
   return ensureStoryDragonState(game)?.[dragonId] === true;
 }
 
-export function recordStoryDragonDefeat(game, enemyId) {
+export function recordStoryDragonDefeat(game, enemyId, locationId) {
   const dragon = STORY_DRAGON_BY_ENEMY[enemyId];
-  if (!dragon || !game) return null;
+  if (!dragon || !game || locationId !== dragon.locationId) return null;
   // Story flags and guaranteed shards are awarded only for the accepted finale mission.
   if (game.player?.activeCampaignMission !== dragon.missionId) return null;
   const flags = ensureStoryDragonState(game);
@@ -60,8 +63,8 @@ export function recordStoryDragonDefeat(game, enemyId) {
   return { dragon, newlyDefeated: true };
 }
 
-export function claimStoryDragonReward(game, enemyId) {
-  const defeat = recordStoryDragonDefeat(game, enemyId);
+export function claimStoryDragonReward(game, enemyId, locationId) {
+  const defeat = recordStoryDragonDefeat(game, enemyId, locationId);
   if (!defeat?.newlyDefeated) return defeat;
   const { shardId, shardItemId } = defeat.dragon;
   if (!game.storyShards || typeof game.storyShards !== 'object' || Array.isArray(game.storyShards)) {
