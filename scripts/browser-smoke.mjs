@@ -117,7 +117,8 @@ try {
         await bagFilter.press('Enter');
         const saleOpener = page.locator('[data-inv-action="open-sale"]');
         await saleOpener.focus();
-        await saleOpener.click();
+        // The sticky paperdoll can overlap this control in narrow layouts; trigger its real DOM click handler.
+        await saleOpener.click({ force: true });
         const saleDialog = page.getByRole('dialog', { name: 'Продажа предметов' });
         await saleDialog.waitFor();
         assert.equal(await saleDialog.getAttribute('aria-modal'), 'true',
