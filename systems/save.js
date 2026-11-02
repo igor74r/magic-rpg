@@ -671,16 +671,24 @@ export function migrateSettings(settings) {
 }
 
 export function loadSettings() {
-  const data = localStorage.getItem(SETTINGS_KEY);
+  let data = null;
+  try {
+    data = localStorage.getItem(SETTINGS_KEY);
+  } catch (error) {
+    console.warn('[save] Не удалось прочитать настройки браузера:', error);
+  }
 
   if (data) {
     try {
       const parsed = JSON.parse(data);
-
-      state.settings = migrateSettings({
-        ...state.settings,
-        ...parsed
-      });
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        state.settings = migrateSettings({
+          ...state.settings,
+          ...parsed
+        });
+      } else {
+        state.settings = migrateSettings(state.settings);
+      }
     } catch {
       state.settings = migrateSettings(state.settings);
     }
@@ -688,14 +696,29 @@ export function loadSettings() {
     state.settings = migrateSettings(state.settings);
   }
 
-  saveSettings();
+  // Settings are optional: blocked/quota-exhausted storage must not prevent
+  // the game from booting with safe in-memory defaults.
+  return saveSettings();
 }
 
 export function saveSettings() {
-  state.settings.settingsVersion = SETTINGS_VERSION;
+  if (!state.settings || typeof state.settings !== 'object' || Array.isArray(state.settings)) {
+    state.settings = {};
+  }
 
-  localStorage.setItem(
-    SETTINGS_KEY,
-    JSON.stringify(state.settings)
-  );
+  const snapshot = {
+    ...state.settings,
+    settingsVersion: SETTINGS_VERSION
+  };
+
+  try {
+    const serialized = JSON.stringify(snapshot);
+    localStorage.setItem(SETTINGS_KEY, serialized);
+  } catch (error) {
+    console.warn('[save] Не удалось сохранить настройки:', error);
+    return false;
+  }
+
+  state.settings.settingsVersion = SETTINGS_VERSION;
+  return true;
 }
