@@ -709,6 +709,7 @@ export function drawEnemy(ctx, enemy, x, y, shadowColor) {
 }
 
 function drawVillageBuilding(ctx, x, y, style = 'home') {
+  // Hard-edged 4px pixel-art construction. No SVG, gradients or vector paths.
   const palettes = {
     hall: ['#d8c39a', '#70443a', '#3d2929', '#e9b75e'],
     forge: ['#9d8870', '#49332e', '#28242a', '#ff914d'],
@@ -720,57 +721,75 @@ function drawVillageBuilding(ctx, x, y, style = 'home') {
   };
   const [wall, timber, roof, glow] = palettes[style] || palettes.home;
   const t = performance.now() * 0.001;
-  const windowPulse = 0.88 + Math.sin(t * 1.7 + x * 0.03) * 0.08;
+  const pulse = Math.round((Math.sin(t * 1.7 + x * 0.03) + 1) * 1.5);
+  const px = (left, top, width, height, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(left, top, width, height);
+  };
+
   ctx.save();
-  ctx.translate(x, y);
-  ctx.fillStyle = 'rgba(0,0,0,0.42)';
-  ctx.beginPath(); ctx.ellipse(0, 17, 48, 15, 0, 0, Math.PI * 2); ctx.fill();
-  // Stone foundation and warm plaster walls.
-  ctx.fillStyle = '#29282b'; ctx.fillRect(-37, -24, 74, 45);
-  ctx.fillStyle = wall; ctx.fillRect(-33, -28, 66, 42);
-  ctx.fillStyle = 'rgba(255,235,190,0.13)'; ctx.fillRect(-30, -25, 60, 4);
-  // Roof silhouette with dark eaves and individual timber beams.
-  ctx.fillStyle = '#211d22';
-  ctx.beginPath(); ctx.moveTo(-43, -24); ctx.lineTo(0, -61); ctx.lineTo(43, -24); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = roof;
-  ctx.beginPath(); ctx.moveTo(-39, -26); ctx.lineTo(0, -57); ctx.lineTo(39, -26); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = timber; ctx.lineWidth = 4;
-  ctx.beginPath(); ctx.moveTo(-31, -28); ctx.lineTo(0, -51); ctx.lineTo(31, -28); ctx.stroke();
-  ctx.fillStyle = timber; ctx.fillRect(-33, -1, 66, 4);
-  // Door, iron handle and two lit windows.
-  ctx.fillStyle = '#30221e'; ctx.fillRect(-8, -12, 16, 26);
-  ctx.strokeStyle = '#b18a54'; ctx.lineWidth = 2; ctx.strokeRect(-8, -12, 16, 26);
-  ctx.fillStyle = '#e4b45f'; ctx.fillRect(4, 1, 2, 2);
-  for (const wx of [-25, 19]) {
-    ctx.fillStyle = '#342b2b'; ctx.fillRect(wx - 5, -14, 11, 13);
-    ctx.fillStyle = glow; ctx.globalAlpha = windowPulse; ctx.fillRect(wx - 3, -12, 7, 9);
-    ctx.globalAlpha = 1; ctx.strokeStyle = timber; ctx.lineWidth = 2;
-    ctx.strokeRect(wx - 5, -14, 11, 13);
-    ctx.beginPath(); ctx.moveTo(wx, -13); ctx.lineTo(wx, -2); ctx.moveTo(wx - 4, -8); ctx.lineTo(wx + 4, -8); ctx.stroke();
+  ctx.translate(Math.round(x), Math.round(y));
+  ctx.imageSmoothingEnabled = false;
+
+  // Stepped ground shadow and stone foundation.
+  px(-40, 16, 80, 8, '#17171b');
+  px(-36, 12, 72, 8, '#29282b');
+  px(-32, 8, 64, 8, '#3a3430');
+
+  // Roof: stair-stepped silhouette, layered shingles and timber edge.
+  px(-8, -64, 16, 4, '#211d22');
+  px(-16, -60, 32, 4, '#211d22');
+  px(-24, -56, 48, 4, '#211d22');
+  px(-32, -52, 64, 4, '#211d22');
+  px(-40, -48, 80, 4, '#211d22');
+  px(-40, -44, 80, 4, roof);
+  px(-36, -40, 72, 4, roof);
+  px(-32, -36, 64, 4, roof);
+  px(-28, -32, 56, 4, roof);
+  px(-24, -28, 48, 4, timber);
+  px(-32, -24, 64, 4, roof);
+  px(-36, -20, 72, 4, timber);
+
+  // Plaster wall, dark outline, corner posts and lower stone course.
+  px(-36, -20, 72, 40, '#211d22');
+  px(-32, -20, 64, 36, wall);
+  px(-32, -20, 4, 36, timber);
+  px(28, -20, 4, 36, timber);
+  px(-28, 8, 56, 4, '#6d6252');
+  px(-28, 12, 56, 4, '#51483e');
+  px(-28, -16, 56, 4, '#ead8b5');
+
+  // Door and lit windows use chunky, crisp pixels.
+  px(-8, -4, 16, 24, '#211916');
+  px(-4, 0, 8, 20, '#70472d');
+  px(4, 8, 4, 4, '#e4b45f');
+  for (const wx of [-24, 16]) {
+    px(wx, -12, 12, 16, '#211d22');
+    px(wx + 4, -8, 4, 8 + pulse, glow);
+    px(wx + 4, -12, 4, 16, timber);
+    px(wx, -4, 12, 4, timber);
   }
-  // Distinctive chimneys and restrained smoke.
+
+  // Roof crest and a few recognizable service-building accents.
+  px(-4, -56, 8, 4, '#b28b5a');
   if (style === 'forge' || style === 'tavern' || style === 'hall') {
-    ctx.fillStyle = '#4a3430'; ctx.fillRect(19, -54, 10, 20);
-    ctx.fillStyle = '#80604c'; ctx.fillRect(17, -56, 14, 4);
-    for (let i = 0; i < 3; i++) {
-      const drift = Math.sin(t * 0.8 + i) * (3 + i * 2);
-      ctx.globalAlpha = 0.18 - i * 0.035;
-      ctx.fillStyle = '#c6c0b5';
-      ctx.beginPath(); ctx.arc(24 + drift, -61 - i * 10 - ((t * 7 + i * 8) % 7), 5 + i * 2, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.globalAlpha = 1;
+    px(16, -56, 12, 20, '#342a28');
+    px(12, -60, 20, 4, '#80604c');
+    px(20, -68, 8, 4, '#8e8980');
+    px(24, -76, 8, 4, '#aaa39a');
   }
   if (style === 'forge') {
-    ctx.fillStyle = '#ff9a4b'; ctx.globalAlpha = 0.8 + Math.sin(t * 5) * 0.15;
-    ctx.beginPath(); ctx.arc(0, 8, 5, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    px(-4, 12, 8, 4, '#ff9a4b');
+    px(0, 8, 4, 4, '#ffd27a');
   }
   if (style === 'market') {
-    ctx.fillStyle = '#a33f38'; ctx.fillRect(-35, -31, 70, 5);
-    ctx.fillStyle = '#e2c18a'; ctx.fillRect(-28, -31, 12, 5); ctx.fillRect(-5, -31, 12, 5); ctx.fillRect(18, -31, 12, 5);
+    px(-36, -24, 72, 4, '#a33f38');
+    px(-28, -24, 12, 4, '#e2c18a');
+    px(-4, -24, 12, 4, '#e2c18a');
+    px(20, -24, 12, 4, '#e2c18a');
   }
   ctx.restore();
 }
-
 function drawVillageProp(ctx, x, y, style) {
   const t = performance.now() * 0.001;
   ctx.save();
