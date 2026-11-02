@@ -353,7 +353,9 @@ function openWorldPortalMenu() {
       ? `ГЛАВА ${story.actNumber} · МАРШРУТ ${String(story.sequence).padStart(2, '0')} · УРОВЕНЬ ${story.recommendedLevel}`
       : 'СВОБОДНОЕ ИССЛЕДОВАНИЕ';
     const statusLabel = here ? '● ВЫ ЗДЕСЬ' : locked
-      ? `🔒 ЗАКРЫТО · НУЖЕН УРОВЕНЬ ${story.requiredLevel}`
+      ? access.reason === 'campaign'
+        ? `🔒 ЗАКРЫТО · СНАЧАЛА ЗАДАНИЕ ${access.requiredMissionId}`
+        : `🔒 ЗАКРЫТО · НУЖЕН УРОВЕНЬ ${story.requiredLevel}`
       : 'ПЕРЕЙТИ В ОБЛАСТЬ →';
     return `<button type="button" data-world-location="${escapeHtml(id)}" data-search="${escapeHtml(`${loc.name} ${loc.desc || ''} ${progressLabel}`.toLocaleLowerCase())}" ${disabled ? 'disabled' : ''} ${here ? 'aria-current="location"' : ''} style="display:flex;align-items:flex-start;gap:12px;min-height:104px;width:100%;text-align:left;padding:14px;border:1px solid ${here ? '#b89a62' : locked ? '#60434a' : '#426a70'};border-radius:13px;background:${here ? 'linear-gradient(135deg,#3a3023,#211c19)' : locked ? 'linear-gradient(145deg,#241c25,#15151e)' : 'linear-gradient(145deg,#1a3039,#111923)'};color:#f2eadb;opacity:${locked ? 0.62 : here ? 0.92 : 1};cursor:${disabled ? 'not-allowed' : 'pointer'};font:inherit;transition:border-color .15s,transform .15s,background .15s">
       <span aria-hidden="true" style="display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:11px;background:rgba(116,185,178,.12);font-size:25px">${loc.emoji || '✦'}</span>
@@ -365,7 +367,7 @@ function openWorldPortalMenu() {
     <section role="dialog" aria-modal="true" aria-labelledby="aurora-world-portal-title" aria-describedby="aurora-world-portal-description" style="width:min(960px,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid #72b9b2;border-radius:18px;background:linear-gradient(145deg,rgba(24,37,44,.99),rgba(10,15,25,.99));box-shadow:0 0 55px rgba(69,190,182,.22),inset 0 0 35px rgba(99,188,175,.06)">
       <header style="padding:clamp(17px,3vw,28px);padding-bottom:16px;border-bottom:1px solid rgba(114,185,178,.2)">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-          <div><small style="letter-spacing:.2em;color:#8bd7ce;font-size:10px">ДРЕВНЯЯ СЕТЬ ПЕРЕХОДОВ</small><h1 id="aurora-world-portal-title" style="margin:7px 0 5px;font-size:clamp(24px,4vw,36px);line-height:1.15">Пути между мирами</h1><p id="aurora-world-portal-description" style="margin:0;color:#b5c6c5;font-size:14px;line-height:1.5">Сюжетные земли идут по маршруту кампании. Каждая следующая глава открывается по уровню героя; закрытые области нельзя выбрать.</p></div>
+          <div><small style="letter-spacing:.2em;color:#8bd7ce;font-size:10px">ДРЕВНЯЯ СЕТЬ ПЕРЕХОДОВ</small><h1 id="aurora-world-portal-title" style="margin:7px 0 5px;font-size:clamp(24px,4vw,36px);line-height:1.15">Пути между мирами</h1><p id="aurora-world-portal-description" style="margin:0;color:#b5c6c5;font-size:14px;line-height:1.5">Сюжетные земли идут по маршруту кампании. Новая область открывается после предыдущего задания и достижения нужного уровня; закрытые области нельзя выбрать.</p></div>
           <button type="button" data-world-close aria-label="Закрыть окно портала" style="flex:0 0 auto;padding:9px 13px;border:1px solid #719b9b;border-radius:9px;background:#182a32;color:#e9ffff;font:inherit;cursor:pointer">✕</button>
         </div>
         <label for="aurora-world-search" style="display:block;margin-top:17px;color:#a9c5c3;font-size:12px;font-weight:700">НАЙТИ ЛОКАЦИЮ</label>
