@@ -51,6 +51,7 @@ assert.equal(buyItem('iron-sword'), true, 'listed stock must remain purchasable'
 assert.equal(buyer.gold, 1000 - getBuyPrice('iron-sword', buyer));
 assert.equal(buyer.inventory[0]?.id, 'iron-sword');
 buyer.buyback = [{ id: 'bad-price', soldAt: new Date().toDateString(), price: -500, item: { id: 'iron-sword', qty: 1 } }];
+assert.equal(buybackItem(0).ok, false, 'zero buyback price must be rejected');
 assert.equal(buybackItem(0).ok, false, 'negative buyback price must be rejected');
 assert.equal(buyer.gold, 1000 - getBuyPrice('iron-sword', buyer), 'invalid buyback must not create gold');
 buyer.buyback = [{ id: 'bad-qty', soldAt: new Date().toDateString(), price: 1, item: { id: 'iron-sword', qty: 0 } }];
