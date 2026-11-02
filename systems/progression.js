@@ -16,6 +16,10 @@ export function addExp(amount) {
 
   // Keep malformed progress from poisoning the level-up loop or the save.
   if (!Number.isSafeInteger(p.exp) || p.exp < 0) p.exp = 0;
+  // Normalize reward counters before level-up to prevent malformed imports
+  // from concatenating strings or propagating Infinity into progression.
+  if (!Number.isSafeInteger(p.statPoints) || p.statPoints < 0) p.statPoints = 0;
+  if (!Number.isSafeInteger(p.passivePoints) || p.passivePoints < 0) p.passivePoints = 0;
   const requiredExp = getExpNext(p.level);
   if (!Number.isSafeInteger(p.expNext) || p.expNext !== requiredExp) {
     p.expNext = requiredExp;
@@ -51,8 +55,8 @@ export function addExp(amount) {
       p.con += 1;
     }
 
-    p.statPoints = (p.statPoints || 0) + 1;
-    p.passivePoints = (p.passivePoints || 0) + 1;
+    p.statPoints++;
+    p.passivePoints++;
 
     p.hp = p.maxHp;
 
