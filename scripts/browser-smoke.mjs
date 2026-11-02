@@ -174,6 +174,7 @@ try {
       assert.ok(dashboard.contentScrollWidth <= dashboard.contentWidth + 1, `${viewport.name}/${tab}: content overflow: ${JSON.stringify(dashboard)}`);
     }
 
+    await page.locator('#game-tab-hero').click();
     const heroPanel = page.locator('.hero-overview');
     await heroPanel.waitFor();
     assert.match(await heroPanel.innerText(), /UI audit/, `${viewport.name}: hero dossier must show the active character`);
