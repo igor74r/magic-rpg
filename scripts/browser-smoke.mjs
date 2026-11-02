@@ -107,7 +107,13 @@ try {
     assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-class-id')), 'warrior',
       `${viewport.name}: keyboard class selection must preserve focus`);
     await page.locator('#char-name').fill('UI audit');
-    await page.getByRole('button', { name: /Начать путь/ }).click();
+    await page.getByRole('button', { name: /Проверить героя/ }).click();
+    await page.locator('#class-review-stage').waitFor();
+    assert.match(await page.locator('#class-review-content').innerText(), /UI audit/,
+      `${viewport.name}: review screen must show the entered hero name`);
+    assert.equal(await page.evaluate(() => localStorage.getItem('magic-rpg-save-2')), null,
+      `${viewport.name}: reviewing must not create the save before final confirmation`);
+    await page.getByRole('button', { name: /Создать героя и начать/ }).click();
     await page.locator('#screen-game.active').waitFor();
 
     for (const tab of ['locations', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
