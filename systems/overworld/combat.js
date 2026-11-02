@@ -153,12 +153,24 @@ function applyElementalReaction(enemy, element) {
 }
 
 function enemyDefenseForStyle(enemy, style, armorPen = 0) {
-  const base = Math.max(0, enemyDefValue(enemy) - armorPen);
+  const rawDefense = enemyDefValue(enemy);
+  const penetration = Math.max(0, Math.min(0.75, armorPen * 0.025));
+  const base = Math.max(0, Math.floor(rawDefense * (1 - penetration) - armorPen * 0.5));
   const counter = enemy?.adaptiveCounter;
   if (!counter || counter.style !== style || counter.remaining <= 0) return base;
   const def = ENEMIES[enemy.enemyId];
   const reduction = def?.boss ? 0.10 : 0.20;
   return base + Math.floor(Math.max(1, base) * reduction);
+}
+
+function mitigateIncomingDamage(attack, defense) {
+  const safeAttack = Number.isFinite(attack) ? Math.max(0, attack) : 0;
+  const safeDefense = Number.isFinite(defense) ? Math.max(0, defense) : 0;
+  return Math.max(1, Math.floor(safeAttack * (100 / (100 + safeDefense * 1.5))));
+}
+
+function resolveCriticalMultiplier(value) {
+  return Number.isFinite(value) ? Math.max(1.25, Math.min(2.5, value)) : 1.5;
 }
 
 function consumeEnemyAdaptation(enemy, style) {
@@ -280,7 +292,7 @@ export function combatAttack() {
   const isCrit = Math.random() < resolveCriticalChance(stats, catLuckBonus);
 
   if (isCrit) {
-    damage = Math.floor(damage * talent.critMult);
+    damage = Math.floor(damage * resolveCriticalMultiplier(talent.critMult));
     triggerShake(8, 0.3);
     spawnParticles(enemy.x, enemy.y, 'spark', 10);
   }
@@ -488,7 +500,7 @@ export function combatCastSpell(spellId) {
     );
     // Damaging spells share weapon attacks' critical-hit formula.
     const isCrit = Math.random() < resolveCriticalChance(stats);
-    const damage = isCrit ? Math.floor(rawDamage * talent.critMult) : rawDamage;
+    const damage = isCrit ? Math.floor(rawDamage * resolveCriticalMultiplier(talent.critMult)) : rawDamage;
 
     enemy.hp -= damage;
 
@@ -1158,7 +1170,7 @@ function enemyCombatTurn() {
   let baseDamage = Math.max(
     1,
     Math.floor(
-      (attack + Math.floor(Math.random() * 5) - stats.def) *
+      mitigateIncomingDamage(attack + Math.floor(Math.random() * 5), stats.def) *
       difficulty
     )
   );
