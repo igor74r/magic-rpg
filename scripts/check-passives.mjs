@@ -9,6 +9,15 @@ import {
 
 const classes = ['warrior', 'mage', 'archer'];
 
+const warriorTree = getPassiveTree('warrior');
+const mageTree = getPassiveTree('mage');
+const archerTree = getPassiveTree('archer');
+assert.match(warriorTree.nodes['warrior-endurance-1'].desc, /\+2 к защите и \+1 HP восстановления/);
+assert.match(mageTree.nodes['mage-frost-1'].desc, /\+2 к магии и \+1 MP восстановления/);
+assert.match(mageTree.nodes['mage-frost-4'].desc, /силы блока/);
+assert.equal(archerTree.nodes['archer-hunter-6'].effects.critMult, 1.8,
+  'final hunter passive must add 0.1 to the preceding 1.7 critical multiplier');
+
 for (const classId of classes) {
   const tree = getPassiveTree(classId);
   assert.equal(tree.classId, classId);
