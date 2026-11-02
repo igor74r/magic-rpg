@@ -370,7 +370,6 @@ export function openHelp() {
 // ============ СЛОТЫ ============
 
 export function loadSlot(slot) {
-  state.currentSlot = slot;
   if (loadGameData(slot)) {
     const log = document.getElementById('game-log');
     if (log) log.innerHTML = '';
