@@ -1262,10 +1262,11 @@ function enemyCombatTurn() {
       ? (def.phases[enemy.phase - 1]?.specialEvery || special?.every)
       : special?.every;
 
-  const useSpecial =
-    special &&
-    specialEvery &&
-    ow.combat.turnCount % specialEvery === 0;
+  const specialOnCooldown = Boolean(special && specialEvery && ow.combat.turnCount % specialEvery === 0);
+  const playerHpRatio = p.maxHp > 0 ? p.hp / p.maxHp : 1;
+  const enemyHpRatio = enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 1;
+  const tacticalSpecial = (special?.type === 'snipe' && playerHpRatio <= 0.35) || (special?.type === 'drain' && enemyHpRatio <= 0.45) || (special?.type === 'double' && ow.combat.blocking);
+  const useSpecial = Boolean(special && (specialOnCooldown || tacticalSpecial));
 
   let actualDamage = 0;
 
