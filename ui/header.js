@@ -73,11 +73,11 @@ export function renderHeader() {
         </span>
 
         <div class="stat-buttons">
-          <button data-spend-stat="str">+1 СИЛ</button>
-          <button data-spend-stat="int">+1 ИНТ</button>
-          <button data-spend-stat="wis">+1 МДР</button>
-          <button data-spend-stat="con">+1 ТЕЛ</button>
-          <button data-spend-stat="dex">+1 ЛОВ</button>
+          <button type="button" data-spend-stat="str">+1 СИЛ</button>
+          <button type="button" data-spend-stat="int">+1 ИНТ</button>
+          <button type="button" data-spend-stat="wis">+1 МДР</button>
+          <button type="button" data-spend-stat="con">+1 ТЕЛ</button>
+          <button type="button" data-spend-stat="dex">+1 ЛОВ</button>
         </div>
       </div>
     `
@@ -183,8 +183,8 @@ export function renderHeader() {
     </div>
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
-      <button data-header-action="tower" style="padding:6px 12px;font-size:12px">🏰 Башня</button>
-      <button data-header-action="rift" style="padding:6px 12px;font-size:12px">🌀 Разлом</button>
+      <button type="button" data-header-action="tower" style="padding:6px 12px;font-size:12px">🏰 Башня</button>
+      <button type="button" data-header-action="rift" style="padding:6px 12px;font-size:12px">🌀 Разлом</button>
     </div>
 
     ${statBlock}
