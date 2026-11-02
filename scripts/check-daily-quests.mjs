@@ -46,7 +46,7 @@ try {
   assert.equal(claimQuestReward('q-kill-any'), false, 'daily quest reward can only be claimed once');
 
   updateQuestProgress('kill', 'goblin', '2');
-  const goblinQuest = normalized.find(quest => quest.id === 'q-kill-goblin');
+  const goblinQuest = getDailyQuests().find(quest => quest.id === 'q-kill-goblin');
   assert.equal(goblinQuest.current, 2);
   assert.equal(typeof goblinQuest.current, 'number', 'numeric progress input must not turn the counter into a string');
 
