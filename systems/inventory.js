@@ -140,7 +140,9 @@ export function getInventoryWeight(player = state.game?.player) {
 
 export function getInventoryCapacity(player = state.game?.player) {
   const strength = Number.isFinite(player?.str) ? player.str : 10;
-  return Math.max(10, strength * 5);
+  const capacity = strength * 5;
+  // Overflowing/corrupt strength must not grant infinite carrying capacity.
+  return Number.isFinite(capacity) ? Math.max(10, capacity) : 10;
 }
 
 export function getInventorySlotCount(player = state.game?.player) {
