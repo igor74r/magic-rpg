@@ -5,6 +5,7 @@ import { migrateGame, loadGameData, migrateLegacySave, hasSave, deleteSave, getS
 import { state } from '../systems/state.js';
 import { EQUIPMENT_SLOTS } from '../systems/inventory.js';
 import { createCharacter } from '../systems/character.js';
+import { getExpNext } from '../systems/progression.js';
 
 const expectedSlots = ['weapon','head','shoulders','chest','gloves','legs','boots','shield','ring1','ring2','amulet','cloak'];
 const failures = [];
@@ -61,7 +62,8 @@ for (let version = 1; version <= 16; version++) {
     assert.equal(migrated.version, 17);
     assert.equal(migrated.player.name, 'Migration Fixture');
     assert.equal(migrated.player.level, 12);
-    assert.equal(migrated.player.exp, 345);
+    assert.equal(migrated.player.expNext, getExpNext(12));
+    assert.equal(migrated.player.exp, 16, 'legacy XP progress must be preserved proportionally');
     assert.equal(migrated.player.gold, 678);
     assert.deepEqual(migrated.player.stats.kills, { wolf: 17 });
     assert.equal(migrated.player.stats.deaths, 4);
