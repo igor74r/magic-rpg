@@ -17,11 +17,41 @@ import {
 } from '../systems/campaign.js';
 
 function showNpcUI(html) {
-  if (state.overworld && state.overworld.active) {
-    document.getElementById('npc-dialog-content').innerHTML = html;
+  const root = state.overworld && state.overworld.active
+    ? document.getElementById('npc-dialog-content')
+    : document.getElementById('tab-content');
+  root.innerHTML = html;
+  root.onclick = (event) => {
+    const button = event.target.closest('[data-npc-action]');
+    if (!button || !root.contains(button) || button.disabled) return;
+    const action = button.dataset.npcAction;
+    const value = button.dataset.npcValue;
+    switch (action) {
+      case 'craft': window.GameAPI?.craftRecipe?.(value); break;
+      case 'upgrade': window.GameAPI?.upgradeEquipment?.(value); break;
+      case 'close': window.GameAPI?.closeNpcAndResume?.(); break;
+      case 'heal': window.GameAPI?.healAtHealer?.(); break;
+      case 'reforge': window.GameAPI?.reforgeItem?.(Number(value)); break;
+      case 'buy': window.GameAPI?.buy?.(value); break;
+      case 'accept-quest': window.GameAPI?.acceptElderQuest?.(); break;
+      case 'turn-in-quest': window.GameAPI?.turnInElderQuest?.(); break;
+      case 'blessing': window.GameAPI?.takeElderBlessing?.(); break;
+      case 'well': window.GameAPI?.useWell?.(); break;
+      case 'bard': window.GameAPI?.payBard?.(); break;
+      case 'pet-cat': window.GameAPI?.petCat?.(); break;
+      default: return;
+    }
+  };
+  root.onmouseover = (event) => {
+    const item = event.target.closest('[data-npc-tooltip]');
+    if (item && root.contains(item)) window.GameAPI?.showShopTooltip?.(event, item.dataset.npcTooltip);
+  };
+  root.onmouseout = (event) => {
+    if (event.target.closest('[data-npc-tooltip]')) window.GameAPI?.hideTooltip?.();
+  };
+  if (root.id === 'npc-dialog-content') {
     document.getElementById('npc-dialog-modal').style.display = 'flex';
   } else {
-    document.getElementById('tab-content').innerHTML = html;
     showScreen('screen-game');
   }
 }
@@ -43,7 +73,7 @@ export function openBlacksmith() {
   const finalForgeRecipes = getCurrentActIndex(p) === 4 ? npc.recipes.map(recipe => {
     const check = canCraftRecipe(recipe.id);
     const ingList = recipe.ingredients.map(ing => `<span style="color:${countItem(ing.id) >= ing.qty ? '#60ff60' : '#ff6060'};">${ITEMS[ing.id].icon} ${ITEMS[ing.id].name} (${countItem(ing.id)}/${ing.qty})</span>`).join(' + ');
-    return `<div class="recipe"><div class="recipe-result" style="color:${RARITIES.legendary.color};">✦ ${ITEMS[recipe.result].name} · T5</div><div class="recipe-ingredients">${ingList}</div><button onclick="GameAPI.craftRecipe('${recipe.id}')" ${check.ok ? '' : 'disabled'} class="sell-btn">⚒️ Создать в финальной кузнице</button>${!check.ok ? `<small>${check.msg}</small>` : ''}</div>`;
+    return `<div class="recipe"><div class="recipe-result" style="color:${RARITIES.legendary.color};">✦ ${ITEMS[recipe.result].name} · T5</div><div class="recipe-ingredients">${ingList}</div><button data-npc-action="craft" data-npc-value="${escapeHtml(recipe.id)}" ${check.ok ? '' : 'disabled'} class="sell-btn">⚒️ Создать в финальной кузнице</button>${!check.ok ? `<small>${check.msg}</small>` : ''}</div>`;
   }).join('') : '';
   const pendingJobs = getCraftingJobs();
   const jobsHTML = pendingJobs.length ? `<div class="recipe"><b>Заказы в работе: ${pendingJobs.length}</b>${pendingJobs.map(job => `<div>${escapeHtml(ITEMS[job.result]?.name || job.result)} — готовность ${new Date(job.readyAt).toLocaleString('ru-RU')}</div>`).join('')}</div>` : '';
@@ -53,17 +83,17 @@ export function openBlacksmith() {
     const rar = obj.rarity ? RARITIES[obj.rarity] : null; const color = rar ? rar.color : '#c9a227'; const lvl = obj.forgeLevel || 0; const maxLvl = npc.maxLevel; const forgeBonus = FORGE_BONUS[lvl] || 0;
     let upgradeBlock = '';
     if (lvl >= maxLvl) upgradeBlock = `<div style="color:#60ff60;">Максимальный уровень: +${maxLvl}</div>`;
-    else { const next = npc.upgrades[lvl]; const can = p.gold >= next.cost; upgradeBlock = `<div style="color:#a89060;font-size:12px;margin-bottom:6px;">Следующий уровень: <b style="color:#c9a227;">+${lvl + 1}</b> — <b style="color:#60ff60;">+5% к характеристикам</b> и +${next.forgeBonus} к ковке</div><button onclick="GameAPI.upgradeEquipment('${slot}')" ${can ? '' : 'disabled'} class="sell-btn">⚒️ Улучшить за ${next.cost}💰</button>`; }
+    else { const next = npc.upgrades[lvl]; const can = p.gold >= next.cost; upgradeBlock = `<div style="color:#a89060;font-size:12px;margin-bottom:6px;">Следующий уровень: <b style="color:#c9a227;">+${lvl + 1}</b> — <b style="color:#60ff60;">+5% к характеристикам</b> и +${next.forgeBonus} к ковке</div><button data-npc-action="upgrade" data-npc-value="${escapeHtml(slot)}" ${can ? '' : 'disabled'} class="sell-btn">⚒️ Улучшить за ${next.cost}💰</button>`; }
     return `<div class="npc-slot"><div class="npc-slot-title">${label}</div><div class="npc-slot-item" style="border-color:${color};"><div style="color:${color};font-weight:bold;">${item.icon} ${item.name}${lvl > 0 ? ` <span style="color:#ffd060;">+${lvl}</span>` : ''}</div><div style="color:#a89060;font-size:12px;margin-top:2px;">Бонус ковки: +${forgeBonus}</div></div>${upgradeBlock}</div>`;
   };
   const slotLabels = { weapon: '⚔️ Оружие', head: '⛑️ Голова', shoulders: '🛡️ Плечи', chest: '🥋 Броня', gloves: '🧤 Перчатки', legs: '🥾 Поножи', boots: '👢 Сапоги', shield: '🛡️ Щит', ring1: '💍 Кольцо 1', ring2: '💍 Кольцо 2', amulet: '🔮 Амулет', cloak: '🧥 Плащ' };
   const equipmentHtml = EQUIPMENT_SLOTS.filter(slot => p.equipped?.[slot]).map(slot => renderSlot(slot, slotLabels[slot] || slot)).join('') || '<p>Сначала экипируйте предметы, чтобы улучшить их у кузнеца.</p>';
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('blacksmith')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><h3>Экипировка</h3><div class="recipes-list">${equipmentHtml}</div>${jobsHTML}${finalForgeRecipes ? `<h3>🔥 Кузница пятого акта</h3><div class="recipes-list">${finalForgeRecipes}</div>` : ''}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('blacksmith')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><h3>Экипировка</h3><div class="recipes-list">${equipmentHtml}</div>${jobsHTML}${finalForgeRecipes ? `<h3>🔥 Кузница пятого акта</h3><div class="recipes-list">${finalForgeRecipes}</div>` : ''}<button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openHealer() {
   const npc = NPCS.healer; const p = state.game.player; const cost = npc.cost; const healthy = p.hp >= p.maxHp && p.mp >= p.maxMp; const canPay = p.gold >= cost;
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('healer')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><div class="npc-stats"><div>HP: <b style="color:${p.hp < p.maxHp ? '#ff6060' : '#60ff60'};">${p.hp}/${p.maxHp}</b></div><div>${p.class === 'warrior' ? '🔥 Ярость' : 'MP'}: <b style="color:${p.mp < p.maxMp ? '#60a0ff' : '#60ff60'};">${p.mp}/${p.maxMp}</b></div></div>${healthy ? `<div style="color:#60ff60;text-align:center;padding:15px;">✨ Вы полностью здоровы</div>` : `<button onclick="GameAPI.healAtHealer()" ${canPay ? '' : 'disabled'} class="sell-btn" style="width:100%;padding:14px;">💚 Полное исцеление за ${cost}💰</button>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('healer')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><div class="npc-stats"><div>HP: <b style="color:${p.hp < p.maxHp ? '#ff6060' : '#60ff60'};">${p.hp}/${p.maxHp}</b></div><div>${p.class === 'warrior' ? '🔥 Ярость' : 'MP'}: <b style="color:${p.mp < p.maxMp ? '#60a0ff' : '#60ff60'};">${p.mp}/${p.maxMp}</b></div></div>${healthy ? `<div style="color:#60ff60;text-align:center;padding:15px;">✨ Вы полностью здоровы</div>` : `<button data-npc-action="heal" ${canPay ? '' : 'disabled'} class="sell-btn" style="width:100%;padding:14px;">💚 Полное исцеление за ${cost}💰</button>`}<button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openAlchemist() {
@@ -72,16 +102,16 @@ export function openAlchemist() {
   const pendingJobs = getCraftingJobs();
   const jobsHTML = pendingJobs.length ? `<div class="recipe"><b>Заказы в работе: ${pendingJobs.length}</b>${pendingJobs.map(job => `<div>${escapeHtml(ITEMS[job.result]?.name || job.result)} — готовность ${new Date(job.readyAt).toLocaleString('ru-RU')}</div>`).join('')}</div>` : '';
   const herbsList = ['herb-life', 'herb-moon'].map(id => { const count = countItem(id); const it = ITEMS[id]; return `<div class="herb-item ${count > 0 ? '' : 'empty'}"><span class="herb-icon">${it.icon}</span><span class="herb-name">${it.name}</span><span class="herb-count">×${count}</span></div>`; }).join('');
-  const recipesHTML = npc.recipes.map(r => { const result = ITEMS[r.result]; const canCraft = r.ingredients.every(ing => countItem(ing.id) >= ing.qty); const ingList = r.ingredients.map(ing => `<span style="color:${countItem(ing.id) >= ing.qty ? '#60ff60' : '#ff6060'};">${ITEMS[ing.id].icon} ${ITEMS[ing.id].name} (${countItem(ing.id)}/${ing.qty})</span>`).join(' + '); return `<div class="recipe"><div class="recipe-result">${result.icon} ${result.name}</div><div class="recipe-ingredients">${ingList}</div><button onclick="GameAPI.craftRecipe('${r.id}')" ${canCraft ? '' : 'disabled'} class="sell-btn">⚗️ Скрафтить</button></div>`; }).join('');
-  const reforgeHTML = state.game.player.inventory.map((inst, index) => { const item = ITEMS[inst.id]; if (!item || !EQUIPMENT_TYPES.has(item.type)) return ''; const check = canReforgeItem(index); const rarity = RARITIES[inst.rarity || 'common']; return `<div class="recipe"><div class="recipe-result" style="color:${rarity?.color || '#c9a227'};">${item.icon} ${item.name} · ${rarity?.name || 'Обычный'}</div><button onclick="GameAPI.reforgeItem(${index})" ${check.ok ? '' : 'disabled'} class="sell-btn">⚒️ Перековать за эссенцию</button>${!check.ok ? `<small>${check.msg}</small>` : ''}</div>`; }).join('');
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('alchemist')}»</p></div></div>${jobsHTML}<h3 style="margin-top:15px;">🌿 Ваши травы</h3><div class="herbs-list">${herbsList}</div><h3 style="margin-top:15px;">⚗️ Рецепты</h3><div class="recipes-list">${recipesHTML}</div><h3 style="margin-top:15px;">⚒️ Перековка экипировки</h3><div class="recipes-list">${reforgeHTML || '<small>В сумке пока нет экипировки для перековки.</small>'}</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  const recipesHTML = npc.recipes.map(r => { const result = ITEMS[r.result]; const canCraft = r.ingredients.every(ing => countItem(ing.id) >= ing.qty); const ingList = r.ingredients.map(ing => `<span style="color:${countItem(ing.id) >= ing.qty ? '#60ff60' : '#ff6060'};">${ITEMS[ing.id].icon} ${ITEMS[ing.id].name} (${countItem(ing.id)}/${ing.qty})</span>`).join(' + '); return `<div class="recipe"><div class="recipe-result">${result.icon} ${result.name}</div><div class="recipe-ingredients">${ingList}</div><button data-npc-action="craft" data-npc-value="${escapeHtml(r.id)}" ${canCraft ? '' : 'disabled'} class="sell-btn">⚗️ Скрафтить</button></div>`; }).join('');
+  const reforgeHTML = state.game.player.inventory.map((inst, index) => { const item = ITEMS[inst.id]; if (!item || !EQUIPMENT_TYPES.has(item.type)) return ''; const check = canReforgeItem(index); const rarity = RARITIES[inst.rarity || 'common']; return `<div class="recipe"><div class="recipe-result" style="color:${rarity?.color || '#c9a227'};">${item.icon} ${item.name} · ${rarity?.name || 'Обычный'}</div><button data-npc-action="reforge" data-npc-value="${index}" ${check.ok ? '' : 'disabled'} class="sell-btn">⚒️ Перековать за эссенцию</button>${!check.ok ? `<small>${check.msg}</small>` : ''}</div>`; }).join('');
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('alchemist')}»</p></div></div>${jobsHTML}<h3 style="margin-top:15px;">🌿 Ваши травы</h3><div class="herbs-list">${herbsList}</div><h3 style="margin-top:15px;">⚗️ Рецепты</h3><div class="recipes-list">${recipesHTML}</div><h3 style="margin-top:15px;">⚒️ Перековка экипировки</h3><div class="recipes-list">${reforgeHTML || '<small>В сумке пока нет экипировки для перековки.</small>'}</div><button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openMerchant() {
   const p = state.game.player;
   const stock = [...NPCS.merchant.stock].sort(() => 0.5 - Math.random()).slice(0, 5);
-  const html = stock.map(id => { const item = ITEMS[id]; return `<div class="item" onmouseover="GameAPI.showShopTooltip(event, '${id}')" onmouseout="GameAPI.hideTooltip()"><div class="item-info"><div class="item-name">${item.icon} ${item.name}</div><div class="item-desc">${item.desc} · 💰 ${item.price}</div></div><button onclick="GameAPI.buy('${id}')" ${p.gold < item.price ? 'disabled' : ''} style="font-size:12px;padding:6px 12px;">Купить</button></div>`; }).join('');
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">🛒</div><div><h3 style="margin:0;">Странствующий торговец</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('merchant')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><h3>Товары дня</h3><div class="item-list">${html}</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  const html = stock.map(id => { const item = ITEMS[id]; return `<div class="item" data-npc-tooltip="${escapeHtml(id)}"><div class="item-info"><div class="item-name">${item.icon} ${item.name}</div><div class="item-desc">${item.desc} · 💰 ${item.price}</div></div><button data-npc-action="buy" data-npc-value="${escapeHtml(id)}" ${p.gold < item.price ? 'disabled' : ''} style="font-size:12px;padding:6px 12px;">Купить</button></div>`; }).join('');
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">🛒</div><div><h3 style="margin:0;">Странствующий торговец</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('merchant')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><h3>Товары дня</h3><div class="item-list">${html}</div><button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openElder() {
@@ -116,9 +146,9 @@ export function openElder() {
 
     const action = active
       ? progress.complete
-        ? '<button onclick="GameAPI.turnInElderQuest()" class="sell-btn elder-quest-action">Сдать поручение и получить награду</button>'
+        ? '<button data-npc-action="turn-in-quest" class="sell-btn elder-quest-action">Сдать поручение и получить награду</button>'
         : ''
-      : '<button onclick="GameAPI.acceptElderQuest()" class="sell-btn elder-quest-action">Принять поручение</button>';
+      : '<button data-npc-action="accept-quest" class="sell-btn elder-quest-action">Принять поручение</button>';
 
     missionBlock = `
       <section class="elder-quest-card">
@@ -140,8 +170,8 @@ export function openElder() {
     <div class="npc-header"><div class="npc-emoji">👴</div><div><h3 style="margin:0;">Старейшина Эдвин</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('elder')}»</p></div></div>
     ${dialogue}
     ${missionBlock}
-    ${hasBlessing ? '<p class="elder-notice">✨ Благословение старейшины уже действует.</p>' : '<div class="elder-blessing"><p>Благословение даёт +20% к получаемому опыту на 10 боёв.</p><button onclick="GameAPI.takeElderBlessing()" class="sell-btn">Принять благословение</button></div>'}
-    <button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>
+    ${hasBlessing ? '<p class="elder-notice">✨ Благословение старейшины уже действует.</p>' : '<div class="elder-blessing"><p>Благословение даёт +20% к получаемому опыту на 10 боёв.</p><button data-npc-action="blessing" class="sell-btn">Принять благословение</button></div>'}
+    <button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>
   `);
 
   if (isFirstMeet) {
@@ -191,18 +221,18 @@ export function turnInElderQuestUI() {
 
 export function openWell() {
   const p = state.game.player; const canUse = canUseWell(p);
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">⛲</div><div><h3 style="margin:0;">Древний колодец</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('well')}»</p></div></div>${p.hp >= p.maxHp && p.mp >= p.maxMp ? `<p style="text-align:center; padding: 20px; color: #60ff60;">✨ Вы полностью здоровы.</p>` : canUse ? `<div style="text-align:center; margin: 20px 0;"><button onclick="GameAPI.useWell()" class="sell-btn" style="padding: 15px 30px;">💧 Испить воды (Полный хил)</button></div>` : `<p style="text-align:center; padding: 20px; color: #ff6060;">Колодец исцелит вас снова через 24 часа.</p>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">⛲</div><div><h3 style="margin:0;">Древний колодец</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('well')}»</p></div></div>${p.hp >= p.maxHp && p.mp >= p.maxMp ? `<p style="text-align:center; padding: 20px; color: #60ff60;">✨ Вы полностью здоровы.</p>` : canUse ? `<div style="text-align:center; margin: 20px 0;"><button data-npc-action="well" class="sell-btn" style="padding: 15px 30px;">💧 Испить воды (Полный хил)</button></div>` : `<p style="text-align:center; padding: 20px; color: #ff6060;">Колодец исцелит вас снова через 24 часа.</p>`}<button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openBard() {
   const p = state.game.player; const hasBuff = hasActiveEntry(p.buffs, 'bardBuff'); const cost = NPCS.bard.cost;
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">🎵</div><div><h3 style="margin:0;">Бард Лютик</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('bard')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div>${hasBuff ? `<p style="text-align:center; padding: 20px; color: #ffd060;">🎵 Музыка барда вдохновляет вас (+10% опыта).</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Песня барда дает +10% к опыту на 3 боя.</p><button onclick="GameAPI.payBard()" ${p.gold < cost ? 'disabled' : ''} class="sell-btn" style="padding: 15px 30px;">Заплатить ${cost}💰</button></div>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">🎵</div><div><h3 style="margin:0;">Бард Лютик</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('bard')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div>${hasBuff ? `<p style="text-align:center; padding: 20px; color: #ffd060;">🎵 Музыка барда вдохновляет вас (+10% опыта).</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Песня барда дает +10% к опыту на 3 боя.</p><button data-npc-action="bard" ${p.gold < cost ? 'disabled' : ''} class="sell-btn" style="padding: 15px 30px;">Заплатить ${cost}💰</button></div>`}<button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
-export function openGuard() { showNpcUI(`<div class="npc-header"><div class="npc-emoji">🛡️</div><div><h3 style="margin:0;">Стражник</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('guard')}»</p></div></div><div class="item-desc" style="padding:15px; line-height:1.7;"><b>Справка по локациям:</b><br>🌲 Тёмный лес — гоблины и скелеты (легко)<br>🏛️ Руины — нежить (средне)<br>🕳️ Пещера теней — тёмный рыцарь и маг (сложно)<br>🩸 Болото — волки и лучники<br>🪦 Кладбище — призраки и босс<br>🌋 Вулкан — элементали и босс</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`); }
-export function openCat() { const p = state.game.player; const hasBuff = hasActiveEntry(p.buffs, 'catLuck'); showNpcUI(`<div class="npc-header"><div class="npc-emoji">🐈</div><div><h3 style="margin:0;">Кошка</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('cat')}»</p></div></div>${hasBuff ? `<p style="text-align:center; padding: 20px; color: #ffd060;">🐈 Кошка мурчит рядом (+5% крита).</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Если погладить кошку, она принесет удачу (+5% крита на 1 бой).</p><button onclick="GameAPI.petCat()" class="sell-btn" style="padding: 15px 30px;">Погладить</button></div>`}<button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`); }
-export function openKids() { showNpcUI(`<div class="npc-header"><div class="npc-emoji">👦</div><div><h3 style="margin:0;">Дети</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('kids')}»</p></div></div><div style="text-align:center; padding: 20px; color: #60ff60;">👦 Дети радостно бегают вокруг вас.</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`); }
-export function openHerald() { showNpcUI(`<div class="npc-header"><div class="npc-emoji">📢</div><div><h3 style="margin:0;">Глашатай</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('herald')}»</p></div></div><div style="text-align:center; padding: 20px; color: #ffd060;">📢 «Слушайте! В лесу замечен элитный гоблин, а в Разломе — сокровища!»</div><button onclick="GameAPI.closeNpcAndResume()" style="width:100%;margin-top:15px;">← Уйти</button>`); }
+export function openGuard() { showNpcUI(`<div class="npc-header"><div class="npc-emoji">🛡️</div><div><h3 style="margin:0;">Стражник</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('guard')}»</p></div></div><div class="item-desc" style="padding:15px; line-height:1.7;"><b>Справка по локациям:</b><br>🌲 Тёмный лес — гоблины и скелеты (легко)<br>🏛️ Руины — нежить (средне)<br>🕳️ Пещера теней — тёмный рыцарь и маг (сложно)<br>🩸 Болото — волки и лучники<br>🪦 Кладбище — призраки и босс<br>🌋 Вулкан — элементали и босс</div><button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`); }
+export function openCat() { const p = state.game.player; const hasBuff = hasActiveEntry(p.buffs, 'catLuck'); showNpcUI(`<div class="npc-header"><div class="npc-emoji">🐈</div><div><h3 style="margin:0;">Кошка</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('cat')}»</p></div></div>${hasBuff ? `<p style="text-align:center; padding: 20px; color: #ffd060;">🐈 Кошка мурчит рядом (+5% крита).</p>` : `<div style="text-align:center; margin: 20px 0;"><p style="margin-bottom: 15px;">Если погладить кошку, она принесет удачу (+5% крита на 1 бой).</p><button data-npc-action="pet-cat" class="sell-btn" style="padding: 15px 30px;">Погладить</button></div>`}<button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`); }
+export function openKids() { showNpcUI(`<div class="npc-header"><div class="npc-emoji">👦</div><div><h3 style="margin:0;">Дети</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('kids')}»</p></div></div><div style="text-align:center; padding: 20px; color: #60ff60;">👦 Дети радостно бегают вокруг вас.</div><button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`); }
+export function openHerald() { showNpcUI(`<div class="npc-header"><div class="npc-emoji">📢</div><div><h3 style="margin:0;">Глашатай</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('herald')}»</p></div></div><div style="text-align:center; padding: 20px; color: #ffd060;">📢 «Слушайте! В лесу замечен элитный гоблин, а в Разломе — сокровища!»</div><button data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`); }
 
 export function payBardUI() {
   const p = state.game?.player;
