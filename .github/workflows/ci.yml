@@ -56,6 +56,9 @@ jobs:
       - name: Check adaptive enemy combat AI
         run: node scripts/check-adaptive-enemy-ai.mjs
 
+      - name: Check spell critical combat feedback
+        run: node scripts/check-spell-critical.mjs
+
       - name: Check enemy weaknesses and resistances
         run: node scripts/check-enemy-matchups.mjs
 
