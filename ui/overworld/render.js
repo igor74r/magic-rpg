@@ -874,7 +874,14 @@ export function openPauseMenu() {
   if (document.getElementById('pause-overlay')) return;
   paused = true; hideMapTooltip();
   const div = document.createElement('div'); div.id = 'pause-overlay'; div.className = 'pause-overlay';
-  div.innerHTML = `<div class="pause-panel"><h2>⏸️ Пауза</h2><button onclick="GameAPI.owPauseResume()">▶️ Продолжить</button><button onclick="GameAPI.owPauseSaveVillage()">💾 Сохранить и в деревню</button><button onclick="GameAPI.owPauseExit()">🚪 Сохранить и в меню</button></div>`;
+  div.innerHTML = `<div class="pause-panel"><h2>⏸️ Пауза</h2><button type="button" data-pause-action="owPauseResume">▶️ Продолжить</button><button type="button" data-pause-action="owPauseSaveVillage">💾 Сохранить и в деревню</button><button type="button" data-pause-action="owPauseExit">🚪 Сохранить и в меню</button></div>`;
+  div.addEventListener('click', event => {
+    const button = event.target.closest('[data-pause-action]');
+    if (!button || !div.contains(button)) return;
+    const action = button.dataset.pauseAction;
+    if (!['owPauseResume', 'owPauseSaveVillage', 'owPauseExit'].includes(action)) return;
+    globalThis.GameAPI?.[action]?.();
+  });
   document.body.appendChild(div);
 }
 
