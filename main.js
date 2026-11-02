@@ -320,10 +320,62 @@ function showRiftOpeningCutscene() {
   setTimeout(finish,12000);
 }
 
+function openWorldPortalMenu() {
+  const ow = state.overworld;
+  if (!ow || ow.combat || ow.defeated) return;
+  ow.active = false;
+  const currentId = ow.sourceLocationId || ow.locationId;
+  const destinations = Object.entries(LOCATIONS).filter(([id, loc]) =>
+    id !== 'rift' && (loc.safe || (Array.isArray(loc.enemies) && loc.enemies.length))
+  );
+  if (isRiftReady() && LOCATIONS.rift) destinations.push(['rift', LOCATIONS.rift]);
+  document.getElementById('aurora-world-portal')?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'aurora-world-portal';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10070;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at 50% 35%,rgba(38,91,94,.34),rgba(5,9,16,.97) 70%);color:#f2eadb;overflow:auto;font-family:inherit;';
+  overlay.innerHTML = `
+    <section style="width:min(900px,100%);max-height:92vh;overflow:auto;padding:clamp(18px,3vw,30px);border:1px solid #72b9b2;border-radius:18px;background:linear-gradient(145deg,rgba(24,37,44,.98),rgba(10,15,25,.99));box-shadow:0 0 55px rgba(69,190,182,.2),inset 0 0 35px rgba(99,188,175,.06)">
+      <header style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px">
+        <div><small style="letter-spacing:.22em;color:#8bd7ce">СЕТЬ ДРЕВНИХ ВРАТ</small><h1 style="margin:7px 0 4px;font-size:clamp(25px,4vw,38px)">Пути между мирами</h1><p style="margin:0;color:#b5c6c5">Выберите область, куда направить портал</p></div>
+        <button type="button" data-world-close style="padding:10px 15px;border:1px solid #719b9b;border-radius:9px;background:#182a32;color:#e9ffff">Закрыть</button>
+      </header>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px">
+        ${destinations.map(([id,loc])=>{const here=id===currentId;return `<button type="button" data-world-location="${id}" ${here?'disabled':''} style="min-height:84px;text-align:left;padding:13px;border:1px solid ${here?'#a88d5d':'#426a70'};border-radius:11px;background:${here?'linear-gradient(135deg,#3a3023,#211c19)':'linear-gradient(145deg,#1a3039,#111923)'};color:#f2eadb;opacity:${here?.8:1};cursor:${here?'default':'pointer'}"><span style="font-size:22px">${loc.emoji||'✦'}</span><strong style="display:block;margin-top:5px">${loc.name}</strong><small style="color:${here?'#d8b978':'#9ebcbb'}">${here?'Вы здесь':'Перейти в область'}</small></button>`}).join('')}
+      </div>
+      <footer style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(114,185,178,.25);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="color:#9db5b6;font-size:13px">Отдельные врата Башни отмечены янтарным светом.</span>
+        <button type="button" data-world-tower style="padding:13px 20px;border:1px solid #d49a5b;border-radius:10px;background:linear-gradient(135deg,#69401f,#2b1b18);color:#fff0d7;font-weight:700">🏰 Открыть Башню · 40 этажей</button>
+      </footer>
+    </section>`;
+  document.body.appendChild(overlay);
+  const resume = () => {
+    overlay.remove();
+    if (state.overworld) { state.overworld.active = true; state.overworld.paused = false; }
+  };
+  overlay.querySelector('[data-world-close]')?.addEventListener('click', resume);
+  overlay.addEventListener('click', event => { if (event.target === overlay) resume(); });
+  overlay.querySelector('[data-world-tower]')?.addEventListener('click', () => {
+    overlay.remove();
+    exitOverworld();
+    openTowerMenu();
+  });
+  overlay.querySelectorAll('[data-world-location]:not(:disabled)').forEach(button => button.addEventListener('click', () => {
+    const id = button.getAttribute('data-world-location');
+    overlay.remove();
+    exitOverworld();
+    if (id === 'rift') { enterRift(); return; }
+    state.game.location = id;
+    saveGame();
+    enterOverworld(id);
+  }));
+}
+
 function interactNpc(npcId) {
   if (!state.overworld) return;
   state.overworld.paused = true;
 
+  if (npcId === 'world-portal' || npcId === 'world-waystone') { openWorldPortalMenu(); return; }
+  if (npcId === 'tower-portal' || npcId === 'tower-gate') { exitOverworld(); openTowerMenu(); return; }
   if (npcId.startsWith('event-')) { handleWorldEvent(npcId); return; }
 
   if (npcId === 'blacksmith') { openBlacksmith(); addVillageInteriorButton('forge'); }
