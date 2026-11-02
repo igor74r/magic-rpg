@@ -210,14 +210,20 @@ function renderSettingsTab(tab) {
       </p>
       <button onclick="GameAPI.exportSave()" style="width:100%;border-color:#60ff60;background:linear-gradient(180deg,#2a5a3a,#1a3a2a);margin-bottom:10px;">💾 Экспортировать сейв (.json)</button>
       <label style="display:block;width:100%;margin-bottom:16px;">
-        <input type="file" id="import-save-input" accept=".json" style="display:none;" onchange="GameAPI.importSave(event)">
-        <button onclick="document.getElementById('import-save-input').click()" style="width:100%;border-color:#60a0ff;background:linear-gradient(180deg,#1a3a6a,#0a1a3a);">📂 Импортировать сейв</button>
+        <input type="file" id="import-save-input" accept=".json" style="display:none;" data-import-save-input>
+        <button type="button" data-import-save-trigger style="width:100%;border-color:#60a0ff;background:linear-gradient(180deg,#1a3a6a,#0a1a3a);">📂 Импортировать сейв</button>
       </label>
       <div class="divider"></div>
       <p style="color:#ffb0a0;margin-bottom:16px;line-height:1.7;font-size:13px;"><b>⚠️ Опасные действия:</b> удаление сохранений необратимо.</p>
       <button onclick="GameAPI.deleteAllSaves()" style="width:100%;border-color:#8b1a1a;background:linear-gradient(180deg,#5a1a1a,#2a0a0a);margin-bottom:10px;">🗑️ Удалить ВСЕ сохранения</button>
       <button onclick="GameAPI.resetAllSettings()" style="width:100%;">🔄 Сбросить настройки</button>
     `;
+  }
+
+  if (tab === 'data') {
+    const importInput = content.querySelector('[data-import-save-input]');
+    content.querySelector('[data-import-save-trigger]')?.addEventListener('click', () => importInput?.click());
+    importInput?.addEventListener('change', event => importSave(event));
   }
 }
 
