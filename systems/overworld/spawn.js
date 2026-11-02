@@ -12,6 +12,7 @@ import { findFreeCell, TILE } from './map.js';
 import { spawnParticles } from './particles.js';
 import { pushLog } from './log.js';
 import { updateQuestProgress } from '../dailyQuests.js';
+import { STORY_DRAGON_BY_ENEMY } from '../story-dragons.js';
 
 export const ELITE_HP_MULT = 1.5;
 export const ELITE_ATK_MULT = 1.3;
@@ -55,8 +56,21 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
   const ng = getNGPlusMult();
   const riftM = opts.rifMode ? getRiftMult(opts.rifFloor || 1) : opts.towerMode ? getTowerMult(opts.towerFloor || 1) : { hpMult: 1 };
   const enemies = [];
-  const count = Math.min(Math.max(loc.enemies.length, 4), 7);
-  const spawnRoster = createSpawnRoster(loc.enemies, count);
+
+  // Canonical story dragons are removed from ambient spawns. They appear only
+  // in their designated finale region while that exact campaign mission is active.
+  const activeMissionId = state.game?.player?.activeCampaignMission || null;
+  const eligibleEnemyIds = loc.enemies.filter(enemyId => {
+    const dragon = STORY_DRAGON_BY_ENEMY[enemyId];
+    return !dragon || (
+      !opts.rifMode &&
+      !opts.towerMode &&
+      locationId === dragon.locationId &&
+      activeMissionId === dragon.missionId
+    );
+  });
+  const count = Math.min(Math.max(eligibleEnemyIds.length, 4), 7);
+  const spawnRoster = createSpawnRoster(eligibleEnemyIds, count);
   const eliteChance = getEliteChance();
 
   for (let i = 0; i < count; i++) {
