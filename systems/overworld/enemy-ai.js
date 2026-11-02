@@ -59,7 +59,9 @@ export function getEnemyGroupBehaviors(enemies, player, options = {}) {
   const leashRange = Number.isFinite(options.leashRange) ? options.leashRange : 340;
   const groupRadius = Number.isFinite(options.groupRadius) ? options.groupRadius : 150;
   const assistRange = Number.isFinite(options.assistRange) ? options.assistRange : aggroRange + 80;
-  const results = enemies.map(enemy => getEnemyBehavior(enemy, player, { aggroRange, leashRange }));
+  const results = enemies.map(enemy => enemy.dead
+    ? { state: 'idle', targetX: enemy.homeX, targetY: enemy.homeY, dead: true }
+    : getEnemyBehavior(enemy, player, { aggroRange, leashRange }));
   const visited = new Set();
 
   for (let seed = 0; seed < enemies.length; seed++) {
