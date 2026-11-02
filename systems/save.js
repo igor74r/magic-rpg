@@ -10,6 +10,7 @@ const SETTINGS_VERSION = 5;
 const MAX_SLOT = 3;
 
 let lastSaveTime = null;
+let lastSaveGame = null;
 
 function isValidSlot(slot) {
   return Number.isSafeInteger(slot) && slot >= 1 && slot <= MAX_SLOT;
@@ -42,7 +43,7 @@ export function saveGame() {
     ? Math.max(0, Math.floor(player.playtimeSec))
     : 0;
 
-  if (player && Number.isFinite(lastSaveTime)) {
+  if (player && lastSaveGame === state.game && Number.isFinite(lastSaveTime)) {
     const deltaSec = (now - lastSaveTime) / 1000;
     if (deltaSec > 0 && deltaSec < 3600) {
       playtimeSec += Math.floor(deltaSec);
@@ -62,6 +63,7 @@ export function saveGame() {
   state.game.version = SAVE_VERSION;
   if (player) player.playtimeSec = playtimeSec;
   lastSaveTime = now;
+  lastSaveGame = state.game;
   return true;
 }
 
@@ -497,6 +499,7 @@ export function loadGameData(slot) {
   const previousGame = state.game;
   const previousSlot = state.currentSlot;
   const previousLastSaveTime = lastSaveTime;
+  const previousLastSaveGame = lastSaveGame;
 
   try {
     const data = localStorage.getItem(slotKey(selectedSlot));
@@ -539,6 +542,7 @@ export function loadGameData(slot) {
     state.game = previousGame;
     state.currentSlot = previousSlot;
     lastSaveTime = previousLastSaveTime;
+    lastSaveGame = previousLastSaveGame;
     console.error('[save] Не удалось загрузить сохранение:', error);
     return false;
   }
@@ -568,6 +572,8 @@ export function deleteSave(slot) {
 
   if (state.currentSlot === selectedSlot) {
     state.game = null;
+    lastSaveTime = null;
+    lastSaveGame = null;
   }
 }
 
