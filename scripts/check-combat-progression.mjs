@@ -190,6 +190,23 @@ try {
   assert.equal(f.p.stats.kills.goblin, killsAfterVictory);
   console.log('PASS defeated enemy cannot be farmed for duplicate rewards');
 
+  // A failed persistence write must roll back all victory rewards and keep the fight retryable.
+  f = fixture('warrior', 'goblin');
+  f.enemy.hp = 1;
+  const victoryGoldBeforeSaveFailure = f.p.gold;
+  const victoryKillsBeforeSaveFailure = f.p.stats.kills.goblin || 0;
+  const originalSetItem = globalThis.localStorage.setItem;
+  globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
+  combatAttack();
+  globalThis.localStorage.setItem = originalSetItem;
+  assert.equal(f.p.gold, victoryGoldBeforeSaveFailure, 'failed save must roll back victory gold');
+  assert.equal(f.p.stats.kills.goblin || 0, victoryKillsBeforeSaveFailure, 'failed save must roll back kill progress');
+  assert.equal(f.enemy.dead, false, 'failed save must leave enemy alive');
+  assert.equal(f.enemy.hp, f.enemy.maxHp, 'failed save must restore encounter health');
+  assert.ok(f.ow.combat, 'failed save must keep combat active');
+  assert.equal(f.ow.combat.turn, 'player', 'failed save must return control to player');
+  console.log('PASS failed victory save rolls back rewards and restores encounter');
+
   // Tower floor events are tied to the floor that emitted them.
   assert.equal(createCharacter('Tower Regression', 'warrior'), true);
   state.game.player.hp = state.game.player.maxHp;
