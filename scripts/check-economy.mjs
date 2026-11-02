@@ -4,7 +4,7 @@ import { STORY } from '../data/story.js';
 import { getCurrentActIndex, getActPriceMultiplier, getBuyPrice, getSellPrice } from '../systems/economy.js';
 import { getMissionReward } from '../systems/campaign.js';
 import { state } from '../systems/state.js';
-import { buyItem, buybackItem, getBuybackItems } from '../systems/shop.js';
+import { buyItem, buybackItem, getBuybackItems, sellItemsByIndices } from '../systems/shop.js';
 import { NPCS } from '../data/npcs.js';
 
 const player = { campaignClaimed: {} };
@@ -63,6 +63,19 @@ assert.equal(getBuybackItems().length, 1, 'shop should hide malformed buyback re
 assert.equal(buybackItem(0).ok, true, 'valid buyback remains selectable after malformed records are filtered');
 assert.equal(buyer.inventory.length, 2, 'valid buyback restores one item');
 assert.equal(getBuybackItems().length, 0, 'claimed buyback record is removed');
+
+// Zero-value or malformed catalog entries must not disappear in a mixed sale.
+ITEMS['test-no-price-material'] = { name: 'Test material', type: 'material' };
+buyer.inventory = [
+  { id: 'test-no-price-material', qty: 1 },
+  { id: 'iron-sword', qty: 1, rarity: 'common' }
+];
+const mixedSale = sellItemsByIndices([0, 1]);
+assert.equal(mixedSale.ok, true);
+assert.equal(buyer.inventory.length, 1);
+assert.equal(buyer.inventory[0].id, 'test-no-price-material',
+  'an item with no sale value must remain in inventory');
+delete ITEMS['test-no-price-material'];
 state.game = null;
 if (originalStorage === undefined) delete globalThis.localStorage;
 else globalThis.localStorage = originalStorage;
