@@ -197,14 +197,24 @@ export function acceptElderQuestUI() {
 export function turnInElderQuestUI() {
   const p = state.game?.player;
   if (!p) return;
+  const active = getActiveCampaignMission(p);
+  if (!active) {
+    toast('Нет активного поручения для сдачи.');
+    return;
+  }
+  const reward = getMissionReward(active.mission);
+  if (!Number.isSafeInteger(p.gold) || p.gold < 0 ||
+      !Number.isSafeInteger(p.gold + reward.gold)) {
+    toast('Невозможно начислить награду: проверьте баланс золота.');
+    return;
+  }
   const completed = claimCampaignMission(p);
   if (!completed) {
     toast('Поручение ещё не выполнено.');
     return;
   }
 
-  const reward = getMissionReward(completed.mission);
-  p.gold = (p.gold || 0) + reward.gold;
+  p.gold += reward.gold;
   addExp(reward.exp);
   const itemReward = reward.itemId ? addItemOrStore(reward.itemId, 1) : null;
   const itemName = reward.itemId ? (ITEMS[reward.itemId]?.name || reward.itemId) : '';
