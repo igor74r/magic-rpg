@@ -12,11 +12,11 @@ export const LOCATIONS = {
     npcs: [
       { id: 'cat', emoji: '🐈', name: 'Кошка', x: 19, y: 17 },
       { id: 'kids', emoji: '👦', name: 'Дети', x: 17, y: 17 },
-      { id: 'villager-1', emoji: '🧑', name: 'Житель Авроры', x: 19, y: 7, ambient: true, wanderRadius: 58 },
-      { id: 'villager-2', emoji: '🧑‍🌾', name: 'Садовник', x: 7, y: 11, ambient: true, wanderRadius: 52 },
-      { id: 'villager-3', emoji: '🧕', name: 'Торговка', x: 31, y: 11, ambient: true, wanderRadius: 55 },
-      { id: 'villager-4', emoji: '🧑‍🌾', name: 'Помощник кузнеца', x: 7, y: 22, ambient: true, wanderRadius: 48 },
-      { id: 'villager-5', emoji: '🧔', name: 'Плотник', x: 31, y: 22, ambient: true, wanderRadius: 50 }
+      { id: 'villager-1', emoji: '🧑', name: 'Житель Авроры', x: 22, y: 7, ambient: true, wanderRadius: 58 },
+      { id: 'villager-2', emoji: '🧑‍🌾', name: 'Садовник', x: 4, y: 11, ambient: true, wanderRadius: 52 },
+      { id: 'villager-3', emoji: '🧕', name: 'Торговка', x: 34, y: 11, ambient: true, wanderRadius: 55 },
+      { id: 'villager-4', emoji: '🧑‍🌾', name: 'Помощник кузнеца', x: 4, y: 22, ambient: true, wanderRadius: 48 },
+      { id: 'villager-5', emoji: '🧔', name: 'Плотник', x: 34, y: 22, ambient: true, wanderRadius: 50 }
     ],
     statics: [
       { id: 'well', name: 'Фонтан площади', x: 15, y: 14, propStyle: 'fountain', decorative: true },
