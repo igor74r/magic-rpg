@@ -38,7 +38,8 @@ export function sellItemsByIndices(indices, options = {}) {
   const candidates = selected.map(index => ({ index, inst: p.inventory[index] }))
     .filter(({ inst }) => {
       const item = ITEMS[inst?.id];
-      return item && item.type !== 'quest' && !item.storyShard && !RARITIES[inst.rarity]?.bossOnly;
+      return item && item.type !== 'quest' && !item.storyShard && !RARITIES[inst.rarity]?.bossOnly &&
+        getSellPrice(inst, p) > 0;
     });
   const total = candidates.reduce((sum, entry) => sum + getSellPrice(entry.inst, p), 0);
   const hasHighTier = candidates.some(({ inst }) => (RARITIES[inst.rarity]?.tier || 1) >= 4);
