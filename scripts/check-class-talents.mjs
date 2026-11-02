@@ -25,5 +25,6 @@ assert.equal(archerBonus.atkFlat, 2);
 
 const cryomancer = findTalentById('mage', 'm-cryomancer');
 assert.equal(cryomancer.effects.spellMult, 1.5, 'cryomancer effect must match its +50% description');
+assert.match(cryomancer.desc, /\+40% макс MP, \+50% урона заклинаниями/, 'cryomancer description must not contradict its effects');
 
 console.log('Class talent checks passed');
