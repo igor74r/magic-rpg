@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { migrateSettings, loadSettings, saveSettings } from '../systems/save.js';
+import { migrateSettings, loadSettings, saveSettings, hasSave, getSlotInfo, deleteSave } from '../systems/save.js';
 import { state } from '../systems/state.js';
 
 const legacy = migrateSettings({ volume: 42 });
@@ -100,6 +100,8 @@ assert.ok(render.includes('settings.bloomEffects'), 'bloom graphics setting is n
 
 const originalStorage = globalThis.localStorage;
 const originalSettings = state.settings;
+const originalGame = state.game;
+const originalSlot = state.currentSlot;
 const settingsStorage = new Map();
 let storageBlocked = false;
 globalThis.localStorage = {
@@ -119,11 +121,19 @@ try {
   assert.equal(state.settings.settingsVersion, 2, 'failed settings write must not mark the live settings as persisted');
   assert.equal(loadSettings(), false, 'settings load should safely fall back when storage is blocked');
   assert.equal(state.settings.musicVolume, 33, 'blocked storage should retain in-memory preferences');
+  state.game = { player: { name: 'Keep me' } };
+  state.currentSlot = 1;
+  assert.equal(hasSave(1), false, 'slot checks should fail safely when storage is blocked');
+  assert.equal(getSlotInfo(1), null, 'slot previews should fail safely when storage is blocked');
+  assert.equal(deleteSave(1), false, 'slot deletion should report blocked storage');
+  assert.equal(state.game.player.name, 'Keep me', 'failed deletion must not clear the active character');
   storageBlocked = false;
   assert.equal(saveSettings(), true, 'settings should save after storage recovers');
   assert.equal(JSON.parse(settingsStorage.get('magic-rpg-settings')).settingsVersion, 5);
 } finally {
   state.settings = originalSettings;
+  state.game = originalGame;
+  state.currentSlot = originalSlot;
   if (originalStorage === undefined) delete globalThis.localStorage;
   else globalThis.localStorage = originalStorage;
 }
