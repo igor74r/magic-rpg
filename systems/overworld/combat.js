@@ -1381,6 +1381,20 @@ function combatVictory() {
   const def = ENEMIES[enemy.enemyId];
   if (!def || !state.game?.player) return;
   const p = state.game.player;
+  let previousGame;
+  try {
+    previousGame = JSON.parse(JSON.stringify(state.game));
+  } catch {
+    pushLog('Не удалось подготовить сохранение награды.', 'warning');
+    return;
+  }
+  const previousEnemy = {
+    dead: enemy.dead,
+    respawnAt: enemy.respawnAt,
+    effects: Array.isArray(enemy.effects) ? [...enemy.effects] : enemy.effects,
+    hp: enemy.hp,
+    state: enemy.state
+  };
 
   const ng = getNGPlusMult();
 
@@ -1589,7 +1603,30 @@ function combatVictory() {
   }
 
   // Save after temporary combat effects and cooldowns have been cleared.
-  saveGame();
+  if (!saveGame()) {
+    state.game = previousGame;
+    Object.assign(enemy, previousEnemy);
+    // Keep the encounter playable; no rewards or kill progress are retained.
+    enemy.hp = enemy.maxHp;
+    enemy.dead = false;
+    enemy.respawnAt = 0;
+    enemy.state = 'combat';
+    ow.combat.enemy = enemy;
+    ow.combat.turn = 'player';
+    ow.combat.over = false;
+    ow.combat.turnCount = 0;
+    ow.combat.blocking = false;
+    ow.combat.guaranteedDodge = false;
+    ow.combat.playerChargeNext = false;
+    ow.combat.playerResurrectionUsed = false;
+    ow.player.hp = state.game.player.hp;
+    ow.player.maxHp = state.game.player.maxHp;
+    ow.player.mp = state.game.player.mp;
+    ow.player.maxMp = state.game.player.maxMp;
+    pushLog('⚠️ Не удалось сохранить победу. Награды отменены, бой восстановлен.', 'warning');
+    emit('game:update');
+    return;
+  }
   endCombat();
   checkAchievements();
 
