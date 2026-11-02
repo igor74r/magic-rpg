@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [html, main, header, menu, css, inventory, shop, npcs, overworld] = await Promise.all([
+const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworldRender] = await Promise.all([
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
   readFile(new URL('../main.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/header.js', import.meta.url), 'utf8'),
@@ -10,7 +10,8 @@ const [html, main, header, menu, css, inventory, shop, npcs, overworld] = await 
   readFile(new URL('../ui/inventory.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/shop.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/npcs.js', import.meta.url), 'utf8'),
-  readFile(new URL('../ui/overworld.js', import.meta.url), 'utf8')
+  readFile(new URL('../ui/overworld.js', import.meta.url), 'utf8'),
+  readFile(new URL('../ui/overworld/render.js', import.meta.url), 'utf8')
 ]);
 
 const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
@@ -66,6 +67,14 @@ for (const [key, label] of [
     `mobile direction key ${key} must have a descriptive accessible name`);
 }
 
+assert.match(overworldRender, /role="dialog" aria-modal="true" aria-labelledby="pause-title"/,
+  'overworld pause menu must expose modal semantics');
+assert.match(overworldRender, /div\.addEventListener\('keydown', event =>/,
+  'overworld pause menu must constrain keyboard navigation');
+assert.match(overworldRender, /pauseReturnFocus\?\.isConnected\) pauseReturnFocus\.focus\(\)/,
+  'closing pause menu must restore focus');
+assert.match(overworldRender, /querySelector\('button:not\(:disabled\)\'\)/,
+  'opening pause menu must move focus to an action');
 for (const event of ['pointerdown', 'pointerup', 'pointercancel', 'keydown', 'keyup', 'blur']) {
   assert.ok(overworld.includes(`btn.addEventListener('${event}'`),
     `mobile d-pad must support ${event} to avoid stuck movement and enable keyboard input`);
