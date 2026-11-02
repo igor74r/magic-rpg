@@ -330,38 +330,75 @@ function openWorldPortalMenu() {
   );
   if (isRiftReady() && LOCATIONS.rift) destinations.push(['rift', LOCATIONS.rift]);
   document.getElementById('aurora-world-portal')?.remove();
+
   const overlay = document.createElement('div');
   overlay.id = 'aurora-world-portal';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:10070;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at 50% 35%,rgba(38,91,94,.34),rgba(5,9,16,.97) 70%);color:#f2eadb;overflow:auto;font-family:inherit;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10070;display:flex;align-items:center;justify-content:center;padding:clamp(10px,3vw,24px);background:radial-gradient(ellipse at 50% 25%,rgba(38,91,94,.42),rgba(5,9,16,.97) 72%);color:#f2eadb;overflow:auto;font-family:inherit;';
+  const cards = destinations.map(([id, loc]) => {
+    const here = id === currentId;
+    const description = escapeHtml(loc.desc || 'Неизведанная область');
+    return `<button type="button" data-world-location="${escapeHtml(id)}" data-search="${escapeHtml(`${loc.name} ${loc.desc || ''}`.toLocaleLowerCase())}" ${here ? 'disabled aria-current="location"' : ''} style="display:flex;align-items:flex-start;gap:12px;min-height:104px;width:100%;text-align:left;padding:14px;border:1px solid ${here ? '#b89a62' : '#426a70'};border-radius:13px;background:${here ? 'linear-gradient(135deg,#3a3023,#211c19)' : 'linear-gradient(145deg,#1a3039,#111923)'};color:#f2eadb;opacity:${here ? 0.92 : 1};cursor:${here ? 'default' : 'pointer'};font:inherit;transition:border-color .15s,transform .15s,background .15s">
+      <span aria-hidden="true" style="display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:11px;background:rgba(116,185,178,.12);font-size:25px">${loc.emoji || '✦'}</span>
+      <span style="display:block;min-width:0;flex:1"><strong style="display:block;font-size:15px;line-height:1.35">${escapeHtml(loc.name)}</strong><span style="display:-webkit-box;margin-top:5px;color:#a9c0bf;font-size:12px;line-height:1.45;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2">${description}</span><small style="display:block;margin-top:8px;color:${here ? '#e0c58f' : '#80c9bd'};font-size:11px;font-weight:700;letter-spacing:.04em">${here ? '● ВЫ ЗДЕСЬ' : 'ПЕРЕЙТИ В ОБЛАСТЬ →'}</small></span>
+    </button>`;
+  }).join('');
+
   overlay.innerHTML = `
-    <section role="dialog" aria-modal="true" aria-labelledby="aurora-world-portal-title" style="width:min(900px,100%);max-height:92vh;overflow:auto;padding:clamp(18px,3vw,30px);border:1px solid #72b9b2;border-radius:18px;background:linear-gradient(145deg,rgba(24,37,44,.98),rgba(10,15,25,.99));box-shadow:0 0 55px rgba(69,190,182,.2),inset 0 0 35px rgba(99,188,175,.06)">
-      <header style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px">
-        <div><small style="letter-spacing:.22em;color:#8bd7ce">СЕТЬ ДРЕВНИХ ВРАТ</small><h1 id="aurora-world-portal-title" style="margin:7px 0 4px;font-size:clamp(25px,4vw,38px)">Пути между мирами</h1><p style="margin:0;color:#b5c6c5">Выберите область, куда направить портал</p></div>
-        <button type="button" data-world-close style="padding:10px 15px;border:1px solid #719b9b;border-radius:9px;background:#182a32;color:#e9ffff">Закрыть</button>
+    <section role="dialog" aria-modal="true" aria-labelledby="aurora-world-portal-title" aria-describedby="aurora-world-portal-description" style="width:min(960px,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid #72b9b2;border-radius:18px;background:linear-gradient(145deg,rgba(24,37,44,.99),rgba(10,15,25,.99));box-shadow:0 0 55px rgba(69,190,182,.22),inset 0 0 35px rgba(99,188,175,.06)">
+      <header style="padding:clamp(17px,3vw,28px);padding-bottom:16px;border-bottom:1px solid rgba(114,185,178,.2)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div><small style="letter-spacing:.2em;color:#8bd7ce;font-size:10px">ДРЕВНЯЯ СЕТЬ ПЕРЕХОДОВ</small><h1 id="aurora-world-portal-title" style="margin:7px 0 5px;font-size:clamp(24px,4vw,36px);line-height:1.15">Куда направимся?</h1><p id="aurora-world-portal-description" style="margin:0;color:#b5c6c5;font-size:14px;line-height:1.5">Выберите область на карте вокруг деревни Аврора. Портал перенесёт вас прямо туда.</p></div>
+          <button type="button" data-world-close aria-label="Закрыть окно портала" style="flex:0 0 auto;padding:9px 13px;border:1px solid #719b9b;border-radius:9px;background:#182a32;color:#e9ffff;font:inherit;cursor:pointer">✕</button>
+        </div>
+        <label for="aurora-world-search" style="display:block;margin-top:17px;color:#a9c5c3;font-size:12px;font-weight:700">НАЙТИ ЛОКАЦИЮ</label>
+        <input id="aurora-world-search" type="search" placeholder="Например: Тёмный лес, Ледяные пики…" autocomplete="off" style="box-sizing:border-box;width:100%;margin-top:7px;padding:12px 14px;border:1px solid #456b70;border-radius:10px;outline:none;background:#0d1a22;color:#f2eadb;font:inherit;font-size:14px">
+        <div style="display:flex;justify-content:space-between;gap:10px;margin-top:9px;color:#91aaa9;font-size:12px"><span>Области на карте мира</span><span data-world-count aria-live="polite">${destinations.length} локаций</span></div>
       </header>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px">
-        ${destinations.map(([id,loc])=>{const here=id===currentId;return `<button type="button" data-world-location="${id}" ${here?'disabled':''} style="min-height:84px;text-align:left;padding:13px;border:1px solid ${here?'#a88d5d':'#426a70'};border-radius:11px;background:${here?'linear-gradient(135deg,#3a3023,#211c19)':'linear-gradient(145deg,#1a3039,#111923)'};color:#f2eadb;opacity:${here ? 0.8 : 1};cursor:${here?'default':'pointer'}"><span style="font-size:22px">${loc.emoji||'✦'}</span><strong style="display:block;margin-top:5px">${loc.name}</strong><small style="color:${here?'#d8b978':'#9ebcbb'}">${here?'Вы здесь':'Перейти в область'}</small></button>`}).join('')}
+      <div data-world-list style="padding:16px clamp(14px,3vw,26px);overflow:auto;overscroll-behavior:contain">
+        <div data-world-grid style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px">${cards}</div>
+        <p data-world-empty hidden style="padding:26px 10px;text-align:center;color:#b5c6c5">Ничего не найдено. Попробуйте другое название.</p>
       </div>
-      <footer style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(114,185,178,.25);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-        <span style="color:#9db5b6;font-size:13px">Отдельные врата Башни отмечены янтарным светом.</span>
-        <button type="button" data-world-tower style="padding:13px 20px;border:1px solid #d49a5b;border-radius:10px;background:linear-gradient(135deg,#69401f,#2b1b18);color:#fff0d7;font-weight:700">🏰 Открыть Башню · 40 этажей</button>
+      <footer style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px clamp(14px,3vw,26px);border-top:1px solid rgba(114,185,178,.22);background:rgba(5,12,18,.35)">
+        <span style="color:#9db5b6;font-size:12px">Башня открывается отдельно от обычных областей.</span>
+        <button type="button" data-world-tower style="padding:12px 17px;border:1px solid #d49a5b;border-radius:10px;background:linear-gradient(135deg,#69401f,#2b1b18);color:#fff0d7;font-weight:700;font:inherit;cursor:pointer">🏰 Башня · 40 этажей</button>
       </footer>
     </section>`;
   document.body.appendChild(overlay);
+
+  const search = overlay.querySelector('#aurora-world-search');
+  const count = overlay.querySelector('[data-world-count]');
+  const empty = overlay.querySelector('[data-world-empty]');
+  const locationButtons = [...overlay.querySelectorAll('[data-world-location]')];
   const resume = () => {
     overlay.remove();
     if (state.overworld) { state.overworld.active = true; state.overworld.paused = false; }
   };
+  const filterLocations = () => {
+    const query = (search.value || '').trim().toLocaleLowerCase();
+    let visible = 0;
+    for (const button of locationButtons) {
+      const matches = !query || button.dataset.search.includes(query);
+      button.hidden = !matches;
+      if (matches) visible++;
+    }
+    count.textContent = `${visible} из ${destinations.length} локаций`;
+    empty.hidden = visible !== 0;
+  };
+
+  search.addEventListener('input', filterLocations);
   overlay.querySelector('[data-world-close]')?.addEventListener('click', resume);
-  overlay.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); resume(); } });
-  overlay.querySelector('[data-world-close]')?.focus();
+  overlay.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { event.preventDefault(); resume(); }
+  });
   overlay.addEventListener('click', event => { if (event.target === overlay) resume(); });
+  search.focus();
+
   overlay.querySelector('[data-world-tower]')?.addEventListener('click', () => {
     overlay.remove();
     exitOverworld();
     openTowerMenu();
   });
-  overlay.querySelectorAll('[data-world-location]:not(:disabled)').forEach(button => button.addEventListener('click', () => {
+  locationButtons.filter(button => !button.disabled).forEach(button => button.addEventListener('click', () => {
     const id = button.getAttribute('data-world-location');
     overlay.remove();
     exitOverworld();
