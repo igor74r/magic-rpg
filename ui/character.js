@@ -48,7 +48,9 @@ export function renderClassSelection() {
       const card = target?.closest('[data-class-id]');
       if (!card || !root.contains(card)) return;
       event.preventDefault();
-      selectClass(card.dataset.classId);
+      const classId = card.dataset.classId;
+      selectClass(classId);
+      root.querySelector(`[data-class-id="${classId}"]`)?.focus();
     });
     root.dataset.classSelectionBound = 'true';
   }
