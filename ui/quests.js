@@ -84,7 +84,7 @@ export function openQuestBoard() {
       ${html}
     </div>
 
-    <button data-game-action="close-npc" style="width:100%;margin-top:15px;">
+    <button type="button" data-game-action="close-npc" style="width:100%;margin-top:15px;">
       ← Уйти
     </button>
   `;
