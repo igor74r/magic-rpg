@@ -189,13 +189,15 @@ export function combatAttack() {
     spawnParticles(enemy.x, enemy.y, 'spark', 8);
   }
 
+  // Lifesteal is based on health actually removed, not overkill damage.
+  const actualDamage = Math.min(Math.max(0, enemy.hp), damage);
   const lifesteal = Math.min(
     1,
     getLifesteal(p) + talent.lifesteal
   );
 
-  if (lifesteal > 0 && damage > 0) {
-    const heal = Math.floor(damage * lifesteal);
+  if (lifesteal > 0 && actualDamage > 0) {
+    const heal = Math.floor(actualDamage * lifesteal);
 
     p.hp = Math.min(p.maxHp, p.hp + heal);
     ow.player.hp = p.hp;
