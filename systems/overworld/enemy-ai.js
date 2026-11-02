@@ -1,0 +1,52 @@
+// Deterministic overworld enemy steering and leash behavior.
+const ANGLE_OFFSETS = [0, 0.45, -0.45, 0.9, -0.9, 1.35, -1.35, 1.8, -1.8, Math.PI];
+
+export function getEnemyBehavior(enemy, player, options = {}) {
+  const aggroRange = Number.isFinite(options.aggroRange) ? options.aggroRange : 200;
+  const leashRange = Number.isFinite(options.leashRange) ? options.leashRange : 340;
+  const disengageRange = Number.isFinite(options.disengageRange) ? options.disengageRange : aggroRange * 1.35;
+  const homeDistance = Math.hypot(enemy.x - enemy.homeX, enemy.y - enemy.homeY);
+  const playerDistance = Math.hypot(enemy.x - player.x, enemy.y - player.y);
+
+  if (homeDistance > leashRange || (enemy.state === 'chase' && playerDistance > disengageRange)) {
+    return { state: 'return', targetX: enemy.homeX, targetY: enemy.homeY, playerDistance, homeDistance };
+  }
+  if (enemy.state === 'return') {
+    if (homeDistance > 18) return { state: 'return', targetX: enemy.homeX, targetY: enemy.homeY, playerDistance, homeDistance };
+    if (playerDistance < aggroRange) return { state: 'chase', targetX: player.x, targetY: player.y, playerDistance, homeDistance };
+    return { state: 'idle', targetX: enemy.homeX, targetY: enemy.homeY, playerDistance, homeDistance };
+  }
+  if (playerDistance < aggroRange && homeDistance <= leashRange) {
+    return { state: 'chase', targetX: player.x, targetY: player.y, playerDistance, homeDistance };
+  }
+  if (homeDistance > 100) {
+    return { state: 'return', targetX: enemy.homeX, targetY: enemy.homeY, playerDistance, homeDistance };
+  }
+  return { state: 'idle', targetX: enemy.homeX, targetY: enemy.homeY, playerDistance, homeDistance };
+}
+
+// Pick a reachable direction that makes the greatest forward progress.
+// The direct vector wins ties; angled alternatives let enemies route around
+// corners without teleporting or ignoring swept collision.
+export function getEnemySteering(x, y, targetX, targetY, canMove) {
+  const dx = targetX - x, dy = targetY - y;
+  const distance = Math.hypot(dx, dy);
+  if (!Number.isFinite(distance) || distance < 0.001) return { x: 0, y: 0, blocked: false };
+  const ux = dx / distance, uy = dy / distance;
+  let best = null, bestScore = -Infinity;
+  for (const angle of ANGLE_OFFSETS) {
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const vx = ux * cos - uy * sin;
+    const vy = ux * sin + uy * cos;
+    // Probe several short distances so a direction cannot be selected
+    // through a thin wall merely because its endpoint is clear.
+    let clear = true;
+    for (const probe of [4, 8, 12]) {
+      if (!canMove(x + vx * probe, y + vy * probe)) { clear = false; break; }
+    }
+    if (!clear) continue;
+    const score = vx * ux + vy * uy;
+    if (score > bestScore) { bestScore = score; best = { x: vx, y: vy, blocked: false }; }
+  }
+  return best || { x: 0, y: 0, blocked: true };
+}
