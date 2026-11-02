@@ -12,7 +12,7 @@ const CAMPAIGN_XP_BANDS = [
   { maxLevel: 20, exp: 259 },
   { maxLevel: 30, exp: 269 },
   { maxLevel: 40, exp: 369 },
-  { maxLevel: 50, exp: 628 }
+  { maxLevel: 50, exp: 535 }
 ];
 
 export function getExpNext(level) {
@@ -20,7 +20,7 @@ export function getExpNext(level) {
   if (level >= MAX_LEVEL) return Infinity;
   const band = CAMPAIGN_XP_BANDS.find(item => level <= item.maxLevel);
   if (band) return band.exp;
-  return Math.floor(628 * Math.pow(level / 50, 1.5));
+  return Math.floor(535 * Math.pow(level / 50, 1.5));
 }
 
 export function addExp(amount) {
