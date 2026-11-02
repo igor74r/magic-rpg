@@ -14,6 +14,11 @@ export function createCharacter(name, className) {
 
   const stats = cls.baseStats;
 
+  if (Number.isSafeInteger(state.pendingSlot) && state.pendingSlot >= 1 && state.pendingSlot <= 3) {
+    state.currentSlot = state.pendingSlot;
+  }
+  state.pendingSlot = null;
+
   state.game = {
     version: 15,
 
