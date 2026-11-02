@@ -21,16 +21,25 @@ function slotKey(slot) {
 }
 
 export function migrateLegacySave() {
-  const legacy = localStorage.getItem(LEGACY_KEY);
+  try {
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (!legacy) return false;
 
-  if (!legacy) return;
+    // Preserve the legacy slot when slot 1 already exists. Removing it here
+    // would silently destroy a second, potentially valuable character save.
+    if (localStorage.getItem(slotKey(1))) return false;
 
-  // Preserve the legacy slot when slot 1 already exists. Removing it here
-  // would silently destroy a second, potentially valuable character save.
-  if (localStorage.getItem(slotKey(1))) return;
-
-  localStorage.setItem(slotKey(1), legacy);
-  localStorage.removeItem(LEGACY_KEY);
+    // Copy first and remove the legacy key only after the new slot is verified.
+    localStorage.setItem(slotKey(1), legacy);
+    if (localStorage.getItem(slotKey(1)) !== legacy) {
+      throw new Error('Legacy save migration verification failed');
+    }
+    localStorage.removeItem(LEGACY_KEY);
+    return true;
+  } catch (error) {
+    console.warn('[save] Не удалось перенести старое сохранение:', error);
+    return false;
+  }
 }
 
 export function saveGame() {
