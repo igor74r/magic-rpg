@@ -165,12 +165,12 @@ export function canCompleteMainQuest(game) {
 }
 
 
-// Story regions unlock in campaign order. Each mission step raises the
-// minimum level, while the world map deliberately scatters the nodes visually.
-// Reused locations keep the earliest level at which the story first needs them.
+// Story regions unlock by both character level and campaign progress.
+// The map order is linear in story logic but nodes may be scattered visually.
 export function getStoryLocationProgression() {
   const locations = [];
   const seen = new Set();
+  let previousMissionId = null;
 
   for (const act of STORY.acts) {
     const match = /^(\d+)/.exec(String(act.recommendedLevel || '1'));
@@ -179,34 +179,26 @@ export function getStoryLocationProgression() {
 
     missions.forEach((mission, missionIndex) => {
       const locationId = mission.locationId || act.locationId;
-      if (!locationId || seen.has(locationId)) return;
-      seen.add(locationId);
+      if (!locationId) return;
 
-      // Five missions span the act's ten-level band: 1/3/5/7/9,
-      // 11/13/15/17/19, and so on.
-      const requiredLevel = Math.min(100, actBaseLevel + missionIndex * 2);
-      locations.push({
-        id: locationId,
-        sequence: locations.length + 1,
-        actNumber: act.number,
-        actTitle: act.title,
-        recommendedLevel: String(requiredLevel),
-        requiredLevel
-      });
+      if (!seen.has(locationId)) {
+        seen.add(locationId);
+        const requiredLevel = Math.min(100, actBaseLevel + missionIndex * 2);
+        locations.push({
+          id: locationId,
+          sequence: locations.length + 1,
+          actNumber: act.number,
+          actTitle: act.title,
+          recommendedLevel: String(requiredLevel),
+          requiredLevel,
+          unlockAfterMissionId: previousMissionId,
+          unlockMissionId: mission.id
+        });
+      }
+
+      // Unlock each new region only after the immediately preceding story step.
+      previousMissionId = mission.id;
     });
-
-    // Keep an act hub visible if it is not itself used by a mission.
-    if (act.locationId && !seen.has(act.locationId)) {
-      seen.add(act.locationId);
-      locations.push({
-        id: act.locationId,
-        sequence: locations.length + 1,
-        actNumber: act.number,
-        actTitle: act.title,
-        recommendedLevel: String(actBaseLevel),
-        requiredLevel: actBaseLevel
-      });
-    }
   }
 
   return locations;
@@ -218,11 +210,18 @@ export function getStoryLocationRequirement(locationId) {
 
 export function canEnterStoryLocation(player, locationId) {
   const requirement = getStoryLocationRequirement(locationId);
-  if (!requirement) return { allowed: true, requirement: null, currentLevel: Number(player?.level) || 1 };
   const currentLevel = Math.max(1, Number(player?.level) || 1);
+  if (!requirement) return { allowed: true, requirement: null, currentLevel, reason: null };
+
+  const levelAllowed = currentLevel >= requirement.requiredLevel;
+  const campaignAllowed = !requirement.unlockAfterMissionId ||
+    player?.campaignClaimed?.[requirement.unlockAfterMissionId] === true;
+
   return {
-    allowed: currentLevel >= requirement.requiredLevel,
+    allowed: levelAllowed && campaignAllowed,
     requirement,
-    currentLevel
+    currentLevel,
+    reason: !levelAllowed ? 'level' : !campaignAllowed ? 'campaign' : null,
+    requiredMissionId: campaignAllowed ? null : requirement.unlockAfterMissionId
   };
 }
