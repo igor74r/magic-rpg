@@ -514,7 +514,7 @@ export function migrateGame(game) {
     const nextExp = getExpNext(player.level);
     const previousNext = Number.isSafeInteger(player.expNext) && player.expNext > 0
       ? player.expNext
-      : 0;
+      : Math.floor(100 * Math.pow(player.level, 1.6));
     const previousExp = Number.isSafeInteger(player.exp) && player.exp >= 0
       ? player.exp
       : 0;
