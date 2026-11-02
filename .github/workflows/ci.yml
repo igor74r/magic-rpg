@@ -94,6 +94,9 @@ jobs:
       - name: Check effective stat stacking and combat caps
         run: node scripts/check-stats.mjs
 
+      - name: Check experience progression and invalid rewards
+        run: node scripts/check-progression.mjs
+
       - name: Check five-act story depth and enemy roster
         run: node scripts/check-story-depth.mjs
 
