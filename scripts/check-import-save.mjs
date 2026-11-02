@@ -13,9 +13,16 @@ globalThis.document = {
   body: { appendChild() {} }
 };
 const storage = new Map([['magic-rpg-save-1', 'KEEP-EXISTING-SAVE']]);
+let failImportWrite = false;
 globalThis.localStorage = {
   getItem: key => storage.get(key) ?? null,
-  setItem: (key, value) => storage.set(key, String(value)),
+  setItem: (key, value) => {
+    storage.set(key, String(value));
+    if (failImportWrite && key === 'magic-rpg-save-1') {
+      failImportWrite = false;
+      throw new Error('simulated storage quota failure after partial write');
+    }
+  },
   removeItem: key => storage.delete(key)
 };
 globalThis.confirm = () => true;
@@ -66,12 +73,16 @@ try {
     storyShards: { flame: false, ice: false, blood: false },
     storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false }
   };
+  failImportWrite = true;
+  runImport(legacy);
+  assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE', 'failed import write must restore the previous slot');
+
   runImport(legacy);
   const imported = JSON.parse(storage.get('magic-rpg-save-1'));
   assert.equal(imported.version, 17, 'legacy save should be migrated before storage');
   assert.equal(imported.player.inventory[0].id, 'old-archive-seal', 'legacy quest item migration should be retained');
   assert.equal(imported.player.name, 'Legacy hero');
-  console.log('check-import-save: PASS (invalid files preserve existing saves; legacy saves migrate before import)');
+  console.log('check-import-save: PASS (invalid files and failed writes preserve existing saves; legacy saves migrate before import)');
 } finally {
   state.game = null;
   if (originalDocument === undefined) delete globalThis.document;
