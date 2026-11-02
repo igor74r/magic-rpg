@@ -9,7 +9,7 @@ const originalSetTimeout = globalThis.setTimeout;
 
 const nodes = new Map();
 globalThis.document = {
-  createElement: () => ({ className: '', textContent: '', remove() {} }),
+  createElement: () => ({ className: '', textContent: '', setAttribute() {}, remove() {} }),
   body: { appendChild() {} }
 };
 const storage = new Map([['magic-rpg-save-1', 'KEEP-EXISTING-SAVE']]);
