@@ -45,7 +45,7 @@ assert.match(overworldSource, /canEnterStoryLocation\(state\.game\.player, locat
   'direct overworld entry must enforce level gates');
 assert.match(portalSource, /ЗАКРЫТО · НУЖЕН УРОВЕНЬ/,
   'Aurora world portal must visibly mark locked destinations');
-assert.match(portalSource, /storyOrder\.get\(a\).*storyOrder\.get\(b\)/,
+assert.match(portalSource, /storyOrder\.get\(a\)[\s\S]*storyOrder\.get\(b\)/,
   'Aurora portal must sort campaign destinations by story sequence');
 assert.match(mapSource, /map-story-link/,
   'world map must connect story locations in campaign sequence');
