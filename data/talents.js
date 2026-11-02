@@ -11,7 +11,7 @@ export const TALENTS = {
   ],
   mage: [
     { id: 'm-pyromancer', tier: 5,  name: 'Пиромант',      icon: '🔥', desc: '+25% урона заклинаниями', effects: { spellMult: 1.25 } },
-    { id: 'm-cryomancer', tier: 5,  name: 'Криомант',      icon: '❄️', desc: '+40% макс MP, +50% урона заклинаниями (нет)', effects: { mpMult: 1.4, spellMult: 1.5 } },
+    { id: 'm-cryomancer', tier: 5,  name: 'Криомант',      icon: '❄️', desc: '+40% макс MP, +50% урона заклинаниями', effects: { mpMult: 1.4, spellMult: 1.5 } },
     { id: 'm-arcanist',   tier: 10, name: 'Чародей',       icon: '✨', desc: '+20% урона заклинаниями, +5 MP/ход', effects: { spellMult: 1.2, manaRegen: 5 } },
     { id: 'm-scholar',    tier: 10, name: 'Учёный',        icon: '📚', desc: '+50% макс MP, +3 MP/ход', effects: { mpMult: 1.5, manaRegen: 3 } },
     { id: 'm-metmaster',  tier: 15, name: 'Метеор-мастер', icon: '☄️', desc: 'Метеор +50% урона', effects: { meteorMult: 1.5 } },
