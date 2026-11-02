@@ -109,6 +109,24 @@ try {
       assert.equal(await tabButton.getAttribute('aria-selected'), 'true', `${viewport.name}: ${tab} tab must become selected`);
       assert.equal(await page.locator('#tab-content').getAttribute('aria-labelledby'), `game-tab-${tab}`,
         `${viewport.name}: tab panel must identify its active tab`);
+      if (tab === 'inventory') {
+        const bagFilter = page.locator('[data-inv-filter="bag"]');
+        assert.equal(await bagFilter.getAttribute('aria-pressed'), 'true',
+          `${viewport.name}: active inventory filter must expose its selected state`);
+        await bagFilter.focus();
+        await bagFilter.press('Enter');
+        const saleOpener = page.locator('[data-inv-action="open-sale"]');
+        await saleOpener.focus();
+        await saleOpener.click();
+        const saleDialog = page.getByRole('dialog', { name: 'Продажа предметов' });
+        await saleDialog.waitFor();
+        assert.equal(await saleDialog.getAttribute('aria-modal'), 'true',
+          `${viewport.name}: sale window must be announced as modal`);
+        await saleDialog.press('Escape');
+        await saleDialog.waitFor({ state: 'detached' });
+        assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-inv-action')), 'open-sale',
+          `${viewport.name}: closing sale dialog must restore focus to its opener`);
+      }
       const dashboard = await page.evaluate(() => {
         const layout = document.querySelector('.dashboard-layout');
         const main = document.querySelector('.dashboard-main');
