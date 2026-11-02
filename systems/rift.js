@@ -78,8 +78,12 @@ export function recordRiftFloor(floor) {
   if (!p) return false;
   if (typeof p.riftBest !== 'number') p.riftBest = 0;
   if (floor > p.riftBest) {
+    const previous = p.riftBest;
     p.riftBest = floor;
-    saveGame();
+    if (!saveGame()) {
+      p.riftBest = previous;
+      return false;
+    }
     return true;
   }
   return false;
