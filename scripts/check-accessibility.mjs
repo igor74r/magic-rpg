@@ -45,6 +45,8 @@ for (const id of settingsControls) {
 }
 assert.match(menu, /aria-label="Удалить сохранение в слоте \${slot}"/,
   'icon-only save deletion buttons must have a descriptive accessible name');
+assert.match(html, /id="overworld-canvas"[^>]*tabindex="0"[^>]*aria-label="Игровой мир\. WASD или стрелки — движение, E — взаимодействие, Escape — пауза\."/,
+  'overworld canvas must be keyboard focusable and provide controls guidance');
 assert.match(html, /id="npc-dialog-modal" class="npc-modal" style="display:none;" role="dialog" aria-modal="true" aria-label="Диалог с персонажем"/,
   'NPC dialogue must expose modal dialog semantics');
 assert.match(npcs, /modal\.addEventListener\('keydown', event =>/,
