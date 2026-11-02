@@ -77,7 +77,6 @@ export function updateOverworld(dt) {
   ow.floatingNumbers = ow.floatingNumbers.filter(fn => { fn.life -= dt * 0.02; fn.y -= dt * 0.6; return fn.life > 0; });
 
   const now = performance.now();
-  const groupBehaviors = getEnemyGroupBehaviors(ow.enemies, ow.player, { aggroRange: AGGRO_RANGE, leashRange: LEASH_RANGE });
   for (let enemyIndex = 0; enemyIndex < ow.enemies.length; enemyIndex++) {
     const e = ow.enemies[enemyIndex];
     if (e.dead && e.respawnAt && now >= e.respawnAt) {
@@ -86,6 +85,8 @@ export function updateOverworld(dt) {
   }
 
   if (ow.combat || ow.defeated) return;
+
+  const groupBehaviors = getEnemyGroupBehaviors(ow.enemies, ow.player, { aggroRange: AGGRO_RANGE, leashRange: LEASH_RANGE });
 
   // AI NPC
   for (const npc of ow.npcs) {
@@ -119,7 +120,8 @@ export function updateOverworld(dt) {
     }
   }
 
-  for (const e of ow.enemies) {
+  for (let enemyIndex = 0; enemyIndex < ow.enemies.length; enemyIndex++) {
+    const e = ow.enemies[enemyIndex];
     if (e.dead) continue;
     const distanceToPlayer = Math.hypot(e.x - ow.player.x, e.y - ow.player.y);
     // Preserve contact-triggered combat even if a test, spawn correction, or
