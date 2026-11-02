@@ -554,7 +554,9 @@ export function claimQuestUI(id) {
   if (claimQuestReward(id)) {
     renderHeader();
     openQuestBoard();
+    return;
   }
+  toast('Награда не выдана: проверьте баланс золота и состояние задания.');
 }
 
 export function takeTalentUI(id) {
