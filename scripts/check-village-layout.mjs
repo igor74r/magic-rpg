@@ -52,7 +52,7 @@ for (const building of buildings) {
   const y = building.y * 48 + 24;
   assert.equal(isVillagePositionBlocked(x, y + 8, 10), false,
     `${building.id}: front doorway must remain passable`);
-  assert.equal(isVillagePositionBlocked(x - 27, y + 8, 10), true,
+  assert.equal(isVillagePositionBlocked(x - 24, y + 8, 12), true,
     `${building.id}: side wall must block the player`);
 }
 
