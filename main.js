@@ -12,7 +12,7 @@ import {
   openAchievementsMenu, openHelp,
   exportSave, importSave
 } from './ui/menu.js';
-import { selectClass, confirmClassSelection } from './ui/character.js';
+import { selectClass, reviewClassSelection, cancelClassReview, confirmClassSelection } from './ui/character.js';
 import {
   renderGame, switchTab, travelTo, useItemOutside,
   equipItemByIndexUI, unequipItemUI, openShop, buyItemUI,
@@ -712,7 +712,7 @@ window.GameAPI = {
   openAchievementsMenu, openHelp,
   saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
-  selectClass, confirmClassSelection,
+  selectClass, reviewClassSelection, cancelClassReview, confirmClassSelection,
   switchTab, travelTo, useItemOutside,
   equipByIndex: equipItemByIndexUI, unequip: unequipItemUI,
   sellByIndex: sellItemByIndexUI,
