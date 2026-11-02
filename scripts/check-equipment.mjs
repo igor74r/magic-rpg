@@ -17,7 +17,7 @@ const player = {
 state.game = { player };
 
 assert.equal(canAddItem('iron-sword', 1, player).ok, true);
-assert.equal(getInventorySlotCount(player), 2, 'runes do not consume equipment slots');
+assert.equal(getInventorySlotCount(player), 3, 'a rune stack occupies one bag slot');
 assert.ok(getInventoryWeight(player) <= getInventoryCapacity(player));
 
 const firstEquip = equipItemByIndex(0);
