@@ -50,3 +50,52 @@ export function getEnemySteering(x, y, targetX, targetY, canMove) {
   }
   return best || { x: 0, y: 0, blocked: true };
 }
+
+
+// Nearby enemies share an alarm: a visible attacker can call its nearby
+// pack into the fight, but each member still obeys its own home leash.
+export function getEnemyGroupBehaviors(enemies, player, options = {}) {
+  const aggroRange = Number.isFinite(options.aggroRange) ? options.aggroRange : 200;
+  const leashRange = Number.isFinite(options.leashRange) ? options.leashRange : 340;
+  const groupRadius = Number.isFinite(options.groupRadius) ? options.groupRadius : 150;
+  const assistRange = Number.isFinite(options.assistRange) ? options.assistRange : aggroRange + 80;
+  const results = enemies.map(enemy => getEnemyBehavior(enemy, player, { aggroRange, leashRange }));
+  const visited = new Set();
+
+  for (let seed = 0; seed < enemies.length; seed++) {
+    if (visited.has(seed) || enemies[seed].dead) continue;
+    const cluster = [];
+    const queue = [seed];
+    visited.add(seed);
+    while (queue.length) {
+      const index = queue.shift();
+      cluster.push(index);
+      const actor = enemies[index];
+      for (let other = 0; other < enemies.length; other++) {
+        if (visited.has(other) || enemies[other].dead) continue;
+        if (Math.hypot(actor.x - enemies[other].x, actor.y - enemies[other].y) <= groupRadius) {
+          visited.add(other);
+          queue.push(other);
+        }
+      }
+    }
+    const alerted = cluster.some(index => results[index].state === 'chase');
+    if (!alerted) continue;
+    for (const index of cluster) {
+      const enemy = enemies[index];
+      const homeDistance = Math.hypot(enemy.x - enemy.homeX, enemy.y - enemy.homeY);
+      const playerDistance = Math.hypot(enemy.x - player.x, enemy.y - player.y);
+      if (homeDistance > leashRange || playerDistance > assistRange) continue;
+      if (results[index].state === 'idle') {
+        results[index] = {
+          ...results[index],
+          state: 'chase',
+          targetX: player.x,
+          targetY: player.y,
+          assisted: true
+        };
+      }
+    }
+  }
+  return results;
+}
