@@ -314,5 +314,18 @@ try {
   Date.now = realDateNow;
 }
 
+// Legacy-key migration must retain the original when writing the new slot fails.
+storage.delete('magic-rpg-save-1');
+storage.set('magic-rpg-save', JSON.stringify(freshSave));
+failWrites = true;
+assert.equal(migrateLegacySave(), false, 'legacy migration should report blocked storage');
+assert.equal(storage.has('magic-rpg-save'), true, 'failed migration must preserve the legacy key');
+assert.equal(storage.has('magic-rpg-save-1'), false, 'failed migration must not leave a partial destination');
+failWrites = false;
+assert.equal(migrateLegacySave(), true, 'legacy migration should succeed when storage recovers');
+assert.equal(storage.has('magic-rpg-save'), false, 'legacy key should be removed after verified migration');
+assert.equal(storage.has('magic-rpg-save-1'), true, 'verified destination slot should exist');
+console.log('PASS legacy save migration preserves source data on write failure');
+
 console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + load path + future-version and malformed-save guards passed; 12 equipment slots verified.`);
 if (failures.length) process.exitCode = 1;
