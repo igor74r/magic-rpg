@@ -36,11 +36,11 @@ export function tryMovePlayer(dx, dy, deltaFrames = 1) {
   // tunnel through a wall. Resolve axes independently to keep wall sliding.
   const distance = Math.hypot(step.x, step.y);
   const substeps = Math.max(1, Math.ceil(distance / 4));
-  const dx = step.x / substeps, dy = step.y / substeps;
+  const stepX = step.x / substeps, stepY = step.y / substeps;
   for (let i = 0; i < substeps; i++) {
-    const nx = p.x + dx;
+    const nx = p.x + stepX;
     if (canOccupy(ow, nx, p.y, r)) { p.x = nx; moved = true; }
-    const ny = p.y + dy;
+    const ny = p.y + stepY;
     if (canOccupy(ow, p.x, ny, r)) { p.y = ny; moved = true; }
   }
   p.x = Math.max(TILE / 2, Math.min(ow.cols * TILE - TILE / 2, p.x));
