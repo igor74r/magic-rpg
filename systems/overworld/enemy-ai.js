@@ -121,7 +121,8 @@ export function getEnemyCombatDecision({
   playerHpRatio = 1,
   enemyHpRatio = 1,
   blocking = false,
-  pendingSpecial = false
+  pendingSpecial = false,
+  isBoss = false
 } = {}) {
   const role = getEnemyCombatRole(specialType);
   if (!specialType || !Number.isFinite(specialEvery) || specialEvery < 1) {
@@ -131,15 +132,17 @@ export function getEnemyCombatDecision({
 
   const scheduled = Math.max(1, Math.floor(specialEvery));
   const cadenceDue = Math.floor(turnCount) > 0 && Math.floor(turnCount) % scheduled === 0;
+  const bossEnrage = isBoss && enemyHpRatio <= 0.25;
+  const bossPunishBlock = isBoss && blocking;
   const tacticalOpening =
     (role === 'marksman' && playerHpRatio <= 0.35) ||
     (role === 'leech' && enemyHpRatio <= 0.45) ||
-    (role === 'bruiser' && blocking);
+    (role === 'bruiser' && blocking) || bossEnrage || bossPunishBlock;
   if (cadenceDue || tacticalOpening) {
     return {
       role,
       action: 'telegraph',
-      reason: tacticalOpening ? 'opening' : 'cadence'
+      reason: bossEnrage ? 'enrage' : bossPunishBlock ? 'punish-block' : tacticalOpening ? 'opening' : 'cadence'
     };
   }
   return { role, action: 'attack', reason: 'basic' };
