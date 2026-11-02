@@ -101,7 +101,7 @@ export function buybackItem(index) {
     p.inventory.push(record.item);
   }
   p.gold -= record.price;
-  p.buyback = records.filter(entry => entry.id !== record.id);
+  p.buyback = p.buyback.filter(entry => entry.id !== record.id);
   saveGame();
   emit('toast', 'Предмет выкуплен обратно за ' + record.price + '💰');
   emit('game:update');
