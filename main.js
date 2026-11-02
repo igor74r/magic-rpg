@@ -3,7 +3,7 @@ import { LOCATIONS } from './data/locations.js?v=20261102-fix1';
 import { on, emit } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
 import { addItemOrStore } from './systems/inventory.js';
-import { ITEMS } from './data/items.js';
+import { ITEMS } from './data/items.js?v=20261102-fix2';
 import { addExp } from './systems/progression.js';
 import {
   updateMainMenu, openSettings, backFromSettings, saveAndMenu,
