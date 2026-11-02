@@ -410,11 +410,15 @@ export function deleteAllSaves() {
 }
 
 export function saveAndMenu() {
-  saveGame();
+  if (!saveGame()) {
+    toast('❌ Не удалось сохранить игру. Проверьте свободное место в хранилище браузера.');
+    return false;
+  }
   toast('Игра сохранена');
   stopBGM();
   showScreen('screen-main');
   updateMainMenu();
+  return true;
 }
 
 // ============ ЭКСПОРТ / ИМПОРТ ============
