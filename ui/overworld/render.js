@@ -24,7 +24,7 @@ let autosaveSavedAt = 0, autosaveErrorAt = 0;
 let fpsNow = 0, fpsFrames = 0, fpsSampleAt = 0;
 let paused = false, nearNpc = null;
 let footprints = [], lastFootprintPos = { x: 0, y: 0 }, hurtFlash = 0, worldTime = 0;
-let deathParticles = [], bloodSplats = [], lowHpPulse = 0, corpses = [], snowAccum = 0;
+let deathParticles = [], bloodSplats = [], lowHpPulse = 0, corpses = [];
 let lastTileKey = null, tileDamageTimer = 0, _weatherEffectApplied = null;
 let mapTooltipEl = null, pauseReturnFocus = null;
 
@@ -129,12 +129,8 @@ function tick(ts) {
         if (k['a'] || k['arrowleft']) dx -= 1; if (k['d'] || k['arrowright']) dx += 1;
         
         if (dx || dy) {
-          const isSnow = theme.weather === 'snow';
-          const needAccum = isSnow ? 1.18 : 1.0;
-          snowAccum += 1;
-          if (snowAccum >= needAccum) {
-            snowAccum -= needAccum;
-            tryMovePlayer(dx, dy);
+          const movementScale = theme.weather === 'snow' ? 0.84 : 1;
+          tryMovePlayer(dx, dy, dt * movementScale);
             
             const pp = ow.player;
             if (Math.hypot(pp.x - lastFootprintPos.x, pp.y - lastFootprintPos.y) > 15) {
@@ -142,10 +138,7 @@ function tick(ts) {
               lastFootprintPos = { x: pp.x, y: pp.y };
               if (footprints.length > 30) footprints.shift();
             }
-          }
-        } else {
-          snowAccum = Math.min(snowAccum, 0.9);
-        }
+        } 
       }
 
       // Опасные тайлы
@@ -937,7 +930,7 @@ export function closePauseMenu() {
 // Сброс визуального состояния при входе в локацию
 export function initWeather(themeName) {
   footprints = []; deathParticles = []; hurtFlash = 0; worldTime = 0; bloodSplats = []; lowHpPulse = 0;
-  corpses = []; snowAccum = 0; lastTileKey = null; tileDamageTimer = 0;
+  corpses = []; lastTileKey = null; tileDamageTimer = 0;
   _weatherEffectApplied = null; nearNpc = null;
   hideMapTooltip();
   initWeatherFx(themeName);
