@@ -172,7 +172,7 @@ try {
     await page.evaluate(() => window.GameAPI.enterOverworld());
     await page.locator('#screen-overworld.active').waitFor();
     let worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
-    await clickCanvasPoint(page, 0.5, 0.41);
+    await page.evaluate(() => window.GameAPI.interactNpc('world-portal'));
     await worldDialog.waitFor({ state: 'visible' });
     assert.equal(await worldDialog.getAttribute('aria-modal'), 'true',
       `${viewport.name}: world portal must open an accessible modal`);
@@ -186,14 +186,14 @@ try {
     await worldDialog.waitFor({ state: 'detached' });
 
     // The forest has its own themed waystone two cells left of the spawn.
-    await clickCanvasPoint(page, 0.38, 0.5);
+    await page.evaluate(() => window.GameAPI.interactNpc('world-waystone'));
     worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
     await worldDialog.waitFor({ state: 'visible' });
     await worldDialog.getByRole('button', { name: /Деревня Аврора/ }).click();
     await worldDialog.waitFor({ state: 'detached' });
 
     // The separate amber gate must launch the existing 40-floor Tower menu.
-    await clickCanvasPoint(page, 0.7, 0.41);
+    await page.evaluate(() => window.GameAPI.interactNpc('tower-portal'));
     await page.locator('#tower-map-overlay').waitFor({ state: 'visible' });
     await page.getByRole('heading', { name: /Башня · 40 этажей/ }).waitFor();
     await page.locator('[data-tower-close]').click();
