@@ -60,6 +60,10 @@ const ui = await readFile(new URL('../ui/inventory.js', import.meta.url), 'utf8'
 assert.doesNotMatch(ui, /\son(?:click|mouseover|mouseout)\s*=/i, 'inventory UI must not emit inline event handlers');
 assert.match(ui, /data-inv-action="socket-rune"/);
 assert.match(ui, /data-sale-action="confirm"/);
+const characterUI = await readFile(new URL('../ui/character.js', import.meta.url), 'utf8');
+assert.doesNotMatch(characterUI, /\son(?:click|mouseover|mouseout)\s*=/i, 'class selection must not emit inline event handlers');
+assert.match(characterUI, /data-class-id=/);
+assert.match(characterUI, /event\.key !== 'Enter'/, 'class cards must support keyboard selection');
 
 state.game = null;
 console.log('check-equipment: PASS (equip, replace, unequip capacity, runes, equip-best and delegated UI)');
