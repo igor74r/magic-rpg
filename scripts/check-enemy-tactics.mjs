@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict';
-import { getEnemyCombatRole, getEnemyCombatDecision } from '../systems/overworld/enemy-ai.js';
+import { getEnemyCombatRole, getEnemyCombatDecision, getEnemyEngagementRange } from '../systems/overworld/enemy-ai.js';
 
 assert.equal(getEnemyCombatRole('snipe'), 'marksman', 'snipe enemies should use the marksman role');
 assert.equal(getEnemyCombatRole('double'), 'bruiser', 'double-strike enemies should use the bruiser role');
 assert.equal(getEnemyCombatRole('drain'), 'leech', 'drain enemies should use the leech role');
 assert.equal(getEnemyCombatRole(null), 'skirmisher', 'ordinary enemies should use the skirmisher role');
+
+assert.equal(getEnemyEngagementRange('snipe'), 118, 'marksmen should engage from ranged distance');
+assert.equal(getEnemyEngagementRange('drain'), 76, 'leech enemies should engage at medium distance');
+assert.equal(getEnemyEngagementRange('double'), 48, 'bruisers should close in before engaging');
+assert.equal(getEnemyEngagementRange(null), 44, 'ordinary enemies should retain contact engagement');
+
 
 let decision = getEnemyCombatDecision({
   specialType: 'snipe', specialEvery: 3, turnCount: 1, playerHpRatio: 0.3
