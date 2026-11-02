@@ -106,7 +106,7 @@ export function spawnStatics(loc, locationId = null, cols = loc.mapCols || 40, r
     ...obj,
     x: obj.x * TILE + TILE / 2,
     y: obj.y * TILE + TILE / 2,
-    interactionRadius: obj.decorative ? 0 : 65
+    interactionRadius: obj.decorative ? 0 : (Number(obj.interactionRadius) || 65)
   }));
 
   // Aurora visibly records the campaign's victories without changing the
