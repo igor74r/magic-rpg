@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { ITEMS, RARITIES, rollRarity, rollItemAffixes } from '../data/items.js';
-import { addItem, canAddItem, countItem, removeItem, useItem } from '../systems/inventory.js';
+import { addItem, canAddItem, countItem, removeItem, useItem, getInventoryWeight } from '../systems/inventory.js';
 import { craftRecipe } from '../systems/crafting.js';
 import { NPCS } from '../data/npcs.js';
 
@@ -28,6 +28,11 @@ assert.equal(legendary.affixes.length, 4);
 assert.ok(legendary.bonus.attack >= sword.bonus.attack);
 assert.equal(canAddItem('health-potion', 0.5).ok, false, 'fractional quantities must be rejected');
 assert.equal(canAddItem('health-potion', 1.5).ok, false, 'fractional quantities must be rejected');
+assert.equal(getInventoryWeight({ inventory: [
+  { id: 'unknown-weight-test', qty: -50 },
+  { id: 'unknown-weight-test', qty: Number.NaN }
+] }), 2, 'invalid stack counts must use safe unit quantities and never subtract weight');
+
 assert.deepEqual(addItem('health-potion', 0.5), [], 'fractional quantities must not silently round down');
 assert.deepEqual(addItem('health-potion', 1.5), [], 'fractional quantities must not silently round down');
 
