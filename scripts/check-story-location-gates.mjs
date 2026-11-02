@@ -24,8 +24,10 @@ const expected = [
 for (const [locationId, requiredLevel] of expected) {
   assert.equal(getStoryLocationRequirement(locationId)?.requiredLevel, requiredLevel,
     `${locationId} must use its act's recommended level floor`);
-  assert.equal(canEnterStoryLocation({ level: requiredLevel - 1 }, locationId).allowed, false,
-    `${locationId} must reject a character below its level gate`);
+  if (requiredLevel > 1) {
+    assert.equal(canEnterStoryLocation({ level: requiredLevel - 1 }, locationId).allowed, false,
+      `${locationId} must reject a character below its level gate`);
+  }
   assert.equal(canEnterStoryLocation({ level: requiredLevel }, locationId).allowed, true,
     `${locationId} must unlock at its required level`);
 }
