@@ -53,8 +53,6 @@ import {
 
 const ALWAYS_SHOW_PROLOGUE = false;
 
-initDiagnostics();
-
 // Lightweight runtime diagnostics: capture uncaught errors, rejected promises,
 // and failed resource loads without interrupting the game.
 const RUNTIME_DIAGNOSTICS_LIMIT = 50;
@@ -693,7 +691,9 @@ function setupPrologueVoice() {
 }
 
 window.GameAPI = {
-  getRuntimeDiagnostics: () => runtimeDiagnostics.map(entry => ({ ...entry })),\n  clearRuntimeDiagnostics: () => { runtimeDiagnostics.length = 0; },\n  updateMainMenu,
+  getRuntimeDiagnostics: () => runtimeDiagnostics.map(entry => ({ ...entry })),
+  clearRuntimeDiagnostics: () => { runtimeDiagnostics.length = 0; },
+  updateMainMenu,
   openSettings, switchSettingsTab, applySettings, backFromSettings,
   resetAllSettings, deleteAllSaves,
   openAchievementsMenu, openHelp,
