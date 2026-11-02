@@ -85,6 +85,9 @@ jobs:
       - name: Check inventory sale safeguards and buyback
         run: node scripts/check-sale.mjs
 
+      - name: Check equipment swaps, capacity and rune sockets
+        run: node scripts/check-equipment.mjs
+
       - name: Check five-act story depth and enemy roster
         run: node scripts/check-story-depth.mjs
 
