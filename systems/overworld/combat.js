@@ -1112,6 +1112,7 @@ function enemyCombatTurn() {
   );
 
   ow.combat.turnCount = (ow.combat.turnCount || 0) + 1;
+  prepareEnemyAdaptation(ow, enemy);
 
   // Уклонение: полностью отменяет одну атаку, включая специальную атаку босса.
   const dodgeChance = Math.max(
