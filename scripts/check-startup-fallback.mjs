@@ -3,7 +3,7 @@ import { Script } from 'node:vm';
 import assert from 'node:assert/strict';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-const match = html.match(/<script>([\\s\\S]*?)<\\/script>/i);
+const match = html.match(/<script>([\s\S]*?)<\/script>/i);
 assert.ok(match, 'index.html must contain an early inline startup guard');
 
 // Parse the actual browser bootstrap as JavaScript, catching syntax regressions.
