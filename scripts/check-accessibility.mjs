@@ -73,7 +73,7 @@ assert.match(overworldRender, /div\.addEventListener\('keydown', event =>/,
   'overworld pause menu must constrain keyboard navigation');
 assert.match(overworldRender, /pauseReturnFocus\?\.isConnected\) pauseReturnFocus\.focus\(\)/,
   'closing pause menu must restore focus');
-assert.match(overworldRender, /querySelector\('button:not\(:disabled\)\'\)/,
+assert.match(overworldRender, /querySelector\('button:not\(:disabled\)'\)/,
   'opening pause menu must move focus to an action');
 for (const event of ['pointerdown', 'pointerup', 'pointercancel', 'keydown', 'keyup', 'blur']) {
   assert.ok(overworld.includes(`btn.addEventListener('${event}'`),
