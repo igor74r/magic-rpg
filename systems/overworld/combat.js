@@ -1328,7 +1328,11 @@ function combatVictory() {
   if (!ow || !ow.combat) return;
 
   const enemy = ow.combat.enemy;
+  // Victory is a one-shot transition: stale callbacks must never duplicate rewards.
+  if (!enemy || enemy.dead || enemy.hp > 0) return;
+
   const def = ENEMIES[enemy.enemyId];
+  if (!def || !state.game?.player) return;
   const p = state.game.player;
 
   const ng = getNGPlusMult();
