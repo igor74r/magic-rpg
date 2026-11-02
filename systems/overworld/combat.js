@@ -102,6 +102,47 @@ function enemyDefValue(e) {
   return Math.floor(base * mult);
 }
 
+function recordPlayerStyle(ow, style) {
+  if (!ow?.combat || !['melee', 'ranged', 'magic'].includes(style)) return;
+  const history = ow.combat.playerStyleHistory || (ow.combat.playerStyleHistory = []);
+  history.push(style);
+  if (history.length > 4) history.shift();
+}
+
+function enemyDefenseForStyle(enemy, style, armorPen = 0) {
+  const base = Math.max(0, enemyDefValue(enemy) - armorPen);
+  const counter = enemy?.adaptiveCounter;
+  if (!counter || counter.style !== style || counter.remaining <= 0) return base;
+  const def = ENEMIES[enemy.enemyId];
+  const reduction = def?.boss ? 0.10 : 0.20;
+  return base + Math.floor(Math.max(1, base) * reduction);
+}
+
+function consumeEnemyAdaptation(enemy, style) {
+  const counter = enemy?.adaptiveCounter;
+  if (!counter || counter.style !== style || counter.remaining <= 0) return false;
+  counter.remaining -= 1;
+  if (counter.remaining <= 0) enemy.adaptiveCounter = null;
+  return true;
+}
+
+function prepareEnemyAdaptation(ow, enemy) {
+  const history = ow?.combat?.playerStyleHistory || [];
+  if (history.length < 3) return;
+  const recent = history.slice(-3);
+  const style = ['melee', 'ranged', 'magic']
+    .find(candidate => recent.filter(value => value === candidate).length >= 2);
+  if (!style || enemy.adaptiveCounter?.remaining > 0) return;
+  const def = ENEMIES[enemy.enemyId];
+  // Bosses learn more slowly and their counter is weaker.
+  enemy.adaptiveCounter = { style, remaining: 1 };
+  const label = style === 'melee' ? 'ближний бой' : style === 'ranged' ? 'дальние атаки' : 'магия';
+  pushLog(`🧠 ${enemyDisplayName(enemy)} приспособился к вашему стилю (${label})!`, 'warning');
+  if (def?.boss) {
+    pushLog('⚠️ Босс изучает ваши действия, но его защита слабее.', 'info');
+  }
+}
+
 function hasBuff(p, id) {
   return Array.isArray(p.buffs) &&
     p.buffs.some(buff => buff.id === id);
