@@ -159,7 +159,7 @@ try {
   console.log('PASS Victory save contains post-combat effects and cooldown state');
 
   assert.ok(scheduled.length >= 5, 'combat actions should schedule enemy responses');
-  console.log(`Combat action regression: 9/9 action checks passed; ${scheduled.length} enemy turns safely queued.`);
+  console.log(`Combat action regression: 10/10 action checks passed; ${scheduled.length} enemy turns safely queued.`);
 } finally {
   globalThis.setTimeout = realSetTimeout;
   state.overworld = null;
