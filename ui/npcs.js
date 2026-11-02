@@ -140,11 +140,17 @@ export function openAlchemist() {
   showNpcUI(`<div class="npc-header"><div class="npc-emoji">${npc.emoji}</div><div><h3 style="margin:0;">${npc.name}</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('alchemist')}»</p></div></div>${jobsHTML}<h3 style="margin-top:15px;">🌿 Ваши травы</h3><div class="herbs-list">${herbsList}</div><h3 style="margin-top:15px;">⚗️ Рецепты</h3><div class="recipes-list">${recipesHTML}</div><h3 style="margin-top:15px;">⚒️ Перековка экипировки</h3><div class="recipes-list">${reforgeHTML || '<small>В сумке пока нет экипировки для перековки.</small>'}</div><button type="button" data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
-export function openMerchant() {
+export function openMerchant(isWandering = false) {
   const p = state.game.player;
-  const stock = [...NPCS.merchant.stock].sort(() => 0.5 - Math.random()).slice(0, 5);
+  const commonPool = [...NPCS.merchant.stock];
+  const rarePool = [...(NPCS.merchant.rareStock || [])].filter(id => ITEMS[id] &&
+    !ITEMS[id].storyShard && !ITEMS[id].bossOnly && ITEMS[id].type !== 'quest');
+  const shuffled = pool => pool.sort(() => Math.random() - 0.5);
+  const stock = isWandering
+    ? [...shuffled(commonPool).slice(0, 3), ...shuffled(rarePool).slice(0, 2)]
+    : shuffled(commonPool).slice(0, 5);
   const html = stock.map(id => { const item = ITEMS[id]; return `<div class="item" data-npc-tooltip="${escapeHtml(id)}"><div class="item-info"><div class="item-name">${item.icon} ${item.name}</div><div class="item-desc">${item.desc} · 💰 ${item.price}</div></div><button type="button" data-npc-action="buy" data-npc-value="${escapeHtml(id)}" ${p.gold < item.price ? 'disabled' : ''} style="font-size:12px;padding:6px 12px;">Купить</button></div>`; }).join('');
-  showNpcUI(`<div class="npc-header"><div class="npc-emoji">🛒</div><div><h3 style="margin:0;">Странствующий торговец</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('merchant')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div><h3>Товары дня</h3><div class="item-list">${html}</div><button type="button" data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`);
+  showNpcUI(`<div class="npc-header"><div class="npc-emoji">🛒</div><div><h3 style="margin:0;">Странствующий торговец</h3><p style="color:#a89060;font-style:italic;margin-top:4px;">«${getGreeting('merchant')}»</p></div></div><div class="npc-gold">💰 Ваше золото: <b style="color:#ffd060;">${p.gold}</b></div>${isWandering ? '<p class="item-desc">Путник остановился ненадолго. В запасе — редкие находки из дальних земель.</p>' : ''}<h3>${isWandering ? 'Редкие находки и товары' : 'Товары дня'}</h3><div class="item-list">${html}</div><button type="button" data-npc-action="close" style="width:100%;margin-top:15px;">← Уйти</button>`);
 }
 
 export function openElder() {
