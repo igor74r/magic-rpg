@@ -510,7 +510,7 @@ export function combatUseAbility(abilityId) {
     ow.floatingNumbers.push({
       x: enemy.x,
       y: enemy.y - 20,
-      text: 'в—Ћ-' + damage,
+      text: '🎯-' + damage,
       type: 'crit',
       life: 1.3
     });
