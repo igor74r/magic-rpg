@@ -214,6 +214,10 @@ function createSeededRandom(seed) {
 }
 
 export function addItemOrStore(id, qty = 1, opts = {}) {
+  if (!opts || typeof opts !== 'object' || Array.isArray(opts)) return { created: [], stored: false };
+  if (opts.rarity !== undefined && (!RARITIES[opts.rarity] || (RARITIES[opts.rarity].bossOnly && opts.allowMythic !== true))) {
+    return { created: [], stored: false };
+  }
   const created = addItem(id, qty, opts);
   if (created.length) return { created, stored: false };
 

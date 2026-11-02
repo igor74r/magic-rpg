@@ -65,6 +65,19 @@ assert.equal(state.game.player.pendingLoot.length, 0);
 const invalid = addItemOrStore('missing-item', 1);
 assert.equal(invalid.stored, false);
 assert.equal(state.game.player.pendingLoot.length, 0);
+const invalidRarity = addItemOrStore('leather-armor', 1, { rarity: 'not-a-rarity' });
+assert.equal(invalidRarity.stored, false, 'unknown rarity must not create an unclaimable reward');
+const lockedRarity = addItemOrStore('leather-armor', 1, { rarity: 'mythic' });
+assert.equal(lockedRarity.stored, false, 'boss-only rarity must require its explicit permission');
+assert.equal(state.game.player.pendingLoot.length, 0, 'invalid reward options must not pollute pending loot');
+const mythicOverflow = addItemOrStore('leather-armor', 1, { rarity: 'mythic', allowMythic: true });
+assert.equal(mythicOverflow.stored, true, 'permitted mythic reward should be preserved on overflow');
+assert.equal(state.game.player.pendingLoot[0].rarity, 'mythic');
+state.game.player.inventory = [];
+const claimedMythic = claimPendingLoot(0);
+assert.equal(claimedMythic.ok, true, 'permitted mythic reward must remain claimable');
+assert.equal(claimedMythic.created[0].rarity, 'mythic');
+assert.equal(state.game.player.pendingLoot.length, 0);
 
 for (const entry of state.game.player.inventory) {
   assert.ok(ITEMS[entry.id], 'claimed item must exist in item catalog');
