@@ -90,10 +90,11 @@ try {
   combatBlock();
   runEnemyTurn(); // announced attack
   const enemyHpBeforeSpecial = vampiric.enemy.hp;
+  const playerHpBeforeSpecial = vampiric.p.hp;
   combatBlock();
   runEnemyTurn(); // prepared double strike
   ENEMIES.wolf.special.effect = wolfSpecialEffect;
-  const actualSpecialDamage = vampiric.enemy.hp - enemyHpBeforeSpecial;
+  const actualSpecialDamage = playerHpBeforeSpecial - vampiric.p.hp;
   const expectedVampiricHeal = Math.floor(actualSpecialDamage * 0.3);
   assert.equal(vampiric.enemy.hp, enemyHpBeforeSpecial + expectedVampiricHeal, 'vampiric heal must use both actual hits');
   state.settings.difficulty = 'normal';
