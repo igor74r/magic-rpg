@@ -439,7 +439,6 @@ function render() {
 
   const p = ow.player; nearNpc = null;
 
-  const p = ow.player;
   nearNpc = null;
   const depthItems = [
     ...(ow.statics || []).map(item => ({ item, kind: 'static', footY: item.y + (item.depthOffset || 0) })),
