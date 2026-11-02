@@ -28,7 +28,7 @@ try {
       class: 'mage', name: 'NG+ test', level: 50, exp: 999, expNext: 1000,
       gold: 777, hp: 1, maxHp: 100, mp: 1, maxMp: 100,
       str: 20, int: 20, wis: 20, con: 20, dex: 20, luck: 20,
-      statPoints: 0, passivePoints: 3, ngPlus: 2, victoryAchieved: true,
+      statPoints: 0, passivePoints: 7, passives: ['start', 'warrior-might-1', 'warrior-might-2'], ngPlus: 2, victoryAchieved: true,
       inventory: [{ id: 'iron-sword', qty: 1 }], equipped: { weapon: { id: 'iron-sword', qty: 1 } },
       achievements: ['first-kill'], stats: { kills: { wolf: 20 }, deaths: 2 },
       weaponLevel: 2, armorLevel: 1, herbs: { 'herb-life': 3 }, talents: [],
@@ -45,6 +45,8 @@ try {
   assert.equal(startNGPlus(), true, 'NG+ should start after the final victory gate');
   assert.equal(ready.player.ngPlus, 3);
   assert.equal(ready.player.level, 1);
+  assert.equal(ready.player.passivePoints, 0, 'unspent passive points must reset with the new cycle');
+  assert.deepEqual(ready.player.passives, ['start'], 'old passive-tree bonuses must not leak into level 1');
   assert.equal(ready.player.gold, 777);
   assert.equal(JSON.stringify(ready.player.inventory), inventoryBefore, 'inventory must carry into NG+');
   assert.equal(JSON.stringify(ready.player.craftingJobs), jobsBefore, 'queued crafting jobs must not be lost');
