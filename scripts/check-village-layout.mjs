@@ -49,13 +49,18 @@ assert.ok(plazaProps.every(item => item.decorative || ['world-portal', 'tower-po
 
 const colliders = getVillageBuildingColliders();
 assert.equal(colliders.length, 30, 'each of ten buildings must have three wall segments');
+assert.ok(colliders.every(rect => rect.width > 0 && rect.height > 0), 'wall rectangles must have positive dimensions');
 for (const building of buildings) {
   const x = building.x * 48 + 24;
   const y = building.y * 48 + 24;
   assert.equal(isVillagePositionBlocked(x, y + 8, 10), false,
     `${building.id}: front doorway must remain passable`);
-  assert.equal(isVillagePositionBlocked(x - 24, y + 8, 12), true,
-    `${building.id}: side wall must block the player`);
+  assert.equal(isVillagePositionBlocked(x - 30, y - 5, 10), true,
+    `${building.id}: left wall must block the player`);
+  assert.equal(isVillagePositionBlocked(x + 30, y - 5, 10), true,
+    `${building.id}: right wall must block the player`);
+  assert.equal(isVillagePositionBlocked(x, y - 18, 10), true,
+    `${building.id}: back wall must block the player`);
 }
 
 const mainSource = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
