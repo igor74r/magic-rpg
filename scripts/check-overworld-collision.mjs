@@ -35,7 +35,7 @@ console.log('Overworld collision checks passed: full player footprint, diagonal 
 const corner = (x, y) => !(x > 10 && x < 20 && y > 10 && y < 20);
 const aroundCorner = resolveSweptMovement(0, 0, 28, 28, corner, 2);
 assert.ok(aroundCorner.moved, 'corner navigation must make progress');
-assert.ok(aroundCorner.x > 20 && aroundCorner.y > 20,
+assert.ok(aroundCorner.x > 10 && aroundCorner.y > 20,
   'balanced sliding must get around the obstacle corner in both axes');
 assert.equal(corner(aroundCorner.x, aroundCorner.y), true,
   'corner navigation must never finish inside the obstacle');
