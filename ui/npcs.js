@@ -16,10 +16,14 @@ import {
   getMissionReward, acceptCampaignMission, claimCampaignMission, canCompleteMainQuest
 } from '../systems/campaign.js';
 
+let npcDialogReturnFocus = null;
+let npcDialogKeydownBound = false;
+
 function showNpcUI(html) {
   const root = state.overworld && state.overworld.active
     ? document.getElementById('npc-dialog-content')
     : document.getElementById('tab-content');
+  if (!root) return;
   root.innerHTML = html;
   root.onclick = (event) => {
     const button = event.target.closest('[data-npc-action]');
@@ -50,7 +54,36 @@ function showNpcUI(html) {
     if (event.target.closest('[data-npc-tooltip]')) window.GameAPI?.hideTooltip?.();
   };
   if (root.id === 'npc-dialog-content') {
-    document.getElementById('npc-dialog-modal').style.display = 'flex';
+    const modal = document.getElementById('npc-dialog-modal');
+    if (!modal) return;
+    if (modal.style.display !== 'flex') {
+      npcDialogReturnFocus = document.activeElement?.nodeType === 1 ? document.activeElement : null;
+    }
+    modal.style.display = 'flex';
+    if (!npcDialogKeydownBound) {
+      npcDialogKeydownBound = true;
+      modal.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeNpcAndResumeUI();
+          return;
+        }
+        if (event.key !== 'Tab') return;
+        const focusable = [...modal.querySelectorAll('button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])')]
+          .filter(element => element.getClientRects().length > 0);
+        if (!focusable.length) { event.preventDefault(); modal.focus(); return; }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      });
+    }
+    (modal.querySelector('.npc-modal-close') || modal.querySelector('#npc-dialog-content button:not(:disabled)') || modal).focus();
   } else {
     showScreen('screen-game');
   }
@@ -267,7 +300,14 @@ export function petCatUI() {
   toast('🐈 Кошка мурчит. Удача с вами! (+5% крита)');
   return true;
 }
-export function closeNpcAndResumeUI() { import('./overworld.js').then(m => { m.closeDialogAndResume(); showScreen('screen-overworld'); }); }
+export function closeNpcAndResumeUI() {
+  import('./overworld.js').then(m => {
+    m.closeDialogAndResume();
+    showScreen('screen-overworld');
+    if (npcDialogReturnFocus?.isConnected) npcDialogReturnFocus.focus();
+    npcDialogReturnFocus = null;
+  });
+}
 export function takeElderBlessingUI() {
   const p = state.game?.player;
   if (!p || hasActiveEntry(p.effects, 'elderBlessing')) return false;
