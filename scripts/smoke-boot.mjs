@@ -338,9 +338,11 @@ try {
   state.game.riftEnding = 'closed';
   state.game.riftOpeningSeen = true;
   state.game.player.riftClearedLocations = ['rift-01'];
+  const ngPlusBefore = state.game.player.ngPlus || 0;
+  const campaignBefore = JSON.stringify(state.game.player.campaignKills || {});
   api.startNGPlus();
-  check('NG+ начинает кампанию заново', Object.keys(state.game.player.campaignKills || {}).length === 0 && Object.keys(state.game.player.campaignClaimed || {}).length === 0 && state.game.player.activeCampaignMission === null && state.game.player.dex === (state.game.player.class === 'mage' ? 8 : state.game.player.class === 'archer' ? 18 : 6));
-  check('NG+ resets the Rift ending and cleared-area cycle', state.game.riftEnding === null && state.game.riftOpeningSeen === false && state.game.player.riftClearedLocations.length === 0);
+  check('NG+ remains locked before campaign completion', (state.game.player.ngPlus || 0) === ngPlusBefore && JSON.stringify(state.game.player.campaignKills || {}) === campaignBefore && state.game.riftEnding === 'closed' && state.game.riftOpeningSeen === true && state.game.player.riftClearedLocations.includes('rift-01'));
+  state.game.riftOpeningSeen = false;
   state.game.storyDragons['blood-crown'] = true;
   const { emit } = await import(new URL('systems/events.js', ROOT).href);
   const realSetTimeout = globalThis.setTimeout;
@@ -389,6 +391,9 @@ try {
   check('ending choice can permanently seal the Rift', state.game.riftEnding === 'closed' && !isRiftReady());
   api.chooseRiftEnding('open');
   check('ending choice can leave the stabilized Rift open', state.game.riftEnding === 'open' && isRiftReady());
+  api.startNGPlus();
+  check('NG+ starts after the complete campaign', state.game.player.ngPlus === 1 && Object.keys(state.game.player.campaignKills || {}).length === 0 && Object.keys(state.game.player.campaignClaimed || {}).length === 0 && state.game.player.activeCampaignMission === null);
+  check('NG+ resets the Rift ending and cleared-area cycle', state.game.riftEnding === null && state.game.riftOpeningSeen === false && state.game.player.riftClearedLocations.length === 0);
 } catch (e) {
   check('сохранение в слот 1', false, String(e && e.message));
 }
