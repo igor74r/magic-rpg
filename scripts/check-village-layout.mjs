@@ -101,7 +101,8 @@ assert.ok(mainSource.includes('data-world-tower'), 'world navigation must expose
 assert.ok(mainSource.includes('aria-modal="true"'), 'world portal window must expose dialog semantics');
 assert.ok(mainSource.includes("event.key === 'Escape'"), 'world portal window must close with Escape');
 const overworldInputSource = readFileSync(new URL('../ui/overworld.js', import.meta.url), 'utf8');
-assert.ok(overworldInputSource.includes("addEventListener('click', onOverworldCanvasClick)"), 'portal sprites must respond to direct canvas clicks');
+assert.ok(overworldInputSource.includes("addEventListener('pointerdown', onOverworldCanvasClick)"), 'portal sprites must respond immediately to pointer and touch input');
+assert.ok(overworldInputSource.includes("addEventListener('click', onOverworldCanvasClick)"), 'portal sprites must retain mouse click support');
 assert.ok(overworldInputSource.includes('window.GameAPI?.interactNpc?.(nearest.id)'), 'portal click must invoke the existing interaction contract');
 
 const styleSource = readFileSync(new URL('../css/2d-art-direction.css', import.meta.url), 'utf8');
