@@ -19,6 +19,7 @@ import {
 
 // Состояние canvas-цикла и визуальных эффектов (погода живёт в effects.js)
 let rafId = null, lastTs = 0, lastNpcKey = '', autosaveTimer = null, autosaveAt = 0;
+let autosaveSavedAt = 0, autosaveErrorAt = 0;
 let fpsNow = 0, fpsFrames = 0, fpsSampleAt = 0;
 let paused = false, nearNpc = null;
 let footprints = [], lastFootprintPos = { x: 0, y: 0 }, hurtFlash = 0, worldTime = 0;
@@ -53,6 +54,8 @@ function edgeSpawn() {
 export function startAutosave() {
   if (autosaveTimer) return;
   autosaveAt = performance.now();
+  autosaveSavedAt = 0;
+  autosaveErrorAt = 0;
   autosaveTimer = setInterval(() => {
     const ow = state.overworld;
     if (!ow || !ow.active) {
@@ -60,11 +63,21 @@ export function startAutosave() {
       autosaveTimer = null;
       return;
     }
+    const now = performance.now();
     const interval = Math.max(15, Math.min(60, Number(state.settings?.autoSaveInterval) || 30)) * 1000;
     if (ow && ow.active && !ow.combat && !ow.defeated && !paused &&
-        state.settings?.autoSave !== false && performance.now() - autosaveAt >= interval) {
-      saveGame();
-      autosaveAt = performance.now();
+        state.settings?.autoSave !== false && now - autosaveAt >= interval) {
+      // Throttle retries after storage errors; never announce a failed write as saved.
+      autosaveAt = now;
+      try {
+        if (saveGame()) {
+          autosaveSavedAt = now;
+          autosaveErrorAt = 0;
+        }
+      } catch (error) {
+        autosaveErrorAt = now;
+        console.error('[autosave] Не удалось сохранить игру:', error);
+      }
     }
   }, 1000);
 }
@@ -787,9 +800,17 @@ function render() {
     ctx.fillText(`${fpsNow} FPS`, VIEW_W - 18, VIEW_H - 24);
     ctx.restore();
   }
-  if (performance.now() - autosaveAt < 1500) {
+  const autosaveNow = performance.now();
+  const autosaveLabel = autosaveErrorAt && autosaveNow - autosaveErrorAt < 2500
+    ? '⚠ ошибка сохранения'
+    : autosaveSavedAt && autosaveNow - autosaveSavedAt < 1500
+      ? '💾 сохранено'
+      : '';
+  if (autosaveLabel) {
     ctx.font = 'bold 12px Montserrat, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
-    ctx.strokeText('💾 сохранено', 12, VIEW_H - 12); ctx.fillStyle = 'rgba(96,255,96,0.9)'; ctx.fillText('💾 сохранено', 12, VIEW_H - 12);
+    ctx.strokeText(autosaveLabel, 12, VIEW_H - 12);
+    ctx.fillStyle = autosaveLabel.startsWith('⚠') ? 'rgba(255,110,110,0.95)' : 'rgba(96,255,96,0.9)';
+    ctx.fillText(autosaveLabel, 12, VIEW_H - 12);
   }
 }
 
