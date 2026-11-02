@@ -281,17 +281,35 @@ function scoreInst(inst) {
   const obj = typeof inst === 'string' ? { id: inst, qty: 1 } : inst;
   const item = ITEMS[obj.id];
   if (!item) return 0;
-  const b = { ...(item.bonus || {}), ...(obj.bonus || {}) };
-  let score = (b.attack || 0) + (b.magic || 0) + (b.defense || 0);
-  score += (b.dex || 0) + (b.armorPen || 0) * 2;
-  score += (b.dodgeChance || 0) * 100 + (b.critChance || 0) * 100;
-  score += (b.blockChance || 0) * 80 + (b.blockPower || 0) * 60;
+
+  const bonus = {
+    ...(item.bonus || {}),
+    ...(obj.bonus || {})
+  };
   for (const runeId of (obj.runes || [])) {
-    const rune = ITEMS[runeId]?.runeBonus || {};
-    score += (rune.attack || 0) + (rune.magic || 0) + (rune.defense || 0);
-    score += (rune.dodgeChance || 0) * 100 + (rune.critChance || 0) * 100;
+    const runeBonus = ITEMS[runeId]?.runeBonus || {};
+    for (const [key, value] of Object.entries(runeBonus)) {
+      bonus[key] = (bonus[key] || 0) + value;
+    }
   }
-  score += FORGE_BONUS[obj.forgeLevel || 0] || 0;
+
+  let score = (bonus.attack || 0) + (bonus.magic || 0);
+  score += (bonus.defense || bonus.armor || 0) + (bonus.dex || 0);
+  score += (bonus.armorPen || 0) * 2;
+  score += (bonus.dodgeChance || 0) * 100;
+  score += (bonus.critChance || 0) * 100;
+  score += (bonus.blockChance || 0) * 80;
+  score += (bonus.blockPower || 0) * 60;
+
+  const forgeBonus = FORGE_BONUS[obj.forgeLevel || 0] || 0;
+  if (forgeBonus > 0) {
+    if (item.type === 'weapon') {
+      score += forgeBonus;
+    } else if (item.type === 'chest' || item.type === 'armor') {
+      score += forgeBonus;
+    }
+  }
+
   return score;
 }
 
