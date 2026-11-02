@@ -21,12 +21,12 @@ assert.equal(behavior.state, 'chase', 'enemy may reacquire player after reaching
 
 const pack = [
   { id: 'scout', x: 20, y: 0, homeX: 0, homeY: 0, state: 'idle' },
-  { id: 'ally', x: 90, y: 20, homeX: 90, homeY: 20, state: 'idle' },
+  { id: 'ally', x: 120, y: 20, homeX: 120, homeY: 20, state: 'idle' },
   { id: 'distant', x: 500, y: 0, homeX: 500, homeY: 0, state: 'idle' },
   { id: 'leashed', x: 80, y: 0, homeX: -300, homeY: 0, state: 'idle' },
   { id: 'dead', x: 30, y: 10, homeX: 30, homeY: 10, state: 'idle', dead: true }
 ];
-const group = getEnemyGroupBehaviors(pack, { x: 100, y: 0 });
+const group = getEnemyGroupBehaviors(pack, { x: -150, y: 0 });
 assert.equal(group[0].state, 'chase', 'enemy that sees the player should raise an alarm');
 assert.equal(group[1].state, 'chase', 'nearby living allies should join the alerted pack');
 assert.equal(group[1].assisted, true, 'assisting allies should be marked as group-alerted');
@@ -34,7 +34,7 @@ assert.equal(group[2].state, 'idle', 'distant enemies must not join an unrelated
 assert.equal(group[3].state, 'return', 'group alert must never pull an enemy beyond its home leash');
 assert.equal(group[4].state, 'idle', 'dead enemies must not receive pack orders');
 
-const noAlert = getEnemyGroupBehaviors(pack.slice(1, 3), { x: 100, y: 0 });
+const noAlert = getEnemyGroupBehaviors(pack.slice(1, 3), { x: 1000, y: 0 });
 assert.equal(noAlert[0].state, 'idle', 'a pack should not alert without a member detecting the player');
 
 const open = () => true;
