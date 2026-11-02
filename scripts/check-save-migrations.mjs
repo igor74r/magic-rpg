@@ -291,9 +291,12 @@ try {
   state.currentSlot = 1;
   Date.now = () => 100000;
   assert.equal(createCharacter('First Slot Hero', 'warrior'), true);
-  state.currentSlot = 2;
+  state.pendingSlot = 2;
+  assert.equal(state.currentSlot, 1, 'choosing a new slot must not switch the active save before character creation');
   Date.now = () => 220000;
   assert.equal(createCharacter('Second Slot Hero', 'mage'), true);
+  assert.equal(state.currentSlot, 2, 'new character creation should activate the pending slot');
+  assert.equal(state.pendingSlot, null, 'pending slot should clear after character creation');
   assert.equal(state.game.player.playtimeSec, 0, 'new character must start with zero playtime');
   assert.equal(JSON.parse(storage.get('magic-rpg-save-2')).player.playtimeSec, 0,
     'new slot must not inherit time from the previous character');
