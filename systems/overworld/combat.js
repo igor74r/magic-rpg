@@ -29,7 +29,7 @@ import { claimStoryDragonReward } from '../story-dragons.js';
 import { getActPriceMultiplier } from '../economy.js';
 import { getLootDropChance } from '../loot.js';
 import { updateQuestProgress } from '../dailyQuests.js';
-import { canCompleteMainQuest, recordCampaignKill, recordCampaignShard } from '../campaign.js';
+import { canCompleteMainQuest, getActiveCampaignMission, getMissionProgress, recordCampaignKill, recordCampaignShard } from '../campaign.js';
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
 import {
@@ -1489,7 +1489,21 @@ function combatVictory() {
   p.stats.kills[enemy.enemyId] =
     (p.stats.kills[enemy.enemyId] || 0) + 1;
 
-  recordCampaignKill(p, ow.locationId, enemy.enemyId);
+  const campaignUpdates = recordCampaignKill(p, ow.locationId, enemy.enemyId);
+  if (campaignUpdates.length > 0) {
+    const activeMission = getActiveCampaignMission(p);
+    if (activeMission && campaignUpdates.includes(activeMission.mission.id)) {
+      const missionProgress = getMissionProgress(p, activeMission.mission);
+      const missionTitle = activeMission.mission.title;
+      const progressLabel = `${missionProgress.current}/${missionProgress.required}`;
+      const notification = missionProgress.complete
+        ? `📜 ${missionTitle}: цель выполнена (${progressLabel}). Вернитесь к Эдвину.`
+        : missionProgress.current >= missionProgress.required && !missionProgress.shardFound
+          ? `📜 ${missionTitle}: убийства выполнены (${progressLabel}), но нужен сюжетный осколок.`
+          : `📜 ${missionTitle}: ${progressLabel}`;
+      emit('toast', notification);
+    }
+  }
 
   p.stats.goldEarned =
     (p.stats.goldEarned || 0) + gold;
