@@ -310,7 +310,9 @@ export function renderLocations() {
   const storyNodes = nodes.filter(node => node.story).sort((a, b) => a.story.sequence - b.story.sequence);
   const storyLinks = storyNodes.map((node, index) => {
     const from = index === 0 ? { x: 50, y: 50 } : storyNodes[index - 1];
-    return `<line class="map-story-link" x1="${from.x.toFixed(2)}" y1="${from.y.toFixed(2)}" x2="${node.x.toFixed(2)}" y2="${node.y.toFixed(2)}" />`;
+    const access = canEnterStoryLocation(state.game?.player, node.id);
+    const routeState = access.allowed ? 'open' : 'locked';
+    return `<line class="map-story-link ${routeState}" x1="${from.x.toFixed(2)}" y1="${from.y.toFixed(2)}" x2="${node.x.toFixed(2)}" y2="${node.y.toFixed(2)}" />`;
   }).join('');
   const freeLinks = nodes.filter(node => !node.story)
     .map(node => `<line class="map-free-link" x1="50" y1="50" x2="${node.x.toFixed(2)}" y2="${node.y.toFixed(2)}" />`).join('');
@@ -321,20 +323,41 @@ export function renderLocations() {
     const access = canEnterStoryLocation(state.game?.player, n.id);
     const locked = !access.allowed;
     const order = n.story ? `<span class="wnode-order" aria-hidden="true">#${n.story.sequence}</span>` : '';
+    const lockDetail = access.reason === 'campaign'
+      ? `после задания ${access.requiredMissionId}`
+      : access.reason === 'level'
+        ? `с ${access.requirement.requiredLevel} уровня`
+        : '';
     const isQuestTarget = n.id === activeMissionLocation;
     const questMarker = isQuestTarget
       ? `<span class="wnode-quest-marker" aria-label="Цель активного задания: ${activeMissionProgress.current} из ${activeMissionProgress.required}">📜 ЗАДАНИЕ · ${activeMissionProgress.current}/${activeMissionProgress.required}</span>`
       : '';
     return `<div class="wnode${n.id === state.game.location ? ' current' : ''}${locked ? ' locked' : ''}${isQuestTarget ? ' quest-target' : ''}" data-loc="${n.id}" data-x="${n.x}" data-y="${n.y}"
-      style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%;${locked ? 'opacity:.48;filter:grayscale(.75)' : ''}" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}${isQuestTarget ? ` · цель задания: ${activeMission.mission.title} · ${activeMissionProgress.current}/${activeMissionProgress.required}` : ''}${n.story ? ` · маршрут #${n.story.sequence} · уровень ${n.story.recommendedLevel}` : ''}${locked ? ` · закрыто до ${n.story.requiredLevel} уровня` : ''}" aria-label="${loc.name}${isQuestTarget ? `, цель задания, ${activeMissionProgress.current} из ${activeMissionProgress.required}` : ''}${locked ? ', закрыто' : ''}">
+      style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%;${locked ? 'opacity:.48;filter:grayscale(.75)' : ''}" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}${isQuestTarget ? ` · цель задания: ${activeMission.mission.title} · ${activeMissionProgress.current}/${activeMissionProgress.required}` : ''}${n.story ? ` · маршрут #${n.story.sequence} · уровень ${n.story.recommendedLevel}` : ''}${locked ? ` · закрыто: ${lockDetail}` : ''}" aria-label="${loc.name}${isQuestTarget ? `, цель задания, ${activeMissionProgress.current} из ${activeMissionProgress.required}` : ''}${locked ? `, закрыто: ${lockDetail}` : ''}">
       ${order}${questMarker}<span class="wnode-icon">${locked ? '🔒' : loc.emoji}</span>
       <span class="wnode-name" aria-hidden="true">${n.story ? `#${n.story.sequence} · ` : ''}${loc.name}</span>
     </div>`;
   }).join('');
 
+  const nextStoryNode = activeMissionLocation
+    ? storyNodes.find(node => node.id === activeMissionLocation)
+    : storyNodes.find(node => node.id !== state.game.location && canEnterStoryLocation(state.game?.player, node.id).allowed);
+  const openStoryCount = storyNodes.filter(node => canEnterStoryLocation(state.game?.player, node.id).allowed).length;
+  const routeSummary = nextStoryNode
+    ? `<div class="map-route-summary" aria-label="Следующая точка сюжетного маршрута">
+        <div class="map-route-copy">
+          <span class="map-route-kicker">СЛЕДУЮЩАЯ ТОЧКА · ${nextStoryNode.story.sequence} / ${storyNodes.length}</span>
+          <strong>${LOCATIONS[nextStoryNode.id]?.name || nextStoryNode.id}</strong>
+          <small>${activeMissionLocation === nextStoryNode.id ? 'Здесь находится цель активного задания' : `Рекомендуемый уровень: ${nextStoryNode.story.requiredLevel}`}</small>
+        </div>
+        <div class="map-route-count"><b>${openStoryCount}</b><span>доступно</span></div>
+      </div>`
+    : `<div class="map-route-summary map-route-complete"><div class="map-route-copy"><span class="map-route-kicker">СЮЖЕТНЫЙ МАРШРУТ</span><strong>Все сюжетные области доступны</strong><small>Вы можете продолжить исследование мира.</small></div><div class="map-route-count"><b>${storyNodes.length}</b><span>областей</span></div></div>`;
+
   requestAnimationFrame(initWorldMap);
 
   return `
+    ${routeSummary}
     <div class="world-map" id="world-map">
       <svg class="map-links" viewBox="0 0 100 100" preserveAspectRatio="none">${links}</svg>
       <div class="map-orbit"></div>

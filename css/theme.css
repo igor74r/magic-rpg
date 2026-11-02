@@ -307,3 +307,35 @@ button:hover:not(:disabled) { text-shadow: 0 0 8px rgba(255, 215, 0, 0.6); }
   border-radius: 6px;
   border: 1px dashed rgba(212, 175, 55, 0.2);
 }
+
+/* ---------- Навигация сюжетного маршрута ---------- */
+.map-route-summary {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin:0 0 10px; padding:12px 15px;
+  border:1px solid rgba(211,174,94,.38); border-radius:6px;
+  background:linear-gradient(105deg,rgba(77,55,26,.55),rgba(18,14,10,.94));
+  box-shadow:inset 0 1px rgba(255,255,255,.04);
+}
+.map-route-copy { display:grid; gap:3px; min-width:0; }
+.map-route-kicker { color:#d8b66d; font-size:10px; letter-spacing:.12em; }
+.map-route-copy strong { color:#f1d99e; font-size:15px; }
+.map-route-copy small { color:#b8a789; font-size:11px; }
+.map-route-count { display:grid; justify-items:center; flex:0 0 auto; min-width:54px; padding-left:12px; border-left:1px solid rgba(211,174,94,.25); }
+.map-route-count b { color:#e9cb83; font-size:21px; line-height:1.1; }
+.map-route-count span { color:#a99572; font-size:9px; text-transform:uppercase; letter-spacing:.08em; }
+.map-links line.map-story-link { stroke:rgba(198,159,83,.24); stroke-width:1.15; stroke-dasharray:3 5; animation:none; }
+.map-links line.map-story-link.open { stroke:rgba(133,190,111,.72); stroke-width:1.8; stroke-dasharray:5 3; }
+.map-links line.map-story-link.locked { stroke:rgba(150,111,88,.26); stroke-dasharray:2 7; }
+.world-map .wnode.locked .wnode-icon { border-color:rgba(154,119,91,.34); box-shadow:inset 0 0 10px rgba(0,0,0,.85); }
+.world-map .wnode.quest-target .wnode-icon { border-color:#e8c66e; box-shadow:0 0 0 3px rgba(232,198,110,.18),0 0 20px rgba(232,198,110,.42); }
+.world-map .wnode-order { position:absolute; top:0; right:0; z-index:3; min-width:17px; padding:2px 4px; border-radius:10px; background:#342719; border:1px solid rgba(222,185,105,.55); color:#efd99f; font-size:9px; text-align:center; }
+.world-map .wnode-quest-marker { max-width:125px; padding:3px 5px; border:1px solid rgba(232,198,110,.55); border-radius:4px; background:rgba(39,29,14,.94); color:#f1d99e; font-size:8px; text-align:center; }
+@media (max-width:720px) {
+  .map-route-summary { padding:10px 11px; }
+  .map-route-copy strong { font-size:13px; }
+  .map-route-copy small { font-size:10px; }
+  .world-map .wnode-order { font-size:8px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .map-links line { animation:none !important; }
+}

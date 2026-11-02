@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const map = readFileSync(new URL('../ui/locations.js', import.meta.url), 'utf8');
+const theme = readFileSync(new URL('../css/theme.css', import.meta.url), 'utf8');
+assert.match(map, /map-route-summary/);
+assert.match(map, /Следующая точка/);
+assert.match(map, /map-story-link ${routeState}/);
+assert.match(map, /lockDetail/);
+assert.match(map, /map-route-count/);
+assert.match(theme, /\.map-route-summary/);
+assert.match(theme, /\.map-links line\.map-story-link\.open/);
+assert.match(theme, /\.map-links line\.map-story-link\.locked/);
+assert.match(theme, /prefers-reduced-motion:reduce/);
+console.log('World map route guidance checks passed.');
