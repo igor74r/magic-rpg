@@ -325,7 +325,7 @@ document.addEventListener('keydown', (event) => {
   }
   const tab = event.target.closest?.('[role="tab"]');
   if (!tab) return;
-  const tabs = Array.from(tab.parentElement?.querySelectorAll('[role="tab"]') || []);
+  const tabs = Array.from(tab.parentElement?.querySelectorAll('[role="tab"]:not([hidden]):not([disabled])') || []);
   if (!tabs.length) return;
 
   if (event.key === 'Enter' || event.key === ' ') {
