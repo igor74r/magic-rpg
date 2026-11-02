@@ -92,7 +92,13 @@ try {
 
     await page.locator('#screen-settings .settings-back-btn').click();
     await page.locator('.slot-new').first().click();
-    await page.locator('.class-card[data-class-id="warrior"]').click();
+    const warriorCard = page.locator('.class-card[data-class-id="warrior"]');
+    await warriorCard.focus();
+    await warriorCard.press('Space');
+    assert.equal(await page.locator('.class-card[data-class-id="warrior"]').getAttribute('aria-pressed'), 'true',
+      `${viewport.name}: keyboard class selection must update its pressed state`);
+    assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('data-class-id')), 'warrior',
+      `${viewport.name}: keyboard class selection must preserve focus`);
     await page.locator('#char-name').fill('UI audit');
     await page.getByRole('button', { name: /Начать путь/ }).click();
     await page.locator('#screen-game.active').waitFor();
