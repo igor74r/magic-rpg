@@ -12,6 +12,7 @@
       if (queue.length > 100) queue.shift();
     };
     window.addEventListener('error', event => {
+      if (window.__GAME_DIAGNOSTICS_READY__) return;
       if (event.target && event.target !== window && (event.target.src || event.target.href)) {
         const target = event.target;
         add('resource-load', 'Не удалось загрузить ресурс <' + (target.tagName || 'resource').toLowerCase() + '> ' + (target.src || target.href), target.src || target.href);
@@ -20,6 +21,7 @@
       }
     }, true);
     window.addEventListener('unhandledrejection', event => {
+      if (window.__GAME_DIAGNOSTICS_READY__) return;
       const reason = event.reason;
       add('unhandled-rejection', reason && (reason.stack || reason.message) || String(reason || 'Promise отклонён без причины'));
     });
