@@ -31,12 +31,9 @@ function generateSecrets(ow) {
   if (!loc) return secrets;
   if (ow.locationId === 'village') return secrets; // в деревне нет секретов
 
-  // Шанс: 20% что на карте будет 1 секрет, 5% что 2
-  const roll = Math.random();
-  let count = 0;
-  if (roll < 0.05) count = 2;
-  else if (roll < 0.20) count = 1;
-  if (count === 0) return secrets;
+  // В каждой боевой локации есть хотя бы одна секретная стена;
+  // в 20% случаев появляется вторая. Добыча остаётся случайной.
+  const count = Math.random() < 0.20 ? 2 : 1;
 
   // Ищем кандидатов — «стены» (камни 4 или деревья 2), рядом с которыми проходимый тайл
   const candidates = [];
