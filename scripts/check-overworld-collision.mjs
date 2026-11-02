@@ -51,7 +51,7 @@ console.log('Corner navigation checks passed: balanced diagonal sliding and obst
 
 const actorA = { x: 100, y: 100, collisionRadius: NPC_COLLISION_RADIUS };
 const actorB = { x: 116, y: 100, collisionRadius: ENEMY_COLLISION_RADIUS };
-assert.equal(isActorPositionClear(actorB.x, actorB.y, actorB.collisionRadius, [actorA], actorB), false,
+assert.equal(isActorPositionClear(actorB.x, actorB.y, actorB.collisionRadius, [actorA], null), false,
   'NPC and enemy bodies must not overlap');
 assert.equal(isActorPositionClear(121, 100, actorB.collisionRadius, [actorA], actorB), true,
   'actors may pass when their body footprints have clearance');
