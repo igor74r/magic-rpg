@@ -32,7 +32,7 @@ export function renderSlots() {
       html += `<div class="slot-card">
         <div class="slot-num">Слот ${slot}</div>
         <div class="slot-body">
-          <div class="slot-name">${cls.emoji} ${info.name}</div>
+          <div class="slot-name">${cls.emoji} ${escapeHtml(info.name)}</div>
           <div class="slot-info">${cls.name}, Ур. ${info.level}${ng}</div>
           <div class="slot-info">${loc.emoji} ${loc.name}</div>
         </div>
