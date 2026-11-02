@@ -64,7 +64,7 @@ assert.match(html, /id="combat-panel" role="region" aria-label="Боевая п�
 assert.match(html, /id="combat-panel-info" role="status" aria-live="polite" aria-atomic="true"/, 'combat status updates must be announced politely and atomically');
 assert.match(html, /id="combat-panel-actions" role="group" aria-label="Боевые действия"/, 'combat controls must form a labelled group');
 assert.match(combatPanel, /function setCombatActionsMarkup\(actions, markup\)/, 'combat submenu rendering must use a focus-preserving renderer');
-assert.match(combatPanel, /next\?\.focus\(\)/, 'combat submenu rerender must restore focus to the equivalent action');
+assert.match(combatPanel, /next \|\| actions\.querySelector/, 'combat submenu rerender must restore focus to an equivalent or first available action');
 assert.match(combatPanel, /<button type="button" data-combat-action="attack"/, 'combat actions must declare button type');
 assert.match(html, /id="game-log" role="log" aria-live="polite"/,
   'game log updates must be announced politely to assistive technology');
