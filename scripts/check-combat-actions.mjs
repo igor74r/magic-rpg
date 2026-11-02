@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 import { state } from '../systems/state.js';
 import { createCharacter } from '../systems/character.js';
 import { ENEMIES } from '../data/enemies.js';
+import { SPELLS } from '../data/spells.js';
+import { CLASSES } from '../data/classes.js';
 import { enterCombat, combatAttack, combatBlock, combatCastSpell, combatUseAbility, combatUseItem } from '../systems/overworld/combat.js';
 
 const storage = new Map();
@@ -57,12 +59,50 @@ try {
   console.log('PASS Warrior block activates the defensive stance');
 
   f = fixture('mage');
+  const fireball = SPELLS.fireball;
+  const timersBeforeMalformedSpell = scheduled.length;
+  const mpBeforeMalformedSpell = f.player.mp;
+  const hpBeforeMalformedSpell = f.enemy.hp;
+  SPELLS.fireball = { ...fireball, cost: -1 };
+  combatCastSpell('fireball');
+  assert.equal(f.player.mp, mpBeforeMalformedSpell, 'invalid spell cost must not consume mana');
+  assert.equal(f.enemy.hp, hpBeforeMalformedSpell, 'invalid spell must not damage target');
+  assert.equal(f.ow.combat.turn, 'player', 'invalid spell must not consume the turn');
+  assert.equal(scheduled.length, timersBeforeMalformedSpell, 'invalid spell must not schedule enemy turn');
+  SPELLS.fireball = { ...fireball, damage: Number.NaN };
+  combatCastSpell('fireball');
+  assert.equal(f.player.mp, mpBeforeMalformedSpell, 'NaN spell damage must not consume mana');
+  assert.equal(f.enemy.hp, hpBeforeMalformedSpell, 'NaN spell damage must not mutate enemy HP');
+  SPELLS.fireball = fireball;
+  console.log('PASS Malformed spell cost/damage is rejected before resource or turn changes');
+
+  f = fixture('mage');
   const mageHpBefore = f.enemy.hp;
   const mageMpBefore = f.player.mp;
   combatCastSpell('fireball');
   assert.ok(f.enemy.hp < mageHpBefore, 'Mage fireball must damage the target');
   assert.ok(f.player.mp < mageMpBefore, 'Mage fireball must consume mana');
   console.log('PASS Mage fireball damages the target and consumes mana');
+
+  f = fixture('archer');
+  const archerAbility = CLASSES.archer.abilities.find(item => item.id === 'aimed-shot');
+  const archerMpBeforeInvalidAbility = f.player.mp;
+  const archerTurnBeforeInvalidAbility = f.ow.combat.turn;
+  CLASSES.archer.abilities.push({ id: 'unfinished-test-action', name: 'Broken', cost: 10, cooldown: 2 });
+  combatUseAbility('unfinished-test-action');
+  assert.equal(f.player.mp, archerMpBeforeInvalidAbility, 'unimplemented ability must not spend resource');
+  assert.equal(f.ow.combat.turn, archerTurnBeforeInvalidAbility, 'unimplemented ability must not advance turn');
+  CLASSES.archer.abilities.pop();
+  CLASSES.archer.abilities = CLASSES.archer.abilities.map(item =>
+    item.id === 'aimed-shot' ? { ...item, cost: Number.NaN } : item
+  );
+  combatUseAbility('aimed-shot');
+  assert.equal(f.player.mp, archerMpBeforeInvalidAbility, 'NaN ability cost must not spend resource');
+  assert.equal(f.player.cooldowns['aimed-shot'], undefined, 'invalid ability must not enter cooldown');
+  CLASSES.archer.abilities = CLASSES.archer.abilities.map(item =>
+    item.id === 'aimed-shot' ? archerAbility : item
+  );
+  console.log('PASS Unsupported or malformed ability is rejected before resource/cooldown changes');
 
   f = fixture('archer');
   f.player.mp = 100;
@@ -119,7 +159,7 @@ try {
   console.log('PASS Victory save contains post-combat effects and cooldown state');
 
   assert.ok(scheduled.length >= 5, 'combat actions should schedule enemy responses');
-  console.log(`Combat action regression: 7/7 action checks passed; ${scheduled.length} enemy turns safely queued.`);
+  console.log(`Combat action regression: 9/9 action checks passed; ${scheduled.length} enemy turns safely queued.`);
 } finally {
   globalThis.setTimeout = realSetTimeout;
   state.overworld = null;
