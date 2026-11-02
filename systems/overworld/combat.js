@@ -222,6 +222,7 @@ export function enterCombat(enemy) {
   if (!ow || !enemy || enemy.dead || enemy.hp <= 0 || ow.combat) return;
 
   enemy.state = 'combat';
+  enemy.tacticalSpecialPending = false;
 
   ow.combat = {
     enemy,
