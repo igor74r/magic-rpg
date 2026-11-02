@@ -173,3 +173,36 @@
 .village-interior-enter,.village-interior-exit { width:100%; margin-top:12px; padding:11px 14px; border:1px solid #b18a54; border-radius:7px; color:#f3dfb8; background:linear-gradient(180deg,#60452f,#342820); font-weight:700; cursor:pointer; }
 .village-interior-enter:hover,.village-interior-exit:hover { filter:brightness(1.18); }
 @media(max-width:480px) { .village-room-art { height:210px; } .village-room-prop { width:30%; min-height:50px; padding:4px; } .village-room-prop small { font-size:9px; } }
+
+
+/* Active campaign objective marker on the world map. */
+.world-map .wnode.quest-target {
+  z-index: 18;
+  outline: 2px solid rgba(255, 211, 91, .88);
+  outline-offset: 5px;
+  filter: drop-shadow(0 0 8px rgba(255, 190, 45, .65));
+}
+.world-map .wnode-quest-marker {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  z-index: 30;
+  transform: translateX(-50%);
+  display: block;
+  padding: 4px 7px;
+  border: 1px solid #e2bd55;
+  border-radius: 999px;
+  background: rgba(38, 24, 8, .96);
+  color: #ffe7a0;
+  font: 700 10px/1.2 Arial, sans-serif;
+  letter-spacing: .03em;
+  white-space: nowrap;
+  box-shadow: 0 2px 9px rgba(0, 0, 0, .65);
+  pointer-events: none;
+}
+@media (max-width: 480px) {
+  .world-map .wnode-quest-marker {
+    font-size: 9px;
+    padding: 3px 5px;
+  }
+}
