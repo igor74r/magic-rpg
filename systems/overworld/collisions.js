@@ -12,6 +12,14 @@ const BUILDING_BODY = Object.freeze({
   doorTop: -5
 });
 
+// Solid square-footprint props in Aurora. Decorative lanterns/flowers are
+// intentionally excluded so the plaza remains open and comfortable to walk.
+const SOLID_PROP_STYLES = new Set(['fountain', 'bench', 'memorial', 'anvil', 'woodpile', 'cart', 'barrels', 'stall', 'herb-rack']);
+const PROP_HALF_SIZE = Object.freeze({
+  fountain: 18, bench: 17, memorial: 13, anvil: 13, woodpile: 15,
+  cart: 18, barrels: 14, stall: 20, 'herb-rack': 14
+});
+
 export function getVillageBuildingColliders(statics = LOCATIONS.village.statics) {
   const buildings = statics.filter(item => item?.buildingStyle);
   return buildings.flatMap(building => {
@@ -38,7 +46,22 @@ function circleIntersectsRect(x, y, radius, rect) {
   return dx * dx + dy * dy < radius * radius;
 }
 
+export function getVillagePropColliders(statics = LOCATIONS.village.statics) {
+  return statics.filter(item => item?.propStyle && SOLID_PROP_STYLES.has(item.propStyle))
+    .map(item => {
+      const half = PROP_HALF_SIZE[item.propStyle] || 14;
+      return {
+        id: item.id,
+        part: 'solid-prop',
+        x: item.x * TILE + TILE / 2 - half,
+        y: item.y * TILE + TILE / 2 - half,
+        width: half * 2,
+        height: half * 2
+      };
+    });
+}
+
 export function isVillagePositionBlocked(x, y, radius = 10, statics = LOCATIONS.village.statics) {
-  return getVillageBuildingColliders(statics)
+  return [...getVillageBuildingColliders(statics), ...getVillagePropColliders(statics)]
     .some(rect => circleIntersectsRect(x, y, radius, rect));
 }
