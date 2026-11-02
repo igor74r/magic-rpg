@@ -165,28 +165,50 @@ export function canCompleteMainQuest(game) {
 }
 
 
-// Story regions follow the five-act campaign's recommended level bands.
-// Their map order is stable even though the world-map positions remain scattered.
+// Story regions unlock in campaign order. Each mission step raises the
+// minimum level, while the world map deliberately scatters the nodes visually.
+// Reused locations keep the earliest level at which the story first needs them.
 export function getStoryLocationProgression() {
   const locations = [];
   const seen = new Set();
+
   for (const act of STORY.acts) {
     const match = /^(\d+)/.exec(String(act.recommendedLevel || '1'));
-    const requiredLevel = Math.max(1, Number(match?.[1]) || 1);
-    const orderedIds = [act.locationId, ...act.missions.map(mission => mission.locationId || act.locationId)];
-    for (const locationId of orderedIds) {
-      if (!locationId || seen.has(locationId)) continue;
+    const actBaseLevel = Math.max(1, Number(match?.[1]) || 1);
+    const missions = Array.isArray(act.missions) ? act.missions : [];
+
+    missions.forEach((mission, missionIndex) => {
+      const locationId = mission.locationId || act.locationId;
+      if (!locationId || seen.has(locationId)) return;
       seen.add(locationId);
+
+      // Five missions span the act's ten-level band: 1/3/5/7/9,
+      // 11/13/15/17/19, and so on.
+      const requiredLevel = Math.min(100, actBaseLevel + missionIndex * 2);
       locations.push({
         id: locationId,
         sequence: locations.length + 1,
         actNumber: act.number,
         actTitle: act.title,
-        recommendedLevel: act.recommendedLevel || String(requiredLevel),
+        recommendedLevel: String(requiredLevel),
         requiredLevel
+      });
+    });
+
+    // Keep an act hub visible if it is not itself used by a mission.
+    if (act.locationId && !seen.has(act.locationId)) {
+      seen.add(act.locationId);
+      locations.push({
+        id: act.locationId,
+        sequence: locations.length + 1,
+        actNumber: act.number,
+        actTitle: act.title,
+        recommendedLevel: String(actBaseLevel),
+        requiredLevel: actBaseLevel
       });
     }
   }
+
   return locations;
 }
 
