@@ -124,7 +124,7 @@ export function spawnStatics(loc, locationId = null, cols = loc.mapCols || 40, r
   } else if (locationId && locationId !== 'rift' && !locationId.startsWith('tower-floor-')) {
     const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
     objects.push(
-      { id: 'world-waystone', name: 'Камень перехода', x: (cx - 2) * TILE + TILE / 2, y: cy * TILE + TILE / 2, propStyle: 'world-waystone', interactionRadius: 76, decorative: false },
+      { id: 'world-waystone', name: 'Камень перехода', x: (cx - 2) * TILE + TILE / 2, y: cy * TILE + TILE / 2, propStyle: `world-waystone-${loc.theme || locationId}`, interactionRadius: 76, decorative: false },
       { id: 'tower-gate', name: 'Врата Башни', x: (cx + 2) * TILE + TILE / 2, y: cy * TILE + TILE / 2, propStyle: 'tower-gate', interactionRadius: 76, decorative: false }
     );
   }
