@@ -46,8 +46,10 @@ for (const [locationId, requiredLevel, prerequisiteMission] of expected) {
   }
   assert.equal(canEnterStoryLocation(player, locationId).allowed, true,
     `${locationId} must unlock when both level and campaign requirements are met`);
-  assert.equal(canEnterStoryLocation({ ...player, level: requiredLevel - 1 }, locationId).allowed, false,
-    `${locationId} must reject a character below its level gate`);
+  if (requiredLevel > 1) {
+    assert.equal(canEnterStoryLocation({ ...player, level: requiredLevel - 1 }, locationId).allowed, false,
+      `${locationId} must reject a character below its level gate`);
+  }
 }
 assert.equal(canEnterStoryLocation({ level: 1 }, 'village').allowed, true,
   'the village must never be level-gated');
