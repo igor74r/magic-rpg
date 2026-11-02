@@ -82,8 +82,11 @@ try {
   state.settings.difficulty = 'hard';
   vampiric.ow.combat.turnCount = 2;
   const hpBeforeSpecial = vampiric.p.hp;
+  const wolfSpecialEffect = ENEMIES.wolf.special.effect;
+  ENEMIES.wolf.special.effect = null;
   combatBlock();
   runEnemyTurn();
+  ENEMIES.wolf.special.effect = wolfSpecialEffect;
   const actualSpecialDamage = hpBeforeSpecial - vampiric.p.hp;
   const expectedVampiricHeal = Math.floor(actualSpecialDamage * 0.3);
   assert.equal(vampiric.enemy.hp, 1000 + expectedVampiricHeal, 'vampiric heal must use both actual hits');
