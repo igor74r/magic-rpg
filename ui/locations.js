@@ -9,6 +9,7 @@ import { saveGame } from '../systems/save.js';
 import { renderGame } from './header.js';
 import { enterOverworld } from '../systems/overworld.js';
 import { isRiftReady } from '../systems/rift.js';
+import { getStoryLocationProgression, canEnterStoryLocation } from '../systems/campaign.js';
 
 const MAP_SPEED_X = 26;
 const MAP_SPEED_Y = 20;
@@ -71,13 +72,19 @@ function ringNodes() {
     worldLayoutKey = key;
     if (selected && !ids.includes(selected)) selected = null;
   }
-  return worldLayout.map(node => ({ ...node }));
+  const sequence = new Map(getStoryLocationProgression().map(item => [item.id, item]));
+  return worldLayout.map(node => ({ ...node, story: sequence.get(node.id) || null }));
 }
 
 function panelHtml(id) {
   const loc = LOCATIONS[id];
   const here = id === state.game.location;
   const actions = [];
+  const access = canEnterStoryLocation(state.game.player, id);
+  const story = access.requirement;
+  const gateNotice = story
+    ? `<p class="map-story-gate">${story.actNumber}-й акт · маршрут #${story.sequence} · рекомендованный уровень ${story.recommendedLevel}${access.allowed ? '' : ` · 🔒 Требуется уровень ${story.requiredLevel} (сейчас ${access.currentLevel})`}</p>`
+    : '';
   if (id === 'rift') {
     actions.push(`<button type="button" onclick="GameAPI.enterRift()">Войти в Разлом</button>`);
   } else if (here) {
@@ -93,13 +100,14 @@ function panelHtml(id) {
     }
   } else {
     // Если локация не текущая, кнопка "Перейти" всё ещё нужна для тех, кто хочет сначала прочитать описание
-    actions.push(`<button type="button" onclick="GameAPI.mapTravel('${id}')">Перейти сюда</button>`);
+    actions.push(`<button type="button" onclick="GameAPI.mapTravel('${id}')" ${access.allowed ? '' : 'disabled'}>${access.allowed ? 'Перейти сюда' : `🔒 Открывается с ${story.requiredLevel} уровня`}</button>`);
   }
   return `
     <div class="map-panel-head">
       <div>
         <h3>${loc.name}${here ? ' <span class="map-here">вы здесь</span>' : ''}</h3>
         <p>${loc.desc || ''}</p>
+        ${gateNotice}
       </div>
       <div class="map-panel-actions">${actions.join('')}</div>
     </div>`;
@@ -131,6 +139,12 @@ function selectNode(id) {
 // ===== ИЗМЕНЕНО: клик сразу перемещает, если это другая локация =====
 export function mapSelect(id) {
   if (!LOCATIONS[id]) return;
+  const access = canEnterStoryLocation(state.game?.player, id);
+  if (!access.allowed && id !== state.game.location) {
+    emit('toast', `🔒 ${LOCATIONS[id].name}: требуется ${access.requirement.recommendedLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
+    selectNode(id);
+    return;
+  }
   if (id === 'rift') {
     selectNode(id);
     return;
@@ -145,12 +159,24 @@ export function mapSelect(id) {
 export function mapTravel(id) {
   if (id === 'rift') { selectNode(id); return; }
   if (!LOCATIONS[id] || id === state.game.location) return;
+  const access = canEnterStoryLocation(state.game?.player, id);
+  if (!access.allowed) {
+    emit('toast', `🔒 ${LOCATIONS[id].name}: требуется ${access.requirement.recommendedLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
+    selectNode(id);
+    return;
+  }
   selected = id;
   travelTo(id);
 }
 
 export function mapEnter() {
   if (!selected) return;
+  const access = canEnterStoryLocation(state.game?.player, selected);
+  if (!access.allowed) {
+    emit('toast', `🔒 ${LOCATIONS[selected].name}: требуется ${access.requirement.recommendedLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
+    renderPanel(selected);
+    return;
+  }
   if (selected === 'rift') { window.GameAPI?.enterRift?.(); return; }
   if (selected !== state.game.location) travelTo(selected);
   if (state.game.location === 'village' || LOCATIONS[state.game.location]?.enemies?.length) enterOverworldFromUI();
@@ -239,14 +265,24 @@ function initWorldMap() {
 
 export function renderLocations() {
   const nodes = ringNodes();
-  const links = nodes.map((n) => `<line x1="50" y1="50" x2="${n.x.toFixed(2)}" y2="${n.y.toFixed(2)}" />`).join('');
+  const storyNodes = nodes.filter(node => node.story).sort((a, b) => a.story.sequence - b.story.sequence);
+  const storyLinks = storyNodes.map((node, index) => {
+    const from = index === 0 ? { x: 50, y: 50 } : storyNodes[index - 1];
+    return `<line class="map-story-link" x1="${from.x.toFixed(2)}" y1="${from.y.toFixed(2)}" x2="${node.x.toFixed(2)}" y2="${node.y.toFixed(2)}" />`;
+  }).join('');
+  const freeLinks = nodes.filter(node => !node.story)
+    .map(node => `<line class="map-free-link" x1="50" y1="50" x2="${node.x.toFixed(2)}" y2="${node.y.toFixed(2)}" />`).join('');
+  const links = storyLinks + freeLinks;
   
   const nodesHtml = nodes.map((n) => {
     const loc = LOCATIONS[n.id];
-    return `<div class="wnode${n.id === state.game.location ? ' current' : ''}" data-loc="${n.id}" data-x="${n.x}" data-y="${n.y}"
-      style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}" aria-label="${loc.name}">
-      <span class="wnode-icon">${loc.emoji}</span>
-      <span class="wnode-name" aria-hidden="true">${loc.name}</span>
+    const access = canEnterStoryLocation(state.game?.player, n.id);
+    const locked = !access.allowed;
+    const order = n.story ? `<span class="wnode-order" aria-hidden="true">#${n.story.sequence}</span>` : '';
+    return `<div class="wnode${n.id === state.game.location ? ' current' : ''}${locked ? ' locked' : ''}" data-loc="${n.id}" data-x="${n.x}" data-y="${n.y}"
+      style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%;${locked ? 'opacity:.48;filter:grayscale(.75)' : ''}" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}${n.story ? ` · маршрут #${n.story.sequence} · уровень ${n.story.recommendedLevel}` : ''}${locked ? ` · закрыто до ${n.story.requiredLevel} уровня` : ''}" aria-label="${loc.name}${locked ? ', закрыто' : ''}">
+      ${order}<span class="wnode-icon">${locked ? '🔒' : loc.emoji}</span>
+      <span class="wnode-name" aria-hidden="true">${n.story ? `#${n.story.sequence} · ` : ''}${loc.name}</span>
     </div>`;
   }).join('');
 
@@ -270,10 +306,16 @@ export function renderLocations() {
 }
 
 export function travelTo(locId) {
+  const access = canEnterStoryLocation(state.game?.player, locId);
+  if (!access.allowed) {
+    emit('toast', `🔒 ${LOCATIONS[locId]?.name || 'Область'}: требуется ${access.requirement.recommendedLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
+    return false;
+  }
   state.game.location = locId;
   emit('log', { channel: 'game', msg: `Вы прибыли в ${LOCATIONS[locId].name}.`, cls: 'info' });
   saveGame();
   renderGame();
+  return true;
 }
 
 export function enterOverworldFromUI() { enterOverworld(state.game.location); }
