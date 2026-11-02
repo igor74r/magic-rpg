@@ -260,10 +260,12 @@ function formatBonus(inst, item) {
   };
   const parts = [];
   for (const [key, label] of Object.entries(labels)) {
-    if (bonus[key]) parts.push(`+${bonus[key]} ${label}`);
+    const value = Number(bonus[key]);
+    if (Number.isFinite(value) && value !== 0) parts.push(`+${value} ${label}`);
   }
   for (const [key, label] of Object.entries(percent)) {
-    if (bonus[key]) parts.push(`+${Math.round(bonus[key] * 100)}% ${label}`);
+    const value = Number(bonus[key]);
+    if (Number.isFinite(value) && value !== 0) parts.push(`+${Math.round(value * 100)}% ${label}`);
   }
   return parts.join(' · ');
 }
@@ -284,15 +286,19 @@ function renderPaperdoll(p) {
     const item = ITEMS[obj.id];
     if (!item) return '';
     const color = RARITIES[obj.rarity]?.color || '#c9a227';
-    const runes = (obj.runes || []).length;
-    const sockets = obj.sockets ?? item.sockets ?? 0;
+    const affixes = Array.isArray(obj.affixes) ? obj.affixes : [];
+    const runeList = Array.isArray(obj.runes) ? obj.runes : [];
+    const runes = runeList.length;
+    const rawSockets = Number(obj.sockets ?? item.sockets ?? 0);
+    const sockets = Number.isSafeInteger(rawSockets) && rawSockets > 0 ? Math.min(rawSockets, 12) : 0;
+    const forgeLevel = Number.isSafeInteger(obj.forgeLevel) && obj.forgeLevel > 0 ? obj.forgeLevel : 0;
     return `
       <div class="gear-slot filled" style="--gear-color:${color}"
         onmouseover="GameAPI.showEqTooltip(event, '${slot}')"
         onmouseout="GameAPI.hideTooltip()">
         <span class="gear-slot-icon">${item.icon}</span>
         <span class="gear-slot-label">${label}</span>
-        <span class="gear-slot-name">${(obj.affixes || []).length ? (obj.affixes || []).map(affix => affix.name).join(' ') + ' ' : ''}${item.name}${obj.forgeLevel ? ` +${obj.forgeLevel}` : ''}</span>
+        <span class="gear-slot-name">${affixes.length ? affixes.map(affix => escapeHtml(affix?.name ?? '')).join(' ') + ' ' : ''}${item.name}${forgeLevel ? ` +${forgeLevel}` : ''}</span>
         <span class="gear-slot-sockets">${sockets ? `◈ ${runes}/${sockets}` : ''}</span>
         <button class="gear-slot-remove" onclick="GameAPI.unequip('${slot}')" title="Снять">×</button>
       </div>`;
@@ -347,8 +353,9 @@ export function renderInventory() {
         grid += '<div class="inv-slot empty"></div>';
         continue;
       }
-      const rarity = inst.rarity || 'common';
-      const qty = (inst.qty || 1) > 1 ? `<span class="slot-qty">${inst.qty}</span>` : '';
+      const rarity = RARITIES[inst.rarity] ? inst.rarity : 'common';
+      const qtyValue = Number.isSafeInteger(inst.qty) && inst.qty > 1 ? inst.qty : 1;
+      const qty = qtyValue > 1 ? `<span class="slot-qty">${qtyValue}</span>` : '';
       const socket = EQUIPMENT_TYPES.has(item.type) && (inst.sockets ?? item.sockets)
         ? '<span class="slot-socket">◈</span>' : '';
       grid += `
@@ -388,7 +395,8 @@ function renderPendingLoot(player) {
   const rows = pending.map((entry, index) => {
     const item = ITEMS[entry.id];
     if (!item) return '';
-    const qty = Math.max(1, Math.floor(Number(entry.qty) || 1));
+    const rawQty = Number(entry.qty);
+    const qty = Number.isSafeInteger(rawQty) && rawQty > 0 ? rawQty : 1;
     return `<div class="pending-loot-row">
       <span class="pending-loot-item">${item.icon} ${item.name}${qty > 1 ? ` ×${qty}` : ''}</span>
       <button type="button" onclick="GameAPI.claimPendingLoot(${index})">Забрать</button>
@@ -615,13 +623,18 @@ function buildTooltipHTML(inst) {
   const rarity = RARITIES[inst.rarity];
   const color = rarity?.color || '#c9a227';
   const rarityLabel = rarity && inst.rarity !== 'common' ? ` · ${rarity.name}` : '';
-  const affixLabel = (inst.affixes || []).map(affix => affix.name).join(' · ');
+  const affixes = Array.isArray(inst.affixes) ? inst.affixes : [];
+  const runeList = Array.isArray(inst.runes) ? inst.runes : [];
+  const forgeLevel = Number.isSafeInteger(inst.forgeLevel) && inst.forgeLevel > 0 ? inst.forgeLevel : 0;
+  const affixLabel = affixes.map(affix => escapeHtml(affix?.name ?? '')).join(' · ');
   const stats = item.runeBonus ? formatBonus({ bonus: item.runeBonus }, { bonus: item.runeBonus }) : formatBonus(inst, item);
+  const rawSockets = Number(inst.sockets ?? item.sockets ?? 0);
+  const socketCount = Number.isSafeInteger(rawSockets) && rawSockets > 0 ? Math.min(rawSockets, 12) : 0;
   const sockets = EQUIPMENT_TYPES.has(item.type)
-    ? `<div class="tooltip-sockets">Гнёзда: ${(inst.runes || []).length}/${inst.sockets ?? item.sockets ?? 0} ${(inst.runes || []).map(id => ITEMS[id]?.icon || 'ᛉ').join(' ')}</div>`
+    ? `<div class="tooltip-sockets">Гнёзда: ${runeList.length}/${socketCount} ${runeList.map(id => ITEMS[id]?.icon || 'ᛉ').join(' ')}</div>`
     : '';
   return `
-    <div class="tooltip-title" style="color:${color}">${item.icon} ${(inst.affixes || []).length ? (inst.affixes || []).map(affix => affix.name).join(' ') + ' ' : ''}${item.name}${rarityLabel}${inst.forgeLevel ? ` +${inst.forgeLevel}` : ''}</div>
+    <div class="tooltip-title" style="color:${color}">${item.icon} ${affixes.length ? affixes.map(affix => escapeHtml(affix?.name ?? '')).join(' ') + ' ' : ''}${item.name}${rarityLabel}${forgeLevel ? ` +${forgeLevel}` : ''}</div>
     <div class="tooltip-type">${TYPE_LABELS[item.type] || item.type}</div>
     <div class="tooltip-desc">${item.desc}</div>
     ${affixLabel ? `<div class="tooltip-type">Модификаторы: ${affixLabel}</div>` : ''}
