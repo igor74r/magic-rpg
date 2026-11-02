@@ -67,7 +67,7 @@ try {
       gold: 50, hp: 80, maxHp: 100, mp: 30, maxMp: 50,
       str: 5, int: 8, wis: 5, con: 5, dex: 5, luck: 5,
       inventory: [{ id: 'mana-crystal', qty: 1 }],
-      spells: [], equipped: {}, stats: {}, campaignKills: {}, campaignClaimed: {},
+      spells: [], equipped: {}, stats: { kills: {} }, campaignKills: {}, campaignClaimed: {},
       activeCampaignMission: null, effects: [], buffs: []
     },
     storyShards: { flame: false, ice: false, blood: false },
