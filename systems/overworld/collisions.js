@@ -4,12 +4,13 @@ import { TILE } from './map.js';
 // The collision silhouette follows drawVillageBuilding() in ui/overworld/sprites.js.
 // The central south opening is intentionally left clear as the front doorway.
 const BUILDING_BODY = Object.freeze({
-  left: -37,
-  right: 37,
-  top: -24,
-  bottom: 21,
-  doorHalfWidth: 14,
-  doorTop: -5
+  // Enlarged wall footprint follows the 3×3-tile pixel-art building sprite.
+  left: -66,
+  right: 66,
+  top: -35,
+  bottom: 30,
+  doorHalfWidth: 25,
+  doorTop: -7
 });
 
 // Solid square-footprint props in Aurora. Decorative lanterns/flowers are
