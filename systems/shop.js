@@ -79,7 +79,7 @@ export function getBuybackItems() {
 
 export function buybackItem(index) {
   const p = state.game?.player;
-  if (!p || !Array.isArray(p.buyback) || !Number.isSafeInteger(index) || index < 0) {
+  if (!p || !Array.isArray(p.inventory) || !Array.isArray(p.buyback) || !Number.isSafeInteger(index) || index < 0) {
     return { ok: false, msg: 'Предмет больше нельзя выкупить' };
   }
   const today = new Date().toDateString();
@@ -87,8 +87,8 @@ export function buybackItem(index) {
   const item = ITEMS[record?.item?.id];
   const rarity = record?.item?.rarity || 'common';
   const qty = record?.item?.qty ?? 1;
-  if (!record || !item || !Number.isFinite(record.price) || record.price < 0 ||
-      !Number.isSafeInteger(qty) || qty < 1 || item.type === 'quest' || item.storyShard ||
+  if (!record || !item || !Number.isSafeInteger(record.price) || record.price < 0 ||
+      !Number.isSafeInteger(qty) || qty < 1 || (!STACKABLE_TYPES.has(item.type) && qty !== 1) || item.type === 'quest' || item.storyShard ||
       item.bossOnly || !RARITIES[rarity] || RARITIES[rarity].bossOnly) {
     return { ok: false, msg: 'Предмет больше нельзя выкупить' };
   }

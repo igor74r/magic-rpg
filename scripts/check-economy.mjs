@@ -55,6 +55,8 @@ assert.equal(buybackItem(0).ok, false, 'negative buyback price must be rejected'
 assert.equal(buyer.gold, 1000 - getBuyPrice('iron-sword', buyer), 'invalid buyback must not create gold');
 buyer.buyback = [{ id: 'bad-qty', soldAt: new Date().toDateString(), price: 1, item: { id: 'iron-sword', qty: 0 } }];
 assert.equal(buybackItem(0).ok, false, 'zero buyback quantity must be rejected');
+buyer.buyback = [{ id: 'bad-equipment-qty', soldAt: new Date().toDateString(), price: 1, item: { id: 'iron-sword', qty: 2 } }];
+assert.equal(buybackItem(0).ok, false, 'non-stackable buyback quantity must be exactly one');
 assert.equal(buyer.inventory.length, 1, 'invalid buyback must not add an item');
 state.game = null;
 if (originalStorage === undefined) delete globalThis.localStorage;
