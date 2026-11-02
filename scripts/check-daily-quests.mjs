@@ -64,13 +64,38 @@ try {
   assert.equal(state.game.player.gold, Number.MAX_SAFE_INTEGER);
   assert.equal(state.game.player.dailyQuests.list[0].claimed, false, 'overflow rejection must not consume the reward');
 
-  const before = target.current;
+  for (const invalidGold of ['100', -1, NaN, Infinity]) {
+    state.game.player.dailyQuests = {
+      date: now,
+      list: [
+        { id: 'q-kill-goblin', current: 5, completed: true, claimed: false },
+        { id: 'q-kill-any', current: 0, completed: false, claimed: false },
+        { id: 'q-kill-skeleton', current: 0, completed: false, claimed: false }
+      ]
+    };
+    getDailyQuests();
+    state.game.player.gold = invalidGold;
+    assert.equal(claimQuestReward('q-kill-goblin'), false, 'daily reward must reject invalid gold balances');
+    assert.equal(state.game.player.gold, invalidGold, 'invalid gold balance must remain untouched');
+    assert.equal(state.game.player.dailyQuests.list[0].claimed, false, 'invalid balance must not consume the reward');
+  }
+
+  state.game.player.dailyQuests = {
+    date: now,
+    list: [
+      { id: 'q-kill-any', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-goblin', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-skeleton', current: 0, completed: false, claimed: false }
+    ]
+  };
+  getDailyQuests();
+  const before = state.game.player.dailyQuests.list[0].current;
   updateQuestProgress('kill', 'any', -5);
-  assert.equal(target.current, before, 'negative progress must be ignored');
+  assert.equal(state.game.player.dailyQuests.list[0].current, before, 'negative progress must be ignored');
   updateQuestProgress('kill', 'any', Infinity);
-  assert.equal(target.current, before, 'non-finite progress must be ignored');
+  assert.equal(state.game.player.dailyQuests.list[0].current, before, 'non-finite progress must be ignored');
   assert.ok(saved.has('magic-rpg-save-1'), 'normalized quests and rewards should be saved');
-  console.log('check-daily-quests: PASS (save normalization, canonical rewards, progress guards)');
+  console.log('check-daily-quests: PASS (save normalization, canonical rewards, progress and balance guards)');
 } finally {
   state.game = null;
   if (previousStorage === undefined) delete globalThis.localStorage;
