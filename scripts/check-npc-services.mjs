@@ -4,7 +4,7 @@ import { NPCS } from '../data/npcs.js';
 
 const nodes = new Map();
 const node = id => {
-  if (!nodes.has(id)) nodes.set(id, { innerHTML: '', style: {}, className: '', textContent: '', classList: { add() {}, remove() {} }, remove() {} });
+  if (!nodes.has(id)) nodes.set(id, { innerHTML: '', style: {}, className: '', textContent: '', classList: { add() {}, remove() {} }, setAttribute() {}, remove() {} });
   return nodes.get(id);
 };
 const originalDocument = globalThis.document;
@@ -13,7 +13,7 @@ const originalSetTimeout = globalThis.setTimeout;
 globalThis.document = {
   querySelectorAll: () => [],
   getElementById: node,
-  createElement: () => ({ className: '', textContent: '', remove() {} }),
+  createElement: () => ({ className: '', textContent: '', setAttribute() {}, remove() {} }),
   body: { appendChild() {} }
 };
 const storage = new Map();
