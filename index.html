@@ -4,29 +4,118 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-  // Early capture: runs before stylesheets, images and ES modules begin loading.
+  // Early startup guard: captures failures before ES modules initialize and
+  // renders a readable fallback instead of leaving the player with a blank screen.
   (() => {
     const queue = window.__GAME_DIAGNOSTICS_EARLY__ = [];
+    let fallbackShown = false;
     const add = (type, message, source = '', line = 0, column = 0) => {
-      queue.push({ type, message: String(message || type).slice(0, 1000), source: String(source || '').slice(0, 500), line: Number(line) || 0, column: Number(column) || 0, time: new Date().toISOString() });
+      const entry = {
+        type,
+        message: String(message || type).slice(0, 1000),
+        source: String(source || '').slice(0, 500),
+        line: Number(line) || 0,
+        column: Number(column) || 0,
+        time: new Date().toISOString()
+      };
+      queue.push(entry);
       if (queue.length > 100) queue.shift();
+      return entry;
     };
+
+    const showStartupFallback = (entry) => {
+      if (fallbackShown || window.__GAME_DIAGNOSTICS_READY__) return;
+      fallbackShown = true;
+      const render = () => {
+        if (!document.body || document.getElementById('game-startup-error')) return;
+        const panel = document.createElement('section');
+        panel.id = 'game-startup-error';
+        panel.setAttribute('role', 'alert');
+        panel.setAttribute('aria-live', 'assertive');
+        panel.style.cssText = [
+          'position:fixed','inset:0','z-index:2147483647','display:flex',
+          'align-items:center','justify-content:center','padding:24px',
+          'box-sizing:border-box','background:rgba(8,10,18,.97)',
+          'color:#f4e8d0','font:16px/1.6 system-ui,sans-serif'
+        ].join(';');
+        const card = document.createElement('div');
+        card.style.cssText = [
+          'width:min(680px,100%)','padding:clamp(20px,5vw,40px)',
+          'border:1px solid #8b6b42','border-radius:14px',
+          'background:linear-gradient(145deg,#191b29,#101119)',
+          'box-shadow:0 20px 70px #0009'
+        ].join(';');
+        const title = document.createElement('h1');
+        title.textContent = 'Не удалось запустить игру';
+        title.style.cssText = 'margin:0 0 12px;color:#ffcc82;font-size:clamp(24px,5vw,34px)';
+        const message = document.createElement('p');
+        message.textContent = 'Один из игровых модулей не загрузился или произошла ошибка при запуске. Ваши сохранения не затронуты. Попробуйте обновить страницу. Если ошибка повторится, отправьте разработчику технические сведения ниже.';
+        message.style.margin = '0 0 16px';
+        const details = document.createElement('pre');
+        details.textContent = [
+          'Тип: ' + entry.type,
+          'Ошибка: ' + entry.message,
+          entry.source ? 'Файл: ' + entry.source : '',
+          entry.line ? 'Строка: ' + entry.line + (entry.column ? ', столбец: ' + entry.column : '') : ''
+        ].filter(Boolean).join('\n');
+        details.style.cssText = 'white-space:pre-wrap;overflow-wrap:anywhere;max-height:30vh;overflow:auto;padding:12px;background:#08090f;border-radius:8px;color:#d7c6a8;font:13px/1.5 ui-monospace,monospace';
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;margin-top:18px';
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.textContent = 'Обновить игру';
+        retry.onclick = () => window.location.reload();
+        retry.style.cssText = 'padding:11px 18px;border:1px solid #d5a45e;border-radius:8px;background:#5a3b20;color:#fff4df;font:inherit;cursor:pointer';
+        const copy = document.createElement('button');
+        copy.type = 'button';
+        copy.textContent = 'Скопировать ошибку';
+        copy.style.cssText = 'padding:11px 18px;border:1px solid #716b60;border-radius:8px;background:#252630;color:#f4e8d0;font:inherit;cursor:pointer';
+        copy.onclick = async () => {
+          const text = details.textContent;
+          try {
+            await navigator.clipboard.writeText(text);
+            copy.textContent = 'Скопировано';
+          } catch {
+            const range = document.createRange();
+            range.selectNodeContents(details);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            copy.textContent = 'Выделено — нажмите Ctrl+C';
+          }
+        };
+        actions.append(retry, copy);
+        card.append(title, message, details, actions);
+        panel.append(card);
+        document.body.append(panel);
+      };
+      if (document.body) render();
+      else document.addEventListener('DOMContentLoaded', render, { once: true });
+    };
+
     window.addEventListener('error', event => {
       if (window.__GAME_DIAGNOSTICS_READY__) return;
+      let entry;
       if (event.target && event.target !== window && (event.target.src || event.target.href)) {
         const target = event.target;
-        add('resource-load', 'Не удалось загрузить ресурс <' + (target.tagName || 'resource').toLowerCase() + '> ' + (target.src || target.href), target.src || target.href);
+        const tag = (target.tagName || 'resource').toLowerCase();
+        const url = target.src || target.href;
+        entry = add('resource-load', 'Не удалось загрузить ресурс <' + tag + '> ' + url, url);
+        if (tag === 'script') showStartupFallback(entry);
       } else {
-        add('uncaught-error', event.message || 'Необработанная ошибка JavaScript', event.filename, event.lineno, event.colno);
+        entry = add('uncaught-error', event.message || 'Необработанная ошибка JavaScript', event.filename, event.lineno, event.colno);
+        showStartupFallback(entry);
       }
     }, true);
+
     window.addEventListener('unhandledrejection', event => {
       if (window.__GAME_DIAGNOSTICS_READY__) return;
       const reason = event.reason;
-      add('unhandled-rejection', reason && (reason.stack || reason.message) || String(reason || 'Promise отклонён без причины'));
+      const entry = add('unhandled-rejection',
+        reason && (reason.stack || reason.message) || String(reason || 'Promise отклонён без причины'));
+      showStartupFallback(entry);
     });
-  })();
-</script>
+  })();</script>
 <title>Осколки Разлома</title>
 <link rel="icon" type="image/png" href="assets/branding/mana-crystal.png">
 <link rel="stylesheet" href="css/style.css">
