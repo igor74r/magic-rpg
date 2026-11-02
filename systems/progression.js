@@ -16,8 +16,9 @@ export function addExp(amount) {
 
   // Keep malformed progress from poisoning the level-up loop or the save.
   if (!Number.isSafeInteger(p.exp) || p.exp < 0) p.exp = 0;
-  if (!Number.isSafeInteger(p.expNext) || p.expNext <= 0) {
-    p.expNext = getExpNext(p.level);
+  const requiredExp = getExpNext(p.level);
+  if (!Number.isSafeInteger(p.expNext) || p.expNext !== requiredExp) {
+    p.expNext = requiredExp;
   }
   const nextExp = p.exp + amount;
   if (!Number.isSafeInteger(nextExp)) return;
