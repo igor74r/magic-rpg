@@ -228,6 +228,30 @@ window.addEventListener('unhandledrejection', (e) => {
 });
 
 let audioBooted = false;
+let dashboardLogFilter = 'all';
+let dashboardLogQuery = '';
+
+function applyDashboardLogFilters() {
+  const log = document.getElementById('game-log');
+  if (!log) return;
+  const query = dashboardLogQuery.trim().toLocaleLowerCase('ru');
+  log.querySelectorAll(':scope > div').forEach(line => {
+    const text = (line.textContent || '').toLocaleLowerCase('ru');
+    const matchesQuery = !query || text.includes(query);
+    const matchesCategory = dashboardLogFilter === 'all'
+      || (dashboardLogFilter === 'combat' && /(урон|атак|удар|блок|крит|побед|враг|бой|здоров)/i.test(text))
+      || (dashboardLogFilter === 'loot' && /(получ|добыч|предмет|золото|ресурс|осколок|экипировк|сундук)/i.test(text))
+      || (dashboardLogFilter === 'story' && /(задан|акт|сюжет|дракон|разлом|мисси|старейшин|локац)/i.test(text));
+    line.hidden = !(matchesQuery && matchesCategory);
+  });
+}
+
+document.addEventListener('input', event => {
+  if (event.target?.id !== 'game-log-search') return;
+  dashboardLogQuery = event.target.value || '';
+  applyDashboardLogFilters();
+});
+
 document.addEventListener('click', (e) => {
   if (!audioBooted) {
     audioBooted = true;
@@ -238,6 +262,18 @@ document.addEventListener('click', (e) => {
   resumeContext();
   const btn = e.target.closest('button');
   if (btn && !btn.closest('#combat-panel') && !btn.closest('#npc-panel') && !btn.closest('.stat-buttons')) playSound('click');
+
+  const logFilter = e.target.closest('[data-log-filter]');
+  if (logFilter) {
+    dashboardLogFilter = logFilter.dataset.logFilter || 'all';
+    document.querySelectorAll('[data-log-filter]').forEach(button => {
+      const active = button === logFilter;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    applyDashboardLogFilters();
+    return;
+  }
 
   const action = e.target.closest('[data-game-action]');
   if (!action) return;
