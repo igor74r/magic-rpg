@@ -14,29 +14,45 @@ assert.deepEqual(
 );
 
 const expected = [
-  ['briar-hollow', 1],
-  ['sunken-necropolis', 11],
-  ['obsidian-fields', 21],
-  ['frost-citadel', 31],
-  ['void-crater', 41],
-  ['dragon-lair', 41]
+  ['briar-hollow', 1, null],
+  ['forest', 3, 'a1-m1'],
+  ['ruins', 5, 'a1-m2'],
+  ['shadow', 7, 'a1-m3'],
+  ['swamp', 11, 'a1-m5'],
+  ['graveyard', 13, 'a2-m1'],
+  ['sunken-necropolis', 15, 'a2-m2'],
+  ['library', 17, 'a2-m3'],
+  ['volcano', 21, 'a2-m5'],
+  ['wasteland', 23, 'a3-m1'],
+  ['obsidian-fields', 25, 'a3-m2'],
+  ['ice-peaks', 31, 'a3-m5'],
+  ['frost-citadel', 33, 'a4-m1'],
+  ['dragon-lair', 41, 'a4-m5'],
+  ['void-crater', 47, 'a5-m3']
 ];
-for (const [locationId, requiredLevel] of expected) {
-  assert.equal(getStoryLocationRequirement(locationId)?.requiredLevel, requiredLevel,
-    `${locationId} must use its act's recommended level floor`);
-  if (requiredLevel > 1) {
-    assert.equal(canEnterStoryLocation({ level: requiredLevel - 1 }, locationId).allowed, false,
-      `${locationId} must reject a character below its level gate`);
+for (const [locationId, requiredLevel, prerequisiteMission] of expected) {
+  const requirement = getStoryLocationRequirement(locationId);
+  assert.equal(requirement?.requiredLevel, requiredLevel,
+    `${locationId} must use its mission's level step`);
+  assert.equal(requirement?.unlockAfterMissionId || null, prerequisiteMission,
+    `${locationId} must depend on the immediately preceding campaign mission`);
+
+  const player = { level: requiredLevel, campaignClaimed: {} };
+  const locked = canEnterStoryLocation(player, locationId);
+  if (prerequisiteMission) {
+    assert.equal(locked.allowed, false, `${locationId} must remain locked before its prerequisite mission`);
+    assert.equal(locked.reason, 'campaign');
+    player.campaignClaimed[prerequisiteMission] = true;
   }
-  assert.equal(canEnterStoryLocation({ level: requiredLevel }, locationId).allowed, true,
-    `${locationId} must unlock at its required level`);
+  assert.equal(canEnterStoryLocation(player, locationId).allowed, true,
+    `${locationId} must unlock when both level and campaign requirements are met`);
+  assert.equal(canEnterStoryLocation({ ...player, level: requiredLevel - 1 }, locationId).allowed, false,
+    `${locationId} must reject a character below its level gate`);
 }
 assert.equal(canEnterStoryLocation({ level: 1 }, 'village').allowed, true,
   'the village must never be level-gated');
-assert.equal(canEnterStoryLocation({ level: 1 }, 'forest').allowed, true,
-  'the first act side regions must be accessible from level one');
 assert.equal(canEnterStoryLocation({ level: 1 }, 'rift').allowed, true,
-  'rift access continues to use its own progression gate');
+  'rift access continues to use its own story-dragon progression gate');
 
 const campaignSource = readFileSync(new URL('../systems/campaign.js', import.meta.url), 'utf8');
 const overworldSource = readFileSync(new URL('../systems/overworld.js', import.meta.url), 'utf8');
