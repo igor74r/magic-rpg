@@ -729,6 +729,8 @@ function drawVillageBuilding(ctx, x, y, style = 'home') {
 
   ctx.save();
   ctx.translate(Math.round(x), Math.round(y));
+  // Each village building occupies a clear 3×3-tile visual footprint (144×144 px).
+  ctx.scale(1.8, 1.44);
   ctx.imageSmoothingEnabled = false;
 
   // Stepped ground shadow and stone foundation.
