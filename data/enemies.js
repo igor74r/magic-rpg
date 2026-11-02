@@ -324,4 +324,53 @@ export const ENEMIES = {
     tactics: 'Быстро сокращает дистанцию и высасывает жизненную силу.',
     special: { type: 'drain', every: 2, name: 'Касание пустоты', effect: 'bleed' }
   },
+  // ---------- СЮЖЕТНЫЕ МИНИ-БОССЫ АКТОВ I–V ----------
+  'root-court-executioner': {
+    name: 'Палач корневого суда', emoji: '🌲',
+    hp: 235, attack: 31, defense: 14, exp: 220, gold: 165,
+    drops: ['root-fiber', 'rune-root', 'strong-health-potion'], boss: true,
+    lore: 'Судья древнего лесного закона, который решил, что память должна принадлежать только корням.',
+    special: { type: 'double', every: 3, name: 'Приговор корней', effect: 'stun' },
+    phases: [{ atHp: 0.45, atkMult: 1.35, msg: 'Палач пробуждает корневые кандалы!', specialEvery: 2 }]
+  },
+
+  'drowned-queen': {
+    name: 'Утопленная плакальщица', emoji: '👑',
+    hp: 325, attack: 40, defense: 16, exp: 340, gold: 275,
+    drops: ['grave-salt', 'rune-tide', 'strong-mana-potion'], boss: true,
+    lore: 'Последняя хранительница затонувшего квартала, чьи песни удерживают мёртвых у своих имён.',
+    special: { type: 'drain', every: 3, name: 'Плач глубин', effect: 'poison' },
+    phases: [{ atHp: 0.45, atkMult: 1.4, msg: 'Плакальщица поднимает затонувшие воды!', specialEvery: 2 }]
+  },
+
+  'oath-forge-warden': {
+    name: 'Страж расплавленной клятвы', emoji: '🔥',
+    hp: 190, attack: 34, defense: 13, exp: 210, gold: 175,
+    drops: ['ember-core', 'rune-ember', 'strong-health-potion'], boss: true,
+    lore: 'Автомат кузницы, созданный проверить каждого, кто приблизится к сердцевине печати.',
+    special: { type: 'snipe', every: 3, mult: 2, name: 'Клеймо кузницы', effect: 'burn' },
+    phases: [{ atHp: 0.4, atkMult: 1.4, msg: 'Страж раскаляет древние руны!', specialEvery: 2 }]
+  },
+
+  'mirror-icekeeper': {
+    name: 'Хранитель ледяного зеркала', emoji: '🪞',
+    hp: 220, attack: 39, defense: 17, exp: 260, gold: 215,
+    drops: ['frost-essence', 'rune-frost', 'strong-mana-potion'], boss: true,
+    lore: 'Страж последней клятвы, отражающий страхи тех, кто ищет проход к ледяному трону.',
+    special: { type: 'snipe', every: 3, mult: 2.1, name: 'Зеркальный разлом', effect: 'stun' },
+    phases: [{ atHp: 0.4, atkMult: 1.4, msg: 'Ледяное зеркало раскалывается на отражения!', specialEvery: 2 }]
+  },
+
+  'echo-devourer': {
+    name: 'Пожиратель эха', emoji: '🕳️',
+    hp: 355, attack: 47, defense: 16, exp: 390, gold: 315,
+    drops: ['void-dust', 'rune-void', 'crystal-amulet'], boss: true,
+    lore: 'Существо, которое питается последними словами погибших у границы мира.',
+    special: { type: 'drain', every: 2, name: 'Беззвучное поглощение', effect: 'burn' },
+    phases: [
+      { atHp: 0.55, atkMult: 1.3, msg: 'Пожиратель собирает забытые голоса!', specialEvery: 2 },
+      { atHp: 0.25, atkMult: 1.5, msg: 'Эхо исчезает, оставляя лишь голод!', specialEvery: 1 }
+    ]
+  },
+
 };
