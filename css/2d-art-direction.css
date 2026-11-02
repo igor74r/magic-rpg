@@ -206,3 +206,77 @@
     padding: 3px 5px;
   }
 }
+
+
+/* Active story mission details inside its target location panel. */
+.map-quest-panel {
+  flex: 1 1 100%;
+  min-width: 0;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(226, 189, 85, .58);
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(55, 39, 18, .78), rgba(18, 20, 24, .96));
+  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 5px 16px rgba(0,0,0,.22);
+  color: #e9dfc9;
+}
+.map-quest-panel-kicker {
+  color: #e7c778;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.map-quest-panel h4 {
+  margin: 6px 0;
+  color: #ffe5a2;
+  font-size: 16px;
+}
+.map-quest-panel > p {
+  margin: 5px 0 9px;
+  color: #c9bea8;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.map-quest-objective {
+  padding: 8px 10px;
+  border-left: 3px solid #d6ad55;
+  border-radius: 4px;
+  background: rgba(0,0,0,.2);
+  color: #f3e5c6;
+  font-size: 12px;
+  font-weight: 700;
+}
+.map-quest-progress {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 9px;
+  color: #c9bea8;
+  font-size: 11px;
+}
+.map-quest-progress strong { color: #ffe5a2; font-variant-numeric: tabular-nums; }
+.map-quest-progress-track {
+  height: 6px;
+  margin-top: 5px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(0,0,0,.48);
+}
+.map-quest-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #9d7130, #f2d27d);
+  transition: width .2s ease;
+}
+.map-quest-panel .map-quest-briefing {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(226,189,85,.2);
+  font-style: italic;
+}
+.map-quest-panel .map-quest-shard { color: #f0bd83; font-weight: 700; }
+@media (max-width: 560px) {
+  .map-quest-panel { padding: 10px; }
+  .map-quest-panel h4 { font-size: 14px; }
+}
