@@ -93,6 +93,17 @@ try {
   console.log('PASS Owned combat consumable applies once, is consumed, and advances the turn');
 
 
+  f = fixture('warrior');
+  f.enemy.hp = 2;
+  f.player.hp = f.player.maxHp - 20;
+  f.ow.player.hp = f.player.hp;
+  f.player.effects = [{ id: 'lifesteal', duration: 2 }];
+  const hpBeforeOverkill = f.player.hp;
+  combatAttack();
+  assert.equal(f.player.hp, hpBeforeOverkill + 1,
+    'lifesteal must heal from the two HP actually removed, not the overkill hit');
+  console.log('PASS Lifesteal uses actual enemy HP removed on a killing hit');
+
   f = fixture('mage');
   f.player.effects = [
     { id: 'atkBuff', duration: 2 },
