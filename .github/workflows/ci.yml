@@ -118,6 +118,9 @@ jobs:
       - name: Check visual assets and responsive UI
         run: node scripts/check-visual-assets.mjs
 
+      - name: Check PNG world atlas manifest and dimensions
+        run: node scripts/check-world-atlas-enrichment.mjs
+
       - name: Check overworld maps and region collision
         run: node scripts/check-overworld-map.mjs
 
