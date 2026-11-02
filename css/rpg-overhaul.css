@@ -466,6 +466,10 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   outline:2px solid #ffe39a;
   outline-offset:3px;
 }
+#overworld-canvas:focus-visible {
+  outline:3px solid #ffe39a;
+  outline-offset:4px;
+}
 #overworld-canvas {
   border:2px solid rgba(201,162,39,.72) !important;
   border-radius:9px !important;
