@@ -44,6 +44,10 @@ export function upgradeEquipment(slot) {
 
   const p = state.game.player;
   const inst = p.equipped[slot];
+  const previousGold = p.gold;
+  const previousBonus = inst.bonus ? { ...inst.bonus } : inst.bonus;
+  const previousUpgradePercent = inst.upgradePercent;
+  const previousForgeLevel = inst.forgeLevel;
   p.gold -= check.cost;
   if (!inst.bonus || typeof inst.bonus !== 'object') inst.bonus = { ...(ITEMS[inst.id].bonus || {}) };
   for (const [key, value] of Object.entries(inst.bonus)) {
@@ -56,7 +60,13 @@ export function upgradeEquipment(slot) {
   inst.upgradePercent = Math.min(1, (inst.upgradePercent || 0) + check.statPercent);
   inst.forgeLevel = (inst.forgeLevel || 0) + 1;
 
-  saveGame();
+  if (!saveGame()) {
+    p.gold = previousGold;
+    inst.bonus = previousBonus;
+    inst.upgradePercent = previousUpgradePercent;
+    inst.forgeLevel = previousForgeLevel;
+    return { ok: false, msg: 'Не удалось сохранить улучшение; золото и экипировка восстановлены' };
+  }
   emit('toast', `⚒️ Улучшено до +${inst.forgeLevel} (−${check.cost}💰)`);
   emit('game:update');
   return { ok: true };
@@ -73,11 +83,17 @@ export function healAtHealer() {
     return { ok: false, msg: `Не хватает золота (нужно ${cost})` };
   }
 
+  const previous = { gold: p.gold, hp: p.hp, mp: p.mp };
   p.gold -= cost;
   p.hp = p.maxHp;
   if (p.class !== 'warrior') p.mp = p.maxMp;
-  
-  saveGame();
+
+  if (!saveGame()) {
+    p.gold = previous.gold;
+    p.hp = previous.hp;
+    p.mp = previous.mp;
+    return { ok: false, msg: 'Не удалось сохранить лечение; состояние и золото восстановлены' };
+  }
   emit('toast', `💚 Полное исцеление (−${cost}💰)`);
   emit('game:update');
   return { ok: true };
