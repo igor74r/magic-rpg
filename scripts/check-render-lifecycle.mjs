@@ -26,6 +26,13 @@ globalThis.clearInterval = id => cleared.push(id);
 try {
   const { start, startAutosave } = await import('../ui/overworld/render.js');
   const renderSource = await readFile(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
+  const overworldSource = await readFile(new URL('../ui/overworld.js', import.meta.url), 'utf8');
+  assert.match(overworldSource, /function clearMovementKeys\(\)/,
+    'movement input must be reset when the browser loses focus');
+  assert.match(overworldSource, /window\.addEventListener\('blur', clearMovementKeys\)/,
+    'window blur must release held movement keys');
+  assert.match(overworldSource, /visibilitychange', \(\) => \{ if \(document\.hidden\) clearMovementKeys\(\); \}/,
+    'backgrounding the tab must release held movement keys');
   assert.match(renderSource, /try\s*\{\s*if\s*\(saveGame\(\)\)/,
     'autosave storage failures must be caught');
   assert.match(renderSource, /autosaveErrorAt/);
