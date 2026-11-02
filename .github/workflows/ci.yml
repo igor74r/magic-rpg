@@ -73,6 +73,9 @@ jobs:
       - name: Check New Game Plus gates and carry-over
         run: node scripts/check-ngplus.mjs
 
+      - name: Check tower and rift record rollback on save failure
+        run: node scripts/check-record-save.mjs
+
       - name: Check endgame enemy and difficulty scaling
         run: node scripts/check-endgame-balance.mjs
 
