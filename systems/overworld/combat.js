@@ -213,10 +213,10 @@ export function combatAttack() {
   const atkMult = getAtkMult(p);
   const talent = getTalentBonus(p);
 
-  const enemyDefense = Math.max(
-    0,
-    enemyDefValue(enemy) - (stats.armorPen || 0)
-  );
+  const style = p.class === 'archer' ? 'ranged' : 'melee';
+  recordPlayerStyle(ow, style);
+  const enemyDefense = enemyDefenseForStyle(enemy, style, stats.armorPen || 0);
+  consumeEnemyAdaptation(enemy, style);
 
   let damage = Math.max(
     1,
@@ -424,6 +424,8 @@ export function combatCastSpell(spellId) {
   if (!hasValidCombatStats(stats, talent)) return;
 
   if (spell.damage) {
+    recordPlayerStyle(ow, 'magic');
+    consumeEnemyAdaptation(enemy, 'magic');
     const damage = Math.max(
       1,
       Math.floor(
@@ -431,10 +433,7 @@ export function combatCastSpell(spellId) {
           spell.damage +
           Math.floor(stats.mag / 2) -
           Math.floor(
-            Math.max(
-              0,
-              enemyDefValue(enemy) - (stats.armorPen || 0)
-            ) / 2
+            enemyDefenseForStyle(enemy, 'magic', stats.armorPen || 0) / 2
           )
         ) *
         talent.spellMult
@@ -575,6 +574,8 @@ export function combatUseAbility(abilityId) {
   );
 
   if (abilityId === 'aimed-shot') {
+    recordPlayerStyle(ow, 'ranged');
+    consumeEnemyAdaptation(enemy, 'ranged');
     const damage = Math.max(
       1,
       Math.floor(
@@ -582,10 +583,7 @@ export function combatUseAbility(abilityId) {
           stats.atk * 1.65 +
           Math.floor(Math.random() * 6) -
           Math.floor(
-            Math.max(
-              0,
-              enemyDefValue(enemy) - (stats.armorPen || 0)
-            ) / 2
+            enemyDefenseForStyle(enemy, 'ranged', stats.armorPen || 0) / 2
           )
         ) *
         talent.dmgMult *
@@ -627,9 +625,11 @@ export function combatUseAbility(abilityId) {
 
     spawnParticles(ow.player.x, ow.player.y, 'smoke', 8);
   } else if (abilityId === 'toxic-blade') {
+    recordPlayerStyle(ow, 'melee');
+    consumeEnemyAdaptation(enemy, 'melee');
     const enemyDefense = Math.max(
       0,
-      enemyDefValue(enemy) - (stats.armorPen || 0)
+      enemyDefenseForStyle(enemy, 'melee', stats.armorPen || 0)
     );
     const damage = Math.max(
       1,
