@@ -15,7 +15,9 @@ assert.ok(Math.abs(diagonal.x - diagonal.y) < 1e-10,
 
 assert.deepEqual(getMovementDelta(0, 0, 1), { x: 0, y: 0 }, 'no input must not move the player');
 assert.deepEqual(getMovementDelta(1, 0, 0), { x: 0, y: 0 }, 'zero elapsed time must not move the player');
-assert.deepEqual(getMovementDelta(1, 0, 10), { x: 9.6, y: 0 }, 'large frame gaps must be capped to avoid teleport-like steps');
+const cappedStep = getMovementDelta(1, 0, 10);
+assert.ok(Math.abs(cappedStep.x - 9.6) < 1e-10 && cappedStep.y === 0,
+  'large frame gaps must be capped to avoid teleport-like steps');
 assert.deepEqual(getMovementDelta(1, 0, -1), { x: 0, y: 0 }, 'negative elapsed time must be ignored');
 
 console.log('Overworld movement checks passed: frame-rate scaling, diagonal normalization and safe delta caps');
