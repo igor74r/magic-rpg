@@ -3,6 +3,7 @@ import { escapeHtml } from '../ui/screens.js';
 import { state } from '../systems/state.js';
 import { renderInventory, buildTooltipHTML } from '../ui/inventory.js';
 import { renderSlots } from '../ui/menu.js';
+import { showAchievementNotification } from '../ui/overworld.js';
 
 assert.equal(escapeHtml('<img src=x onerror="alert(1)">'), '&lt;img src=x onerror=&quot;alert(1)&quot;&gt;');
 assert.equal(escapeHtml("O'Neil & Sons"), 'O&#39;Neil &amp; Sons');
@@ -45,6 +46,31 @@ try {
   renderSlots();
   assert.ok(grid.innerHTML.includes('&lt;img src=x onerror=alert(9)&gt;'), 'save-slot character names must be escaped');
   assert.ok(!grid.innerHTML.includes('<img src=x onerror=alert(9)>'), 'imported character name must not inject markup');
+
+
+  const previousRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const previousSetTimeout = globalThis.setTimeout;
+  const notificationElement = { style: {}, innerHTML: '', remove() {} };
+  globalThis.document = {
+    getElementById: id => id === 'slots-grid' ? grid : null,
+    createElement: () => notificationElement,
+    body: { appendChild() {} }
+  };
+  globalThis.requestAnimationFrame = callback => callback();
+  globalThis.setTimeout = () => 0;
+  showAchievementNotification({
+    name: '<img src=x onerror=alert(10)>',
+    desc: '<svg onload=alert(11)>',
+    icon: '<script>alert(12)</script>'
+  });
+  assert.ok(notificationElement.innerHTML.includes('&lt;img src=x onerror=alert(10)&gt;'), 'achievement names must be escaped');
+  assert.ok(notificationElement.innerHTML.includes('&lt;svg onload=alert(11)&gt;'), 'achievement descriptions must be escaped');
+  assert.ok(notificationElement.innerHTML.includes('&lt;script&gt;alert(12)&lt;/script&gt;'), 'achievement icons must be escaped');
+  assert.ok(!notificationElement.innerHTML.includes('<img src=x onerror=alert(10)>'), 'achievement payload must not inject markup');
+  if (previousRequestAnimationFrame === undefined) delete globalThis.requestAnimationFrame;
+  else globalThis.requestAnimationFrame = previousRequestAnimationFrame;
+  if (previousSetTimeout === undefined) delete globalThis.setTimeout;
+  else globalThis.setTimeout = previousSetTimeout;
 
   const inventoryHtml = renderInventory();
   const importedTooltip = buildTooltipHTML(state.game.player.inventory[0]);
