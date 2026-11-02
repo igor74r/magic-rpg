@@ -62,6 +62,9 @@ jobs:
       - name: Check enemy weaknesses and resistances
         run: node scripts/check-enemy-matchups.mjs
 
+      - name: Check combat damage, mitigation and critical formula bounds
+        run: node scripts/check-combat-formulas.mjs
+
       - name: Check elemental magic and reactions
         run: node scripts/check-elemental-magic.mjs
 
