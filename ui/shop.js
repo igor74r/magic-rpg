@@ -43,7 +43,7 @@ export function openShop() {
     return `<div class="item" data-shop-item="${escapeHtml(id)}"><div class="item-info"><div class="item-name">${escapeHtml(item.icon)} ${escapeHtml(item.name)}</div><div class="item-desc">${escapeHtml(item.desc)} · 💰 ${escapeHtml(price)}</div></div><button data-shop-buy="${escapeHtml(id)}" ${p.gold < price || price <= 0 ? 'disabled' : ''} style="font-size:12px;padding:6px 12px;">Купить</button></div>`;
   }).join('');
   const buyback = getBuybackItems();
-  const buybackHtml = buyback.length ? '<h3>↩️ Обратный выкуп (сегодня)</h3><div class="item-list>' + buyback.map((record, index) => {
+  const buybackHtml = buyback.length ? '<h3>↩️ Обратный выкуп (сегодня)</h3><div class="item-list">' + buyback.map((record, index) => {
     const item = ITEMS[record.item.id];
     const name = item ? item.name : record.item.id;
     const rarity = RARITIES[record.item.rarity]?.name || 'Обычный';
