@@ -160,6 +160,12 @@ assert.equal(recovered.player.hp, 60, 'recovered state must be rewritten to stor
 console.log('PASS zero-HP save recovers to village at half HP/MP without losing death stats');
 
 
+// Explicit null must never alias the active slot during deletion.
+storage.set('magic-rpg-save-1', '{"marker":"active-slot-must-survive"}');
+deleteSave(null);
+assert.equal(storage.get('magic-rpg-save-1'), '{"marker":"active-slot-must-survive"}',
+  'null slot must not delete the active save');
+
 // Save-slot API must reject invalid indices rather than read, write or delete
 // arbitrary localStorage keys.
 for (const invalidSlot of [0, -1, 4, 1.5, '1', null]) {
