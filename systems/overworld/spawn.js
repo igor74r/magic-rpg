@@ -101,7 +101,7 @@ export function spawnNPCs(loc) {
   }));
 }
 
-export function spawnStatics(loc) {
+export function spawnStatics(loc, locationId = null, cols = loc.mapCols || 40, rows = loc.mapRows || 30) {
   if (!loc.statics) return [];
   const objects = loc.statics.map(obj => ({
     ...obj,
@@ -118,9 +118,15 @@ export function spawnStatics(loc) {
       id, name, x: x * TILE + TILE / 2, y: y * TILE + TILE / 2,
       propStyle, decorative: true, interactionRadius: 0, storyDecoration: true
     });
-    if (dragons['ash-herald']) addStoryProp('aurora-ash-victory', 'Знамя победы над Пепельным Вестником', 31, 16, 'banner');
-    if (dragons['ice-grasp']) addStoryProp('aurora-ice-victory', 'Ледяной фонарь северного тракта', 40, 18, 'frost-lantern');
-    if (dragons['blood-crown']) addStoryProp('aurora-rift-ward', 'Памятный знак открытого Разлома', 32, 3, 'rift-ward');
+    if (dragons['ash-herald']) addStoryProp('aurora-ash-victory', 'Знамя победы над Пепельным Вестником', 18, 6, 'banner');
+    if (dragons['ice-grasp']) addStoryProp('aurora-ice-victory', 'Ледяной фонарь северного тракта', 27, 10, 'frost-lantern');
+    if (dragons['blood-crown']) addStoryProp('aurora-rift-ward', 'Памятный знак открытого Разлома', 19, 5, 'rift-ward');
+  } else if (locationId && locationId !== 'rift' && !locationId.startsWith('tower-floor-')) {
+    const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
+    objects.push(
+      { id: 'world-waystone', name: 'Камень перехода', x: (cx - 2) * TILE + TILE / 2, y: cy * TILE + TILE / 2, propStyle: 'world-waystone', interactionRadius: 76, decorative: false },
+      { id: 'tower-gate', name: 'Врата Башни', x: (cx + 2) * TILE + TILE / 2, y: cy * TILE + TILE / 2, propStyle: 'tower-gate', interactionRadius: 76, decorative: false }
+    );
   }
   return objects;
 }
