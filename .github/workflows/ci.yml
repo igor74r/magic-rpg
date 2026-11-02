@@ -50,6 +50,9 @@ jobs:
       - name: Check combat specials, defeat, rewards and floor progression
         run: node scripts/check-combat-progression.mjs
 
+      - name: Check chest reward rollback on save failure
+        run: node scripts/check-chest-save.mjs
+
       - name: Check passive trees and respec
         run: node scripts/check-passives.mjs
 
