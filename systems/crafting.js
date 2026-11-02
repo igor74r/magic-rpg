@@ -229,7 +229,10 @@ export function reforgeItemByIndex(index) {
     p.inventory.splice(currentIndex, 1);
     p.inventory.splice(Math.min(oldIndex, p.inventory.length), 0, reforged);
   }
-  saveGame();
+  if (!saveGame()) {
+    p.inventory = originalInventory;
+    return { ok: false, msg: 'Не удалось сохранить перековку; предмет и материалы восстановлены' };
+  }
   emit('toast', '⚒️ Перековано: ' + ITEMS[old.id].name);
   emit('game:update');
   return { ok: true };
