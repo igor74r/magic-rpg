@@ -806,18 +806,19 @@ function drawVillageProp(ctx, x, y, style) {
     ctx.fillStyle = '#d9c9a4'; ctx.fillRect(x - 9, y - 23, 18, 4);
     ctx.strokeStyle = '#a9e9f0'; ctx.lineWidth = 2; ctx.globalAlpha = 0.7 + Math.sin(t * 2) * 0.2;
     ctx.beginPath(); ctx.moveTo(x, y - 22); ctx.quadraticCurveTo(x - 7, y - 32, x - 10, y - 26); ctx.moveTo(x, y - 22); ctx.quadraticCurveTo(x + 7, y - 32, x + 10, y - 26); ctx.stroke();
-  } else if (style === 'world-portal' || style === 'world-waystone') {
+  } else if (style === 'world-portal' || style.startsWith('world-waystone')) {
+    const portalTone = style.includes('forest') || style.includes('briar') ? '#79bd78' : style.includes('ice') || style.includes('frost') ? '#8edfff' : style.includes('volcano') || style.includes('obsidian') ? '#ff9364' : style.includes('shadow') || style.includes('void') || style.includes('rift') ? '#bd91ff' : style.includes('swamp') ? '#b0bd6a' : '#6fd7d2';
     const pulse = 0.72 + Math.sin(t * 2.2 + x * 0.01) * 0.16;
     ctx.fillStyle = 'rgba(0,0,0,0.42)';
     ctx.beginPath(); ctx.ellipse(x, y + 18, 35, 12, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#34313d'; ctx.beginPath(); ctx.ellipse(x, y + 7, 30, 12, 0, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = '#b89b69'; ctx.lineWidth = 4; ctx.stroke();
     ctx.fillStyle = '#151b2a'; ctx.beginPath(); ctx.ellipse(x, y - 8, 19, 27, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#6fd7d2'; ctx.lineWidth = 3; ctx.globalAlpha = pulse;
+    ctx.strokeStyle = portalTone; ctx.lineWidth = 3; ctx.globalAlpha = pulse;
     ctx.beginPath(); ctx.ellipse(x, y - 8, 17, 25, 0, 0, Math.PI * 2); ctx.stroke();
     ctx.strokeStyle = '#d7c18a'; ctx.lineWidth = 2; ctx.globalAlpha = 0.9;
     ctx.beginPath(); ctx.arc(x, y - 8, 10, t * 0.7, t * 0.7 + Math.PI * 1.55); ctx.stroke();
-    ctx.fillStyle = '#a5fff0'; ctx.globalAlpha = pulse;
+    ctx.fillStyle = portalTone; ctx.globalAlpha = pulse;
     ctx.beginPath(); ctx.arc(x, y - 8, 5 + Math.sin(t * 3) * 1.5, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 1;
   } else if (style === 'tower-gate') {
