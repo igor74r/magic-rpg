@@ -1,4 +1,5 @@
 import { state } from '../state.js';
+import { ENEMIES } from '../../data/enemies.js';
 import { playSound } from '../audio.js';
 import { TILE } from './map.js';
 import { canOccupyPlayerPosition, canOccupyActorPosition, isActorPositionClear, PLAYER_COLLISION_RADIUS, NPC_COLLISION_RADIUS, ENEMY_COLLISION_RADIUS } from './collisions.js';
@@ -6,7 +7,7 @@ import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
 import { getMovementDelta, resolveSweptMovement, getCameraPosition } from './movement.js';
-import { getEnemyGroupBehaviors, getEnemySteering } from './enemy-ai.js';
+import { getEnemyGroupBehaviors, getEnemySteering, getEnemyEngagementRange } from './enemy-ai.js';
 
 const VIEW_W = 800, VIEW_H = 500;
 
@@ -126,7 +127,8 @@ export function updateOverworld(dt) {
     const distanceToPlayer = Math.hypot(e.x - ow.player.x, e.y - ow.player.y);
     // Preserve contact-triggered combat even if a test, spawn correction, or
     // knockback places the enemy outside its normal home leash.
-    if (distanceToPlayer < COMBAT_RANGE) {
+    const engagementRange = getEnemyEngagementRange(ENEMIES[e.enemyId]?.special?.type);
+    if (distanceToPlayer < engagementRange) {
       enterCombat(e);
       return;
     }
