@@ -57,8 +57,12 @@ export function recordTowerFloor(floor) {
   if (!player) return false;
   const value = Math.max(0, Math.min(TOWER_MAX_FLOOR, Math.floor(Number(floor) || 0)));
   if (value <= (player.towerBest || 0)) return false;
+  const previous = player.towerBest || 0;
   player.towerBest = value;
-  saveGame();
+  if (!saveGame()) {
+    player.towerBest = previous;
+    return false;
+  }
   return true;
 }
 
