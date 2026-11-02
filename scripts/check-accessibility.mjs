@@ -35,7 +35,7 @@ const settingsControls = [
   'set-damage-numbers', 'set-screen-shake', 'set-low-health', 'set-reduced-motion'
 ];
 for (const id of settingsControls) {
-  assert.match(menu, new RegExp(`<label for="${id}">[^<]+</label>\\s*<(?:input|select) id="${id}"`),
+  assert.match(menu, new RegExp(`<label for="${id}">[^<]+</label>\\s*<(?:input|select)\\b[^>]*\\bid="${id}"`),
     `settings control ${id} must have an explicitly associated label`);
 }
 assert.match(menu, /aria-label="Удалить сохранение в слоте \${slot}"/,
