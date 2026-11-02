@@ -617,7 +617,7 @@ function buildCompareHTML(inst, item) {
   return lines.length ? `<div class="tooltip-compare"><b>Сравнение с: ${eqObj ? ITEMS[eqObj.id]?.name : 'пустым слотом'}</b>${lines.join('')}</div>` : '';
 }
 
-function buildTooltipHTML(inst) {
+export function buildTooltipHTML(inst) {
   const item = ITEMS[inst.id];
   if (!item) return '';
   const rarity = RARITIES[inst.rarity];

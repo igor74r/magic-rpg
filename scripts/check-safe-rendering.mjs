@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { escapeHtml } from '../ui/screens.js';
 import { state } from '../systems/state.js';
-import { renderInventory } from '../ui/inventory.js';
+import { renderInventory, buildTooltipHTML } from '../ui/inventory.js';
 
 assert.equal(escapeHtml('<img src=x onerror="alert(1)">'), '&lt;img src=x onerror=&quot;alert(1)&quot;&gt;');
 assert.equal(escapeHtml("O'Neil & Sons"), 'O&#39;Neil &amp; Sons');
@@ -32,8 +32,10 @@ state.game = {
 };
 try {
   const inventoryHtml = renderInventory();
-  assert.ok(inventoryHtml.includes('&lt;img src=x onerror=alert(1)&gt;'), 'imported affix name must be escaped');
+  const importedTooltip = buildTooltipHTML(state.game.player.inventory[0]);
+  assert.ok(importedTooltip.includes('&lt;img src=x onerror=alert(1)&gt;'), 'imported affix name must be escaped in tooltip');
   assert.ok(inventoryHtml.includes('&lt;script&gt;alert(2)&lt;/script&gt;'), 'equipped affix name must be escaped');
+  assert.ok(!importedTooltip.includes('<img src=x onerror=alert(1)>'), 'raw imported affix HTML must not enter tooltip markup');
   assert.ok(!inventoryHtml.includes('<img src=x onerror=alert(1)>'), 'raw affix HTML must not enter inventory markup');
   assert.ok(!inventoryHtml.includes('<svg onload=alert(1)>'), 'invalid forge levels must not enter inventory markup');
   assert.ok(!inventoryHtml.includes('onmouseover="alert(1)'), 'invalid rarity must not enter class attributes');
