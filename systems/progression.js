@@ -4,9 +4,23 @@ import { playSound } from './audio.js';
 
 export const MAX_LEVEL = 100;
 
+// Campaign XP is deliberately tiered by act. The 25 main missions and their
+// required kills should carry a normally played character through levels 1–50;
+// post-campaign activities continue the curve toward the level-100 cap.
+const CAMPAIGN_XP_BANDS = [
+  { maxLevel: 10, exp: 125 },
+  { maxLevel: 20, exp: 259 },
+  { maxLevel: 30, exp: 269 },
+  { maxLevel: 40, exp: 369 },
+  { maxLevel: 50, exp: 628 }
+];
+
 export function getExpNext(level) {
+  if (!Number.isSafeInteger(level) || level < 1) return 125;
   if (level >= MAX_LEVEL) return Infinity;
-  return Math.floor(100 * Math.pow(level, 1.6));
+  const band = CAMPAIGN_XP_BANDS.find(item => level <= item.maxLevel);
+  if (band) return band.exp;
+  return Math.floor(628 * Math.pow(level / 50, 1.5));
 }
 
 export function addExp(amount) {
