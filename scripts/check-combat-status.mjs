@@ -15,7 +15,7 @@ const recovering = { effects: [] };
 applyEffect(recovering, 'stun');
 tickEffects(recovering);
 assert.equal(consumeStun(recovering), true);
-assert.equal(recovering.stunImmunityTurns, 1);
+assert.equal(recovering.stunImmunityTurns, 2);
 applyEffect(recovering, 'stun');
 assert.equal(isStunned(recovering), false, 'the next boss attack must not immediately re-stun the player');
 tickEffects(recovering);
