@@ -129,6 +129,9 @@ export function canCraftRecipe(recipeId) {
 
   const tier = getRecipeTier(recipe);
   const actIndex = getCurrentActIndex(p);
+  if (Number.isSafeInteger(recipe.requiredAct) && recipe.requiredAct > actIndex + 1) {
+    return { ok: false, msg: `Этот рецепт откроется в ${recipe.requiredAct}-м акте` };
+  }
   if (tier >= 4) {
     const crafted = p.craftedHighTierByAct || {};
     if ((crafted[actIndex] || 0) >= 1) {
