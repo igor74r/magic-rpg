@@ -56,7 +56,7 @@ export function sellItemsByIndices(indices, options = {}) {
 
   if (!Array.isArray(p.buyback)) p.buyback = [];
   const soldAt = new Date().toDateString();
-  p.buyback = p.buyback.filter(record => record.soldAt === soldAt);
+  p.buyback = p.buyback.filter(record => record?.soldAt === soldAt);
   for (const entry of candidates) {
     const snapshot = JSON.parse(JSON.stringify(entry.inst));
     const price = getSellPrice(entry.inst, p);
