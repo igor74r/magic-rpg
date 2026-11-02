@@ -33,29 +33,36 @@ export function migrateLegacySave() {
 }
 
 export function saveGame() {
-  if (!state.game) return;
+  if (!state.game) return false;
 
   const slot = isValidSlot(state.currentSlot) ? state.currentSlot : 1;
-
-  state.game.version = SAVE_VERSION;
-
+  const now = Date.now();
   const player = state.game.player;
+  let playtimeSec = player && Number.isFinite(player.playtimeSec)
+    ? Math.max(0, Math.floor(player.playtimeSec))
+    : 0;
 
-  if (player && lastSaveTime) {
-    const deltaSec = (Date.now() - lastSaveTime) / 1000;
-
+  if (player && Number.isFinite(lastSaveTime)) {
+    const deltaSec = (now - lastSaveTime) / 1000;
     if (deltaSec > 0 && deltaSec < 3600) {
-      player.playtimeSec =
-        (player.playtimeSec || 0) + Math.floor(deltaSec);
+      playtimeSec += Math.floor(deltaSec);
     }
   }
 
-  lastSaveTime = Date.now();
+  // Serialize a snapshot first. Neither schema version nor playtime changes
+  // in live state until localStorage confirms the write succeeded.
+  const snapshot = {
+    ...state.game,
+    version: SAVE_VERSION,
+    ...(player ? { player: { ...player, playtimeSec } } : {})
+  };
+  const serialized = JSON.stringify(snapshot);
+  localStorage.setItem(slotKey(slot), serialized);
 
-  localStorage.setItem(
-    slotKey(slot),
-    JSON.stringify(state.game)
-  );
+  state.game.version = SAVE_VERSION;
+  if (player) player.playtimeSec = playtimeSec;
+  lastSaveTime = now;
+  return true;
 }
 
 function normalizeEquipped(player) {
@@ -486,11 +493,15 @@ export function migrateGame(game) {
 export function loadGameData(slot) {
   const selectedSlot = slot === undefined ? (state.currentSlot ?? 1) : slot;
   if (!isValidSlot(selectedSlot)) return false;
-  const data = localStorage.getItem(slotKey(selectedSlot));
 
-  if (!data) return false;
+  const previousGame = state.game;
+  const previousSlot = state.currentSlot;
+  const previousLastSaveTime = lastSaveTime;
 
   try {
+    const data = localStorage.getItem(slotKey(selectedSlot));
+    if (!data) return false;
+
     const game = JSON.parse(data);
     if (!game || typeof game !== 'object' || Array.isArray(game) ||
         !game.player || typeof game.player !== 'object' || Array.isArray(game.player)) {
@@ -523,6 +534,11 @@ export function loadGameData(slot) {
 
     return true;
   } catch (error) {
+    // A failed migration rewrite must not leave a half-loaded character or
+    // switch the active slot while the previous save remains authoritative.
+    state.game = previousGame;
+    state.currentSlot = previousSlot;
+    lastSaveTime = previousLastSaveTime;
     console.error('[save] Не удалось загрузить сохранение:', error);
     return false;
   }
