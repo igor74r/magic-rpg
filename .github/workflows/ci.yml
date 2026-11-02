@@ -68,6 +68,9 @@ jobs:
       - name: Check story location level gates and ordered route
         run: node scripts/check-story-location-gates.mjs
 
+      - name: Check story dragon spawn restrictions
+        run: node scripts/check-story-dragon-spawns.mjs
+
       - name: Check complete five-act campaign progression
         run: |
           node scripts/check-campaign-full.mjs
