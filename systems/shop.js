@@ -79,12 +79,20 @@ export function getBuybackItems() {
 
 export function buybackItem(index) {
   const p = state.game?.player;
-  const records = p?.buyback || [];
+  if (!p || !Array.isArray(p.buyback) || !Number.isSafeInteger(index) || index < 0) {
+    return { ok: false, msg: 'Предмет больше нельзя выкупить' };
+  }
   const today = new Date().toDateString();
-  const record = records.filter(entry => entry.soldAt === today)[index];
-  if (!p || !record || !record.item || !ITEMS[record.item.id]) return { ok: false, msg: 'Предмет больше нельзя выкупить' };
-  if (p.gold < record.price) return { ok: false, msg: 'Не хватает золота для обратного выкупа' };
-  const qty = record.item.qty || 1;
+  const record = p.buyback.filter(entry => entry?.soldAt === today)[index];
+  const item = ITEMS[record?.item?.id];
+  const rarity = record?.item?.rarity || 'common';
+  const qty = record?.item?.qty ?? 1;
+  if (!record || !item || !Number.isFinite(record.price) || record.price < 0 ||
+      !Number.isSafeInteger(qty) || qty < 1 || item.type === 'quest' || item.storyShard ||
+      item.bossOnly || !RARITIES[rarity] || RARITIES[rarity].bossOnly) {
+    return { ok: false, msg: 'Предмет больше нельзя выкупить' };
+  }
+  if (!Number.isFinite(p.gold) || p.gold < record.price) return { ok: false, msg: 'Не хватает золота для обратного выкупа' };
   const capacity = canAddItem(record.item.id, qty, p);
   if (!capacity.ok) return { ok: false, msg: capacity.reason === 'slots' ? 'Сумка заполнена' : 'Превышен лимит переносимого веса' };
   if (STACKABLE_TYPES.has(ITEMS[record.item.id].type)) {
