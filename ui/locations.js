@@ -79,21 +79,21 @@ function panelHtml(id) {
   const here = id === state.game.location;
   const actions = [];
   if (id === 'rift') {
-    actions.push(`<button onclick="GameAPI.enterRift()">Войти в Разлом</button>`);
+    actions.push(`<button type="button" onclick="GameAPI.enterRift()">Войти в Разлом</button>`);
   } else if (here) {
-    if (loc.safe || loc.enemies?.length) actions.push(`<button onclick="GameAPI.enterOverworld()">Исследовать</button>`);
-    if (loc.shop) actions.push(`<button onclick="GameAPI.openShop()">Магазин</button>`);
+    if (loc.safe || loc.enemies?.length) actions.push(`<button type="button" onclick="GameAPI.enterOverworld()">Исследовать</button>`);
+    if (loc.shop) actions.push(`<button type="button" onclick="GameAPI.openShop()">Магазин</button>`);
     if (id === 'village') {
       const canOpen = canOpenDaily();
-      actions.push(`<button onclick="GameAPI.openDailyChest()" ${canOpen ? '' : 'disabled'}>${canOpen ? 'Ежедневный сундук' : `Сундук через ${formatRemaining(timeUntilDaily())}`}</button>`);
+      actions.push(`<button type="button" onclick="GameAPI.openDailyChest()" ${canOpen ? '' : 'disabled'}>${canOpen ? 'Ежедневный сундук' : `Сундук через ${formatRemaining(timeUntilDaily())}`}</button>`);
       const riftReady = isRiftReady();
       const best = state.game.player.riftBest || 0;
-      actions.push(`<button onclick="GameAPI.enterRift()" ${riftReady ? '' : 'disabled'}>Разлом${best > 0 ? ` · рекорд ${best}` : ''}</button>`);
-      actions.push(`<button onclick="GameAPI.enterTower()">🏰 Башня · 40 этажей</button>`);
+      actions.push(`<button type="button" onclick="GameAPI.enterRift()" ${riftReady ? '' : 'disabled'}>Разлом${best > 0 ? ` · рекорд ${best}` : ''}</button>`);
+      actions.push(`<button type="button" onclick="GameAPI.enterTower()">🏰 Башня · 40 этажей</button>`);
     }
   } else {
     // Если локация не текущая, кнопка "Перейти" всё ещё нужна для тех, кто хочет сначала прочитать описание
-    actions.push(`<button onclick="GameAPI.mapTravel('${id}')">Перейти сюда</button>`);
+    actions.push(`<button type="button" onclick="GameAPI.mapTravel('${id}')">Перейти сюда</button>`);
   }
   return `
     <div class="map-panel-head">
