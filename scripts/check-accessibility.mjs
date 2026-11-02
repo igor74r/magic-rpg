@@ -115,3 +115,12 @@ assert.ok(quests.includes('type="button" data-game-action="claim-quest"'),
 assert.ok(quests.includes('role="progressbar" aria-label="Прогресс миссии: ${mission.title}" aria-valuemin="0" aria-valuemax="${mission.count}" aria-valuenow="${Math.min(missionProgress.current, mission.count)}"'),
   'campaign mission progress must expose accessible progress semantics');
 console.log('check-accessibility: PASS (14 keyboard-operable tabs, labelled settings, modal/live-region/progress semantics)');
+
+const questBoard = (await readFile(new URL('../ui/quests.js', import.meta.url), 'utf8'));
+assert.match(questBoard, /<button type="button" data-game-action="close-npc"/,
+  'quest board exit control must not submit an enclosing form');
+const combatPanel = (await readFile(new URL('../ui/overworld/combat-panel.js', import.meta.url), 'utf8'));
+for (const action of ['attack', 'open-spells', 'open-items', 'flee', 'block', 'open-abilities']) {
+  assert.match(combatPanel, new RegExp('<button type="button" data-combat-action="' + action + '"'),
+    `combat action "${action}" must be an explicit button`);
+}
