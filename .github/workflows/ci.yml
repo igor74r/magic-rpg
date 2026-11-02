@@ -112,6 +112,9 @@ jobs:
       - name: Check overworld maps and region collision
         run: node scripts/check-overworld-map.mjs
 
+      - name: Check secret exploration and world-event save safety
+        run: node scripts/check-world-exploration.mjs
+
       - name: Check Aurora village layout, portals and building collision
         run: node scripts/check-village-layout.mjs
 
