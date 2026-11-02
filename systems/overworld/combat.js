@@ -160,7 +160,7 @@ function enemyDefenseForStyle(enemy, style, armorPen = 0) {
   const counter = enemy?.adaptiveCounter;
   if (!counter || counter.style !== style || counter.remaining <= 0) return base;
   const def = ENEMIES[enemy.enemyId];
-  const reduction = def?.boss ? 0.10 : 0.20;
+  const reduction = def?.boss ? 0.12 : 0.20;
   return base + Math.floor(Math.max(1, base) * reduction);
 }
 
@@ -191,7 +191,7 @@ function prepareEnemyAdaptation(ow, enemy) {
   if (!style || enemy.adaptiveCounter?.remaining > 0) return;
   const def = ENEMIES[enemy.enemyId];
   // Bosses learn more slowly and their counter is weaker.
-  enemy.adaptiveCounter = { style, remaining: 1 };
+  enemy.adaptiveCounter = { style, remaining: def?.boss ? 2 : 1 };
   const label = style === 'melee' ? 'ближний бой' : style === 'ranged' ? 'дальние атаки' : 'магия';
   pushLog(`🧠 ${enemyDisplayName(enemy)} приспособился к вашему стилю (${label})!`, 'warning');
   if (def?.boss) {
@@ -1285,7 +1285,8 @@ function enemyCombatTurn() {
     playerHpRatio,
     enemyHpRatio,
     blocking: ow.combat.blocking,
-    pendingSpecial: Boolean(enemy.tacticalSpecialPending)
+    pendingSpecial: Boolean(enemy.tacticalSpecialPending),
+    isBoss: Boolean(def.boss)
   });
   const useSpecial = tacticalDecision.action === 'special';
   if (tacticalDecision.action === 'telegraph') {
