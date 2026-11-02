@@ -10,8 +10,8 @@ behavior = getEnemyBehavior({ ...enemy, x: 350, state: 'chase' }, { x: 370, y: 0
 assert.equal(behavior.state, 'return', 'enemy must return when pulled beyond its home leash');
 assert.deepEqual([behavior.targetX, behavior.targetY], [0, 0]);
 
-behavior = getEnemyBehavior({ ...enemy, x: 60, state: 'chase' }, { x: 300, y: 0 });
-assert.equal(behavior.state, 'return', 'enemy must disengage after player escapes aggro range');
+behavior = getEnemyBehavior({ ...enemy, x: 60, state: 'chase' }, { x: 350, y: 0 });
+assert.equal(behavior.state, 'return', 'enemy must disengage after player escapes the disengage hysteresis range');
 
 behavior = getEnemyBehavior({ ...enemy, x: 45, state: 'return' }, { x: 120, y: 0 });
 assert.equal(behavior.state, 'return', 'returning enemy must finish reaching its home before reacquiring');
