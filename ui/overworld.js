@@ -158,10 +158,11 @@ function onOverworldCanvasClick(event) {
   const portals = (ow.statics || []).filter(item =>
     ['world-portal', 'tower-portal', 'world-waystone', 'tower-gate'].includes(item.id)
   );
-  let nearest = null, nearestDistance = 50;
+  let nearest = null, nearestDistance = Infinity;
   for (const portal of portals) {
     const distance = Math.hypot(portal.x - worldX, portal.y - worldY);
-    if (distance < nearestDistance) {
+    const hitRadius = Math.max(70, Number(portal.interactionRadius) || 0);
+    if (distance <= hitRadius && distance < nearestDistance) {
       nearest = portal;
       nearestDistance = distance;
     }
