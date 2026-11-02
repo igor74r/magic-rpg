@@ -73,6 +73,22 @@ try {
     console.log(`PASS ${enemyId} ${ENEMIES[enemyId].special.type} special and status effect`);
   }
 
+  // Vampiric modifier must heal from actual multi-hit damage, not the pre-special base hit.
+  let f = fixture('warrior', 'wolf');
+  f.enemy.modifier = 'vampiric';
+  f.enemy.hp = 1000;
+  f.p.con = 0;
+  state.settings.difficulty = 'hard';
+  f.ow.combat.turnCount = 2;
+  combatAttack();
+  runEnemyTurn();
+  const specialBaseDamage = Math.max(1, Math.floor((ENEMIES.wolf.attack + 4) * 1.4));
+  const doubleHitDamage = Math.max(1, Math.floor(specialBaseDamage * 0.6)) * 2;
+  const expectedVampiricHeal = Math.floor(doubleHitDamage * 0.3);
+  assert.equal(f.enemy.hp, 1000 + expectedVampiricHeal, 'vampiric heal must use both actual hits');
+  state.settings.difficulty = 'normal';
+  console.log('PASS vampiric healing scales with actual double-special damage');
+
   // Evasion prevents the next enemy action, including a special.
   let f = fixture('archer', 'skeleton-archer');
   f.ow.combat.turnCount = 2;
