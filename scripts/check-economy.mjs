@@ -83,6 +83,22 @@ assert.equal(buyer.inventory.length, 1);
 assert.equal(buyer.inventory[0].id, 'test-no-price-material',
   'an item with no sale value must remain in inventory');
 delete ITEMS['test-no-price-material'];
+
+// Malformed stack quantities and unsafe sale totals must never mint infinite gold.
+assert.equal(getSellPrice({ id: 'health-potion', qty: Infinity }, buyer), 0);
+assert.equal(getSellPrice({ id: 'health-potion', qty: Number.MAX_SAFE_INTEGER }, buyer), 0);
+buyer.inventory = [{ id: 'health-potion', qty: Infinity }];
+const malformedSale = sellItemsByIndices([0], { confirmed: true });
+assert.equal(malformedSale.ok, false);
+assert.equal(buyer.inventory.length, 1, 'malformed stack must remain in inventory');
+buyer.inventory = [{ id: 'iron-sword', qty: 1, rarity: 'common' }];
+buyer.gold = Number.MAX_SAFE_INTEGER;
+const overflowSale = sellItemsByIndices([0], { confirmed: true });
+assert.equal(overflowSale.ok, false, 'sale must reject a balance overflow');
+assert.equal(buyer.gold, Number.MAX_SAFE_INTEGER);
+assert.equal(buyer.inventory.length, 1, 'overflowing sale must not remove the item');
+buyer.gold = 1000;
+
 state.game = null;
 if (originalStorage === undefined) delete globalThis.localStorage;
 else globalThis.localStorage = originalStorage;
