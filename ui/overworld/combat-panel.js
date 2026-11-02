@@ -113,12 +113,12 @@ export function renderCombatPanel() {
 
   const hideMagic = p.class === 'warrior';
   actions.innerHTML = `
-    <button data-combat-action="attack">[1] ⚔️ Атака</button>
-    ${!hideMagic ? `<button data-combat-action="open-spells" ${p.spells.length === 0 ? 'disabled' : ''}>[2] ✨ Магия</button>` : ''}
-    <button data-combat-action="open-items" ${p.inventory.filter(i => ITEMS[i.id]?.type === 'consumable').length === 0 ? 'disabled' : ''}>[3] 🎒 Предмет</button>
-    <button data-combat-action="flee">[4] 🏃 Побег</button>
-    <button data-combat-action="block" style="background:linear-gradient(180deg,#2a5a8b,#1a3a6a);border-color:#60a0ff;">[5] 🛡️ Блок</button>
-    <button data-combat-action="open-abilities" style="background:linear-gradient(180deg,#5a2a7a,#3a1a4a);border-color:#b060ff;">[6] ✨ Способность</button>`;
+    <button type="button" data-combat-action="attack">[1] ⚔️ Атака</button>
+    ${!hideMagic ? `<button type="button" data-combat-action="open-spells" ${p.spells.length === 0 ? 'disabled' : ''}>[2] ✨ Магия</button>` : ''}
+    <button type="button" data-combat-action="open-items" ${p.inventory.filter(i => ITEMS[i.id]?.type === 'consumable').length === 0 ? 'disabled' : ''}>[3] 🎒 Предмет</button>
+    <button type="button" data-combat-action="flee">[4] 🏃 Побег</button>
+    <button type="button" data-combat-action="block" style="background:linear-gradient(180deg,#2a5a8b,#1a3a6a);border-color:#60a0ff;">[5] 🛡️ Блок</button>
+    <button type="button" data-combat-action="open-abilities" style="background:linear-gradient(180deg,#5a2a7a,#3a1a4a);border-color:#b060ff;">[6] ✨ Способность</button>`;
 }
 
 export function owOpenSpells() { subPanel = 'spells'; renderCombatPanel(); }
