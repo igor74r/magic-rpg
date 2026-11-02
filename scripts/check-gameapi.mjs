@@ -45,7 +45,7 @@ function splitTopLevel(str, sep) {
 // Вырезает тело объекта window.GameAPI = { ... } с учётом строк и комментариев.
 function extractFacadeBody(text) {
   // Find the actual facade assignment, not an earlier delegated reference to GameAPI.
-  const assignment = /window\\.GameAPI\\s*=\\s*\\{/.exec(text);
+  const assignment = /window\.GameAPI\s*=\s*\{/.exec(text);
   if (!assignment) return null;
   const brace = assignment.index + assignment[0].lastIndexOf('{');
 
