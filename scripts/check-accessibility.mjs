@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [html, main, header, menu] = await Promise.all([
+const [html, main, header, menu, css] = await Promise.all([
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
   readFile(new URL('../main.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/header.js', import.meta.url), 'utf8'),
-  readFile(new URL('../ui/menu.js', import.meta.url), 'utf8')
+  readFile(new URL('../ui/menu.js', import.meta.url), 'utf8'),
+  readFile(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8')
 ]);
 
 const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
@@ -24,5 +25,6 @@ assert.match(main, /tabs\[nextIndex\]\.focus\(\)/);
 assert.match(main, /tabs\[nextIndex\]\.click\(\)/);
 assert.match(header, /setAttribute\('aria-selected', String\(active\)\)/);
 assert.match(menu, /setAttribute\('aria-selected', String\(active\)\)/);
+assert.match(css, /\.settings-tab:focus-visible/);
 
 console.log('check-accessibility: PASS (14 keyboard-operable tabs, selected state and tab panels)');
