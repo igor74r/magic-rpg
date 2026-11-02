@@ -81,7 +81,7 @@ try {
   vampiric.p.con = 0;
   state.settings.difficulty = 'hard';
   vampiric.ow.combat.turnCount = 2;
-  combatAttack();
+  combatBlock();
   runEnemyTurn();
   const specialBaseDamage = Math.max(1, Math.floor((ENEMIES.wolf.attack + 4) * 1.4));
   const doubleHitDamage = Math.max(1, Math.floor(specialBaseDamage * 0.6)) * 2;
