@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { escapeHtml } from '../ui/screens.js';
 import { state } from '../systems/state.js';
 import { renderInventory, buildTooltipHTML } from '../ui/inventory.js';
+import { renderSlots } from '../ui/menu.js';
 
 assert.equal(escapeHtml('<img src=x onerror="alert(1)">'), '&lt;img src=x onerror=&quot;alert(1)&quot;&gt;');
 assert.equal(escapeHtml("O'Neil & Sons"), 'O&#39;Neil &amp; Sons');
@@ -31,6 +32,17 @@ state.game = {
   }
 };
 try {
+  const slotData = {
+    player: { name: '<img src=x onerror=alert(9)>', class: 'mage', level: 4 },
+    location: 'village'
+  };
+  globalThis.localStorage = {
+    getItem: key => key === 'magic-rpg-save-1' ? JSON.stringify(slotData) : null
+  };
+  renderSlots();
+  assert.ok(grid.innerHTML.includes('&lt;img src=x onerror=alert(9)&gt;'), 'save-slot character names must be escaped');
+  assert.ok(!grid.innerHTML.includes('<img src=x onerror=alert(9)>'), 'imported character name must not inject markup');
+
   const inventoryHtml = renderInventory();
   const importedTooltip = buildTooltipHTML(state.game.player.inventory[0]);
   assert.ok(importedTooltip.includes('&lt;img src=x onerror=alert(1)&gt;'), 'imported affix name must be escaped in tooltip');
