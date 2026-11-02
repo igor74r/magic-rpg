@@ -383,7 +383,10 @@ export function loadSlot(slot) {
 }
 
 export function newGameSlot(slot) {
-  state.currentSlot = slot;
+  if (!Number.isSafeInteger(slot) || slot < 1 || slot > 3) return;
+  // Defer the active-slot switch until the new character is actually created.
+  // This prevents pagehide/autosave from copying the previous hero into this slot.
+  state.pendingSlot = slot;
   state.selectedClass = null;
   renderClassSelection();
   showScreen('screen-char');
