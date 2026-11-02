@@ -2,7 +2,7 @@ import { state } from './state.js';
 import { CLASSES } from '../data/classes.js';
 import { STORY } from '../data/story.js';
 import { addItem } from './inventory.js';
-import { saveGame } from './save.js';
+import { migrateGame, saveGame } from './save.js';
 import { emit } from './events.js';
 
 export function createCharacter(name, className) {
@@ -129,6 +129,9 @@ export function createCharacter(name, className) {
     state.game.quests[quest.id] = false;
   });
 
+  // Apply the current save schema before saveGame stamps the version.
+  // Otherwise a fresh v15 character would skip the v16/v17 migrations.
+  migrateGame(state.game);
   saveGame();
 
   emit('game:started', {
