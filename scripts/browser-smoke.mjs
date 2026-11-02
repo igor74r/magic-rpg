@@ -109,6 +109,16 @@ try {
       assert.equal(await tabButton.getAttribute('aria-selected'), 'true', `${viewport.name}: ${tab} tab must become selected`);
       assert.equal(await page.locator('#tab-content').getAttribute('aria-labelledby'), `game-tab-${tab}`,
         `${viewport.name}: tab panel must identify its active tab`);
+      if (tab === 'quests') {
+        const progress = page.locator('.campaign-progress[role="progressbar"]').first();
+        await progress.waitFor();
+        assert.ok(Number(await progress.getAttribute('aria-valuemax')) > 0,
+          `${viewport.name}: campaign progress must expose a positive maximum`);
+        const current = Number(await progress.getAttribute('aria-valuenow'));
+        assert.ok(Number.isFinite(current) && current >= 0,
+          `${viewport.name}: campaign progress must expose a valid current value`);
+      }
+
       if (tab === 'inventory') {
         const bagFilter = page.locator('[data-inv-filter="bag"]');
         assert.equal(await bagFilter.getAttribute('aria-pressed'), 'true',
