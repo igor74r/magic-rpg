@@ -66,6 +66,9 @@ try {
     const hpBefore = f.p.hp;
     combatAttack();
     const enemyHpAfterPlayerAttack = f.enemy.hp;
+    runEnemyTurn(); // telegraph turn: enemy warns before the configured special
+    assert.ok(f.enemy.tacticalSpecialPending, `${enemyId} must retain its announced special`);
+    combatBlock();
     runEnemyTurn();
     assert.ok(f.p.hp < hpBefore, `${enemyId} special must damage player`);
     assert.ok(f.p.effects.some(effect => effect.id === expectedEffect), `${enemyId} special must apply its configured effect`);
@@ -85,9 +88,12 @@ try {
   const wolfSpecialEffect = ENEMIES.wolf.special.effect;
   ENEMIES.wolf.special.effect = null;
   combatBlock();
-  runEnemyTurn();
+  runEnemyTurn(); // announced attack
+  const enemyHpBeforeSpecial = vampiric.enemy.hp;
+  combatBlock();
+  runEnemyTurn(); // prepared double strike
   ENEMIES.wolf.special.effect = wolfSpecialEffect;
-  const actualSpecialDamage = hpBeforeSpecial - vampiric.p.hp;
+  const actualSpecialDamage = vampiric.enemy.hp - enemyHpBeforeSpecial;
   const expectedVampiricHeal = Math.floor(actualSpecialDamage * 0.3);
   assert.equal(vampiric.enemy.hp, 1000 + expectedVampiricHeal, 'vampiric heal must use both actual hits');
   state.settings.difficulty = 'normal';
@@ -142,7 +148,9 @@ try {
   f = fixture('warrior', 'book-guardian');
   f.ow.combat.turnCount = 2;
   combatAttack();
-  runEnemyTurn();
+  runEnemyTurn(); // telegraph
+  combatAttack();
+  runEnemyTurn(); // prepared special applies stun
   assert.equal(f.p.effects.some(effect => effect.id === 'stun'), false, 'stun must be consumed after skipping the player turn');
   assert.equal(f.ow.combat.turn, 'enemy', 'enemy must receive its next turn after player stun');
   runEnemyTurn();
