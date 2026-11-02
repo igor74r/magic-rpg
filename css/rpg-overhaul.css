@@ -462,7 +462,7 @@
   0%,100% { transform:translateY(0) rotate(-2deg); }
   50% { transform:translateY(-5px) rotate(2deg); }
 }
-button:focus-visible, a:focus-visible, .tab:focus-visible {
+button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-visible {
   outline:2px solid #ffe39a;
   outline-offset:3px;
 }
