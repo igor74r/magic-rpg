@@ -39,7 +39,7 @@ import { exitOverworld, enterOverworld } from './systems/overworld.js';
 import { isRiftReady, getRiftLocations } from './systems/rift.js';
 import { getTowerBest, getTowerStartFloor, TOWER_MAX_FLOOR } from './systems/tower.js';
 import { startNGPlus } from './systems/ngplus.js';
-import { showScreen, toast, logTo } from './ui/screens.js';
+import { showScreen, toast, logTo, escapeHtml } from './ui/screens.js';
 import {
   initAudio, playSound, playBGM, updateVolume, resumeContext
 } from './systems/audio.js';
