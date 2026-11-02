@@ -90,6 +90,29 @@ function panelHtml(id) {
   const gateNotice = story
     ? `<p class="map-story-gate">${story.actNumber}-й акт · маршрут #${story.sequence} · уровень открытия ${story.requiredLevel}${gateReason}</p>`
     : '';
+  const activeMission = getActiveCampaignMission(state.game?.player);
+  const activeLocationId = activeMission
+    ? (activeMission.mission.locationId || activeMission.act.locationId)
+    : null;
+  const missionPanel = activeMission && id === activeLocationId
+    ? (() => {
+        const progress = getMissionProgress(state.game.player, activeMission.mission);
+        const mission = activeMission.mission;
+        const shardNotice = mission.shardId && !progress.shardFound
+          ? '<p class="map-quest-shard">Осколок ещё не найден — выполните особое условие задания.</p>'
+          : '';
+        return `<section class="map-quest-panel" aria-label="Активное сюжетное задание">
+          <div class="map-quest-panel-kicker">📜 АКТИВНОЕ СЮЖЕТНОЕ ЗАДАНИЕ · АКТ ${activeMission.act.number}</div>
+          <h4>${mission.title}</h4>
+          <p>${mission.desc || ''}</p>
+          <div class="map-quest-objective">${mission.objective || 'Выполните цель задания'}</div>
+          <div class="map-quest-progress"><span>Прогресс</span><strong>${progress.current} / ${progress.required}</strong></div>
+          <div class="map-quest-progress-track" role="progressbar" aria-label="Прогресс задания" aria-valuemin="0" aria-valuemax="${progress.required}" aria-valuenow="${progress.current}"><span style="width:${Math.round(progress.current / progress.required * 100)}%"></span></div>
+          ${mission.briefing ? `<p class="map-quest-briefing">${mission.briefing}</p>` : ''}
+          ${shardNotice}
+        </section>`;
+      })()
+    : '';
   if (id === 'rift') {
     actions.push(`<button type="button" onclick="GameAPI.enterRift()">Войти в Разлом</button>`);
   } else if (here) {
@@ -115,6 +138,7 @@ function panelHtml(id) {
         ${gateNotice}
       </div>
       <div class="map-panel-actions">${actions.join('')}</div>
+      ${missionPanel}
     </div>`;
 }
 
