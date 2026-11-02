@@ -1615,3 +1615,241 @@ function combatVictory() {
 
   p.stats.goldEarned =
     (p.stats.goldEarned || 0) + gold;
+
+  if (enemy.elite) {
+    p.stats.eliteKills = (p.stats.eliteKills || 0) + 1;
+  }
+
+  if (enemy.boss) {
+    p.stats.bossKills = (p.stats.bossKills || 0) + 1;
+  }
+
+  // Elites have a high chance for each listed drop. Bosses guarantee
+  // their first signature drop; additional drops still use normal difficulty odds.
+  const baseDropChance = enemy.elite ? 0.85 : getDropChance();
+  const dropChance = getLootDropChance(baseDropChance, p);
+
+  def.drops.forEach((id, index) => {
+    const shouldDrop = enemy.boss
+      ? index === 0 || Math.random() < getLootDropChance(getDropChance(), p)
+      : Math.random() < dropChance;
+
+    if (shouldDrop) {
+      const result = addItemOrStore(id, 1, { allowMythic: !!enemy.boss });
+      const instance = result.created[0];
+      if (result.stored) {
+        pushLog(`Сумка заполнена: ${ITEMS[id].name} отправлено в хранилище добычи.`, 'warning');
+        return;
+      }
+      if (!instance) return;
+
+      const rarity =
+        instance.rarity && instance.rarity !== 'common'
+          ? `${RARITIES[instance.rarity].name} `
+          : '';
+
+      pushLog(
+        `Добыча: ${rarity}${ITEMS[id].name}`,
+        'success'
+      );
+    }
+  });
+
+  const herbChance = enemy.boss
+    ? Math.min(1, HERB_DROP_CHANCE_ELITE * 1.25)
+    : enemy.elite
+      ? HERB_DROP_CHANCE_ELITE
+      : HERB_DROP_CHANCE;
+
+  if (Math.random() < herbChance) {
+    const herbQty = (enemy.elite || enemy.boss) ? 2 : 1;
+
+    const herbId =
+      Math.random() < 0.5
+        ? 'herb-life'
+        : 'herb-moon';
+
+    const herbResult = addItemOrStore(herbId, herbQty);
+    if (herbResult.created.length) {
+      pushLog(`Трава: ${ITEMS[herbId].name} ×${herbQty}`, 'success');
+    } else if (herbResult.stored) {
+      pushLog(`Сумка заполнена: ${ITEMS[herbId].name} отправлено в хранилище добычи.`, 'warning');
+    }
+  }
+
+  // Legacy location-based shard rewards disabled; canonical shards come from story dragons.
+  const dragonReward = claimStoryDragonReward(state.game, enemy.enemyId, ow.locationId);
+  if (dragonReward?.newlyDefeated) {
+    const shardId = dragonReward.shardItemId;
+    if (shardId && ITEMS[shardId]) {
+      const shardResult = addItemOrStore(shardId, 1);
+      pushLog('🐉 Сюжетный дракон повержен!', 'success');
+      pushLog(`💎 Получен сюжетный осколок: ${ITEMS[shardId].name}`, shardResult.created.length || shardResult.stored ? 'success' : 'warning');
+      if (dragonReward.dragon.id === 'blood-crown') {
+        state.game.riftOpenedAt = Date.now();
+        setTimeout(() => emit('rift:opened'), 900);
+      }
+    }
+  }
+
+  p.gold += gold;
+
+  const previousLevel = p.level;
+
+  addExp(exp);
+
+  if (p.level > previousLevel) {
+    spawnParticles(ow.player.x, ow.player.y, 'levelup', 25);
+    triggerShake(6, 0.3);
+  }
+
+  enemy.dead = true;
+  enemy.respawnAt = performance.now() + getRespawnMs();
+  enemy.effects = [];
+
+  clearPlayerEffects();
+
+  if (hasElderBlessing && savedBlessingDuration > 0) {
+    p.effects.push({
+      id: 'elderBlessing',
+      duration: savedBlessingDuration
+    });
+  }
+
+  if (hasBuff(p, 'catLuck')) {
+    consumeBuffRound(p, 'catLuck');
+  }
+
+  if (hasBuff(p, 'bardBuff')) {
+    consumeBuffRound(p, 'bardBuff');
+  }
+
+  // Save after temporary combat effects and cooldowns have been cleared.
+  saveGame();
+  endCombat();
+  checkAchievements();
+
+  if (ow.rifMode || ow.towerMode) {
+    const alive = ow.enemies.filter(
+      currentEnemy => !currentEnemy.dead
+    ).length;
+
+    if (alive === 0) {
+      setTimeout(
+        () => emit(ow.towerMode ? 'tower:floor-cleared' : 'rift:floor-cleared', {
+          floor: ow.towerMode ? ow.towerFloor : ow.rifFloor
+        }),
+        900
+      );
+    }
+  }
+
+  if (canCompleteMainQuest(state.game) && !p.victoryAchieved) {
+    setTimeout(
+      () => emit('victory'),
+      1500
+    );
+  }
+}
+
+function combatDefeat() {
+  const ow = state.overworld;
+
+  if (!ow || !ow.combat) return;
+
+  const p = state.game.player;
+  const cls = CLASSES[p.class];
+
+  const hasResurrection = cls.abilities?.some(
+    ability => ability.id === 'resurrection'
+  );
+
+  if (
+    hasResurrection &&
+    !ow.combat.playerResurrectionUsed
+  ) {
+    ow.combat.playerResurrectionUsed = true;
+
+    const talent = getTalentBonus(p);
+
+    const restore = Math.ceil(
+      p.maxHp * (talent.resurrectPct || 0.3)
+    );
+
+    p.hp = restore;
+    ow.player.hp = restore;
+
+    pushLog(
+      `✨ Воскрешение! Возрождение с ${restore} HP`,
+      'success'
+    );
+
+    playSound('heal');
+    triggerShake(12, 0.5);
+    spawnParticles(ow.player.x, ow.player.y, 'levelup', 20);
+
+    ow.combat.turn = 'player';
+    return;
+  }
+
+  const enemy = ow.combat.enemy;
+
+  pushLog('💀 Поражение...', 'damage');
+  playSound('defeat');
+  spawnParticles(ow.player.x, ow.player.y, 'hurt', 25);
+
+  if (!p.stats) {
+    p.stats = {
+      kills: {},
+      deaths: 0,
+      goldEarned: 0,
+      chestsOpened: 0,
+      dailyChestAt: 0,
+      dailyChestsOpened: 0,
+      flawlessStreak: 0
+    };
+  }
+
+  p.stats.deaths = (p.stats.deaths || 0) + 1;
+  p.stats.flawlessStreak = 0;
+
+  if (p.dailyQuests?.list) {
+    const quest = p.dailyQuests.list.find(item =>
+      item.type === 'flawless' &&
+      !item.completed &&
+      !item.claimed
+    );
+
+    if (quest) {
+      quest.current = 0;
+    }
+  }
+
+  p.hp = 0;
+  ow.player.hp = 0;
+
+  enemy.state = 'idle';
+  ow.defeated = true;
+  ow.combat = null;
+
+  clearPlayerEffects();
+  // Persist the death counter and zero-HP state immediately. loadGameData
+  // safely restores this state at half HP in the village after a restart.
+  saveGame();
+
+  emit('rift:defeated');
+  emit('overworld:defeat');
+}
+
+function endCombat() {
+  const ow = state.overworld;
+  if (!ow) return;
+
+  if (ow.combat) {
+    ow.combat.enemy.state = 'idle';
+  }
+
+  ow.combat = null;
+
+  emit('combat:end');
+}
