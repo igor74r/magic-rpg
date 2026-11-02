@@ -189,7 +189,7 @@ try {
     const dashboardNav = await page.locator('.dashboard-sidebar').boundingBox();
     assert.ok(dashboardNav && dashboardNav.height > 0, `${viewport.name}: primary dashboard navigation must remain visible`);
     const navSearch = page.locator('#dashboard-nav-search');
-    await navSearch.fill('таланты');
+    await navSearch.fill('талант');
     assert.equal(await page.locator('#game-tab-talents').isVisible(), true,
       `${viewport.name}: navigation search must keep matching sections visible`);
     assert.equal(await page.locator('#game-tab-inventory').isVisible(), false,
@@ -197,6 +197,13 @@ try {
     await navSearch.fill('');
     assert.equal(await page.locator('#game-tab-inventory').isVisible(), true,
       `${viewport.name}: clearing navigation search must restore all sections`);
+    assert.equal(await page.locator('.dashboard-tablist [role="tab"]').count(), 10,
+      `${viewport.name}: all ten dashboard sections must be present`);
+    assert.equal(await page.locator('#dashboard-context').isVisible(), true,
+      `${viewport.name}: live quest context must remain visible`);
+    await page.locator('#game-tab-hero').click();
+    await page.locator('.hero-overview').waitFor({ state: 'visible' });
+    await page.locator('#game-tab-locations').click();
     await page.locator('#game-header').click();
     await page.keyboard.press('/');
     assert.equal(await page.evaluate(() => document.activeElement?.id), 'dashboard-nav-search',
@@ -277,7 +284,7 @@ try {
     await page.locator('#tower-map-overlay').waitFor({ state: 'detached' });
 
     assert.deepEqual(pageErrors, [], `${viewport.name}: uncaught browser errors: ${pageErrors.join('; ')}`);
-    console.log(`PASS ${viewport.name} (${viewport.width}x${viewport.height}): settings labels, game creation, 9 dashboard tabs, responsive widths, no page errors`);
+    console.log(`PASS ${viewport.name} (${viewport.width}x${viewport.height}): settings labels, game creation, 10 dashboard tabs, responsive widths, no page errors`);
     await page.close();
   }
   console.log('Browser smoke checks passed (3 viewport sizes)');
