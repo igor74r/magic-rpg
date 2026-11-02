@@ -20,7 +20,7 @@ export function getDailyQuests() {
   const saved = p.dailyQuests && typeof p.dailyQuests === 'object' && !Array.isArray(p.dailyQuests)
     ? p.dailyQuests
     : { date: 0, list: [] };
-  const lastDate = Number.isFinite(saved.date) && saved.date >= 0 ? saved.date : 0;
+  const lastDate = Number.isSafeInteger(saved.date) && saved.date >= 0 && saved.date <= now ? saved.date : 0;
   const savedList = Array.isArray(saved.list) ? saved.list : [];
   const seen = new Set();
   const normalized = savedList.map(entry => {
@@ -29,7 +29,8 @@ export function getDailyQuests() {
     seen.add(definition.id);
     const rawCurrent = Number(entry.current);
     const current = Number.isSafeInteger(rawCurrent) ? Math.max(0, Math.min(definition.max, rawCurrent)) : 0;
-    const completed = entry.completed === true || current >= definition.max;
+    // Completion is derived from normalized progress, never trusted from a save file.
+    const completed = current >= definition.max;
     return { ...definition, current, completed, claimed: completed && entry.claimed === true };
   }).filter(Boolean);
   const expired = now - lastDate > dayMs;
