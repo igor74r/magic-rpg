@@ -88,6 +88,9 @@ jobs:
       - name: Check equipment swaps, capacity and rune sockets
         run: node scripts/check-equipment.mjs
 
+      - name: Check effective stat stacking and combat caps
+        run: node scripts/check-stats.mjs
+
       - name: Check five-act story depth and enemy roster
         run: node scripts/check-story-depth.mjs
 
