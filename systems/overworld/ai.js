@@ -6,6 +6,7 @@ import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
 import { getMovementDelta, resolveSweptMovement, getCameraPosition } from './movement.js';
+import { getEnemyBehavior, getEnemySteering } from './enemy-ai.js';
 
 const VIEW_W = 800, VIEW_H = 500;
 
@@ -118,16 +119,20 @@ export function updateOverworld(dt) {
 
   for (const e of ow.enemies) {
     if (e.dead) continue;
-    const d = Math.hypot(e.x - ow.player.x, e.y - ow.player.y);
-    if (d < COMBAT_RANGE) { enterCombat(e); return; }
-    if (d < AGGRO_RANGE) e.state = 'chase';
-    else if (d > LEASH_RANGE) e.state = 'idle';
+    const behavior = getEnemyBehavior(e, ow.player, { aggroRange: AGGRO_RANGE, leashRange: LEASH_RANGE });
+    e.state = behavior.state;
+    if (behavior.state === 'chase' && behavior.playerDistance < COMBAT_RANGE) {
+      enterCombat(e);
+      return;
+    }
 
-    if (e.state === 'chase') {
-      const dx = ow.player.x - e.x, dy = ow.player.y - e.y;
-      const ln = Math.hypot(dx, dy) || 1, spd = 2.2 * dt;
-      const others = [...ow.enemies, ...ow.npcs, ow.player];
-      moveActor(ow, e, (dx / ln) * spd, (dy / ln) * spd, e.collisionRadius || ENEMY_COLLISION_RADIUS, others);
+    const others = [...ow.enemies, ...ow.npcs, ow.player];
+    const radius = e.collisionRadius || ENEMY_COLLISION_RADIUS;
+    if (behavior.state === 'chase' || behavior.state === 'return') {
+      const spd = (behavior.state === 'chase' ? 2.2 : 1.8) * dt;
+      const steering = getEnemySteering(e.x, e.y, behavior.targetX, behavior.targetY,
+        (x, y) => canOccupyActor(ow, e, x, y, radius, others));
+      if (!steering.blocked) moveActor(ow, e, steering.x * spd, steering.y * spd, radius, others);
     } else {
       e.wanderTimer -= dt * 0.02;
       if (e.wanderTimer <= 0) {
@@ -141,8 +146,7 @@ export function updateOverworld(dt) {
         e.wanderDy = (e.homeY - e.y) / (dHome || 1);
       }
       const spd = 0.9 * dt;
-      const others = [...ow.enemies, ...ow.npcs, ow.player];
-      if (!moveActor(ow, e, e.wanderDx * spd, e.wanderDy * spd, e.collisionRadius || ENEMY_COLLISION_RADIUS, others)) {
+      if (!moveActor(ow, e, e.wanderDx * spd, e.wanderDy * spd, radius, others)) {
         e.wanderDx = -e.wanderDx;
         e.wanderDy = -e.wanderDy;
       }
