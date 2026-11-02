@@ -355,6 +355,12 @@ button:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
   overflow-y: auto;
   box-shadow: inset -8px 0 24px rgba(0,0,0,0.5);
 }
+.dashboard-tablist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
 .sidebar-title {
   color: var(--ink-faint);
   font-size: 11px; text-transform: uppercase;
@@ -1071,6 +1077,7 @@ input[type="text"]:focus, select:focus { outline: none; border-color: var(--gold
   .screen.screen-dashboard { padding: 10px; overflow-y: auto; }
   .dashboard-layout { height: auto; min-height: calc(100vh - 20px); display: flex; flex-direction: column; }
   .dashboard-sidebar { flex-direction: row; overflow-x: auto; padding: 10px; border-right: none; border-bottom: 2px solid var(--gold-dark); }
+  .dashboard-tablist { flex: 1 1 auto; min-width: 0; flex-direction: row; overflow-x: auto; gap: 6px; }
   .sidebar-title, .sidebar-bottom { display: none; }
   .dashboard-sidebar .tab { white-space: nowrap; padding: 8px 12px; border: 1px solid var(--line); border-radius: 3px; border-left: 1px solid var(--line); }
   .dashboard-main { min-height: 50vh; }
