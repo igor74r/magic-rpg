@@ -214,7 +214,7 @@ try {
   check('дерево талантов можно перемещать мышью и касанием', talentHtml.includes('passive-tree-viewport') && talentHtml.includes('passiveTreePointerDown'));
   api.switchTab('inventory');
   const inventoryHtml = byId('tab-content').innerHTML;
-  check('инвентарь рендерит 12 слотов экипировки, 30 ячеек сумки и отдельные вкладки', inventoryHtml.includes('rpg-inventory-layout') && inventoryHtml.includes('Голова') && inventoryHtml.includes('Палец 2') && inventoryHtml.includes('Сумка') && inventoryHtml.includes('Материалы') && inventoryHtml.includes('Осколки') && inventoryHtml.includes('GameAPI.openSaleUI()') && (inventoryHtml.match(/class="gear-slot /g) || []).length === 12 && (inventoryHtml.match(/class="inv-slot/g) || []).length === 30);
+  check('инвентарь рендерит 12 слотов экипировки, 30 ячеек сумки и отдельные вкладки', inventoryHtml.includes('rpg-inventory-layout') && inventoryHtml.includes('Голова') && inventoryHtml.includes('Палец 2') && inventoryHtml.includes('Сумка') && inventoryHtml.includes('Материалы') && inventoryHtml.includes('Осколки') && inventoryHtml.includes('data-inv-action="open-sale"') && (inventoryHtml.match(/class="gear-slot /g) || []).length === 12 && (inventoryHtml.match(/class="inv-slot/g) || []).length === 30);
   api.openSaleUI();
   const saleHtml = byId('inventory-sale-overlay')?.innerHTML || '';
   check('окно продажи показывает инвентарь, список выбранного и массовые действия', saleHtml.includes('Продажа предметов') && saleHtml.includes('Продать все T1–T2') && saleHtml.includes('Выбрать по фильтру') && saleHtml.includes('Итого:'));
