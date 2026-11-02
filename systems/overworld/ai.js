@@ -1,6 +1,6 @@
 import { state } from '../state.js';
 import { playSound } from '../audio.js';
-import { TILE, isWalkable } from './map.js';
+import { TILE } from './map.js';
 import { canOccupyPlayerPosition, canOccupyActorPosition, isActorPositionClear, PLAYER_COLLISION_RADIUS, NPC_COLLISION_RADIUS, ENEMY_COLLISION_RADIUS } from './collisions.js';
 import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
@@ -13,7 +13,7 @@ function canOccupy(ow, x, y, radius = PLAYER_COLLISION_RADIUS) {
   return canOccupyPlayerPosition(
     ow.map, ow.cols, ow.rows, x, y, radius,
     ow.sourceLocationId || ow.locationId
-  );
+  ) && isActorPositionClear(x, y, radius, [...ow.npcs, ...ow.enemies], ow.player);
 }
 
 function canOccupyActor(ow, actor, x, y, radius, others) {
