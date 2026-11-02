@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworldRender, combatPanel] = await Promise.all([
+const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworldRender, combatPanel, quests] = await Promise.all([
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
   readFile(new URL('../main.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/header.js', import.meta.url), 'utf8'),
@@ -12,7 +12,8 @@ const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworl
   readFile(new URL('../ui/npcs.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/overworld.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/overworld/render.js', import.meta.url), 'utf8'),
-  readFile(new URL('../ui/overworld/combat-panel.js', import.meta.url), 'utf8')
+  readFile(new URL('../ui/overworld/combat-panel.js', import.meta.url), 'utf8'),
+  readFile(new URL('../ui/quests.js', import.meta.url), 'utf8')
 ]);
 
 const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
@@ -107,4 +108,10 @@ assert.match(inventory, /if \(saleReturnFocus\?\.isConnected\) saleReturnFocus\.
   'sale dialog must restore focus to its opener');
 assert.match(inventory, /aria-label="Снять: \$\{escapeHtml\(label\)\}"/,
   'equipment removal controls must identify their slot');
-console.log('check-accessibility: PASS (14 keyboard-operable tabs, 16 labelled settings controls, modal and live-region semantics)');
+assert.ok(quests.includes('role="progressbar" aria-label="Прогресс: ${quest.text}" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${current}"'),
+  'daily quest progress must expose accessible min/max/current values');
+assert.ok(quests.includes('type="button" data-game-action="claim-quest"'),
+  'daily quest reward controls must declare button type');
+assert.ok(quests.includes('role="progressbar" aria-label="Прогресс миссии: ${mission.title}" aria-valuemin="0" aria-valuemax="${mission.count}" aria-valuenow="${Math.min(missionProgress.current, mission.count)}"'),
+  'campaign mission progress must expose accessible progress semantics');
+console.log('check-accessibility: PASS (14 keyboard-operable tabs, labelled settings, modal/live-region/progress semantics)');
