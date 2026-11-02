@@ -95,7 +95,7 @@ try {
   ENEMIES.wolf.special.effect = wolfSpecialEffect;
   const actualSpecialDamage = vampiric.enemy.hp - enemyHpBeforeSpecial;
   const expectedVampiricHeal = Math.floor(actualSpecialDamage * 0.3);
-  assert.equal(vampiric.enemy.hp, 1000 + expectedVampiricHeal, 'vampiric heal must use both actual hits');
+  assert.equal(vampiric.enemy.hp, enemyHpBeforeSpecial + expectedVampiricHeal, 'vampiric heal must use both actual hits');
   state.settings.difficulty = 'normal';
   console.log('PASS vampiric healing scales with actual double-special damage');
 
