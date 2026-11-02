@@ -293,11 +293,11 @@ function renderLocation() {
 export function switchTab(tab) {
   state.currentTab = tab;
 
-  document.querySelectorAll('.tab').forEach(element => {
-    element.classList.toggle(
-      'active',
-      element.dataset.tab === tab
-    );
+  document.querySelectorAll('.tab[role="tab"]').forEach(element => {
+    const active = element.dataset.tab === tab;
+    element.classList.toggle('active', active);
+    element.setAttribute('aria-selected', String(active));
+    element.tabIndex = active ? 0 : -1;
   });
 
   renderTab(tab);
