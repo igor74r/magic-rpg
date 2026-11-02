@@ -251,9 +251,20 @@ export function collectCraftingJobs(now = Date.now()) {
     const created = addItem(job.result, job.qty, { rarity: job.rarity });
     if (created.length) claimed.push(job);
   }
+  const previousInventory = p.inventory.map(item => ({
+    ...item,
+    bonus: item.bonus ? { ...item.bonus } : item.bonus,
+    affixes: Array.isArray(item.affixes) ? item.affixes.map(affix => ({ ...affix, bonus: { ...affix.bonus } })) : item.affixes,
+    runes: Array.isArray(item.runes) ? [...item.runes] : item.runes
+  }));
+  const previousJobs = [...p.craftingJobs];
   p.craftingJobs = p.craftingJobs.filter(job => !claimed.includes(job));
   if (claimed.length) {
-    saveGame();
+    if (!saveGame()) {
+      p.inventory = previousInventory;
+      p.craftingJobs = previousJobs;
+      return [];
+    }
     emit('toast', `⚗️ Готово предметов: ${claimed.length}`);
     emit('game:update');
   }
