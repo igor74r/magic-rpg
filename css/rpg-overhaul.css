@@ -876,3 +876,18 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   .hero-overview-identity { align-items:flex-start; flex-wrap:wrap; }
   .hero-overview-gold { margin-left:auto; }
 }
+
+
+.dashboard-nav-search {
+  display:block; width:100%; min-width:0; margin:0 0 9px; padding:8px 9px;
+  border:1px solid rgba(201,162,39,.2); border-radius:5px;
+  background:rgba(0,0,0,.24); color:#e8dcc0; font-size:11px;
+}
+.dashboard-nav-search::placeholder { color:#827252; }
+.dashboard-nav-search:focus-visible { outline:2px solid #e0bd58; outline-offset:2px; }
+.dashboard-tablist .tab[hidden], .dashboard-tablist .dashboard-nav-caption[hidden] { display:none !important; }
+@media (max-width:700px) {
+  .dashboard-nav-search { flex:0 0 100%; margin:0 0 7px; }
+  .dashboard-sidebar { flex-wrap:wrap; }
+  .dashboard-sidebar .dashboard-tablist { flex:1 1 100%; }
+}
