@@ -110,8 +110,11 @@ function exportsOf(file) {
 }
 
 function resolveSpec(fromFile, spec) {
-  const base = resolve(dirname(fromFile), spec);
-  const candidates = [base, `${base}.js`, join(base, 'index.js')];
+  // Browser cache-busting suffixes (?v=...) and fragments are not part of
+  // the filesystem module path; normalize them before checking imports.
+  const cleanSpec = spec.split(/[?#]/, 1)[0];
+  const base = resolve(dirname(fromFile), cleanSpec);
+  const candidates = [base, `${base}`.js, join(base, 'index.js')];
   return candidates.find(fileExists) || null;
 }
 
