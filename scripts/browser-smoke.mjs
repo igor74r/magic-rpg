@@ -116,7 +116,7 @@ try {
     await page.getByRole('button', { name: /Создать героя и начать/ }).click();
     await page.locator('#screen-game.active').waitFor();
 
-    for (const tab of ['locations', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
+    for (const tab of ['locations', 'hero', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
       const tabButton = page.locator(`#game-tab-${tab}`);
       await tabButton.click();
       assert.equal(await tabButton.getAttribute('aria-selected'), 'true', `${viewport.name}: ${tab} tab must become selected`);
@@ -173,6 +173,20 @@ try {
       assert.ok(dashboard.mainScrollWidth <= dashboard.mainWidth + 1, `${viewport.name}/${tab}: main panel overflow: ${JSON.stringify(dashboard)}`);
       assert.ok(dashboard.contentScrollWidth <= dashboard.contentWidth + 1, `${viewport.name}/${tab}: content overflow: ${JSON.stringify(dashboard)}`);
     }
+
+    const heroPanel = page.locator('.hero-overview');
+    await heroPanel.waitFor();
+    assert.match(await heroPanel.innerText(), /UI audit/, `${viewport.name}: hero dossier must show the active character`);
+    assert.equal(await page.locator('#dashboard-context').count(), 1, `${viewport.name}: persistent quest context must render`);
+    assert.equal(await page.locator('[data-log-filter]').count(), 4, `${viewport.name}: event journal must expose four filters`);
+    await page.locator('[data-log-filter="combat"]').click();
+    assert.equal(await page.locator('[data-log-filter="combat"]').getAttribute('aria-pressed'), 'true',
+      `${viewport.name}: selected event filter must expose its state`);
+    await page.locator('#game-log-search').fill('проверка');
+    await page.locator('#game-log-search').fill('');
+    await page.locator('[data-log-filter="all"]').click();
+    const dashboardNav = await page.locator('.dashboard-sidebar').boundingBox();
+    assert.ok(dashboardNav && dashboardNav.height > 0, `${viewport.name}: primary dashboard navigation must remain visible`);
 
     // Exercise the portal interaction contract and destination navigation.
     await page.evaluate(() => window.GameAPI.enterOverworld());
