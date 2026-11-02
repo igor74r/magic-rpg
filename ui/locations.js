@@ -82,8 +82,13 @@ function panelHtml(id) {
   const actions = [];
   const access = canEnterStoryLocation(state.game.player, id);
   const story = access.requirement;
+  const gateReason = access.reason === 'campaign'
+    ? ` · 🔒 Сначала завершите сюжетное задание ${access.requiredMissionId}`
+    : access.reason === 'level'
+      ? ` · 🔒 Требуется уровень ${story?.requiredLevel} (сейчас ${access.currentLevel})`
+      : '';
   const gateNotice = story
-    ? `<p class="map-story-gate">${story.actNumber}-й акт · маршрут #${story.sequence} · рекомендованный уровень ${story.recommendedLevel}${access.allowed ? '' : ` · 🔒 Требуется уровень ${story.requiredLevel} (сейчас ${access.currentLevel})`}</p>`
+    ? `<p class="map-story-gate">${story.actNumber}-й акт · маршрут #${story.sequence} · уровень открытия ${story.requiredLevel}${gateReason}</p>`
     : '';
   if (id === 'rift') {
     actions.push(`<button type="button" onclick="GameAPI.enterRift()">Войти в Разлом</button>`);
@@ -141,7 +146,7 @@ export function mapSelect(id) {
   if (!LOCATIONS[id]) return;
   const access = canEnterStoryLocation(state.game?.player, id);
   if (!access.allowed && id !== state.game.location) {
-    emit('toast', `🔒 ${LOCATIONS[id].name}: требуется ${access.requirement.recommendedLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
+    emit('toast', access.reason === 'campaign' ? `🔒 ${LOCATIONS[id].name}: сначала завершите задание ${access.requiredMissionId}.` : `🔒 ${LOCATIONS[id].name}: требуется ${access.requirement.requiredLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
     selectNode(id);
     return;
   }
@@ -161,7 +166,7 @@ export function mapTravel(id) {
   if (!LOCATIONS[id] || id === state.game.location) return;
   const access = canEnterStoryLocation(state.game?.player, id);
   if (!access.allowed) {
-    emit('toast', `🔒 ${LOCATIONS[id].name}: требуется ${access.requirement.recommendedLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
+    emit('toast', access.reason === 'campaign' ? `🔒 ${LOCATIONS[id].name}: сначала завершите задание ${access.requiredMissionId}.` : `🔒 ${LOCATIONS[id].name}: требуется ${access.requirement.requiredLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
     selectNode(id);
     return;
   }
@@ -308,7 +313,7 @@ export function renderLocations() {
 export function travelTo(locId) {
   const access = canEnterStoryLocation(state.game?.player, locId);
   if (!access.allowed) {
-    emit('toast', `🔒 ${LOCATIONS[locId]?.name || 'Область'}: требуется ${access.requirement.recommendedLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
+    emit('toast', access.reason === 'campaign' ? `🔒 ${LOCATIONS[locId]?.name || 'Область'}: сначала завершите задание ${access.requiredMissionId}.` : `🔒 ${LOCATIONS[locId]?.name || 'Область'}: требуется ${access.requirement.requiredLevel} уровень. Ваш уровень: ${access.currentLevel}.`);
     return false;
   }
   state.game.location = locId;
