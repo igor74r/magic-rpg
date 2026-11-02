@@ -85,7 +85,7 @@ export function consumeStun(target) {
   const index = target.effects.findIndex(effect => effect.id === 'stun');
   if (index < 0) return false;
   target.effects.splice(index, 1);
-  target.stunImmunityTurns = 1;
+  target.stunImmunityTurns = 2;
   return true;
 }
 
