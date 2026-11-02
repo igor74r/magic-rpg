@@ -17,6 +17,7 @@ let invFilter = 'bag';
 let invSort = 'default';
 let saleSelection = [];
 let saleConfirmState = false;
+let saleReturnFocus = null;
 
 const FILTER_TYPES = {
   equipment: [...EQUIPMENT_TYPES],
@@ -148,6 +149,9 @@ export function setInvSort(sort) {
 function renderSaleModal() {
   const overlay = document.getElementById('inventory-sale-overlay');
   if (!overlay) return;
+  const active = overlay.contains(document.activeElement) ? document.activeElement : null;
+  const activeAction = active?.dataset.saleAction;
+  const activeIndex = active?.dataset.index;
   const p = state.game.player;
   const valid = p.inventory.map((inst, index) => ({ inst, index, item: ITEMS[inst.id] }))
     .filter(entry => entry.item && entry.item.type !== 'quest' && !entry.item.storyShard && !RARITIES[entry.inst.rarity]?.bossOnly);
@@ -159,23 +163,39 @@ function renderSaleModal() {
   const left = valid.map(entry => {
     const rarity = RARITIES[entry.inst.rarity || 'common'];
     const checked = saleSelection.includes(entry.index);
-    return '<button class="sale-item ' + (checked ? 'selected' : '') + '" data-sale-action="toggle" data-index="' + entry.index + '"><span>' + entry.item.icon + ' ' + entry.item.name + '</span><small>' + (rarity?.name || 'Обычный') + ' · ' + getSellPrice(entry.inst, p) + ' зол.</small></button>';
+    return '<button type="button" class="sale-item ' + (checked ? 'selected' : '') + '" data-sale-action="toggle" data-index="' + entry.index + '" aria-pressed="' + checked + '"><span>' + entry.item.icon + ' ' + escapeHtml(entry.item.name) + '</span><small>' + escapeHtml(rarity?.name || 'Обычный') + ' · ' + getSellPrice(entry.inst, p) + ' зол.</small></button>';
   }).join('');
   const right = selected.length ? selected.map(entry => '<div class="sale-summary-row"><span>' + entry.item.name + '</span><b>' + getSellPrice(entry.inst, p) + '💰</b></div>').join('') : '<small>Выбери предметы слева.</small>';
   const warning = saleConfirmState && needsConfirm
     ? '<p class="sale-warning">Внимание: выбраны предметы T4+ или сумма выше 500 золота. Подтверди продажу ещё раз.</p>'
     : needsConfirm ? '<p class="sale-warning">Для продажи T4+ или на сумму свыше 500 золота потребуется дополнительное подтверждение.</p>' : '';
-  overlay.innerHTML = '<div class="sale-dialog"><div class="sale-heading"><h3>Продажа предметов</h3><button data-sale-action="cancel">×</button></div><div class="sale-columns"><section class="sale-inventory"><b>Инвентарь</b><div class="sale-item-list">' + (left || '<small>Нет предметов для продажи.</small>') + '</div></section><section class="sale-display"><b>К продаже: ' + selected.length + '</b><div class="sale-summary-list">' + right + '</div><div class="sale-total">Итого: ' + total + '💰</div>' + warning + '</section></div><div class="sale-actions"><button data-sale-action="tiers">Продать все T1–T2</button><button data-sale-action="filter">Выбрать по фильтру</button><button class="sell-btn" data-sale-action="confirm">' + (saleConfirmState && needsConfirm ? 'Подтвердить продажу' : 'Продать выбранное') + '</button><button data-sale-action="cancel">Отмена</button></div></div>';
+  overlay.innerHTML = '<div class="sale-dialog" role="dialog" aria-modal="true" aria-labelledby="inventory-sale-title" tabindex="-1"><div class="sale-heading"><h3 id="inventory-sale-title">Продажа предметов</h3><button type="button" data-sale-action="cancel" aria-label="Закрыть окно продажи">×</button></div><div class="sale-columns"><section class="sale-inventory"><b>Инвентарь</b><div class="sale-item-list">' + (left || '<small>Нет предметов для продажи.</small>') + '</div></section><section class="sale-display"><b>К продаже: ' + selected.length + '</b><div class="sale-summary-list">' + right + '</div><div class="sale-total">Итого: ' + total + '💰</div>' + warning + '</section></div><div class="sale-actions"><button data-sale-action="tiers">Продать все T1–T2</button><button data-sale-action="filter">Выбрать по фильтру</button><button class="sell-btn" data-sale-action="confirm">' + (saleConfirmState && needsConfirm ? 'Подтвердить продажу' : 'Продать выбранное') + '</button><button data-sale-action="cancel">Отмена</button></div></div>';
+  const focusTarget = activeAction
+    ? [...overlay.querySelectorAll('[data-sale-action]')].find(button =>
+        button.dataset.saleAction === activeAction && (activeIndex === undefined || button.dataset.index === activeIndex))
+    : null;
+  (focusTarget || overlay.querySelector('[data-sale-action="cancel"]') || overlay.querySelector('.sale-dialog'))?.focus();
 }
 
 export function openSaleUI(initialSelection = []) {
   saleSelection = Array.isArray(initialSelection) ? [...initialSelection] : [];
   saleConfirmState = false;
+  saleReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   document.getElementById('inventory-sale-overlay')?.remove();
   const overlay = document.createElement('div');
   overlay.id = 'inventory-sale-overlay';
   overlay.className = 'inventory-sale-overlay';
   document.body.appendChild(overlay);
+  overlay.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { event.preventDefault(); cancelSaleUI(); return; }
+    if (event.key !== 'Tab') return;
+    const focusable = [...overlay.querySelectorAll('button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])')];
+    if (!focusable.length) { event.preventDefault(); return; }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !overlay.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  });
   overlay.addEventListener('click', event => {
     if (event.target === overlay) { cancelSaleUI(); return; }
     const button = event.target.closest('[data-sale-action]');
@@ -229,6 +249,8 @@ export function cancelSaleUI() {
   saleSelection = [];
   saleConfirmState = false;
   document.getElementById('inventory-sale-overlay')?.remove();
+  if (saleReturnFocus?.isConnected) saleReturnFocus.focus();
+  saleReturnFocus = null;
 }
 function filterBarHTML() {
   const filters = [
@@ -237,9 +259,9 @@ function filterBarHTML() {
     ['rift-shards', '💎 Осколки']
   ];
   const f = ([key, label]) =>
-    `<button class="inv-filter-btn ${invFilter === key ? 'active' : ''}" data-inv-filter="${key}">${label}</button>`;
+    `<button type="button" class="inv-filter-btn ${invFilter === key ? 'active' : ''}" data-inv-filter="${key}" aria-pressed="${invFilter === key}">${label}</button>`;
   const s = (key, label) =>
-    `<button class="inv-filter-btn ${invSort === key ? 'active' : ''}" data-inv-sort="${key}">${label}</button>`;
+    `<button type="button" class="inv-filter-btn ${invSort === key ? 'active' : ''}" data-inv-sort="${key}" aria-pressed="${invSort === key}">${label}</button>`;
   return `
     <div class="inv-controls">
       <div class="inv-filter-row">${filters.map(f).join('')}</div>
@@ -310,7 +332,7 @@ function renderPaperdoll(p) {
         <span class="gear-slot-label">${label}</span>
         <span class="gear-slot-name">${affixes.length ? affixes.map(affix => escapeHtml(affix?.name ?? '')).join(' ') + ' ' : ''}${item.name}${forgeLevel ? ` +${forgeLevel}` : ''}</span>
         <span class="gear-slot-sockets">${sockets ? `◈ ${runes}/${sockets}` : ''}</span>
-        <button class="gear-slot-remove" data-inv-action="unequip" data-slot="${slot}" title="Снять">×</button>
+        <button class="gear-slot-remove" data-inv-action="unequip" data-slot="${slot}" title="Снять" aria-label="Снять: ${escapeHtml(label)}">×</button>
       </div>`;
   }).join('');
 
@@ -409,7 +431,7 @@ export function renderInventory() {
       grid += `
         <button type="button" class="inv-slot has-item ${rarity}"
           data-inv-tooltip="${idx}" data-inv-action="slot" data-index="${idx}"
-          aria-label="${item.name}">
+          aria-label="${escapeHtml(item.name)}">
           <span class="slot-icon">${item.icon}</span>${qty}${socket}
         </button>`;
     } else {
