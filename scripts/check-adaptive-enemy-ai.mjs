@@ -12,7 +12,7 @@ assert.match(source, /recent\.filter\(value => value === candidate\)\.length >= 
   'counter requires repeated style, not a single action');
 assert.match(source, /style === 'melee' \? 'ближний бой'/,
   'adaptation must log a localized style message');
-assert.match(source, /def\?\.boss \? 0\.10 : 0\.20/,
+assert.match(source, /def\?\.boss \? 0\.12 : 0\.20/,
   'boss counter must be weaker than regular enemy counter');
 assert.match(source, /enemyDefenseForStyle\(enemy, style, stats\.armorPen \|\| 0\)/,
   'basic attacks must respect adaptive defense');
