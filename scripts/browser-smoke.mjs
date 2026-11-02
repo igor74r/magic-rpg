@@ -172,7 +172,7 @@ try {
     await page.evaluate(() => window.GameAPI.enterOverworld());
     await page.locator('#screen-overworld.active').waitFor();
     let worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
-    await clickCanvasPoint(page, 0.44, 0.308);
+    await clickCanvasPoint(page, 0.5, 0.41);
     await worldDialog.waitFor({ state: 'visible' });
     assert.equal(await worldDialog.getAttribute('aria-modal'), 'true',
       `${viewport.name}: world portal must open an accessible modal`);
@@ -193,7 +193,7 @@ try {
     await worldDialog.waitFor({ state: 'detached' });
 
     // The separate amber gate must launch the existing 40-floor Tower menu.
-    await clickCanvasPoint(page, 0.68, 0.308);
+    await clickCanvasPoint(page, 0.7, 0.41);
     await page.locator('#tower-map-overlay').waitFor({ state: 'visible' });
     await page.getByRole('heading', { name: /Башня · 40 этажей/ }).waitFor();
     await page.locator('[data-tower-close]').click();
