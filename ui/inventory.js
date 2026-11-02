@@ -330,7 +330,7 @@ function renderPaperdoll(p) {
 let inventoryEventsBound = false;
 
 function bindInventoryEvents() {
-  if (inventoryEventsBound || typeof document === 'undefined') return;
+  if (inventoryEventsBound || typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
   inventoryEventsBound = true;
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
