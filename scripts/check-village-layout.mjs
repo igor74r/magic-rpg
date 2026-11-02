@@ -75,6 +75,8 @@ for (const prop of village.statics.filter(item => ['lantern', 'planter', 'banner
     `${prop.id}: lightweight plaza decor must not block player`);
 }
 assert.equal(colliders.length, 24, 'each of eight buildings must have three wall segments');
+assert.ok(colliders.every(rect => rect.width >= 40 && rect.height >= 28),
+  'building wall collision must scale with the enlarged 3×3-tile houses');
 assert.ok(colliders.every(rect => rect.width > 0 && rect.height > 0), 'wall rectangles must have positive dimensions');
 for (const building of buildings) {
   const x = building.x * 48 + 24;
