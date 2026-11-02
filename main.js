@@ -142,6 +142,15 @@ document.addEventListener('click', (e) => {
   resumeContext();
   const btn = e.target.closest('button');
   if (btn && !btn.closest('#combat-panel') && !btn.closest('#npc-panel') && !btn.closest('.stat-buttons')) playSound('click');
+
+  const action = e.target.closest('[data-game-action]');
+  if (!action) return;
+  if (action.dataset.gameAction === 'claim-quest') {
+    const questId = action.dataset.questId;
+    if (questId) window.GameAPI?.claimQuest?.(questId);
+  } else if (action.dataset.gameAction === 'close-npc') {
+    window.GameAPI?.closeNpcAndResume?.();
+  }
 });
 
 // Tab-like navigation remains fully usable without a pointer.
