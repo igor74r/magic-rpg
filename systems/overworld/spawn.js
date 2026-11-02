@@ -10,6 +10,7 @@ import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
 import { getTowerMult } from '../tower.js';
 import { findFreeCell, TILE } from './map.js';
+import { NPC_COLLISION_RADIUS, ENEMY_COLLISION_RADIUS } from './collisions.js';
 import { spawnParticles } from './particles.js';
 import { pushLog } from './log.js';
 import { updateQuestProgress } from '../dailyQuests.js';
@@ -98,7 +99,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
     enemies.push({
       id: i, enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
       homeX: pos.x * TILE + TILE / 2, homeY: pos.y * TILE + TILE / 2,
-      hp, maxHp: hp, elite: isElite, boss: isBoss, modifier,
+      hp, maxHp: hp, elite: isElite, boss: isBoss, modifier, collisionRadius: ENEMY_COLLISION_RADIUS,
       effects: [], phase: 0, state: 'idle',
       wanderTimer: 1 + Math.random() * 2, wanderDx: 0, wanderDy: 0,
       dead: false, respawnAt: 0,
@@ -130,6 +131,7 @@ export function spawnNPCs(loc, locationId = '') {
     homeX: npc.x * TILE + TILE / 2,
     homeY: npc.y * TILE + TILE / 2,
     interactionRadius: npc.ambient ? 0 : 65,
+    collisionRadius: NPC_COLLISION_RADIUS,
     wanderTimer: Math.random() * 3,
     wanderDx: 0, wanderDy: 0,
     facing: 'down'
