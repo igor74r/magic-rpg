@@ -71,10 +71,22 @@ export function sellItemByIndex(idx) {
   return sellItemsByIndices([idx]).ok;
 }
 
-export function getBuybackItems() {
-  const records = state.game?.player?.buyback || [];
+function getValidTodayBuybackRecords(player) {
+  if (!Array.isArray(player?.buyback)) return [];
   const today = new Date().toDateString();
-  return records.filter(record => record.soldAt === today);
+  return player.buyback.filter(record => {
+    const item = ITEMS[record?.item?.id];
+    const rarity = record?.item?.rarity || 'common';
+    const qty = record?.item?.qty ?? 1;
+    return record?.soldAt === today && item && Number.isSafeInteger(record.price) && record.price >= 0 &&
+      Number.isSafeInteger(qty) && qty > 0 && (STACKABLE_TYPES.has(item.type) || qty === 1) &&
+      item.type !== 'quest' && !item.storyShard && !item.bossOnly &&
+      !!RARITIES[rarity] && !RARITIES[rarity].bossOnly;
+  });
+}
+
+export function getBuybackItems() {
+  return getValidTodayBuybackRecords(state.game?.player);
 }
 
 export function buybackItem(index) {
@@ -82,8 +94,7 @@ export function buybackItem(index) {
   if (!p || !Array.isArray(p.inventory) || !Array.isArray(p.buyback) || !Number.isSafeInteger(index) || index < 0) {
     return { ok: false, msg: 'Предмет больше нельзя выкупить' };
   }
-  const today = new Date().toDateString();
-  const record = p.buyback.filter(entry => entry?.soldAt === today)[index];
+  const record = getValidTodayBuybackRecords(p)[index];
   const item = ITEMS[record?.item?.id];
   const rarity = record?.item?.rarity || 'common';
   const qty = record?.item?.qty ?? 1;
@@ -101,7 +112,7 @@ export function buybackItem(index) {
     p.inventory.push(record.item);
   }
   p.gold -= record.price;
-  p.buyback = p.buyback.filter(entry => entry.id !== record.id);
+  p.buyback = p.buyback.filter(entry => entry !== record);
   saveGame();
   emit('toast', 'Предмет выкуплен обратно за ' + record.price + '💰');
   emit('game:update');

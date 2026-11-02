@@ -4,7 +4,7 @@ import { STORY } from '../data/story.js';
 import { getCurrentActIndex, getActPriceMultiplier, getBuyPrice, getSellPrice } from '../systems/economy.js';
 import { getMissionReward } from '../systems/campaign.js';
 import { state } from '../systems/state.js';
-import { buyItem, buybackItem } from '../systems/shop.js';
+import { buyItem, buybackItem, getBuybackItems } from '../systems/shop.js';
 import { NPCS } from '../data/npcs.js';
 
 const player = { campaignClaimed: {} };
@@ -57,7 +57,11 @@ buyer.buyback = [{ id: 'bad-qty', soldAt: new Date().toDateString(), price: 1, i
 assert.equal(buybackItem(0).ok, false, 'zero buyback quantity must be rejected');
 buyer.buyback = [{ id: 'bad-equipment-qty', soldAt: new Date().toDateString(), price: 1, item: { id: 'iron-sword', qty: 2 } }];
 assert.equal(buybackItem(0).ok, false, 'non-stackable buyback quantity must be exactly one');
-assert.equal(buyer.inventory.length, 1, 'invalid buyback must not add an item');
+buyer.buyback = [null, { soldAt: new Date().toDateString(), price: 1 }, { soldAt: new Date().toDateString(), price: 1, item: { id: 'iron-sword', qty: 1 } }];
+assert.equal(getBuybackItems().length, 1, 'shop should hide malformed buyback records');
+assert.equal(buybackItem(0).ok, true, 'valid buyback remains selectable after malformed records are filtered');
+assert.equal(buyer.inventory.length, 2, 'valid buyback restores one item');
+assert.equal(getBuybackItems().length, 0, 'claimed buyback record is removed');
 state.game = null;
 if (originalStorage === undefined) delete globalThis.localStorage;
 else globalThis.localStorage = originalStorage;
