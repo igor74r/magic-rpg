@@ -45,6 +45,19 @@ try {
   assert.equal(state.game.player.exp, 50);
   assert.equal(claimQuestReward('q-kill-any'), false, 'daily quest reward can only be claimed once');
 
+  state.game.player.dailyQuests = {
+    date: now,
+    list: [
+      { id: 'q-kill-wolf', current: 0, completed: true, claimed: false },
+      { id: 'q-kill-any', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-goblin', current: 0, completed: false, claimed: false }
+    ]
+  };
+  const repairedCompletion = getDailyQuests().find(quest => quest.id === 'q-kill-wolf');
+  assert.equal(repairedCompletion.completed, false, 'completion must be derived from progress, not a saved boolean');
+  assert.equal(repairedCompletion.claimed, false, 'an incomplete quest cannot retain a claimed reward flag');
+  assert.equal(claimQuestReward('q-kill-wolf'), false, 'a forged completion flag must not unlock a reward');
+
   updateQuestProgress('kill', 'goblin', '2');
   const goblinQuest = getDailyQuests().find(quest => quest.id === 'q-kill-goblin');
   assert.equal(goblinQuest.current, 2);
@@ -81,6 +94,18 @@ try {
   }
 
   state.game.player.dailyQuests = {
+    date: now + 3 * 24 * 60 * 60 * 1000,
+    list: [
+      { id: 'q-kill-goblin', current: 4, completed: false, claimed: false },
+      { id: 'q-kill-any', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-skeleton', current: 0, completed: false, claimed: false }
+    ]
+  };
+  getDailyQuests();
+  assert.ok(state.game.player.dailyQuests.date <= Date.now(), 'future quest timestamps must be repaired');
+  assert.ok(state.game.player.dailyQuests.list.every(quest => quest.current === 0), 'future-dated quests must refresh instead of freezing daily rotation');
+
+  state.game.player.dailyQuests = {
     date: now,
     list: [
       { id: 'q-kill-any', current: 0, completed: false, claimed: false },
@@ -95,7 +120,7 @@ try {
   updateQuestProgress('kill', 'any', Infinity);
   assert.equal(state.game.player.dailyQuests.list[0].current, before, 'non-finite progress must be ignored');
   assert.ok(saved.has('magic-rpg-save-1'), 'normalized quests and rewards should be saved');
-  console.log('check-daily-quests: PASS (save normalization, canonical rewards, progress and balance guards)');
+  console.log('check-daily-quests: PASS (save normalization, canonical rewards, forged completion, future dates, progress and balance guards)');
 } finally {
   state.game = null;
   if (previousStorage === undefined) delete globalThis.localStorage;
