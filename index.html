@@ -265,22 +265,29 @@
   <div class="dashboard-layout">
     
     <!-- ЛЕВАЯ ПАНЕЛЬ (ВКЛАДКИ) -->
-    <aside class="dashboard-sidebar">
-      <div class="sidebar-title">Меню</div>
+    <aside class="dashboard-sidebar" aria-label="Главная навигация">
+      <div class="dashboard-brand">
+        <img src="assets/branding/mana-crystal.png" alt="" width="34" height="34">
+        <div><b>ОСКОЛКИ РАЗЛОМА</b><span>ПАНЕЛЬ ПУТНИКА</span></div>
+      </div>
+      <div class="sidebar-title">Разделы игры</div>
       <div class="dashboard-tablist" role="tablist" aria-label="Разделы игры">
-      <div class="tab active" id="game-tab-locations" role="tab" aria-selected="true" aria-controls="tab-content" tabindex="0" data-tab="locations" onclick="GameAPI.switchTab('locations')"><span class="tab-icon">🗺️</span> <span class="tab-text">Локации</span></div>
-      <div class="tab" id="game-tab-inventory" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="inventory" onclick="GameAPI.switchTab('inventory')"><span class="tab-icon">🎒</span> <span class="tab-text">Инвентарь</span></div>
-      <div class="tab" id="game-tab-spells" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="spells" onclick="GameAPI.switchTab('spells')"><span class="tab-icon">✨</span> <span class="tab-text">Магия</span></div>
-      <div class="tab" id="game-tab-quests" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="quests" onclick="GameAPI.switchTab('quests')"><span class="tab-icon">📜</span> <span class="tab-text">Квесты</span></div>
-      <div class="tab" id="game-tab-achievements" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="achievements" onclick="GameAPI.switchTab('achievements')"><span class="tab-icon">🏆</span> <span class="tab-text">Достижения</span></div>
-      <div class="tab" id="game-tab-statistics" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="statistics" onclick="GameAPI.switchTab('statistics')"><span class="tab-icon">📊</span> <span class="tab-text">Статистика</span></div>
-      <div class="tab" id="game-tab-talents" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="talents" onclick="GameAPI.switchTab('talents')"><span class="tab-icon">🌳</span> <span class="tab-text">Таланты</span></div>
-      <div class="tab" id="game-tab-bestiary" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="bestiary" onclick="GameAPI.switchTab('bestiary')"><span class="tab-icon">📖</span> <span class="tab-text">Бестиарий</span></div>
-      
-      <div class="tab" id="game-tab-chronicles" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="chronicles" onclick="GameAPI.switchTab('chronicles')"><span class="tab-icon">📚</span> <span class="tab-text">Хроники</span></div>
+        <div class="dashboard-nav-caption">МИР</div>
+        <div class="tab active" id="game-tab-locations" role="tab" aria-selected="true" aria-controls="tab-content" tabindex="0" data-tab="locations" onclick="GameAPI.switchTab('locations')"><span class="tab-icon">🗺️</span> <span class="tab-text">Карта мира</span></div>
+        <div class="tab" id="game-tab-quests" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="quests" onclick="GameAPI.switchTab('quests')"><span class="tab-icon">📜</span> <span class="tab-text">Журнал заданий</span></div>
+        <div class="dashboard-nav-caption">ГЕРОЙ</div>
+        <div class="tab" id="game-tab-hero" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="hero" onclick="GameAPI.switchTab('hero')"><span class="tab-icon">🧙</span> <span class="tab-text">Мой герой</span></div>
+        <div class="tab" id="game-tab-inventory" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="inventory" onclick="GameAPI.switchTab('inventory')"><span class="tab-icon">🎒</span> <span class="tab-text">Экипировка</span></div>
+        <div class="tab" id="game-tab-spells" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="spells" onclick="GameAPI.switchTab('spells')"><span class="tab-icon">✨</span> <span class="tab-text">Магия и навыки</span></div>
+        <div class="tab" id="game-tab-talents" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="talents" onclick="GameAPI.switchTab('talents')"><span class="tab-icon">🌳</span> <span class="tab-text">Древо талантов</span></div>
+        <div class="dashboard-nav-caption">ЗНАНИЯ И ПРОГРЕСС</div>
+        <div class="tab" id="game-tab-bestiary" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="bestiary" onclick="GameAPI.switchTab('bestiary')"><span class="tab-icon">📖</span> <span class="tab-text">Бестиарий</span></div>
+        <div class="tab" id="game-tab-achievements" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="achievements" onclick="GameAPI.switchTab('achievements')"><span class="tab-icon">🏆</span> <span class="tab-text">Достижения</span></div>
+        <div class="tab" id="game-tab-statistics" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="statistics" onclick="GameAPI.switchTab('statistics')"><span class="tab-icon">📊</span> <span class="tab-text">Статистика</span></div>
+        <div class="tab" id="game-tab-chronicles" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="chronicles" onclick="GameAPI.switchTab('chronicles')"><span class="tab-icon">📚</span> <span class="tab-text">Хроники мира</span></div>
       </div>
       <div class="sidebar-bottom">
-        <button onclick="GameAPI.saveAndMenu()" class="save-menu-btn">💾 Сохранить и в меню</button>
+        <button type="button" onclick="GameAPI.saveAndMenu()" class="save-menu-btn">💾 Сохранить и в меню</button>
       </div>
     </aside>
 
@@ -291,8 +298,19 @@
     </main>
 
     <!-- ПРАВАЯ ПАНЕЛЬ (ЖУРНАЛ) -->
-    <aside class="dashboard-log">
-      <div class="log-header">📜 Журнал</div>
+    <aside class="dashboard-log" aria-label="Путеводитель и журнал событий">
+      <section class="dashboard-context-panel" id="dashboard-context" aria-label="Текущая цель"></section>
+      <div class="log-header"><span>📜 Журнал событий</span><span class="log-live-indicator">● LIVE</span></div>
+      <div class="dashboard-log-tools">
+        <div class="log-filter-row" role="group" aria-label="Фильтр журнала">
+          <button type="button" class="log-filter active" data-log-filter="all" aria-pressed="true">Все</button>
+          <button type="button" class="log-filter" data-log-filter="combat" aria-pressed="false">Бой</button>
+          <button type="button" class="log-filter" data-log-filter="loot" aria-pressed="false">Добыча</button>
+          <button type="button" class="log-filter" data-log-filter="story" aria-pressed="false">Сюжет</button>
+        </div>
+        <label class="visually-hidden" for="game-log-search">Поиск по журналу</label>
+        <input id="game-log-search" class="log-search" type="search" placeholder="Найти событие…" autocomplete="off">
+      </div>
       <div class="log-body" id="game-log" role="log" aria-live="polite" aria-relevant="additions"></div>
     </aside>
 
