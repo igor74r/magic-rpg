@@ -1124,6 +1124,8 @@ function enemyCombatTurn() {
     specialEvery &&
     ow.combat.turnCount % specialEvery === 0;
 
+  let actualDamage = 0;
+
   if (useSpecial && special.type === 'double') {
     const damage1 = Math.max(
       1,
@@ -1135,7 +1137,8 @@ function enemyCombatTurn() {
       Math.floor(baseDamage * 0.6)
     );
 
-    p.hp -= damage1 + damage2;
+    actualDamage = damage1 + damage2;
+    p.hp -= actualDamage;
     ow.player.hp = Math.max(0, p.hp);
 
     ow.floatingNumbers.push({
@@ -1170,7 +1173,8 @@ function enemyCombatTurn() {
       Math.floor(baseDamage * mult)
     );
 
-    p.hp -= damage;
+    actualDamage = damage;
+    p.hp -= actualDamage;
     ow.player.hp = Math.max(0, p.hp);
 
     ow.floatingNumbers.push({
@@ -1192,6 +1196,7 @@ function enemyCombatTurn() {
     }
   } else if (useSpecial && special.type === 'drain') {
     const damage = baseDamage;
+    actualDamage = damage;
 
     p.hp -= damage;
     ow.player.hp = Math.max(0, p.hp);
@@ -1224,7 +1229,8 @@ function enemyCombatTurn() {
       pushLog(`☠️ Наложен эффект: ${special.effect}`, 'damage');
     }
   } else {
-    p.hp -= baseDamage;
+    actualDamage = baseDamage;
+    p.hp -= actualDamage;
     ow.player.hp = Math.max(0, p.hp);
 
     ow.floatingNumbers.push({
@@ -1241,9 +1247,9 @@ function enemyCombatTurn() {
     );
   }
 
-  if (enemy.modifier === 'vampiric' && baseDamage > 0) {
+  if (enemy.modifier === 'vampiric' && actualDamage > 0) {
     const heal = Math.floor(
-      baseDamage * (MODIFIERS.vampiric.vampiricPct || 0.3)
+      actualDamage * (MODIFIERS.vampiric.vampiricPct || 0.3)
     );
 
     enemy.hp = Math.min(enemy.maxHp, enemy.hp + heal);
