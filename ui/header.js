@@ -16,6 +16,7 @@ import {
 } from './quests.js';
 import { renderPassives } from './passives.js';
 import { renderChronicles } from './chronicles.js';
+import { renderHeroOverview, renderDashboardContext } from './dashboard.js';
 
 let overhaulCssLoaded = false;
 
@@ -45,6 +46,7 @@ export function renderGame() {
 
   renderHeader();
   renderLocation();
+  renderDashboardContext();
   renderTab(state.currentTab);
 }
 
@@ -340,5 +342,7 @@ function renderTab(tab) {
     element.innerHTML = renderBestiary();
   } else if (tab === 'chronicles') {
     element.innerHTML = renderChronicles();
+  } else if (tab === 'hero') {
+    element.innerHTML = renderHeroOverview();
   }
 }
