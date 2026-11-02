@@ -11,6 +11,10 @@ const MAX_SLOT = 3;
 
 let lastSaveTime = null;
 
+function isValidSlot(slot) {
+  return Number.isSafeInteger(slot) && slot >= 1 && slot <= MAX_SLOT;
+}
+
 function slotKey(slot) {
   return SLOT_PREFIX + slot;
 }
@@ -31,7 +35,7 @@ export function migrateLegacySave() {
 export function saveGame() {
   if (!state.game) return;
 
-  const slot = state.currentSlot || 1;
+  const slot = isValidSlot(state.currentSlot) ? state.currentSlot : 1;
 
   state.game.version = SAVE_VERSION;
 
@@ -480,7 +484,8 @@ export function migrateGame(game) {
 }
 
 export function loadGameData(slot) {
-  const selectedSlot = slot || state.currentSlot || 1;
+  const selectedSlot = slot ?? state.currentSlot ?? 1;
+  if (!isValidSlot(selectedSlot)) return false;
   const data = localStorage.getItem(slotKey(selectedSlot));
 
   if (!data) return false;
@@ -511,9 +516,9 @@ export function loadGameData(slot) {
 
 export function hasSave(slot) {
   if (slot === undefined) {
-    slot = state.currentSlot || 1;
+    slot = isValidSlot(state.currentSlot) ? state.currentSlot : 1;
   }
-
+  if (!isValidSlot(slot)) return false;
   return !!localStorage.getItem(slotKey(slot));
 }
 
@@ -526,7 +531,8 @@ export function hasAnySave() {
 }
 
 export function deleteSave(slot) {
-  const selectedSlot = slot || state.currentSlot || 1;
+  const selectedSlot = slot ?? state.currentSlot ?? 1;
+  if (!isValidSlot(selectedSlot)) return;
 
   localStorage.removeItem(slotKey(selectedSlot));
 
@@ -536,6 +542,7 @@ export function deleteSave(slot) {
 }
 
 export function getSlotInfo(slot) {
+  if (!isValidSlot(slot)) return null;
   const data = localStorage.getItem(slotKey(slot));
 
   if (!data) return null;
