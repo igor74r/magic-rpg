@@ -48,3 +48,15 @@ export function resolveSweptMovement(x, y, dx, dy, canOccupy, maxStep = 4) {
   }
   return { x, y, moved };
 }
+
+// Exponential camera easing expressed in normalized 60 FPS frames.
+// This preserves the existing 0.15-per-frame feel while making it FPS independent.
+export function getCameraPosition(current, target, deltaFrames = 1, smoothing = 0.15) {
+  if (!Number.isFinite(current) || !Number.isFinite(target)) return current;
+  const frames = Number.isFinite(deltaFrames) ? Math.max(0, Math.min(3, deltaFrames)) : 1;
+  const factor = Number.isFinite(smoothing) ? Math.max(0, Math.min(1, smoothing)) : 0.15;
+  if (frames === 0 || factor === 0) return current;
+  if (factor === 1) return target;
+  const next = current + (target - current) * (1 - Math.pow(1 - factor, frames));
+  return Math.abs(target - next) < 0.05 ? target : next;
+}
