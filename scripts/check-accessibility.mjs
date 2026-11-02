@@ -63,7 +63,7 @@ assert.match(npcs, /querySelector\('\.npc-modal-close'\)/,
 assert.match(html, /id="combat-panel" role="region" aria-label="Боевая панель"/, 'combat interface must be exposed as a named region');
 assert.match(html, /id="combat-panel-info" role="status" aria-live="polite" aria-atomic="true"/, 'combat status updates must be announced politely and atomically');
 assert.match(html, /id="combat-panel-actions" role="group" aria-label="Боевые действия"/, 'combat controls must form a labelled group');
-assert.match(combatPanel, /function setCombatActionsMarkup\(actions, markup/, 'combat action renderer must accept focus-aware markup updates');
+assert.match(combatPanel, /function setCombatActionsMarkup\(actions, markup\)/, 'combat action renderer must accept focus-aware markup updates');
 assert.match(combatPanel, /next \|\| actions\.querySelector/, 'combat submenu rerender must restore focus to an equivalent or first available action');
 assert.match(combatPanel, /setCombatActionsMarkup\(actions, markup,/, 'combat action renderer must accept focus-aware markup updates');
 assert.doesNotMatch(combatPanel, /actions\.innerHTML = `\\n    <button data-combat-action/, 'main combat actions must use the focus-aware renderer');
