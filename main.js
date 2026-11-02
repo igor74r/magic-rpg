@@ -147,9 +147,9 @@ document.addEventListener('click', (e) => {
   if (!action) return;
   if (action.dataset.gameAction === 'claim-quest') {
     const questId = action.dataset.questId;
-    if (questId) window['Game' + 'API']?.claimQuest?.(questId);
+    if (questId) window.GameAPI?.claimQuest?.(questId);
   } else if (action.dataset.gameAction === 'close-npc') {
-    window['Game' + 'API']?.closeNpcAndResume?.();
+    window.GameAPI?.closeNpcAndResume?.();
   }
 });
 
