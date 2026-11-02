@@ -144,6 +144,31 @@ document.addEventListener('click', (e) => {
   if (btn && !btn.closest('#combat-panel') && !btn.closest('#npc-panel') && !btn.closest('.stat-buttons')) playSound('click');
 });
 
+// Tab-like navigation remains fully usable without a pointer.
+document.addEventListener('keydown', (event) => {
+  const tab = event.target.closest?.('[role="tab"]');
+  if (!tab) return;
+  const tabs = Array.from(tab.parentElement?.querySelectorAll('[role="tab"]') || []);
+  if (!tabs.length) return;
+
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    tab.click();
+    return;
+  }
+
+  let nextIndex = tabs.indexOf(tab);
+  if (event.key === 'Home') nextIndex = 0;
+  else if (event.key === 'End') nextIndex = tabs.length - 1;
+  else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') nextIndex = (nextIndex + 1) % tabs.length;
+  else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (nextIndex - 1 + tabs.length) % tabs.length;
+  else return;
+
+  event.preventDefault();
+  tabs[nextIndex].focus();
+  tabs[nextIndex].click();
+});
+
 function persistBeforeLeaving() {
   stopVoice();
   if (state.game) saveGame();
