@@ -21,7 +21,7 @@ for (const [id, enemy] of Object.entries(ENEMIES)) {
   }
 
   if (enemy.phases) {
-    assert.equal(enemy.boss, true, `${id}: only bosses may define phases`);
+    assert.ok(enemy.boss || enemy.special, `${id}: phased enemy needs an encounter mechanic`);
     let previousThreshold = 1;
     for (const [index, phase] of enemy.phases.entries()) {
       assert.ok(Number.isFinite(phase.atHp) && phase.atHp > 0 && phase.atHp < previousThreshold,
