@@ -2,6 +2,7 @@ export const EFFECTS = {
   poison:     { name: 'Отравление',    icon: '☠️', type: 'debuff', damage: 5, duration: 3, color: '#60a060', desc: '−5 HP каждый ход' },
   burn:       { name: 'Ожог',          icon: '🔥', type: 'debuff', damage: 8, duration: 2, color: '#ff6020', desc: '−8 HP каждый ход' },
   bleed:      { name: 'Кровотечение',  icon: '🩸', type: 'debuff', damage: 6, duration: 3, color: '#d63030', desc: '−6 HP каждый ход' },
+  slow:       { name: 'Замедление', icon: '❄️', type: 'debuff', atkMult: 0.75, duration: 2, color: '#70c8e8', desc: '−25% к атаке на 2 хода' },
   stun:       { name: 'Оглушение',     icon: '💫', type: 'debuff', skipTurn: true, duration: 1, color: '#d6c030', desc: 'Пропуск хода' },
   atkBuff:    { name: 'Боевой клич',   icon: '📢', type: 'buff', atkMult: 1.3, duration: 2, color: '#ffd060', desc: '+30% к атаке' },
   defBuff:    { name: 'Щит маны',      icon: '🛡️', type: 'buff', defMult: 1.5, duration: 2, color: '#60a0ff', desc: '+50% к защите' },
