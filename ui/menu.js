@@ -67,7 +67,12 @@ export function openSettings() {
 
 export function switchSettingsTab(tab) {
   currentSettingsTab = tab;
-  document.querySelectorAll('.settings-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.settings-tab[role="tab"]').forEach(element => {
+    const active = element.dataset.tab === tab;
+    element.classList.toggle('active', active);
+    element.setAttribute('aria-selected', String(active));
+    element.tabIndex = active ? 0 : -1;
+  });
   renderSettingsTab(tab);
 }
 
