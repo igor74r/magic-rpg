@@ -42,7 +42,7 @@ export function tryMovePlayer(dx, dy, deltaFrames = 1) {
   p.y = Math.max(TILE / 2, Math.min(ow.rows * TILE - TILE / 2, p.y));
   if (moved) {
     const now = performance.now();
-    if (now - (ow.lastStepSoundAt || 0) >= 175) {
+    if (ow.lastStepSoundAt === undefined || now - ow.lastStepSoundAt >= 175) {
       playSound('step');
       ow.lastStepSoundAt = now;
     }
