@@ -389,7 +389,7 @@ function openWorldPortalMenu() {
   search.addEventListener('input', filterLocations);
   overlay.querySelector('[data-world-close]')?.addEventListener('click', resume);
   overlay.addEventListener('keydown', event => {
-    if (event.key === 'Escape') { event.preventDefault(); resume(); }
+    if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); resume(); }
   });
   overlay.addEventListener('click', event => { if (event.target === overlay) resume(); });
   search.focus();
