@@ -563,7 +563,12 @@ export function hasSave(slot) {
     slot = isValidSlot(state.currentSlot) ? state.currentSlot : 1;
   }
   if (!isValidSlot(slot)) return false;
-  return !!localStorage.getItem(slotKey(slot));
+  try {
+    return !!localStorage.getItem(slotKey(slot));
+  } catch (error) {
+    console.warn('[save] Не удалось проверить слот сохранения:', error);
+    return false;
+  }
 }
 
 export function hasAnySave() {
@@ -576,33 +581,40 @@ export function hasAnySave() {
 
 export function deleteSave(slot) {
   const selectedSlot = slot === undefined ? (state.currentSlot ?? 1) : slot;
-  if (!isValidSlot(selectedSlot)) return;
+  if (!isValidSlot(selectedSlot)) return false;
 
-  localStorage.removeItem(slotKey(selectedSlot));
+  try {
+    localStorage.removeItem(slotKey(selectedSlot));
+  } catch (error) {
+    console.error('[save] Не удалось удалить слот сохранения:', error);
+    return false;
+  }
 
   if (state.currentSlot === selectedSlot) {
     state.game = null;
     lastSaveTime = null;
     lastSaveGame = null;
   }
+  return true;
 }
 
 export function getSlotInfo(slot) {
   if (!isValidSlot(slot)) return null;
-  const data = localStorage.getItem(slotKey(slot));
-
-  if (!data) return null;
 
   try {
+    const data = localStorage.getItem(slotKey(slot));
+    if (!data) return null;
     const game = JSON.parse(data);
-    const player = game.player || {};
+    if (!game || typeof game !== 'object' || Array.isArray(game)) return null;
+    const player = game.player && typeof game.player === 'object' && !Array.isArray(game.player)
+      ? game.player : {};
 
     return {
-      name: player.name || '???',
-      class: player.class || 'mage',
-      level: player.level || 1,
-      location: game.location || 'village',
-      ngPlus: player.ngPlus || 0
+      name: typeof player.name === 'string' && player.name ? player.name : '???',
+      class: typeof player.class === 'string' && player.class ? player.class : 'mage',
+      level: Number.isFinite(player.level) && player.level > 0 ? player.level : 1,
+      location: typeof game.location === 'string' && game.location ? game.location : 'village',
+      ngPlus: Number.isFinite(player.ngPlus) && player.ngPlus > 0 ? player.ngPlus : 0
     };
   } catch {
     return null;
