@@ -29,12 +29,22 @@ globalThis.FileReader = class {
 try {
   const { importSave } = await import('../ui/menu.js');
   state.currentSlot = 1;
+  let readCalls = 0;
+  globalThis.FileReader.prototype.readAsText = function () {
+    readCalls++;
+    this.onload({ target: { result: fileContent } });
+  };
   const runImport = content => {
     fileContent = JSON.stringify(content);
-    const event = { target: { files: [{}], value: 'selected.json' } };
+    const event = { target: { files: [{ size: fileContent.length }], value: 'selected.json' } };
     importSave(event);
     return event;
   };
+
+  const oversizedEvent = { target: { files: [{ size: 6 * 1024 * 1024 }], value: 'oversized.json' } };
+  importSave(oversizedEvent);
+  assert.equal(readCalls, 0, 'oversized save must be rejected before reading');
+  assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE');
 
   runImport({ version: 999, player: { name: 'Future save', level: 10 } });
   assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE', 'unsupported future save must not overwrite the slot');
