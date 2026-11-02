@@ -152,14 +152,14 @@ export function openElder() {
 
     missionBlock = `
       <section class="elder-quest-card">
-        <small>${act.subtitle} · ${act.number} акт</small>
-        <h3>${mission.title}</h3>
-        <p>${mission.desc}</p>
-        <div class="elder-quest-meta">📍 Регион: <b>${location}</b></div>
-        <div class="elder-quest-objective">${status}<span>${mission.objective}</span></div>
+        <small>${escapeHtml(act.subtitle)} · ${act.number} акт</small>
+        <h3>${escapeHtml(mission.title)}</h3>
+        <p>${escapeHtml(mission.desc)}</p>
+        <div class="elder-quest-meta">📍 Регион: <b>${escapeHtml(location)}</b></div>
+        <div class="elder-quest-objective">${status}<span>${escapeHtml(mission.objective)}</span></div>
         <div class="campaign-progress"><i style="width:${Math.min(100, progress.current / progress.required * 100)}%"></i></div>
         <div class="elder-quest-count">${progress.current} / ${progress.required}</div>
-        <div class="elder-quest-reward">Награда: 💰 ${reward.gold} · ✨ ${reward.exp} EXP · ${ITEMS[reward.itemId]?.icon || '📦'} ${ITEMS[reward.itemId]?.name || reward.itemId}</div>
+        <div class="elder-quest-reward">Награда: 💰 ${reward.gold} · ✨ ${reward.exp} EXP · ${ITEMS[reward.itemId]?.icon || '📦'} ${escapeHtml(ITEMS[reward.itemId]?.name || reward.itemId)}</div>
         ${action}
       </section>`;
   } else {
