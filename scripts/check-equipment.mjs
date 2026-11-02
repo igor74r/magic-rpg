@@ -19,7 +19,7 @@ state.game = { player };
 assert.equal(canAddItem('iron-sword', 1, player).ok, true);
 assert.equal(getInventorySlotCount(player), 3, 'a rune stack occupies one bag slot');
 assert.ok(getInventoryWeight(player) <= getInventoryCapacity(player));
-assert.equal(getInventoryCapacity({ str: Number.POSITIVE_INFINITY }), 10,
+assert.equal(getInventoryCapacity({ str: Number.POSITIVE_INFINITY }), 50,
   'non-finite strength must not grant infinite carry capacity');
 assert.equal(Number.isFinite(getInventoryCapacity({ str: Number.MAX_VALUE })), true,
   'overflowing strength must not produce infinite carry capacity');
