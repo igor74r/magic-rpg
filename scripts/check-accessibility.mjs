@@ -16,15 +16,17 @@ for (const [tag] of tabs) {
   assert.match(tag, /aria-controls="(?:tab-content|settings-content)"/);
   assert.match(tag, /tabindex="(?:0|-1)"/);
 }
-assert.match(html, /id="tab-content" role="tabpanel" tabindex="0"/);
-assert.match(html, /id="settings-content" role="tabpanel" tabindex="0"/);
+assert.match(html, /id="tab-content" role="tabpanel" aria-labelledby="game-tab-locations" tabindex="0"/);
+assert.match(html, /id="settings-content" role="tabpanel" aria-labelledby="settings-tab-sound" tabindex="0"/);
 for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter']) {
   assert.ok(main.includes(`event.key === '${key}'`), `keyboard navigation missing ${key}`);
 }
 assert.match(main, /tabs\[nextIndex\]\.focus\(\)/);
 assert.match(main, /tabs\[nextIndex\]\.click\(\)/);
 assert.match(header, /setAttribute\('aria-selected', String\(active\)\)/);
+assert.match(header, /setAttribute\('aria-labelledby', activeTab\.id\)/);
 assert.match(menu, /setAttribute\('aria-selected', String\(active\)\)/);
+assert.match(menu, /setAttribute\('aria-labelledby', activeTab\.id\)/);
 assert.match(css, /\.settings-tab:focus-visible/);
 
 console.log('check-accessibility: PASS (14 keyboard-operable tabs, selected state and tab panels)');
