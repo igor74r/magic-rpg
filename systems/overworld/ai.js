@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import { playSound } from '../audio.js';
 import { TILE, isWalkable } from './map.js';
-import { isVillagePositionBlocked } from './collisions.js';
+import { canOccupyPlayerPosition } from './collisions.js';
 import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
@@ -10,9 +10,10 @@ import { getMovementDelta } from './movement.js';
 const VIEW_W = 800, VIEW_H = 500;
 
 function canOccupy(ow, x, y, radius = 9) {
-  const locationId = ow.sourceLocationId || ow.locationId;
-  return isWalkable(ow.map, ow.cols, ow.rows, x, y, locationId)
-    && (locationId !== 'village' || !isVillagePositionBlocked(x, y, radius));
+  return canOccupyPlayerPosition(
+    ow.map, ow.cols, ow.rows, x, y, radius,
+    ow.sourceLocationId || ow.locationId
+  );
 }
 const AGGRO_RANGE = 200, LEASH_RANGE = 340, COMBAT_RANGE = 44, CAMERA_LERP = 0.15;
 
@@ -31,13 +32,17 @@ export function tryMovePlayer(dx, dy, deltaFrames = 1) {
   if (step.x === 0 && step.y === 0) return;
   const p = ow.player, r = 12;
   let moved = false;
-  const nx = p.x + step.x, ny = p.y + step.y;
-  if (canOccupy(ow, nx, p.y, r)
-      && isWalkable(ow.map, ow.cols, ow.rows, nx - r, p.y, (ow.sourceLocationId || ow.locationId))
-      && isWalkable(ow.map, ow.cols, ow.rows, nx + r, p.y, (ow.sourceLocationId || ow.locationId))) { p.x = nx; moved = true; }
-  if (canOccupy(ow, p.x, ny, r)
-      && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny - r, (ow.sourceLocationId || ow.locationId))
-      && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny + r, (ow.sourceLocationId || ow.locationId))) { p.y = ny; moved = true; }
+  // Sweep the player's circle in short increments so a long frame cannot
+  // tunnel through a wall. Resolve axes independently to keep wall sliding.
+  const distance = Math.hypot(step.x, step.y);
+  const substeps = Math.max(1, Math.ceil(distance / 4));
+  const dx = step.x / substeps, dy = step.y / substeps;
+  for (let i = 0; i < substeps; i++) {
+    const nx = p.x + dx;
+    if (canOccupy(ow, nx, p.y, r)) { p.x = nx; moved = true; }
+    const ny = p.y + dy;
+    if (canOccupy(ow, p.x, ny, r)) { p.y = ny; moved = true; }
+  }
   p.x = Math.max(TILE / 2, Math.min(ow.cols * TILE - TILE / 2, p.x));
   p.y = Math.max(TILE / 2, Math.min(ow.rows * TILE - TILE / 2, p.y));
   if (moved) {
