@@ -806,6 +806,34 @@ function drawVillageProp(ctx, x, y, style) {
     ctx.fillStyle = '#d9c9a4'; ctx.fillRect(x - 9, y - 23, 18, 4);
     ctx.strokeStyle = '#a9e9f0'; ctx.lineWidth = 2; ctx.globalAlpha = 0.7 + Math.sin(t * 2) * 0.2;
     ctx.beginPath(); ctx.moveTo(x, y - 22); ctx.quadraticCurveTo(x - 7, y - 32, x - 10, y - 26); ctx.moveTo(x, y - 22); ctx.quadraticCurveTo(x + 7, y - 32, x + 10, y - 26); ctx.stroke();
+  } else if (style === 'world-portal' || style === 'world-waystone') {
+    const pulse = 0.72 + Math.sin(t * 2.2 + x * 0.01) * 0.16;
+    ctx.fillStyle = 'rgba(0,0,0,0.42)';
+    ctx.beginPath(); ctx.ellipse(x, y + 18, 35, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#34313d'; ctx.beginPath(); ctx.ellipse(x, y + 7, 30, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#b89b69'; ctx.lineWidth = 4; ctx.stroke();
+    ctx.fillStyle = '#151b2a'; ctx.beginPath(); ctx.ellipse(x, y - 8, 19, 27, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#6fd7d2'; ctx.lineWidth = 3; ctx.globalAlpha = pulse;
+    ctx.beginPath(); ctx.ellipse(x, y - 8, 17, 25, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = '#d7c18a'; ctx.lineWidth = 2; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.arc(x, y - 8, 10, t * 0.7, t * 0.7 + Math.PI * 1.55); ctx.stroke();
+    ctx.fillStyle = '#a5fff0'; ctx.globalAlpha = pulse;
+    ctx.beginPath(); ctx.arc(x, y - 8, 5 + Math.sin(t * 3) * 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+  } else if (style === 'tower-gate') {
+    const pulse = 0.68 + Math.sin(t * 1.8 + x * 0.02) * 0.14;
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.beginPath(); ctx.ellipse(x, y + 19, 38, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#37313a'; ctx.fillRect(x - 28, y - 24, 9, 45); ctx.fillRect(x + 19, y - 24, 9, 45);
+    ctx.fillStyle = '#796047'; ctx.fillRect(x - 33, y - 30, 66, 8);
+    ctx.strokeStyle = '#c49a5e'; ctx.lineWidth = 3; ctx.strokeRect(x - 28, y - 24, 56, 45);
+    ctx.fillStyle = '#1d1220'; ctx.beginPath(); ctx.moveTo(x - 17, y + 19); ctx.lineTo(x - 17, y - 7); ctx.quadraticCurveTo(x, y - 34, x + 17, y - 7); ctx.lineTo(x + 17, y + 19); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#d28b58'; ctx.lineWidth = 3; ctx.globalAlpha = pulse;
+    ctx.beginPath(); ctx.moveTo(x - 17, y + 19); ctx.lineTo(x - 17, y - 7); ctx.quadraticCurveTo(x, y - 34, x + 17, y - 7); ctx.lineTo(x + 17, y + 19); ctx.stroke();
+    ctx.fillStyle = '#ffb36b'; ctx.globalAlpha = pulse;
+    ctx.beginPath(); ctx.arc(x, y - 7, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#d6b77e'; ctx.fillRect(x - 2, y - 35, 4, 7);
   } else if (style === 'planter') {
     ctx.fillStyle = '#58443a'; ctx.fillRect(x - 13, y - 3, 26, 15);
     ctx.fillStyle = '#98704d'; ctx.fillRect(x - 15, y - 7, 30, 5);
