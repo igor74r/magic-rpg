@@ -5,6 +5,7 @@ import { isVillagePositionBlocked } from './collisions.js';
 import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
+import { getMovementDelta } from './movement.js';
 
 const VIEW_W = 800, VIEW_H = 500;
 
@@ -23,15 +24,14 @@ export function initCamera(playerPos, cols, rows) {
   return { x: cx, y: cy };
 }
 
-export function tryMovePlayer(dx, dy) {
+export function tryMovePlayer(dx, dy, deltaFrames = 1) {
   const ow = state.overworld;
   if (!ow || !ow.active || ow.combat || ow.defeated) return;
-  const len = Math.hypot(dx, dy);
-  if (len === 0) return;
-  dx /= len; dy /= len;
-  const speed = 3.2, p = ow.player, r = 12;
+  const step = getMovementDelta(dx, dy, deltaFrames);
+  if (step.x === 0 && step.y === 0) return;
+  const p = ow.player, r = 12;
   let moved = false;
-  const nx = p.x + dx * speed, ny = p.y + dy * speed;
+  const nx = p.x + step.x, ny = p.y + step.y;
   if (canOccupy(ow, nx, p.y, r)
       && isWalkable(ow.map, ow.cols, ow.rows, nx - r, p.y, (ow.sourceLocationId || ow.locationId))
       && isWalkable(ow.map, ow.cols, ow.rows, nx + r, p.y, (ow.sourceLocationId || ow.locationId))) { p.x = nx; moved = true; }
@@ -40,7 +40,13 @@ export function tryMovePlayer(dx, dy) {
       && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny + r, (ow.sourceLocationId || ow.locationId))) { p.y = ny; moved = true; }
   p.x = Math.max(TILE / 2, Math.min(ow.cols * TILE - TILE / 2, p.x));
   p.y = Math.max(TILE / 2, Math.min(ow.rows * TILE - TILE / 2, p.y));
-  if (moved) playSound('step');
+  if (moved) {
+    const now = performance.now();
+    if (now - (ow.lastStepSoundAt || 0) >= 175) {
+      playSound('step');
+      ow.lastStepSoundAt = now;
+    }
+  }
 }
 
 export function updateOverworld(dt) {
