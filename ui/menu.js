@@ -482,7 +482,27 @@ export function importSave(event) {
         event.target.value = '';
         return;
       }
-      localStorage.setItem(`magic-rpg-save-${slot}`, JSON.stringify(data));
+      const saveKey = `magic-rpg-save-${slot}`;
+      const previousSave = localStorage.getItem(saveKey);
+      const serialized = JSON.stringify(data);
+      try {
+        localStorage.setItem(saveKey, serialized);
+        if (localStorage.getItem(saveKey) !== serialized) {
+          throw new Error('Imported save verification failed');
+        }
+      } catch (writeError) {
+        // A storage implementation may write partially and then throw. Restore
+        // the previous slot so a failed import never destroys the existing save.
+        try {
+          if (previousSave === null) localStorage.removeItem(saveKey);
+          else localStorage.setItem(saveKey, previousSave);
+        } catch (rollbackError) {
+          console.error('[save] Не удалось восстановить слот после неудачного импорта:', rollbackError);
+        }
+        toast('❌ Не удалось записать импорт: сохранение в слоте восстановлено');
+        event.target.value = '';
+        return;
+      }
       toast('✅ Сейв импортирован! Перезагрузка...');
       setTimeout(() => location.reload(), 900);
     } catch (err) {
