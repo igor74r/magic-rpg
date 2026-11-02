@@ -102,8 +102,7 @@ export function spawnNPCs(loc) {
 }
 
 export function spawnStatics(loc, locationId = null, cols = loc.mapCols || 40, rows = loc.mapRows || 30) {
-  if (!loc.statics) return [];
-  const objects = loc.statics.map(obj => ({
+  const objects = (loc.statics || []).map(obj => ({
     ...obj,
     x: obj.x * TILE + TILE / 2,
     y: obj.y * TILE + TILE / 2,
