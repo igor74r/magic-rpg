@@ -3,6 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  // Early capture: runs before stylesheets, images and ES modules begin loading.
+  (() => {
+    const queue = window.__GAME_DIAGNOSTICS_EARLY__ = [];
+    const add = (type, message, source = '', line = 0, column = 0) => {
+      queue.push({ type, message: String(message || type).slice(0, 1000), source: String(source || '').slice(0, 500), line: Number(line) || 0, column: Number(column) || 0, time: new Date().toISOString() });
+      if (queue.length > 100) queue.shift();
+    };
+    window.addEventListener('error', event => {
+      if (event.target && event.target !== window && (event.target.src || event.target.href)) {
+        const target = event.target;
+        add('resource-load', 'Не удалось загрузить ресурс <' + (target.tagName || 'resource').toLowerCase() + '> ' + (target.src || target.href), target.src || target.href);
+      } else {
+        add('uncaught-error', event.message || 'Необработанная ошибка JavaScript', event.filename, event.lineno, event.colno);
+      }
+    }, true);
+    window.addEventListener('unhandledrejection', event => {
+      const reason = event.reason;
+      add('unhandled-rejection', reason && (reason.stack || reason.message) || String(reason || 'Promise отклонён без причины'));
+    });
+  })();
+</script>
 <title>Осколки Разлома</title>
 <link rel="icon" type="image/png" href="assets/branding/mana-crystal.png">
 <link rel="stylesheet" href="css/style.css">
