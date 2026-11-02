@@ -439,53 +439,67 @@ function render() {
 
   const p = ow.player; nearNpc = null;
 
-  for (const obj of ow.statics || []) {
-    const sx = obj.x - cam.x, sy = obj.y - cam.y;
-    if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
-    const dist = Math.hypot(obj.x - p.x, obj.y - p.y);
-    if (!obj.decorative && dist < obj.interactionRadius && !ow.combat) {
-      nearNpc = obj;
-      ctx.fillStyle = 'rgba(255, 215, 0, 0.15)'; ctx.beginPath(); ctx.arc(sx, sy, 32, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; ctx.lineWidth = 2; ctx.stroke();
-    }
-    drawStatic(ctx, obj, sx, sy, theme.shadow);
-    if (!obj.decorative) {
-      ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
-      ctx.strokeText(obj.name, sx, sy - 30); ctx.fillStyle = '#d4c8a8'; ctx.fillText(obj.name, sx, sy - 30);
-    }
-  }
+  const p = ow.player;
+  nearNpc = null;
+  const depthItems = [
+    ...(ow.statics || []).map(item => ({ item, kind: 'static', footY: item.y + (item.depthOffset || 0) })),
+    ...(ow.npcs || []).map(item => ({ item, kind: 'npc', footY: item.y + (item.depthOffset || 0) })),
+    ...(ow.events || []).map(item => ({ item, kind: 'event', footY: item.y + (item.depthOffset || 0) })),
+    ...(ow.enemies || []).filter(item => !item.dead).map(item => ({ item, kind: 'enemy', footY: item.y + (item.depthOffset || 0) })),
+    { item: ow.player, kind: 'player', footY: ow.player.y + 12 }
+  ].sort((a, b) => a.footY - b.footY);
 
-  for (const npc of ow.npcs || []) {
-    const sx = npc.x - cam.x, sy = npc.y - cam.y;
-    if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
-    const dist = Math.hypot(npc.x - p.x, npc.y - p.y);
-    if (dist < npc.interactionRadius && !ow.combat) {
-      nearNpc = npc;
-      ctx.fillStyle = 'rgba(255, 215, 0, 0.15)'; ctx.beginPath(); ctx.arc(sx, sy, 32, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; ctx.lineWidth = 2; ctx.stroke();
+  for (const entry of depthItems) {
+    const item = entry.item;
+    const sx = item.x - cam.x, sy = item.y - cam.y;
+    if (sx < -90 || sx > VIEW_W + 90 || sy < -90 || sy > VIEW_H + 90) continue;
+    if (entry.kind === 'static' || entry.kind === 'npc') {
+      const dist = Math.hypot(item.x - p.x, item.y - p.y);
+      if (!item.decorative && dist < (item.interactionRadius || 60) && !ow.combat) {
+        nearNpc = item;
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.15)';
+        ctx.beginPath(); ctx.arc(sx, sy, 32, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; ctx.lineWidth = 2; ctx.stroke();
+      }
+      drawStatic(ctx, item, sx, sy, theme.shadow);
+      if (entry.kind === 'npc' || !item.decorative) {
+        ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.lineWidth = 3; ctx.strokeStyle = '#000';
+        ctx.strokeText(item.name, sx, sy - 30);
+        ctx.fillStyle = '#d4c8a8'; ctx.fillText(item.name, sx, sy - 30);
+      }
+    } else if (entry.kind === 'event') {
+      const dist = Math.hypot(item.x - p.x, item.y - p.y);
+      if (dist < item.interactionRadius && !ow.combat) {
+        nearNpc = item;
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.2)';
+        ctx.beginPath(); ctx.arc(sx, sy, 32, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
+      }
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 400);
+      ctx.fillStyle = `rgba(255, 215, 0, ${0.1 + pulse * 0.15})`;
+      ctx.beginPath(); ctx.arc(sx, sy, 24 + pulse * 4, 0, Math.PI * 2); ctx.fill();
+      const eventPropIndex = getEventPropIndex(item.eventType, ow.theme || ow.locationId);
+      if (eventPropIndex < 0 || !drawAtlasProp(ctx, eventPropIndex, sx - 24, sy - 24, 48, 48)) {
+        drawStatic(ctx, item, sx, sy, theme.shadow);
+      }
+      ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.strokeText(item.name, sx, sy - 24);
+      ctx.fillStyle = '#ffd060'; ctx.fillText(item.name, sx, sy - 24);
+    } else if (entry.kind === 'enemy') {
+      drawEnemyByType(ctx, item, sx, sy, theme.shadow);
+      const enemyDef = ENEMIES[item.enemyId];
+      if (enemyDef) {
+        const hpPct = item.hp / item.maxHp;
+        ctx.fillStyle = '#330000'; ctx.fillRect(sx - 20, sy - 40, 40, 5);
+        ctx.fillStyle = hpPct > 0.5 ? '#30cc30' : hpPct > 0.25 ? '#ccaa00' : '#cc3030';
+        ctx.fillRect(sx - 20, sy - 40, 40 * hpPct, 5);
+        ctx.font = '10px Georgia'; ctx.textAlign = 'center'; ctx.fillStyle = '#ddd';
+        ctx.fillText(enemyDef.name, sx, sy - 43);
+      }
+    } else if (entry.kind === 'player') {
+      drawPlayerByClass(ctx, item, sx, sy, theme.shadow);
     }
-    drawStatic(ctx, npc, sx, sy, theme.shadow);
-    ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
-    ctx.strokeText(npc.name, sx, sy - 30); ctx.fillStyle = '#d4c8a8'; ctx.fillText(npc.name, sx, sy - 30);
-  }
-
-  for (const ev of ow.events || []) {
-    const sx = ev.x - cam.x, sy = ev.y - cam.y;
-    if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
-    const dist = Math.hypot(ev.x - p.x, ev.y - p.y);
-    if (dist < ev.interactionRadius && !ow.combat) {
-      nearNpc = ev;
-      ctx.fillStyle = 'rgba(255, 215, 0, 0.2)'; ctx.beginPath(); ctx.arc(sx, sy, 32, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
-    }
-    const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 400);
-    ctx.fillStyle = `rgba(255, 215, 0, ${0.1 + pulse * 0.15})`; ctx.beginPath(); ctx.arc(sx, sy, 24 + pulse * 4, 0, Math.PI * 2); ctx.fill();
-    const eventPropIndex = getEventPropIndex(ev.eventType, ow.theme || ow.locationId);
-    if (eventPropIndex < 0 || !drawAtlasProp(ctx, eventPropIndex, sx - 24, sy - 24, 48, 48)) {
-      drawStatic(ctx, ev, sx, sy, theme.shadow);
-    }
-    ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
-    ctx.strokeText(ev.name, sx, sy - 24); ctx.fillStyle = '#ffd060'; ctx.fillText(ev.name, sx, sy - 24);
   }
 
   const activeMission = getActiveCampaignMission(state.game.player);
