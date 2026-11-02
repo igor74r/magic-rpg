@@ -19,6 +19,7 @@ const overflowSnapshot = JSON.stringify(player);
 addExp(100);
 assert.equal(JSON.stringify(player), overflowSnapshot, 'XP total overflow must be rejected');
 player.exp = 25;
+player.expNext = 999999;
 addExp(75);
 assert.equal(player.level, 2);
 assert.equal(player.exp, 0);
