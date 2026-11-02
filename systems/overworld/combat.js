@@ -131,6 +131,27 @@ function enemyDamageMultiplier(enemy, style) {
   return weak ? 1.25 : resist ? 0.80 : 1;
 }
 
+function applyElementalReaction(enemy, element) {
+  if (!enemy || !Array.isArray(enemy.effects)) return 1;
+  const has = id => enemy.effects.some(effect => effect.id === id);
+  const remove = id => { enemy.effects = enemy.effects.filter(effect => effect.id !== id); };
+  let multiplier = 1;
+
+  if (element === 'ice' && has('burn')) {
+    remove('burn');
+    pushLog('❄️🔥 Реакция стихий: лёд гасит ожог и охлаждает цель!', 'info');
+  } else if (element === 'fire' && has('slow')) {
+    remove('slow');
+    pushLog('🔥❄️ Реакция стихий: огонь снимает замедление!', 'info');
+  } else if (element === 'lightning' && has('slow')) {
+    multiplier = 1.20;
+    remove('slow');
+    pushLog('⚡❄️ Реакция стихий: молния поражает охлаждённую цель (+20% урона)!', 'success');
+  }
+
+  return multiplier;
+}
+
 function enemyDefenseForStyle(enemy, style, armorPen = 0) {
   const base = Math.max(0, enemyDefValue(enemy) - armorPen);
   const counter = enemy?.adaptiveCounter;
@@ -449,6 +470,7 @@ export function combatCastSpell(spellId) {
   if (spell.damage) {
     recordPlayerStyle(ow, 'magic');
     consumeEnemyAdaptation(enemy, 'magic');
+    const elementalMultiplier = applyElementalReaction(enemy, spell.element);
     const damage = Math.max(
       1,
       Math.floor(
@@ -460,7 +482,8 @@ export function combatCastSpell(spellId) {
           )
         ) *
         talent.spellMult *
-        enemyDamageMultiplier(enemy, 'magic')
+        enemyDamageMultiplier(enemy, 'magic') *
+        elementalMultiplier
       )
     );
 
@@ -1122,6 +1145,7 @@ function enemyCombatTurn() {
 
   const attack =
     def.attack *
+    getAtkMult(enemy) *
     (enemy.elite ? ELITE_ATK_MULT : 1) *
     modifierAttack *
     phaseAttack *
