@@ -62,6 +62,8 @@ try {
 
     await page.locator('[data-tab="sound"]').click();
     await page.locator('#set-music-volume').waitFor();
+    assert.equal(await page.getByLabel('🎵 Музыка').count(), 1, `${viewport.name}: music slider must have an accessible label`);
+    assert.equal(await page.getByLabel('🔊 Эффекты').count(), 1, `${viewport.name}: effects slider must have an accessible label`);
     await checkViewport(page, `${viewport.name}/sound`);
 
     await page.locator('[data-tab="game"]').click();
@@ -88,8 +90,42 @@ try {
     assert.equal(stored.reducedMotion, true, `${viewport.name}: reduced motion was not saved`);
     assert.equal(stored.screenShake, false, `${viewport.name}: screen shake was not saved`);
 
+    await page.locator('#screen-settings .settings-back-btn').click();
+    await page.locator('.slot-new').first().click();
+    await page.locator('.class-card[data-class-id="warrior"]').click();
+    await page.locator('#char-name').fill('UI audit');
+    await page.getByRole('button', { name: /Начать путь/ }).click();
+    await page.locator('#screen-game.active').waitFor();
+
+    for (const tab of ['locations', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
+      const tabButton = page.locator(`#game-tab-${tab}`);
+      await tabButton.click();
+      assert.equal(await tabButton.getAttribute('aria-selected'), 'true', `${viewport.name}: ${tab} tab must become selected`);
+      assert.equal(await page.locator('#tab-content').getAttribute('aria-labelledby'), `game-tab-${tab}`,
+        `${viewport.name}: tab panel must identify its active tab`);
+      const dashboard = await page.evaluate(() => {
+        const layout = document.querySelector('.dashboard-layout');
+        const main = document.querySelector('.dashboard-main');
+        const content = document.querySelector('.dashboard-content');
+        return {
+          viewport: window.innerWidth,
+          documentWidth: document.documentElement.scrollWidth,
+          layoutWidth: layout?.getBoundingClientRect().width ?? 0,
+          layoutScrollWidth: layout?.scrollWidth ?? 0,
+          mainWidth: main?.getBoundingClientRect().width ?? 0,
+          mainScrollWidth: main?.scrollWidth ?? 0,
+          contentWidth: content?.getBoundingClientRect().width ?? 0,
+          contentScrollWidth: content?.scrollWidth ?? 0
+        };
+      });
+      assert.ok(dashboard.documentWidth <= dashboard.viewport + 1, `${viewport.name}/${tab}: document overflow: ${JSON.stringify(dashboard)}`);
+      assert.ok(dashboard.layoutScrollWidth <= dashboard.layoutWidth + 1, `${viewport.name}/${tab}: dashboard overflow: ${JSON.stringify(dashboard)}`);
+      assert.ok(dashboard.mainScrollWidth <= dashboard.mainWidth + 1, `${viewport.name}/${tab}: main panel overflow: ${JSON.stringify(dashboard)}`);
+      assert.ok(dashboard.contentScrollWidth <= dashboard.contentWidth + 1, `${viewport.name}/${tab}: content overflow: ${JSON.stringify(dashboard)}`);
+    }
+
     assert.deepEqual(pageErrors, [], `${viewport.name}: uncaught browser errors: ${pageErrors.join('; ')}`);
-    console.log(`PASS ${viewport.name} (${viewport.width}x${viewport.height}): boot, settings tabs, persistence, responsive widths, no page errors`);
+    console.log(`PASS ${viewport.name} (${viewport.width}x${viewport.height}): settings labels, game creation, 9 dashboard tabs, responsive widths, no page errors`);
     await page.close();
   }
   console.log('Browser smoke checks passed (3 viewport sizes)');
