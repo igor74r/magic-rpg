@@ -45,4 +45,4 @@ assert.match(html, /id="npc-dialog-modal" class="npc-modal" style="display:none;
 assert.match(html, /id="game-log" role="log" aria-live="polite"/,
   'game log updates must be announced politely to assistive technology');
 
-console.log('check-accessibility: PASS (14 keyboard-operable tabs, selected state and tab panels)');
+console.log('check-accessibility: PASS (14 keyboard-operable tabs, 16 labelled settings controls, modal and live-region semantics)');
