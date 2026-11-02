@@ -199,8 +199,8 @@ try {
   globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
   combatAttack();
   globalThis.localStorage.setItem = originalSetItem;
-  assert.equal(f.p.gold, victoryGoldBeforeSaveFailure, 'failed save must roll back victory gold');
-  assert.equal(f.p.stats.kills.goblin || 0, victoryKillsBeforeSaveFailure, 'failed save must roll back kill progress');
+  assert.equal(state.game.player.gold, victoryGoldBeforeSaveFailure, 'failed save must roll back victory gold');
+  assert.equal(state.game.player.stats.kills.goblin || 0, victoryKillsBeforeSaveFailure, 'failed save must roll back kill progress');
   assert.equal(f.enemy.dead, false, 'failed save must leave enemy alive');
   assert.equal(f.enemy.hp, f.enemy.maxHp, 'failed save must restore encounter health');
   assert.ok(f.ow.combat, 'failed save must keep combat active');
