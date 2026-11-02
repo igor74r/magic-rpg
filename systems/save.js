@@ -57,11 +57,14 @@ export function saveGame() {
     version: SAVE_VERSION,
     ...(player ? { player: { ...player, playtimeSec } } : {})
   };
-  const serialized = JSON.stringify(snapshot);
+  let serialized;
   try {
+    serialized = JSON.stringify(snapshot);
     localStorage.setItem(slotKey(slot), serialized);
   } catch (error) {
-    console.error('[save] Не удалось записать сохранение:', error);
+    // Serialization can fail too (e.g. cyclic extension data or BigInt),
+    // and must follow the same non-mutating failure path as storage errors.
+    console.error('[save] Не удалось подготовить или записать сохранение:', error);
     return false;
   }
 
