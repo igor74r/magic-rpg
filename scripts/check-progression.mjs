@@ -75,8 +75,31 @@ for (const [actIndex, act] of STORY.acts.entries()) {
   );
 }
 
-assert.equal(getExpNext(50), 628, 'level 50 should use the final campaign XP band');
+assert.equal(getExpNext(50), 535, 'level 50 should use the final campaign XP band');
 assert.ok(getExpNext(51) > getExpNext(50), 'post-campaign XP requirements must continue increasing');
+
+// The final region opens after mission 3 of Act V. Its level gate must be
+// reachable from the guaranteed campaign rewards before mission 4 begins.
+let beforeFinalRegionExp = 0;
+for (const act of STORY.acts.slice(0, 4)) {
+  for (const mission of act.missions) {
+    beforeFinalRegionExp += ENEMIES[mission.enemyId].exp * mission.count;
+    beforeFinalRegionExp += getMissionReward(mission).exp;
+  }
+}
+for (const mission of STORY.acts[4].missions.slice(0, 3)) {
+  beforeFinalRegionExp += ENEMIES[mission.enemyId].exp * mission.count;
+  beforeFinalRegionExp += getMissionReward(mission).exp;
+}
+let beforeFinalRegionLevel = 1;
+let beforeFinalRegionRemaining = beforeFinalRegionExp;
+while (beforeFinalRegionLevel < MAX_LEVEL &&
+       beforeFinalRegionRemaining >= getExpNext(beforeFinalRegionLevel)) {
+  beforeFinalRegionRemaining -= getExpNext(beforeFinalRegionLevel);
+  beforeFinalRegionLevel++;
+}
+assert.ok(beforeFinalRegionLevel >= 47,
+  `Act V mission 4 region must be reachable at level 47 from guaranteed progress (got ${beforeFinalRegionLevel})`);
 assert.equal(getExpNext(MAX_LEVEL), Infinity, 'level cap must stop further XP requirements');
 
 state.game = null;
