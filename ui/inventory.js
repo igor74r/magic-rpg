@@ -237,9 +237,9 @@ function filterBarHTML() {
     ['rift-shards', '💎 Осколки']
   ];
   const f = ([key, label]) =>
-    `<button class="inv-filter-btn ${invFilter === key ? 'active' : ''}" onclick="GameAPI.setInvFilter('${key}')">${label}</button>`;
+    `<button class="inv-filter-btn ${invFilter === key ? 'active' : ''}" data-inv-filter="${key}">${label}</button>`;
   const s = (key, label) =>
-    `<button class="inv-filter-btn ${invSort === key ? 'active' : ''}" onclick="GameAPI.setInvSort('${key}')">${label}</button>`;
+    `<button class="inv-filter-btn ${invSort === key ? 'active' : ''}" data-inv-sort="${key}">${label}</button>`;
   return `
     <div class="inv-controls">
       <div class="inv-filter-row">${filters.map(f).join('')}</div>
@@ -305,13 +305,12 @@ function renderPaperdoll(p) {
     const forgeLevel = Number.isSafeInteger(obj.forgeLevel) && obj.forgeLevel > 0 ? obj.forgeLevel : 0;
     return `
       <div class="gear-slot filled" style="--gear-color:${color}"
-        onmouseover="GameAPI.showEqTooltip(event, '${slot}')"
-        onmouseout="GameAPI.hideTooltip()">
+        data-eq-tooltip="${slot}">
         <span class="gear-slot-icon">${item.icon}</span>
         <span class="gear-slot-label">${label}</span>
         <span class="gear-slot-name">${affixes.length ? affixes.map(affix => escapeHtml(affix?.name ?? '')).join(' ') + ' ' : ''}${item.name}${forgeLevel ? ` +${forgeLevel}` : ''}</span>
         <span class="gear-slot-sockets">${sockets ? `◈ ${runes}/${sockets}` : ''}</span>
-        <button class="gear-slot-remove" onclick="GameAPI.unequip('${slot}')" title="Снять">×</button>
+        <button class="gear-slot-remove" data-inv-action="unequip" data-slot="${slot}" title="Снять">×</button>
       </div>`;
   }).join('');
 
@@ -328,7 +327,45 @@ function renderPaperdoll(p) {
   `;
 }
 
+let inventoryEventsBound = false;
+
+function bindInventoryEvents() {
+  if (inventoryEventsBound || typeof document === 'undefined') return;
+  inventoryEventsBound = true;
+  document.addEventListener('click', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    const control = target?.closest('[data-inv-action], [data-inv-filter], [data-inv-sort]');
+    if (!control) return;
+    if (control.hasAttribute('data-inv-filter')) { setInvFilter(control.dataset.invFilter); return; }
+    if (control.hasAttribute('data-inv-sort')) { setInvSort(control.dataset.invSort); return; }
+    const index = Number(control.dataset.index);
+    switch (control.dataset.invAction) {
+      case 'equip-best': equipBestUI(); break;
+      case 'sell-junk': sellJunkUI(); break;
+      case 'open-sale': openSaleUI(); break;
+      case 'unequip': unequipItemUI(control.dataset.slot); break;
+      case 'slot': invSlotClick(index); break;
+      case 'claim-loot': claimPendingLootUI(index); break;
+      case 'socket-rune': socketRuneUI(index, control.dataset.slot); break;
+      case 'close-rune': document.getElementById('rune-socket-overlay')?.remove(); break;
+    }
+  });
+  document.addEventListener('mouseover', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    const control = target?.closest('[data-inv-tooltip], [data-eq-tooltip]');
+    if (!control || control.contains(event.relatedTarget)) return;
+    if (control.hasAttribute('data-inv-tooltip')) showInvTooltip(event, Number(control.dataset.invTooltip));
+    else showEqTooltip(event, control.dataset.eqTooltip);
+  });
+  document.addEventListener('mouseout', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    const control = target?.closest('[data-inv-tooltip], [data-eq-tooltip]');
+    if (control && !control.contains(event.relatedTarget)) hideTooltip();
+  });
+}
+
 export function renderInventory() {
+  bindInventoryEvents();
   const p = state.game.player;
   if (!Array.isArray(p.inventory)) p.inventory = [];
   const hasBetter = hasBetterEquipment(p);
@@ -349,9 +386,9 @@ export function renderInventory() {
 
   const actions = `
     <div class="inv-top-actions">
-      ${hasBetter ? '<button onclick="GameAPI.equipBest()" class="equip-best-btn">⚡ Экипировать лучшее</button>' : ''}
-      ${junkCount ? `<button onclick="GameAPI.sellJunk()" class="inv-sell-junk">💰 Продать слабое (${junkCount})</button>` : ''}
-      <button onclick="GameAPI.openSaleUI()" class="inv-sell-junk">💰 Продажа</button>
+      ${hasBetter ? '<button data-inv-action="equip-best" class="equip-best-btn">⚡ Экипировать лучшее</button>' : ''}
+      ${junkCount ? `<button data-inv-action="sell-junk" class="inv-sell-junk">💰 Продать слабое (${junkCount})</button>` : ''}
+      <button data-inv-action="open-sale" class="inv-sell-junk">💰 Продажа</button>
     </div>`;
 
   let grid = '';
@@ -371,9 +408,7 @@ export function renderInventory() {
         ? '<span class="slot-socket">◈</span>' : '';
       grid += `
         <button type="button" class="inv-slot has-item ${rarity}"
-          onmouseover="GameAPI.showInvTooltip(event, ${idx})"
-          onmouseout="GameAPI.hideTooltip()"
-          onclick="GameAPI.invSlotClick(${idx})"
+          data-inv-tooltip="${idx}" data-inv-action="slot" data-index="${idx}"
           aria-label="${item.name}">
           <span class="slot-icon">${item.icon}</span>${qty}${socket}
         </button>`;
@@ -410,7 +445,7 @@ function renderPendingLoot(player) {
     const qty = Number.isSafeInteger(rawQty) && rawQty > 0 ? rawQty : 1;
     return `<div class="pending-loot-row">
       <span class="pending-loot-item">${item.icon} ${item.name}${qty > 1 ? ` ×${qty}` : ''}</span>
-      <button type="button" onclick="GameAPI.claimPendingLoot(${index})">Забрать</button>
+      <button type="button" data-inv-action="claim-loot" data-index="${index}">Забрать</button>
     </div>`;
   }).join('');
   return `<section class="pending-loot-panel">
@@ -489,12 +524,12 @@ function openRuneSocketMenu(inventoryIndex) {
       <b>Выберите предмет для установки:</b>
       <div class="rune-socket-options">
         ${candidates.map(c => `
-          <button onclick="GameAPI.socketRune(${inventoryIndex}, '${c.slot}')">
+          <button data-inv-action="socket-rune" data-index="${inventoryIndex}" data-slot="${c.slot}">
             <span>${c.item.icon} ${c.label}: ${c.item.name}</span>
             <small>Свободно гнёзд: ${c.sockets - c.used}</small>
           </button>`).join('')}
       </div>
-      <button class="rune-socket-cancel" onclick="document.getElementById('rune-socket-overlay')?.remove()">Отмена</button>
+      <button class="rune-socket-cancel" data-inv-action="close-rune">Отмена</button>
     </div>`;
   overlay.addEventListener('click', e => {
     if (e.target === overlay) overlay.remove();
