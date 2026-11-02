@@ -149,7 +149,7 @@ export function setInvSort(sort) {
 function renderSaleModal() {
   const overlay = document.getElementById('inventory-sale-overlay');
   if (!overlay) return;
-  const active = overlay.contains(document.activeElement) ? document.activeElement : null;
+  const active = overlay.contains?.(document.activeElement) ? document.activeElement : null;
   const activeAction = active?.dataset.saleAction;
   const activeIndex = active?.dataset.index;
   const p = state.game.player;
