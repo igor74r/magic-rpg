@@ -603,3 +603,12 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   .pending-loot-row { align-items:flex-start; }
   .pending-loot-row button { padding:6px 9px; }
 }
+
+
+/* ---------- Keyboard focus for non-native interactive cards ---------- */
+.class-card[role="button"]:focus-visible,
+.passive-tree-viewport .passive-node:focus-visible {
+  outline: 3px solid #ffe39a;
+  outline-offset: 4px;
+  z-index: 5;
+}
