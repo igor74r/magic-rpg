@@ -538,7 +538,9 @@ export function loadGameData(slot) {
     lastSaveTime = Date.now();
 
     // После миграции сразу записываем обновлённую структуру.
-    saveGame();
+    if (!saveGame()) {
+      throw new Error('Failed to persist migrated save');
+    }
 
     return true;
   } catch (error) {
