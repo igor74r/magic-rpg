@@ -14,7 +14,7 @@ globalThis.localStorage = {
 };
 const combatSource = readFileSync(new URL('../systems/overworld/combat.js', import.meta.url), 'utf8');
 // Narrow signature check catches common double-decoding artifacts without rejecting valid Cyrillic.
-assert.doesNotMatch(combatSource, /(?:Р[А-Я]|рџ|в[љњћЂџ\u0098])/, 'combat log must not contain UTF-8/Windows-1251 mojibake');
+assert.doesNotMatch(combatSource, /(?:Р[’‘]|Р[а-я]Р[а-я]|рџ|в[љњћЂџ\u0098])/, 'combat log must not contain UTF-8/Windows-1251 mojibake');
 
 const scheduled = [];
 const realSetTimeout = globalThis.setTimeout;
