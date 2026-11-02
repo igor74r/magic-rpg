@@ -54,7 +54,7 @@ export function openQuestBoard() {
 
           ${
             quest.completed && !quest.claimed
-              ? `<button data-game-action="claim-quest" data-quest-id="'${quest.id}"" class="sell-btn" style="padding:6px 12px;font-size:12px;">Забрать</button>`
+              ? `<button data-game-action="claim-quest" data-quest-id="${quest.id}" class="sell-btn" style="padding:6px 12px;font-size:12px;">Забрать</button>`
               : quest.claimed
                 ? `<span style="color:#60ff60;font-size:12px;">Получено</span>`
                 : ''
