@@ -102,6 +102,11 @@ assert.doesNotMatch(newGameSlotBody, /state\.currentSlot\s*=/,
   'new-game selection must not change the active slot before character creation');
 assert.doesNotMatch(loadSlotBody, /state\.currentSlot\s*=/,
   'failed slot loads must not switch the active slot in the UI');
+const saveAndMenuBody = menuSource.match(/export function saveAndMenu\(\) \{([\s\S]*?)\n\}/)?.[1] || '';
+assert.match(saveAndMenuBody, /if\s*\(!saveGame\(\)\)/,
+  'manual save failure must stop navigation away from the active game');
+assert.match(saveAndMenuBody, /return false/,
+  'manual save failure must be reported to its caller');
 console.log('PASS menu defers slot switching until a new character is created and load succeeds');
 
 // Exercise the real load-and-rewrite path against disposable in-memory storage.
