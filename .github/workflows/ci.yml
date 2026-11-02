@@ -166,6 +166,9 @@ jobs:
       - name: Check player footprint and swept collision
         run: node scripts/check-overworld-collision.mjs
 
+      - name: Check overworld enemy behavior and steering
+        run: node scripts/check-overworld-enemy-ai.mjs
+
       - name: Check overworld maps and region collision
         run: node scripts/check-overworld-map.mjs
 
