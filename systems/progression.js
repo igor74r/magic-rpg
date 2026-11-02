@@ -10,9 +10,15 @@ export function getExpNext(level) {
 }
 
 export function addExp(amount) {
-  const p = state.game.player;
-  if (p.level >= MAX_LEVEL) return;
+  const p = state.game?.player;
+  if (!p || !Number.isSafeInteger(amount) || amount <= 0 ||
+      !Number.isSafeInteger(p.level) || p.level < 1 || p.level >= MAX_LEVEL) return;
 
+  // Keep malformed progress from poisoning the level-up loop or the save.
+  if (!Number.isSafeInteger(p.exp) || p.exp < 0) p.exp = 0;
+  if (!Number.isSafeInteger(p.expNext) || p.expNext <= 0) {
+    p.expNext = getExpNext(p.level);
+  }
   p.exp += amount;
 
   while (p.level < MAX_LEVEL && p.exp >= p.expNext) {
