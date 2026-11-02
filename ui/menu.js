@@ -87,13 +87,13 @@ function renderSettingsTab(tab) {
   if (tab === 'sound') {
     content.innerHTML = `
       <div class="settings-row">
-        <label>🎵 Музыка</label>
-        <input type="range" id="set-music-volume" min="0" max="100" value="${s.musicVolume ?? 60}" oninput="GameAPI.applySettings()">
+        <label for="set-music-volume">🎵 Музыка</label>
+        <input type="range" id="set-music-volume" min="0" max="100" value="${s.musicVolume ?? 60}" aria-describedby="set-music-volume-val" oninput="GameAPI.applySettings()">
         <span id="set-music-volume-val">${s.musicVolume ?? 60}%</span>
       </div>
       <div class="settings-row">
-        <label>🔊 Эффекты</label>
-        <input type="range" id="set-sfx-volume" min="0" max="100" value="${s.sfxVolume ?? 80}" oninput="GameAPI.applySettings()">
+        <label for="set-sfx-volume">🔊 Эффекты</label>
+        <input type="range" id="set-sfx-volume" min="0" max="100" value="${s.sfxVolume ?? 80}" aria-describedby="set-sfx-volume-val" oninput="GameAPI.applySettings()">
         <span id="set-sfx-volume-val">${s.sfxVolume ?? 80}%</span>
       </div>
       <div class="settings-row">
