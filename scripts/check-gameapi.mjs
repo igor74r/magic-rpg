@@ -44,11 +44,10 @@ function splitTopLevel(str, sep) {
 
 // Вырезает тело объекта window.GameAPI = { ... } с учётом строк и комментариев.
 function extractFacadeBody(text) {
-  const marker = 'window.GameAPI';
-  const at = text.indexOf(marker);
-  if (at < 0) return null;
-  const brace = text.indexOf('{', at);
-  if (brace < 0) return null;
+  // Find the actual facade assignment, not an earlier delegated reference to GameAPI.
+  const assignment = /window\\.GameAPI\\s*=\\s*\\{/.exec(text);
+  if (!assignment) return null;
+  const brace = assignment.index + assignment[0].lastIndexOf('{');
 
   let depth = 0, quote = null, lineComment = false, blockComment = false, i = brace;
   for (; i < text.length; i++) {
@@ -82,6 +81,14 @@ function collectFacadeKeys(text) {
 }
 
 const lineAt = (text, index) => text.slice(0, index).split('\n').length;
+
+const facadeProbe = collectFacadeKeys(
+  "window.GameAPI?.claimQuest?.('probe');\nwindow.GameAPI = { claimQuest: () => {}, closeNpcAndResume: () => {} };"
+);
+if (!facadeProbe?.has('claimQuest') || !facadeProbe?.has('closeNpcAndResume')) {
+  console.log('check-gameapi: не удалось найти фасад после делегированного обращения');
+  process.exit(1);
+}
 
 const mainFile = join(ROOT, 'main.js');
 if (!existsSync(mainFile)) {
