@@ -99,6 +99,19 @@ export function healAtHealer() {
   return { ok: true };
 }
 
+function cloneInventoryForRollback(inventory) {
+  return (Array.isArray(inventory) ? inventory : []).map(item => {
+    const clone = { ...item };
+    if (item.bonus && typeof item.bonus === 'object') clone.bonus = { ...item.bonus };
+    if (Array.isArray(item.affixes)) clone.affixes = item.affixes.map(affix => ({
+      ...affix,
+      ...(affix.bonus && typeof affix.bonus === 'object' ? { bonus: { ...affix.bonus } } : {})
+    }));
+    if (Array.isArray(item.runes)) clone.runes = [...item.runes];
+    return clone;
+  });
+}
+
 function findCraftRecipe(recipeId) {
   return [
     ...(NPCS.alchemist.recipes || []),
@@ -191,12 +204,7 @@ export function reforgeItemByIndex(index) {
   const check = canReforgeItem(index);
   if (!check.ok) return check;
   const p = state.game.player;
-  const originalInventory = p.inventory.map(item => ({
-    ...item,
-    bonus: item.bonus ? { ...item.bonus } : item.bonus,
-    affixes: Array.isArray(item.affixes) ? item.affixes.map(affix => ({ ...affix, bonus: { ...affix.bonus } })) : item.affixes,
-    runes: Array.isArray(item.runes) ? [...item.runes] : item.runes
-  }));
+  const originalInventory = cloneInventoryForRollback(p.inventory);
   const old = p.inventory[index];
   const preserved = {
     sockets: old.sockets,
@@ -254,12 +262,7 @@ export function collectCraftingJobs(now = Date.now()) {
     const created = addItem(job.result, job.qty, { rarity: job.rarity });
     if (created.length) claimed.push(job);
   }
-  const previousInventory = p.inventory.map(item => ({
-    ...item,
-    bonus: item.bonus ? { ...item.bonus } : item.bonus,
-    affixes: Array.isArray(item.affixes) ? item.affixes.map(affix => ({ ...affix, bonus: { ...affix.bonus } })) : item.affixes,
-    runes: Array.isArray(item.runes) ? [...item.runes] : item.runes
-  }));
+  const previousInventory = cloneInventoryForRollback(p.inventory);
   const previousJobs = [...p.craftingJobs];
   p.craftingJobs = p.craftingJobs.filter(job => !claimed.includes(job));
   if (claimed.length) {
@@ -282,11 +285,7 @@ export function craftRecipe(recipeId) {
   const rarity = recipe.rarity || (tier === 5 ? 'legendary' : tier === 4 ? 'epic' : undefined);
 
   // Ingredients are validated together, then consumed as one synchronous transaction.
-  const originalInventory = p.inventory.map(item => ({
-    ...item,
-    bonus: item.bonus ? { ...item.bonus } : item.bonus,
-    affixes: Array.isArray(item.affixes) ? item.affixes.map(affix => ({ ...affix, bonus: { ...affix.bonus } })) : item.affixes
-  }));
+  const originalInventory = cloneInventoryForRollback(p.inventory);
   const originalJobs = Array.isArray(p.craftingJobs) ? [...p.craftingJobs] : p.craftingJobs;
   const originalHighTier = p.craftedHighTierByAct
     ? { ...p.craftedHighTierByAct }
