@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [html, main, header, menu, css] = await Promise.all([
+const [html, main, header, menu, css, inventory, shop] = await Promise.all([
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
   readFile(new URL('../main.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/header.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/menu.js', import.meta.url), 'utf8'),
-  readFile(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8')
+  readFile(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8'),
+  readFile(new URL('../ui/inventory.js', import.meta.url), 'utf8'),
+  readFile(new URL('../ui/shop.js', import.meta.url), 'utf8')
 ]);
 
 const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
@@ -52,4 +54,18 @@ for (const [key, label] of [
     `mobile direction key ${key} must have a descriptive accessible name`);
 }
 
+assert.match(inventory, /data-inv-filter="\$\{key\}" aria-pressed="\$\{invFilter === key\}"/,
+  'inventory filters must expose their selected state');
+assert.match(inventory, /data-inv-sort="\$\{key\}" aria-pressed="\$\{invSort === key\}"/,
+  'inventory sorting controls must expose their selected state');
+assert.match(shop, /data-shop-preset="\$\{escapeHtml\(id\)\}" aria-pressed="\$\{shopPreset === id\}"/,
+  'shop filters must expose their selected state');
+assert.match(inventory, /role="dialog" aria-modal="true" aria-labelledby="inventory-sale-title"/,
+  'sale overlay must expose modal dialog semantics');
+assert.match(inventory, /if \(event.key === 'Escape'\) \{ event.preventDefault\(\); cancelSaleUI\(\); return; \}/,
+  'sale dialog must close with Escape');
+assert.match(inventory, /if \(saleReturnFocus\?\.isConnected\) saleReturnFocus\.focus\(\)/,
+  'sale dialog must restore focus to its opener');
+assert.match(inventory, /aria-label="Снять: \$\{escapeHtml\(label\)\}"/,
+  'equipment removal controls must identify their slot');
 console.log('check-accessibility: PASS (14 keyboard-operable tabs, 16 labelled settings controls, modal and live-region semantics)');
