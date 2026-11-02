@@ -144,3 +144,13 @@ export function getEnemyCombatDecision({
   }
   return { role, action: 'attack', reason: 'basic' };
 }
+
+
+// Engagement distance follows the enemy's existing combat archetype. Ranged
+// enemies initiate their turn-based encounter before touching the player.
+export function getEnemyEngagementRange(specialType) {
+  if (specialType === 'snipe') return 118;
+  if (specialType === 'drain') return 76;
+  if (specialType === 'double') return 48;
+  return 44;
+}
