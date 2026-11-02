@@ -58,7 +58,7 @@ export function renderCombatPanel() {
     }
   };
   if (c.turn !== 'player') {
-    actions.innerHTML = `<button disabled style="grid-column:1/-1;">Ход противника...</button>`;
+    setCombatActionsMarkup(actions, `<button type="button" disabled style="grid-column:1/-1;">Ход противника...</button>`);
     return;
   }
 
@@ -81,7 +81,7 @@ export function renderCombatPanel() {
       if (!item) return '';
       return `<button type="button" data-combat-action="use-item" data-action-id="${escapeHtml(it.id)}" style="font-size:13px;">[${i + 1}] ${escapeHtml(item.icon)} ${escapeHtml(item.name)} ×${escapeHtml(it.qty)}</button>`;
     }).join('');
-    actions.innerHTML = (btns || `<p style="color:#a89060;grid-column:1/-1;text-align:center;">Нет предметов</p>`) + `<button data-combat-action="close-sub" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`;
+    setCombatActionsMarkup(actions, (btns || `<p style="color:#a89060;grid-column:1/-1;text-align:center;">Нет предметов</p>`) + `<button type="button" data-combat-action="close-sub" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`);
     return;
   }
 
