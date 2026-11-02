@@ -20,10 +20,11 @@ export function migrateLegacySave() {
 
   if (!legacy) return;
 
-  if (!localStorage.getItem(slotKey(1))) {
-    localStorage.setItem(slotKey(1), legacy);
-  }
+  // Preserve the legacy slot when slot 1 already exists. Removing it here
+  // would silently destroy a second, potentially valuable character save.
+  if (localStorage.getItem(slotKey(1))) return;
 
+  localStorage.setItem(slotKey(1), legacy);
   localStorage.removeItem(LEGACY_KEY);
 }
 
