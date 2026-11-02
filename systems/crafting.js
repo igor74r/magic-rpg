@@ -254,6 +254,10 @@ export function craftRecipe(recipeId) {
     bonus: item.bonus ? { ...item.bonus } : item.bonus,
     affixes: Array.isArray(item.affixes) ? item.affixes.map(affix => ({ ...affix, bonus: { ...affix.bonus } })) : item.affixes
   }));
+  const originalJobs = Array.isArray(p.craftingJobs) ? [...p.craftingJobs] : p.craftingJobs;
+  const originalHighTier = p.craftedHighTierByAct
+    ? { ...p.craftedHighTierByAct }
+    : p.craftedHighTierByAct;
   for (const [id, qty] of requirements) {
     if (!removeItem(id, qty)) {
       p.inventory = originalInventory;
@@ -275,7 +279,12 @@ export function craftRecipe(recipeId) {
       if (!p.craftedHighTierByAct) p.craftedHighTierByAct = {};
       p.craftedHighTierByAct[actIndex] = (p.craftedHighTierByAct[actIndex] || 0) + 1;
     }
-    saveGame();
+    if (!saveGame()) {
+      p.inventory = originalInventory;
+      p.craftingJobs = originalJobs;
+      p.craftedHighTierByAct = originalHighTier;
+      return { ok: false, msg: 'Не удалось сохранить заказ; ресурсы возвращены' };
+    }
     emit('toast', `⚗️ Заказ принят. Готово через ${hours} ч.`);
     emit('game:update');
     return { ok: true, queued: true, hours };
@@ -291,7 +300,11 @@ export function craftRecipe(recipeId) {
     p.craftedHighTierByAct[actIndex] = (p.craftedHighTierByAct[actIndex] || 0) + 1;
   }
 
-  saveGame();
+  if (!saveGame()) {
+    p.inventory = originalInventory;
+    p.craftedHighTierByAct = originalHighTier;
+    return { ok: false, msg: 'Не удалось сохранить результат; ингредиенты возвращены' };
+  }
   emit('toast', `⚗️ Скрафчено: ${ITEMS[recipe.result].name} ×${recipe.qty}`);
   emit('game:update');
   return { ok: true };
