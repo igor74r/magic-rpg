@@ -119,12 +119,15 @@ export function updateOverworld(dt) {
 
   for (const e of ow.enemies) {
     if (e.dead) continue;
-    const behavior = getEnemyBehavior(e, ow.player, { aggroRange: AGGRO_RANGE, leashRange: LEASH_RANGE });
-    e.state = behavior.state;
-    if (behavior.state === 'chase' && behavior.playerDistance < COMBAT_RANGE) {
+    const distanceToPlayer = Math.hypot(e.x - ow.player.x, e.y - ow.player.y);
+    // Preserve contact-triggered combat even if a test, spawn correction, or
+    // knockback places the enemy outside its normal home leash.
+    if (distanceToPlayer < COMBAT_RANGE) {
       enterCombat(e);
       return;
     }
+    const behavior = getEnemyBehavior(e, ow.player, { aggroRange: AGGRO_RANGE, leashRange: LEASH_RANGE });
+    e.state = behavior.state;
 
     const others = [...ow.enemies, ...ow.npcs, ow.player];
     const radius = e.collisionRadius || ENEMY_COLLISION_RADIUS;
