@@ -116,6 +116,10 @@ assert.ok(quests.includes('role="progressbar" aria-label="Прогресс ми�
   'campaign mission progress must expose accessible progress semantics');
 console.log('check-accessibility: PASS (14 keyboard-operable tabs, labelled settings, modal/live-region/progress semantics)');
 
+const npcButtons = npcs.match(/<button\\b[^>]*>/g) || [];
+assert.ok(npcButtons.length > 0, 'NPC screens should render interactive buttons');
+for (const tag of npcButtons) assert.match(tag, /\\btype="button"/, `NPC button must explicitly declare type=button: ${tag}`);
+
 const questBoard = quests;
 assert.match(questBoard, /<button type="button" data-game-action="close-npc"/,
   'quest board exit control must not submit an enclosing form');
