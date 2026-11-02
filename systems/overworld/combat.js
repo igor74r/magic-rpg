@@ -312,7 +312,8 @@ export function combatCastSpell(spellId) {
     !isFiniteNonNegative(spell.cost) ||
     (spell.damage !== undefined && (!Number.isFinite(spell.damage) || spell.damage <= 0)) ||
     (spell.heal !== undefined && (!Number.isFinite(spell.heal) || spell.heal <= 0)) ||
-    ((spell.damage === undefined && spell.heal === undefined && !spell.selfEffect) ||\n    (spell.damage !== undefined && spell.heal !== undefined))
+    ((spell.damage === undefined && spell.heal === undefined && !spell.selfEffect) ||
+    (spell.damage !== undefined && spell.heal !== undefined))
   ) {
     return;
   }
