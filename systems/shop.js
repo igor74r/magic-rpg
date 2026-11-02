@@ -14,7 +14,11 @@ export function buyItem(id) {
     return false;
   }
   const price = getBuyPrice(id, p);
-  if (p.gold < price) { emit('toast', 'Недостаточно золота'); return false; }
+  if (!Number.isSafeInteger(price) || price <= 0) {
+    emit('toast', 'Этот предмет нельзя купить');
+    return false;
+  }
+  if (!Number.isFinite(p.gold) || p.gold < price) { emit('toast', 'Недостаточно золота'); return false; }
   const capacity = canAddItem(id, 1, p);
   if (!capacity.ok) { emit('toast', capacity.reason === 'slots' ? 'Сумка заполнена' : 'Превышен лимит переносимого веса'); return false; }
   const created = addItem(id, 1, { rarity: 'common' });
