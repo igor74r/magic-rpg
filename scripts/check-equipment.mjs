@@ -30,11 +30,11 @@ assert.equal(replacement, 'head');
 assert.equal(player.equipped.head.id, 'cinder-visor');
 assert.equal(player.inventory.at(-1).id, 'rootbound-hood', 'replaced gear returns to the bag');
 
-assert.equal(socketRune(0, 'head'), false, 'only an actual rune may be socketed');
-assert.equal(socketRune(1, 'head'), true);
+assert.equal(socketRune(1, 'head'), false, 'only an actual rune may be socketed');
+assert.equal(socketRune(0, 'head'), true);
 assert.deepEqual(player.equipped.head.runes, ['rune-root']);
 assert.equal(player.inventory.find(item => item.id === 'rune-root').qty, 1, 'socketing consumes exactly one rune');
-assert.equal(socketRune(1, 'head'), false, 'a full socket cannot accept another rune');
+assert.equal(socketRune(0, 'head'), false, 'a full socket cannot accept another rune');
 
 assert.equal(unequipItemBySlot('head'), true);
 assert.equal(player.equipped.head, null);
