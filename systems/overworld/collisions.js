@@ -110,8 +110,11 @@ export function isActorPositionClear(x, y, radius, actors = [], self = null) {
     const dx = x - actor.x, dy = y - actor.y;
     const distanceSquared = dx * dx + dy * dy;
     if (distanceSquared >= minDistance * minDistance) return true;
-    const currentX = Number.isFinite(self?.x) ? self.x : x;
-    const currentY = Number.isFinite(self?.y) ? self.y : y;
+    // New actors must never be placed inside another footprint. Only an
+    // already-existing actor may retain an overlap while moving out of it.
+    if (!self || !Number.isFinite(self.x) || !Number.isFinite(self.y)) return false;
+    const currentX = self.x;
+    const currentY = self.y;
     const currentDistance = Math.hypot(currentX - actor.x, currentY - actor.y);
     return currentDistance < minDistance && Math.sqrt(distanceSquared) >= currentDistance - 0.001;
   });
