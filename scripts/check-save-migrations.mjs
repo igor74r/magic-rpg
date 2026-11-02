@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { migrateGame, loadGameData, migrateLegacySave, hasSave, deleteSave, getSlotInfo } from '../systems/save.js';
 import { state } from '../systems/state.js';
 import { EQUIPMENT_SLOTS } from '../systems/inventory.js';
+import { createCharacter } from '../systems/character.js';
 
 const expectedSlots = ['weapon','head','shoulders','chest','gloves','legs','boots','shield','ring1','ring2','amulet','cloak'];
 const failures = [];
@@ -110,6 +111,22 @@ globalThis.localStorage = {
 };
 state.game = null;
 state.currentSlot = 1;
+assert.equal(createCharacter('Fresh Schema Hero', 'warrior'), true);
+const freshSave = JSON.parse(storage.get('magic-rpg-save-1'));
+assert.equal(freshSave.version, 17, 'new character must be saved with current schema');
+assert.deepEqual(Object.keys(freshSave.player.equipped).sort(), [...expectedSlots].sort(),
+  'new character must pass equipment-slot migrations before first save');
+assert.ok(!['back', 'wrists', 'hands', 'seal'].some(slot => slot in freshSave.player.equipped),
+  'new character must not persist obsolete equipment slots');
+console.log('PASS new character creation runs v16/v17 migrations before first save');
+storage.set('magic-rpg-save-1', JSON.stringify({
+  version: 16,
+  player: { name: 'Storage Fixture', level: 8, luck: 8.5, inventory: [{ id: 'mana-crystal', qty: 4 }],
+    equipped: Object.fromEntries(expectedSlots.map(slot => [slot, null])) },
+  storyShards: { flame: false, ice: false, blood: false },
+  storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false }
+}));
+state.game = null;
 const loaded = loadGameData(1);
 const rewritten = JSON.parse(storage.get('magic-rpg-save-1'));
 const storagePathOk = loaded && state.game?.version === 17 && rewritten.version === 17 &&
