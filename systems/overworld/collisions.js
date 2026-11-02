@@ -19,7 +19,7 @@ export function getVillageBuildingColliders(statics = LOCATIONS.village.statics)
     const y = building.y * TILE + TILE / 2;
     const b = BUILDING_BODY;
     return [
-      { id: building.id, x: x + b.left, y: y + b.top, width: b.doorHalfWidth + b.left * -1, height: b.bottom - b.top },
+      { id: building.id, x: x + b.left, y: y + b.top, width: -b.doorHalfWidth - b.left, height: b.bottom - b.top },
       { id: building.id, x: x + b.doorHalfWidth, y: y + b.top, width: b.right - b.doorHalfWidth, height: b.bottom - b.top },
       { id: building.id, x: x - b.doorHalfWidth, y: y + b.top, width: b.doorHalfWidth * 2, height: b.doorTop - b.top }
     ];
