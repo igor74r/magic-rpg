@@ -4,6 +4,7 @@ import { STORY } from '../data/story.js';
 import { addItem } from './inventory.js';
 import { migrateGame, saveGame } from './save.js';
 import { emit } from './events.js';
+import { getExpNext } from './progression.js';
 
 export function createCharacter(name, className) {
   const cls = CLASSES[className];
@@ -28,7 +29,7 @@ export function createCharacter(name, className) {
 
       level: 1,
       exp: 0,
-      expNext: 100,
+      expNext: getExpNext(1),
 
       hp: stats.maxHp,
       maxHp: stats.maxHp,
