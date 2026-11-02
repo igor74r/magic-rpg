@@ -11,8 +11,8 @@ assert.match(spellCombat, /const rawDamage = Math\.max\(/,
   'spell damage must preserve the existing defense/elemental formula');
 assert.match(spellCombat, /resolveCriticalChance\(stats\)/,
   'damaging spells must use the shared critical chance');
-assert.match(spellCombat, /Math\.floor\(rawDamage \* talent\.critMult\)/,
-  'spell critical damage must use class/talent critical multiplier');
+assert.match(spellCombat, /Math\.floor\(rawDamage \* resolveCriticalMultiplier\(talent\.critMult\)\)/,
+  'spell critical damage must use the shared bounded class/talent critical multiplier');
 assert.match(spellCombat, /type: isCrit \? 'crit' : 'damage'/,
   'critical spells must use critical floating-number presentation');
 assert.match(spellCombat, /playSound\(isCrit \? 'crit' : 'cast'\)/,
