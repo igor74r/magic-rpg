@@ -5,7 +5,7 @@ import { canOccupyPlayerPosition } from './collisions.js';
 import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
-import { getMovementDelta, resolveSweptMovement } from './movement.js';
+import { getMovementDelta, resolveSweptMovement, getCameraPosition } from './movement.js';
 
 const VIEW_W = 800, VIEW_H = 500;
 
@@ -15,7 +15,7 @@ function canOccupy(ow, x, y, radius = 9) {
     ow.sourceLocationId || ow.locationId
   );
 }
-const AGGRO_RANGE = 200, LEASH_RANGE = 340, COMBAT_RANGE = 44, CAMERA_LERP = 0.15;
+const AGGRO_RANGE = 200, LEASH_RANGE = 340, COMBAT_RANGE = 44;
 
 export function initCamera(playerPos, cols, rows) {
   const mapW = cols * TILE, mapH = rows * TILE;
@@ -54,7 +54,7 @@ export function tryMovePlayer(dx, dy, deltaFrames = 1) {
 export function updateOverworld(dt) {
   const ow = state.overworld;
   if (!ow || !ow.active) return;
-  updateCamera();
+  updateCamera(dt);
   if (ow.shake && ow.shake.t > 0) { ow.shake.t -= dt * 0.0167; if (ow.shake.t <= 0) { ow.shake.t = 0; ow.shake.mag = 0; } }
   updateParticles(dt);
   ow.floatingNumbers = ow.floatingNumbers.filter(fn => { fn.life -= dt * 0.02; fn.y -= dt * 0.6; return fn.life > 0; });
@@ -136,7 +136,7 @@ export function updateOverworld(dt) {
   }
 }
 
-function updateCamera() {
+function updateCamera(dt = 1) {
   const ow = state.overworld;
   const mapW = ow.cols * ow.tile, mapH = ow.rows * ow.tile;
   let targetX, targetY;
@@ -144,6 +144,6 @@ function updateCamera() {
   else targetX = Math.max(0, Math.min(mapW - VIEW_W, ow.player.x - VIEW_W / 2));
   if (mapH <= VIEW_H) targetY = (mapH - VIEW_H) / 2;
   else targetY = Math.max(0, Math.min(mapH - VIEW_H, ow.player.y - VIEW_H / 2));
-  ow.camera.x += (targetX - ow.camera.x) * CAMERA_LERP;
-  ow.camera.y += (targetY - ow.camera.y) * CAMERA_LERP;
+  ow.camera.x = getCameraPosition(ow.camera.x, targetX, dt);
+  ow.camera.y = getCameraPosition(ow.camera.y, targetY, dt);
 }
