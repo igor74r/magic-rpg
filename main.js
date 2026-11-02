@@ -144,9 +144,18 @@ document.addEventListener('click', (e) => {
   if (btn && !btn.closest('#combat-panel') && !btn.closest('#npc-panel') && !btn.closest('.stat-buttons')) playSound('click');
 });
 
+function persistBeforeLeaving() {
+  stopVoice();
+  if (state.game) saveGame();
+}
+
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { hideTooltip(); stopVoice(); }
+  if (document.hidden) {
+    hideTooltip();
+    persistBeforeLeaving();
+  }
 });
+window.addEventListener('pagehide', persistBeforeLeaving);
 window.addEventListener('scroll', () => hideTooltip(), true);
 
 function respawnInVillage() {
@@ -563,7 +572,4 @@ if (showPrologue && prologueEl) {
   updateMainMenu();
 }
 
-window.addEventListener('beforeunload', () => {
-  stopVoice();
-  if (state.game) saveGame();
-});
+window.addEventListener('beforeunload', persistBeforeLeaving);
