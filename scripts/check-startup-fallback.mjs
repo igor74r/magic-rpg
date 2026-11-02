@@ -22,13 +22,13 @@ assert.match(guard, /Скопировать ошибку/,
   'fallback must offer copying diagnostic details');
 assert.match(guard, /__GAME_DIAGNOSTICS_EARLY__/,
   'startup errors must remain available for runtime diagnostics');
-assert.match(guard, /window\\.addEventListener\\(['"]error['"]/,
+assert.match(guard, /window\.addEventListener\(['"]error['"]/,
   'guard must intercept startup errors');
-assert.match(guard, /window\\.addEventListener\\(['"]unhandledrejection['"]/,
+assert.match(guard, /window\.addEventListener\(['"]unhandledrejection['"]/,
   'guard must intercept rejected startup promises');
 assert.match(guard, /tag === 'script'/,
   'failed script/module resources must trigger the fallback');
-assert.match(html, /main\\.js\\?v=20261102-startup-guard1/,
+assert.match(html, /main\.js\?v=20261102-startup-guard1/,
   'entry module URL must be cache-busted after the fix');
 
 console.log('Startup fallback contract and inline syntax: OK');
