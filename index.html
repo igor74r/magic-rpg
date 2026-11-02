@@ -159,7 +159,7 @@
     <!-- ПРАВАЯ ПАНЕЛЬ (ЖУРНАЛ) -->
     <aside class="dashboard-log">
       <div class="log-header">📜 Журнал</div>
-      <div class="log-body" id="game-log"></div>
+      <div class="log-body" id="game-log" role="log" aria-live="polite" aria-relevant="additions"></div>
     </aside>
 
   </div>
@@ -184,7 +184,7 @@
         <div class="actions" id="npc-panel-actions"></div>
       </div>
       <!-- Модальное окно NPC — отдельный слой поверх карты -->
-      <div id="npc-dialog-modal" class="npc-modal" style="display:none;">
+      <div id="npc-dialog-modal" class="npc-modal" style="display:none;" role="dialog" aria-modal="true" aria-label="Диалог с персонажем">
         <div class="npc-modal-content">
           <button class="npc-modal-close" onclick="GameAPI.closeNpcAndResume()">✖</button>
           <div id="npc-dialog-content"></div>
