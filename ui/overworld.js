@@ -145,6 +145,32 @@ function openSecret(sw) {
 }
 
 
+function onOverworldCanvasClick(event) {
+  const ow = state.overworld;
+  if (!ow || !ow.active || ow.combat || ow.defeated) return;
+  const canvas = event.currentTarget;
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const screenX = (event.clientX - rect.left) * (canvas.width / rect.width);
+  const screenY = (event.clientY - rect.top) * (canvas.height / rect.height);
+  const worldX = screenX + ow.camera.x;
+  const worldY = screenY + ow.camera.y;
+  const portals = (ow.statics || []).filter(item =>
+    ['world-portal', 'tower-portal', 'world-waystone', 'tower-gate'].includes(item.id)
+  );
+  let nearest = null, nearestDistance = 50;
+  for (const portal of portals) {
+    const distance = Math.hypot(portal.x - worldX, portal.y - worldY);
+    if (distance < nearestDistance) {
+      nearest = portal;
+      nearestDistance = distance;
+    }
+  }
+  if (!nearest) return;
+  event.preventDefault();
+  window.GameAPI?.interactNpc?.(nearest.id);
+}
+
 export function initOverworld() {
   if (!overworldInputBound) {
     window.addEventListener('keydown', onKeyDown);
@@ -153,7 +179,7 @@ export function initOverworld() {
     document.addEventListener('visibilitychange', () => { if (document.hidden) clearMovementKeys(); });
     overworldInputBound = true;
     const canvas = document.getElementById('overworld-canvas');
-    if (canvas) { canvas.addEventListener('mousemove', onCanvasMouseMove); canvas.addEventListener('mouseleave', hideMapTooltip); }
+    if (canvas) { canvas.addEventListener('mousemove', onCanvasMouseMove); canvas.addEventListener('mouseleave', hideMapTooltip); canvas.addEventListener('click', onOverworldCanvasClick); }
   }
   setSubPanel(null); setLastNpcKey(''); setPaused(false);
   initWeather(state.overworld ? (state.overworld.theme || state.overworld.locationId) : 'default');
