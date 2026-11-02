@@ -280,3 +280,24 @@
   .map-quest-panel { padding: 10px; }
   .map-quest-panel h4 { font-size: 14px; }
 }
+
+
+.map-quest-journal-button {
+  display: block;
+  width: 100%;
+  margin-top: 11px;
+  padding: 9px 12px;
+  border: 1px solid rgba(226, 189, 85, .72);
+  border-radius: 7px;
+  background: linear-gradient(180deg, rgba(105, 76, 32, .9), rgba(52, 39, 21, .96));
+  color: #ffe8ae;
+  font: 700 12px/1.3 Arial, sans-serif;
+  cursor: pointer;
+  transition: filter .16s ease, border-color .16s ease;
+}
+.map-quest-journal-button:hover,
+.map-quest-journal-button:focus-visible {
+  border-color: #f4d88e;
+  filter: brightness(1.15);
+  outline: none;
+}
