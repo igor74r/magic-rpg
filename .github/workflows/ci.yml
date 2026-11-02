@@ -160,6 +160,9 @@ jobs:
       - name: Check overworld movement timing and diagonal speed
         run: node scripts/check-overworld-movement.mjs
 
+      - name: Check frame-rate independent overworld camera follow
+        run: node scripts/check-overworld-camera.mjs
+
       - name: Check player footprint and swept collision
         run: node scripts/check-overworld-collision.mjs
 
