@@ -429,6 +429,9 @@ function prepareImportedSave(raw) {
   validateCurrentSaveShape(raw);
   const candidate = JSON.parse(JSON.stringify(raw));
   migrateGame(candidate);
+  // Validate the fully migrated schema too: legacy files can pass the
+  // version-aware precheck yet still contain invalid core player values.
+  validateCurrentSaveShape(candidate);
   const player = candidate.player;
   if (candidate.version !== 17 ||
       !Array.isArray(player.inventory) ||
