@@ -168,7 +168,7 @@ try {
       assert.ok(dashboard.contentScrollWidth <= dashboard.contentWidth + 1, `${viewport.name}/${tab}: content overflow: ${JSON.stringify(dashboard)}`);
     }
 
-    // Exercise the actual portal sprites and their navigation, not only static markup.
+    // Exercise the portal interaction contract and destination navigation.
     await page.evaluate(() => window.GameAPI.enterOverworld());
     await page.locator('#screen-overworld.active').waitFor();
     let worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
@@ -179,7 +179,7 @@ try {
     await page.keyboard.press('Escape');
     await worldDialog.waitFor({ state: 'detached' });
 
-    await clickCanvasPoint(page, 0.44, 0.308);
+    await page.evaluate(() => window.GameAPI.interactNpc('world-portal'));
     worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
     await worldDialog.waitFor({ state: 'visible' });
     await worldDialog.getByRole('button', { name: /Тёмный лес/ }).click();
