@@ -1,5 +1,5 @@
 import { state } from './systems/state.js';
-import { LOCATIONS } from './data/locations.js';
+import { LOCATIONS } from './data/locations.js?v=20261102-fix1';
 import { on, emit } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
 import { addItemOrStore } from './systems/inventory.js';
