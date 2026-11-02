@@ -1,5 +1,5 @@
 import { LOCATIONS } from '../../data/locations.js';
-import { TILE } from './map.js';
+import { TILE, isWalkable } from './map.js';
 
 // The collision silhouette follows drawVillageBuilding() in ui/overworld/sprites.js.
 // The central south opening is intentionally left clear as the front doorway.
@@ -62,7 +62,29 @@ export function getVillagePropColliders(statics = LOCATIONS.village.statics) {
     });
 }
 
+const DEFAULT_VILLAGE_COLLIDERS = [
+  ...getVillageBuildingColliders(),
+  ...getVillagePropColliders()
+];
+
 export function isVillagePositionBlocked(x, y, radius = 10, statics = LOCATIONS.village.statics) {
-  return [...getVillageBuildingColliders(statics), ...getVillagePropColliders(statics)]
-    .some(rect => circleIntersectsRect(x, y, radius, rect));
+  const colliders = statics === LOCATIONS.village.statics
+    ? DEFAULT_VILLAGE_COLLIDERS
+    : [...getVillageBuildingColliders(statics), ...getVillagePropColliders(statics)];
+  return colliders.some(rect => circleIntersectsRect(x, y, radius, rect));
+}
+
+// Check the complete player footprint instead of testing only its center.
+// Eight perimeter samples catch diagonal corner clipping while preserving
+// the existing circle-vs-building/prop checks in Aurora.
+export function canOccupyPlayerPosition(map, cols, rows, x, y, radius = 12, locationId = null) {
+  const samples = [
+    [0, 0], [1, 0], [-1, 0], [0, 1], [0, -1],
+    [Math.SQRT1_2, Math.SQRT1_2], [-Math.SQRT1_2, Math.SQRT1_2],
+    [Math.SQRT1_2, -Math.SQRT1_2], [-Math.SQRT1_2, -Math.SQRT1_2]
+  ];
+  if (samples.some(([sx, sy]) => !isWalkable(map, cols, rows, x + sx * radius, y + sy * radius, locationId))) {
+    return false;
+  }
+  return locationId !== 'village' || !isVillagePositionBlocked(x, y, radius);
 }
