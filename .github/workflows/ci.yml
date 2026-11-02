@@ -53,6 +53,9 @@ jobs:
       - name: Check combat status effects and skipped turns
         run: node scripts/check-combat-status.mjs
 
+      - name: Check adaptive enemy combat AI
+        run: node scripts/check-adaptive-enemy-ai.mjs
+
       - name: Check combat specials, defeat, rewards and floor progression
         run: node scripts/check-combat-progression.mjs
 
