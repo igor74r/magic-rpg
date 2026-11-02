@@ -17,7 +17,7 @@ export function getSubPanel() { return subPanel; }
 export function setSubPanel(val) { subPanel = val; }
 
 function setCombatActionsMarkup(actions, markup) {
-  const active = actions.contains(document.activeElement) ? document.activeElement : null;
+  const active = actions.contains?.(document.activeElement) ? document.activeElement : null;
   const activeAction = active?.dataset.combatAction;
   const activeId = active?.dataset.actionId;
   actions.innerHTML = markup;
