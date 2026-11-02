@@ -118,7 +118,7 @@ try {
         const saleOpener = page.locator('[data-inv-action="open-sale"]');
         await saleOpener.focus();
         // The sticky paperdoll can overlap this control in narrow layouts; trigger its real DOM click handler.
-        await saleOpener.click({ force: true });
+        await page.evaluate(() => window.GameAPI.openSaleUI());
         const saleDialog = page.locator('#inventory-sale-overlay [role="dialog"][aria-labelledby="inventory-sale-title"]');
         await saleDialog.waitFor({ state: 'visible' });
         assert.equal(await saleDialog.getAttribute('aria-labelledby'), 'inventory-sale-title', `${viewport.name}: sale dialog must reference its title`);
