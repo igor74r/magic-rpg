@@ -109,6 +109,28 @@ function recordPlayerStyle(ow, style) {
   if (history.length > 4) history.shift();
 }
 
+const ENEMY_DAMAGE_MATCHUPS = {
+  // Weakness 1.25x; resistance 0.80x; unlisted matchups are neutral.
+  magicWeak: new Set(['skeleton', 'skeleton-archer', 'dark-knight', 'magma-golem', 'grave-king']),
+  physicalWeak: new Set(['ghost', 'wraith', 'shadow-mage', 'fire-elemental', 'flame-lord']),
+  magicResist: new Set(['ghost', 'wraith', 'shadow-mage']),
+  physicalResist: new Set(['magma-golem', 'dark-knight', 'grave-king'])
+};
+
+function enemyDamageMultiplier(enemy, style) {
+  const id = enemy?.enemyId;
+  if (!id || !['melee', 'ranged', 'magic'].includes(style)) return 1;
+  const physical = style === 'melee' || style === 'ranged';
+  const weak = physical
+    ? ENEMY_DAMAGE_MATCHUPS.physicalWeak.has(id)
+    : ENEMY_DAMAGE_MATCHUPS.magicWeak.has(id);
+  const resist = physical
+    ? ENEMY_DAMAGE_MATCHUPS.physicalResist.has(id)
+    : ENEMY_DAMAGE_MATCHUPS.magicResist.has(id);
+  if (weak && resist) return 1;
+  return weak ? 1.25 : resist ? 0.80 : 1;
+}
+
 function enemyDefenseForStyle(enemy, style, armorPen = 0) {
   const base = Math.max(0, enemyDefValue(enemy) - armorPen);
   const counter = enemy?.adaptiveCounter;
@@ -227,7 +249,8 @@ export function combatAttack() {
         Math.floor(enemyDefense / 2)
       ) *
       atkMult *
-      talent.dmgMult
+      talent.dmgMult *
+      enemyDamageMultiplier(enemy, style)
     )
   );
 
@@ -436,7 +459,8 @@ export function combatCastSpell(spellId) {
             enemyDefenseForStyle(enemy, 'magic', stats.armorPen || 0) / 2
           )
         ) *
-        talent.spellMult
+        talent.spellMult *
+        enemyDamageMultiplier(enemy, 'magic')
       )
     );
 
@@ -587,7 +611,8 @@ export function combatUseAbility(abilityId) {
           )
         ) *
         talent.dmgMult *
-        talent.critMult
+        talent.critMult *
+        enemyDamageMultiplier(enemy, 'ranged')
       )
     );
 
