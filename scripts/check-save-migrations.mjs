@@ -138,6 +138,7 @@ assert.ok(storagePathOk);
 // A crash/reload after defeat must not strand the player at zero HP.
 const defeatedSave = JSON.parse(JSON.stringify(freshSave));
 defeatedSave.location = 'dark-forest';
+defeatedSave.player.class = 'mage';
 defeatedSave.player.hp = 0;
 defeatedSave.player.maxHp = 120;
 defeatedSave.player.mp = 0;
