@@ -78,7 +78,7 @@ function getValidTodayBuybackRecords(player) {
     const item = ITEMS[record?.item?.id];
     const rarity = record?.item?.rarity || 'common';
     const qty = record?.item?.qty ?? 1;
-    return record?.soldAt === today && item && Number.isSafeInteger(record.price) && record.price >= 0 &&
+    return record?.soldAt === today && item && Number.isSafeInteger(record.price) && record.price > 0 &&
       Number.isSafeInteger(qty) && qty > 0 && (STACKABLE_TYPES.has(item.type) || qty === 1) &&
       item.type !== 'quest' && !item.storyShard && !item.bossOnly &&
       !!RARITIES[rarity] && !RARITIES[rarity].bossOnly;
@@ -98,7 +98,7 @@ export function buybackItem(index) {
   const item = ITEMS[record?.item?.id];
   const rarity = record?.item?.rarity || 'common';
   const qty = record?.item?.qty ?? 1;
-  if (!record || !item || !Number.isSafeInteger(record.price) || record.price < 0 ||
+  if (!record || !item || !Number.isSafeInteger(record.price) || record.price <= 0 ||
       !Number.isSafeInteger(qty) || qty < 1 || (!STACKABLE_TYPES.has(item.type) && qty !== 1) || item.type === 'quest' || item.storyShard ||
       item.bossOnly || !RARITIES[rarity] || RARITIES[rarity].bossOnly) {
     return { ok: false, msg: 'Предмет больше нельзя выкупить' };
