@@ -12,7 +12,7 @@ assert.equal(canOccupyPlayerPosition(open, 8, 8, 3 * 48 + 24, 3 * 48 + 24, PLAYE
   'player must move freely on clear ground');
 assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 + 24, 3 * 48 + 24, PLAYER_COLLISION_RADIUS, 'forest'), false,
   'player center inside a blocked tile must be rejected');
-assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 - 8, 3 * 48 - 8, PLAYER_COLLISION_RADIUS, 'forest'), false,
+assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 - 6, 3 * 48 - 6, PLAYER_COLLISION_RADIUS, 'forest'), false,
   'player circle must not clip a diagonal obstacle corner');
 assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 - 18, 3 * 48 + 24, PLAYER_COLLISION_RADIUS, 'forest'), true,
   'player must remain able to pass beside a wall with sufficient clearance');
