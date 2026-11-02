@@ -1,11 +1,18 @@
 import { state } from '../state.js';
 import { playSound } from '../audio.js';
 import { TILE, isWalkable } from './map.js';
+import { isVillagePositionBlocked } from './collisions.js';
 import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
 
 const VIEW_W = 800, VIEW_H = 500;
+
+function canOccupy(ow, x, y, radius = 9) {
+  const locationId = ow.sourceLocationId || ow.locationId;
+  return isWalkable(ow.map, ow.cols, ow.rows, x, y, locationId)
+    && (locationId !== 'village' || !isVillagePositionBlocked(x, y, radius));
+}
 const AGGRO_RANGE = 200, LEASH_RANGE = 340, COMBAT_RANGE = 44, CAMERA_LERP = 0.15;
 
 export function initCamera(playerPos, cols, rows) {
@@ -25,8 +32,12 @@ export function tryMovePlayer(dx, dy) {
   const speed = 3.2, p = ow.player, r = 12;
   let moved = false;
   const nx = p.x + dx * speed, ny = p.y + dy * speed;
-  if (isWalkable(ow.map, ow.cols, ow.rows, nx - r, p.y, (ow.sourceLocationId || ow.locationId)) && isWalkable(ow.map, ow.cols, ow.rows, nx + r, p.y, (ow.sourceLocationId || ow.locationId))) { p.x = nx; moved = true; }
-  if (isWalkable(ow.map, ow.cols, ow.rows, p.x, ny - r, (ow.sourceLocationId || ow.locationId)) && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny + r, (ow.sourceLocationId || ow.locationId))) { p.y = ny; moved = true; }
+  if (canOccupy(ow, nx, p.y, r)
+      && isWalkable(ow.map, ow.cols, ow.rows, nx - r, p.y, (ow.sourceLocationId || ow.locationId))
+      && isWalkable(ow.map, ow.cols, ow.rows, nx + r, p.y, (ow.sourceLocationId || ow.locationId))) { p.x = nx; moved = true; }
+  if (canOccupy(ow, p.x, ny, r)
+      && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny - r, (ow.sourceLocationId || ow.locationId))
+      && isWalkable(ow.map, ow.cols, ow.rows, p.x, ny + r, (ow.sourceLocationId || ow.locationId))) { p.y = ny; moved = true; }
   p.x = Math.max(TILE / 2, Math.min(ow.cols * TILE - TILE / 2, p.x));
   p.y = Math.max(TILE / 2, Math.min(ow.rows * TILE - TILE / 2, p.y));
   if (moved) playSound('step');
@@ -75,8 +86,8 @@ export function updateOverworld(dt) {
     }
     const spd = (npc.wanderSpeed || 0.5) * dt;
     const nx = npc.x + npc.wanderDx * spd, ny = npc.y + npc.wanderDy * spd;
-    if (isWalkable(ow.map, ow.cols, ow.rows, nx, npc.y, (ow.sourceLocationId || ow.locationId))) npc.x = nx; else npc.wanderDx = -npc.wanderDx;
-    if (isWalkable(ow.map, ow.cols, ow.rows, npc.x, ny, (ow.sourceLocationId || ow.locationId))) npc.y = ny; else npc.wanderDy = -npc.wanderDy;
+    if (canOccupy(ow, nx, npc.y, 8)) npc.x = nx; else npc.wanderDx = -npc.wanderDx;
+    if (canOccupy(ow, npc.x, ny, 8)) npc.y = ny; else npc.wanderDy = -npc.wanderDy;
   }
 
   for (const e of ow.enemies) {
@@ -90,8 +101,8 @@ export function updateOverworld(dt) {
       const dx = ow.player.x - e.x, dy = ow.player.y - e.y;
       const ln = Math.hypot(dx, dy) || 1, spd = 2.2 * dt;
       const nx = e.x + (dx / ln) * spd, ny = e.y + (dy / ln) * spd;
-      if (isWalkable(ow.map, ow.cols, ow.rows, nx, e.y, (ow.sourceLocationId || ow.locationId))) e.x = nx;
-      if (isWalkable(ow.map, ow.cols, ow.rows, e.x, ny, (ow.sourceLocationId || ow.locationId))) e.y = ny;
+      if (canOccupy(ow, nx, e.y, 9)) e.x = nx;
+      if (canOccupy(ow, e.x, ny, 9)) e.y = ny;
     } else {
       e.wanderTimer -= dt * 0.02;
       if (e.wanderTimer <= 0) {
