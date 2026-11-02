@@ -278,6 +278,8 @@ try {
 try {
   api.exitOverworld?.();
   state.game.location = 'briar-hollow';
+  // The Act I optional mini-boss is level-gated; test the complete roster at its threshold.
+  state.game.player.level = 8;
   api.enterOverworld();
   frame(2);
 
