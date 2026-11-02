@@ -46,6 +46,11 @@ export function sellItemsByIndices(indices, options = {}) {
         getSellPrice(inst, p) > 0;
     });
   const total = candidates.reduce((sum, entry) => sum + getSellPrice(entry.inst, p), 0);
+  if (!Number.isSafeInteger(total) || total <= 0 ||
+      !Number.isSafeInteger(p.gold) || p.gold < 0 ||
+      !Number.isSafeInteger(p.gold + total)) {
+    return { ok: false, count: 0, total: 0, msg: 'Некорректная стоимость продажи или баланс золота' };
+  }
   const hasHighTier = candidates.some(({ inst }) => (RARITIES[inst.rarity]?.tier || 1) >= 4);
   if (hasHighTier || total > 500) {
     if (!options.confirmed) {
@@ -60,7 +65,10 @@ export function sellItemsByIndices(indices, options = {}) {
   for (const entry of candidates) {
     const snapshot = JSON.parse(JSON.stringify(entry.inst));
     const price = getSellPrice(entry.inst, p);
-    p.buyback.push({ id: 'buyback-' + Date.now() + '-' + entry.index, item: snapshot, soldAt, price: Math.ceil(price * 1.2) });
+    const buybackPrice = Math.ceil(price * 1.2);
+    if (Number.isSafeInteger(buybackPrice) && buybackPrice > 0) {
+      p.buyback.push({ id: 'buyback-' + Date.now() + '-' + entry.index, item: snapshot, soldAt, price: buybackPrice });
+    }
   }
   for (const { index } of candidates) p.inventory.splice(index, 1);
   p.gold = (p.gold || 0) + total;
