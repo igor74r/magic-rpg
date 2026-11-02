@@ -439,7 +439,7 @@ export const RARITIES = {
   rare:      { name: 'Редкий',      tier: 3, color: '#4a9eff', multiplier: 1.5,  weight: 10, statRange: [16, 30],   mods: 2, price: 60 },
   epic:      { name: 'Эпический',   tier: 4, color: '#b060ff', multiplier: 2.2,  weight: 4,  statRange: [31, 55],   mods: 3, price: 150 },
   legendary: { name: 'Легендарный', tier: 5, color: '#ffa500', multiplier: 3.5,  weight: 0.9,statRange: [56, 90],   mods: 4, price: 400 },
-  mythic:    { name: 'Мифический',  tier: 6, color: '#e34d5b', multiplier: 4.5,  weight: 0.1,statRange: [91, 150],  mods: 5, price: 1000, bossOnly: true }
+  mythic:    { name: 'Мифический',  tier: 6, color: '#e34d5b', multiplier: 4.5,  weight: 0.1,statRange: [91, 150],  mods: 5, price: 1000, bossOnly: true },
   // ---------- УНИКАЛЬНЫЕ ТРОФЕИ СЮЖЕТНЫХ МИНИ-БОССОВ ----------
   'root-court-seal': { name: 'Печать корневого суда', icon: '🌿', desc: 'Трофей Палача корневого суда. Основа для реликвии живой чащи.', price: 24, type: 'material' },
   'drowned-lament': { name: 'Слеза утопленной плакальщицы', icon: '💧', desc: 'Трофей плакальщицы. Внутри слышна песнь затонувшего некрополя.', price: 38, type: 'material' },
