@@ -284,5 +284,26 @@ failWrites = false;
 Date.now = previousNow;
 console.log('PASS quota/write failure preserves live state, playtime and active slot');
 
+// A newly created character in another slot must not inherit the old session's playtime.
+const realDateNow = Date.now;
+try {
+  state.game = null;
+  state.currentSlot = 1;
+  Date.now = () => 100000;
+  assert.equal(createCharacter('First Slot Hero', 'warrior'), true);
+  state.currentSlot = 2;
+  Date.now = () => 220000;
+  assert.equal(createCharacter('Second Slot Hero', 'mage'), true);
+  assert.equal(state.game.player.playtimeSec, 0, 'new character must start with zero playtime');
+  assert.equal(JSON.parse(storage.get('magic-rpg-save-2')).player.playtimeSec, 0,
+    'new slot must not inherit time from the previous character');
+  Date.now = () => 280000;
+  saveGame();
+  assert.equal(state.game.player.playtimeSec, 60, 'playtime should accrue within the same save session');
+  console.log('PASS playtime is isolated between slots and accumulates within a single character');
+} finally {
+  Date.now = realDateNow;
+}
+
 console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + load path + future-version and malformed-save guards passed; 12 equipment slots verified.`);
 if (failures.length) process.exitCode = 1;
