@@ -274,16 +274,25 @@ export function renderQuests() {
     ${
       currentMission
         ? `
-          <div class="campaign-current-objective">
-            <span>${currentProgress.active ? 'Активное поручение' : 'Следующее поручение'}</span>
+          <section class="campaign-current-objective campaign-quest-journal" aria-label="Журнал текущего задания">
+            <span>📜 ${currentProgress.active ? 'Журнал задания · принято' : 'Журнал задания · ожидает принятия'}</span>
             <b>${currentMission.act.number}.${currentMission.missionIndex + 1} — ${currentMission.mission.title}</b>
-            <p>${currentMission.mission.objective}</p>
+            <p>${currentMission.mission.desc}</p>
+            <div class="campaign-objective">
+              <span>🎯 ${currentMission.mission.objective}</span>
+              <b>${currentProgress.current}/${currentProgress.required}</b>
+            </div>
+            <div class="campaign-progress" role="progressbar" aria-label="Выполнение текущего задания" aria-valuemin="0" aria-valuemax="${currentProgress.required}" aria-valuenow="${currentProgress.current}">
+              <i style="width:${currentProgress.active ? Math.round(currentProgress.current / currentProgress.required * 100) : 0}%"></i>
+            </div>
+            <p>📍 Место: ${LOCATIONS[currentMission.mission.locationId || currentMission.act.locationId]?.name || currentMission.mission.locationId || currentMission.act.locationId}</p>
+            <p>🎁 Награда: ${getMissionReward(currentMission.mission).gold}💰 · ${getMissionReward(currentMission.mission).exp} EXP</p>
             <p>${currentProgress.active
               ? currentProgress.complete
-                ? 'Цель достигнута. Вернитесь к Старейшине Эдвину в Аврору и сдайте поручение.'
-                : 'Поручение принято. Побеждайте указанного врага в нужном регионе.'
+                ? 'Цель достигнута. Вернитесь к Старейшине Эдвину в Аврору, чтобы сдать задание.'
+                : 'Задание принято. Побеждайте указанного врага в отмеченной локации.'
               : 'Поговорите со Старейшиной Эдвином в Авроре, чтобы принять это задание.'}</p>
-          </div>
+          </section>
         `
         : `
           <div class="campaign-current-objective campaign-finished">
