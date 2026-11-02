@@ -1,4 +1,3 @@
-import { initDiagnostics } from './systems/diagnostics.js';
 import { state } from './systems/state.js';
 import { LOCATIONS } from './data/locations.js';
 import { on, emit } from './systems/events.js';
@@ -74,15 +73,27 @@ function recordRuntimeDiagnostic(type, message, details = {}) {
   return entry;
 }
 
+// Transfer errors that occurred while HTML was parsing and modules were loading.
+const earlyDiagnostics = Array.isArray(window.__GAME_DIAGNOSTICS_EARLY__)
+  ? window.__GAME_DIAGNOSTICS_EARLY__.splice(0)
+  : [];
+earlyDiagnostics.forEach(entry => recordRuntimeDiagnostic(entry.type, entry.message, {
+  source: entry.source || '',
+  line: entry.line || 0,
+  column: entry.column || 0,
+  resource: entry.resource || ''
+}));
+
 window.addEventListener('error', (event) => {
   const target = event.target;
   // Resource errors do not bubble; capture-phase listener receives them.
   if (target && target !== window) {
     const tag = target.tagName ? target.tagName.toLowerCase() : 'resource';
     const url = target.src || target.href || '';
-    recordRuntimeDiagnostic('resource-load', `Failed to load ${tag}`, {
+    recordRuntimeDiagnostic('resource-load', `Не удалось загрузить ресурс <${tag}>`, {
       resource: String(url).slice(0, 1000)
     });
+    showErrorToast(`Не удалось загрузить ресурс: ${tag}`);
     return;
   }
   recordRuntimeDiagnostic('uncaught-error', event.message || 'Uncaught error', {
@@ -91,6 +102,8 @@ window.addEventListener('error', (event) => {
     column: event.colno || 0
   });
 }, true);
+
+window.__GAME_DIAGNOSTICS_READY__ = true;
 
 window.addEventListener('unhandledrejection', (event) => {
   const reason = event.reason;
