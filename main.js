@@ -52,6 +52,54 @@ import {
 
 const ALWAYS_SHOW_PROLOGUE = false;
 
+// Lightweight runtime diagnostics: capture uncaught errors, rejected promises,
+// and failed resource loads without interrupting the game.
+const RUNTIME_DIAGNOSTICS_LIMIT = 50;
+const runtimeDiagnostics = [];
+function recordRuntimeDiagnostic(type, message, details = {}) {
+  const entry = {
+    type,
+    message: String(message || 'Unknown runtime error').slice(0, 500),
+    timestamp: new Date().toISOString(),
+    ...details
+  };
+  runtimeDiagnostics.push(entry);
+  if (runtimeDiagnostics.length > RUNTIME_DIAGNOSTICS_LIMIT) {
+    runtimeDiagnostics.splice(0, runtimeDiagnostics.length - RUNTIME_DIAGNOSTICS_LIMIT);
+  }
+  try {
+    console.warn('[Game diagnostics]', entry);
+  } catch {}
+  return entry;
+}
+
+window.addEventListener('error', (event) => {
+  const target = event.target;
+  // Resource errors do not bubble; capture-phase listener receives them.
+  if (target && target !== window) {
+    const tag = target.tagName ? target.tagName.toLowerCase() : 'resource';
+    const url = target.src || target.href || '';
+    recordRuntimeDiagnostic('resource-load', `Failed to load ${tag}`, {
+      resource: String(url).slice(0, 1000)
+    });
+    return;
+  }
+  recordRuntimeDiagnostic('uncaught-error', event.message || 'Uncaught error', {
+    source: event.filename || '',
+    line: event.lineno || 0,
+    column: event.colno || 0
+  });
+}, true);
+
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason;
+  const message = reason && reason.stack
+    ? reason.stack
+    : (reason && reason.message) || String(reason);
+  recordRuntimeDiagnostic('unhandled-rejection', message);
+});
+
+
 on('toast', toast);
 on('log', ({ channel, msg, cls }) => logTo('game-log', msg, cls));
 
@@ -642,7 +690,7 @@ function setupPrologueVoice() {
 }
 
 window.GameAPI = {
-  updateMainMenu,
+  getRuntimeDiagnostics: () => runtimeDiagnostics.map(entry => ({ ...entry })),\n  clearRuntimeDiagnostics: () => { runtimeDiagnostics.length = 0; },\n  updateMainMenu,
   openSettings, switchSettingsTab, applySettings, backFromSettings,
   resetAllSettings, deleteAllSaves,
   openAchievementsMenu, openHelp,
