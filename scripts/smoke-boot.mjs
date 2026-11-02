@@ -339,7 +339,7 @@ try {
   state.game.riftOpeningSeen = true;
   state.game.player.riftClearedLocations = ['rift-01'];
   // Keep the world-map fixture in a post-game state without invoking NG+ here.
-  state.game.player.ngPlus = Math.max(1, state.game.player.ngPlus || 0);
+  state.game.player.ngPlus = 0;
   state.game.riftEnding = null;
   state.game.riftOpeningSeen = false;
   state.game.player.riftClearedLocations = [];
