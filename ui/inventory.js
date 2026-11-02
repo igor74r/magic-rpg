@@ -180,7 +180,7 @@ function renderSaleModal() {
 export function openSaleUI(initialSelection = []) {
   saleSelection = Array.isArray(initialSelection) ? [...initialSelection] : [];
   saleConfirmState = false;
-  saleReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  saleReturnFocus = document.activeElement?.nodeType === 1 ? document.activeElement : null;
   document.getElementById('inventory-sale-overlay')?.remove();
   const overlay = document.createElement('div');
   overlay.id = 'inventory-sale-overlay';
