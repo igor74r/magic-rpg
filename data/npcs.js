@@ -5,6 +5,13 @@ export const NPCS = {
     maxLevel: 3,
     upgrades: [{ cost: 30, forgeBonus: 2, statPercent: 0.05 }, { cost: 75, forgeBonus: 4, statPercent: 0.05 }, { cost: 140, forgeBonus: 7, statPercent: 0.05 }],
     recipes: [
+
+      // Relics forged from guaranteed mini-boss trophies (one per act).
+      { id: 'r-briar-court-mantle', result: 'briar-court-mantle', qty: 1, rarity: 'uncommon', craftTier: 2, ingredients: [{ id: 'root-court-seal', qty: 1 }, { id: 'root-fiber', qty: 2 }] },
+      { id: 'r-mourner-signet', result: 'mourner-signet', qty: 1, rarity: 'rare', craftTier: 3, ingredients: [{ id: 'drowned-lament', qty: 1 }, { id: 'grave-salt', qty: 2 }] },
+      { id: 'r-oathfire-cleaver', result: 'oathfire-cleaver', qty: 1, rarity: 'rare', craftTier: 3, ingredients: [{ id: 'oathforge-heart', qty: 1 }, { id: 'ember-core', qty: 2 }] },
+      { id: 'r-mirrorweave-cloak', result: 'mirrorweave-cloak', qty: 1, rarity: 'epic', craftTier: 4, ingredients: [{ id: 'mirror-shard', qty: 1 }, { id: 'frost-essence', qty: 2 }] },
+      { id: 'r-echo-prism-amulet', result: 'echo-prism-amulet', qty: 1, rarity: 'epic', craftTier: 4, ingredients: [{ id: 'echo-core', qty: 1 }, { id: 'void-dust', qty: 3 }] },
       { id: 'r5-dragon-blade', result: 'dragon-blade', qty: 1, rarity: 'legendary', craftTier: 5, station: 'final-forge', ingredients: [{ id: 'ember-core', qty: 3 }, { id: 'void-dust', qty: 2 }, { id: 'grave-salt', qty: 1 }] },
       { id: 'r5-dragon-plate', result: 'dragon-scale-armor', qty: 1, rarity: 'legendary', craftTier: 5, station: 'final-forge', ingredients: [{ id: 'ember-core', qty: 2 }, { id: 'frost-essence', qty: 2 }, { id: 'root-fiber', qty: 2 }] },
       { id: 'r5-astral-staff', result: 'astral-staff', qty: 1, rarity: 'legendary', craftTier: 5, station: 'final-forge', ingredients: [{ id: 'void-dust', qty: 3 }, { id: 'frost-essence', qty: 2 }, { id: 'ember-core', qty: 1 }] }
