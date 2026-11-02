@@ -149,6 +149,8 @@ export function initOverworld() {
   if (!overworldInputBound) {
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', clearMovementKeys);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) clearMovementKeys(); });
     overworldInputBound = true;
     const canvas = document.getElementById('overworld-canvas');
     if (canvas) { canvas.addEventListener('mousemove', onCanvasMouseMove); canvas.addEventListener('mouseleave', hideMapTooltip); }
@@ -256,6 +258,13 @@ function onKeyUp(e) {
   if (!state.overworld) return;
   const k = getLogicalKey(e);
   state.overworld.keys[k] = false;
+}
+
+// Не оставляем движение зажатым, если вкладка теряет фокус до события keyup.
+function clearMovementKeys() {
+  const keys = state.overworld?.keys;
+  if (!keys) return;
+  for (const key of ['w', 'a', 's', 'd']) keys[key] = false;
 }
 
 export function closeDialogAndResume() { 
