@@ -342,6 +342,7 @@ try {
   const campaignBefore = JSON.stringify(state.game.player.campaignKills || {});
   api.startNGPlus();
   check('NG+ remains locked before campaign completion', (state.game.player.ngPlus || 0) === ngPlusBefore && JSON.stringify(state.game.player.campaignKills || {}) === campaignBefore && state.game.riftEnding === 'closed' && state.game.riftOpeningSeen === true && state.game.player.riftClearedLocations.includes('rift-01'));
+  state.game.riftEnding = null;
   state.game.riftOpeningSeen = false;
   state.game.storyDragons['blood-crown'] = true;
   const { emit } = await import(new URL('systems/events.js', ROOT).href);
