@@ -169,7 +169,7 @@ function renderSaleModal() {
   const warning = saleConfirmState && needsConfirm
     ? '<p class="sale-warning">Внимание: выбраны предметы T4+ или сумма выше 500 золота. Подтверди продажу ещё раз.</p>'
     : needsConfirm ? '<p class="sale-warning">Для продажи T4+ или на сумму свыше 500 золота потребуется дополнительное подтверждение.</p>' : '';
-  overlay.innerHTML = '<div class="sale-dialog" role="dialog" aria-modal="true" aria-labelledby="inventory-sale-title" tabindex="-1"><div class="sale-heading"><h3 id="inventory-sale-title">Продажа предметов</h3><button type="button" data-sale-action="cancel" aria-label="Закрыть окно продажи">×</button></div><div class="sale-columns"><section class="sale-inventory"><b>Инвентарь</b><div class="sale-item-list">' + (left || '<small>Нет предметов для продажи.</small>') + '</div></section><section class="sale-display"><b>К продаже: ' + selected.length + '</b><div class="sale-summary-list">' + right + '</div><div class="sale-total">Итого: ' + total + '💰</div>' + warning + '</section></div><div class="sale-actions"><button data-sale-action="tiers">Продать все T1–T2</button><button data-sale-action="filter">Выбрать по фильтру</button><button class="sell-btn" data-sale-action="confirm">' + (saleConfirmState && needsConfirm ? 'Подтвердить продажу' : 'Продать выбранное') + '</button><button data-sale-action="cancel">Отмена</button></div></div>';
+  overlay.innerHTML = '<div class="sale-dialog" role="dialog" aria-modal="true" aria-labelledby="inventory-sale-title" tabindex="-1"><div class="sale-heading"><h3 id="inventory-sale-title">Продажа предметов</h3><button type="button" data-sale-action="cancel" aria-label="Закрыть окно продажи">×</button></div><div class="sale-columns"><section class="sale-inventory"><b>Инвентарь</b><div class="sale-item-list">' + (left || '<small>Нет предметов для продажи.</small>') + '</div></section><section class="sale-display"><b>К продаже: ' + selected.length + '</b><div class="sale-summary-list">' + right + '</div><div class="sale-total">Итого: ' + total + '💰</div>' + warning + '</section></div><div class="sale-actions"><button type="button" data-sale-action="tiers">Продать все T1–T2</button><button type="button" data-sale-action="filter">Выбрать по фильтру</button><button type="button" class="sell-btn" data-sale-action="confirm">' + (saleConfirmState && needsConfirm ? 'Подтвердить продажу' : 'Продать выбранное') + '</button><button type="button" data-sale-action="cancel">Отмена</button></div></div>';
   const focusTarget = activeAction
     ? [...overlay.querySelectorAll('[data-sale-action]')].find(button =>
         button.dataset.saleAction === activeAction && (activeIndex === undefined || button.dataset.index === activeIndex))
@@ -332,7 +332,7 @@ function renderPaperdoll(p) {
         <span class="gear-slot-label">${label}</span>
         <span class="gear-slot-name">${affixes.length ? affixes.map(affix => escapeHtml(affix?.name ?? '')).join(' ') + ' ' : ''}${item.name}${forgeLevel ? ` +${forgeLevel}` : ''}</span>
         <span class="gear-slot-sockets">${sockets ? `◈ ${runes}/${sockets}` : ''}</span>
-        <button class="gear-slot-remove" data-inv-action="unequip" data-slot="${slot}" title="Снять" aria-label="Снять: ${escapeHtml(label)}">×</button>
+        <button type="button" class="gear-slot-remove" data-inv-action="unequip" data-slot="${slot}" title="Снять" aria-label="Снять: ${escapeHtml(label)}">×</button>
       </div>`;
   }).join('');
 
@@ -408,9 +408,9 @@ export function renderInventory() {
 
   const actions = `
     <div class="inv-top-actions">
-      ${hasBetter ? '<button data-inv-action="equip-best" class="equip-best-btn">⚡ Экипировать лучшее</button>' : ''}
-      ${junkCount ? `<button data-inv-action="sell-junk" class="inv-sell-junk">💰 Продать слабое (${junkCount})</button>` : ''}
-      <button data-inv-action="open-sale" class="inv-sell-junk">💰 Продажа</button>
+      ${hasBetter ? '<button type="button" data-inv-action="equip-best" class="equip-best-btn">⚡ Экипировать лучшее</button>' : ''}
+      ${junkCount ? `<button type="button" data-inv-action="sell-junk" class="inv-sell-junk">💰 Продать слабое (${junkCount})</button>` : ''}
+      <button type="button" data-inv-action="open-sale" class="inv-sell-junk">💰 Продажа</button>
     </div>`;
 
   let grid = '';
@@ -546,12 +546,12 @@ function openRuneSocketMenu(inventoryIndex) {
       <b>Выберите предмет для установки:</b>
       <div class="rune-socket-options">
         ${candidates.map(c => `
-          <button data-inv-action="socket-rune" data-index="${inventoryIndex}" data-slot="${c.slot}">
+          <button type="button" data-inv-action="socket-rune" data-index="${inventoryIndex}" data-slot="${c.slot}">
             <span>${c.item.icon} ${c.label}: ${c.item.name}</span>
             <small>Свободно гнёзд: ${c.sockets - c.used}</small>
           </button>`).join('')}
       </div>
-      <button class="rune-socket-cancel" data-inv-action="close-rune">Отмена</button>
+      <button type="button" class="rune-socket-cancel" data-inv-action="close-rune">Отмена</button>
     </div>`;
   overlay.addEventListener('click', e => {
     if (e.target === overlay) overlay.remove();
