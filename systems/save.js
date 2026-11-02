@@ -58,7 +58,12 @@ export function saveGame() {
     ...(player ? { player: { ...player, playtimeSec } } : {})
   };
   const serialized = JSON.stringify(snapshot);
-  localStorage.setItem(slotKey(slot), serialized);
+  try {
+    localStorage.setItem(slotKey(slot), serialized);
+  } catch (error) {
+    console.error('[save] Не удалось записать сохранение:', error);
+    return false;
+  }
 
   state.game.version = SAVE_VERSION;
   if (player) player.playtimeSec = playtimeSec;
