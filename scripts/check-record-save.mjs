@@ -3,6 +3,7 @@ import { state } from '../systems/state.js';
 import { createCharacter } from '../systems/character.js';
 import { recordRiftFloor } from '../systems/rift.js';
 import { recordTowerFloor } from '../systems/tower.js';
+import { saveGame } from '../systems/save.js';
 
 const originalStorage = globalThis.localStorage;
 const storage = new Map();
@@ -18,6 +19,13 @@ try {
   const player = state.game.player;
   player.riftBest = 2;
   player.towerBest = 3;
+
+  const persistedBeforeSerializationFailure = storage.get('magic-rpg-save-1');
+  player.unexpectedExtensionValue = 1n;
+  assert.equal(saveGame(), false, 'save must return false when JSON serialization fails');
+  assert.equal(storage.get('magic-rpg-save-1'), persistedBeforeSerializationFailure,
+    'serialization failure must preserve the previously persisted character');
+  delete player.unexpectedExtensionValue;
 
   const originalSetItem = globalThis.localStorage.setItem;
   globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
