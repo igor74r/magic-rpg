@@ -104,9 +104,23 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
   return enemies;
 }
 
-export function spawnNPCs(loc) {
-  if (!loc.npcs) return [];
-  return loc.npcs.map(npc => ({
+export function spawnNPCs(loc, locationId = '') {
+  const baseNPCs = Array.isArray(loc.npcs) ? [...loc.npcs] : [];
+  // A wandering merchant may appear in ordinary exploration, never in the Rift,
+  // Tower, or story-dragon arenas. Each entry rolls independently.
+  const specialInstance = /^(rift|tower-floor-)/.test(locationId) ||
+    loc.storyDragon || loc.bossArena || loc.safe;
+  if (!specialInstance && Math.random() < 0.16 && !baseNPCs.some(n => n.id === 'wandering-merchant')) {
+    const cols = loc.mapCols || 40, rows = loc.mapRows || 30;
+    baseNPCs.push({
+      id: 'wandering-merchant', npcType: 'merchant',
+      name: 'Странствующий торговец', emoji: '🧳',
+      x: 3 + Math.floor(Math.random() * Math.max(1, cols - 6)),
+      y: 3 + Math.floor(Math.random() * Math.max(1, rows - 6)),
+      greetings: ['Удача привела нас друг к другу.', 'Есть кое-что из дальних земель.', 'Редкости долго не залеживаются!']
+    });
+  }
+  return baseNPCs.map(npc => ({
     ...npc,
     x: npc.x * TILE + TILE / 2,
     y: npc.y * TILE + TILE / 2,
