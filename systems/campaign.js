@@ -163,3 +163,44 @@ export function canCompleteMainQuest(game) {
     shards?.blood === true;
   return Boolean(allShardsFound && game?.storyDragons?.['blood-crown'] === true && isCampaignComplete(game?.player));
 }
+
+
+// Story regions follow the five-act campaign's recommended level bands.
+// Their map order is stable even though the world-map positions remain scattered.
+export function getStoryLocationProgression() {
+  const locations = [];
+  const seen = new Set();
+  for (const act of STORY.acts) {
+    const match = /^(\d+)/.exec(String(act.recommendedLevel || '1'));
+    const requiredLevel = Math.max(1, Number(match?.[1]) || 1);
+    const orderedIds = [act.locationId, ...act.missions.map(mission => mission.locationId || act.locationId)];
+    for (const locationId of orderedIds) {
+      if (!locationId || seen.has(locationId)) continue;
+      seen.add(locationId);
+      locations.push({
+        id: locationId,
+        sequence: locations.length + 1,
+        actNumber: act.number,
+        actTitle: act.title,
+        recommendedLevel: act.recommendedLevel || String(requiredLevel),
+        requiredLevel
+      });
+    }
+  }
+  return locations;
+}
+
+export function getStoryLocationRequirement(locationId) {
+  return getStoryLocationProgression().find(location => location.id === locationId) || null;
+}
+
+export function canEnterStoryLocation(player, locationId) {
+  const requirement = getStoryLocationRequirement(locationId);
+  if (!requirement) return { allowed: true, requirement: null, currentLevel: Number(player?.level) || 1 };
+  const currentLevel = Math.max(1, Number(player?.level) || 1);
+  return {
+    allowed: currentLevel >= requirement.requiredLevel,
+    requirement,
+    currentLevel
+  };
+}
