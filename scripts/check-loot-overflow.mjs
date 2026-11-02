@@ -70,6 +70,10 @@ assert.equal(invalidRarity.stored, false, 'unknown rarity must not create an unc
 const lockedRarity = addItemOrStore('leather-armor', 1, { rarity: 'mythic' });
 assert.equal(lockedRarity.stored, false, 'boss-only rarity must require its explicit permission');
 assert.equal(state.game.player.pendingLoot.length, 0, 'invalid reward options must not pollute pending loot');
+// Refill every slot so the permitted mythic reward exercises the overflow path.
+state.game.player.inventory = Array.from({ length: 30 }, () => ({
+  id: 'iron-sword', qty: 1, rarity: 'common', bonus: {}, affixes: [], runes: []
+}));
 const mythicOverflow = addItemOrStore('leather-armor', 1, { rarity: 'mythic', allowMythic: true });
 assert.equal(mythicOverflow.stored, true, 'permitted mythic reward should be preserved on overflow');
 assert.equal(state.game.player.pendingLoot[0].rarity, 'mythic');
