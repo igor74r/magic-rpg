@@ -15,6 +15,7 @@ export function applyEffect(target, effectId) {
   if (!Array.isArray(target.effects)) target.effects = [];
   const def = EFFECTS[effectId];
   if (!def) return;
+  if (effectId === 'stun' && target.stunImmunityTurns > 0) return;
   const existing = target.effects.find(e => e.id === effectId);
   if (existing) existing.duration = Math.max(existing.duration, def.duration);
   else target.effects.push({ id: effectId, duration: def.duration });
@@ -36,6 +37,7 @@ export function tickEffects(target) {
     if (!def.skipTurn) e.duration -= 1;
   }
   target.effects = target.effects.filter(e => e.duration > 0);
+  if (target.stunImmunityTurns > 0) target.stunImmunityTurns -= 1;
   return { totalDamage, messages };
 }
 
@@ -83,6 +85,7 @@ export function consumeStun(target) {
   const index = target.effects.findIndex(effect => effect.id === 'stun');
   if (index < 0) return false;
   target.effects.splice(index, 1);
+  target.stunImmunityTurns = 1;
   return true;
 }
 
