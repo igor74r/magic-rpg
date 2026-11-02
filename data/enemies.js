@@ -72,7 +72,10 @@ export const ENEMIES = {
     hp: 220, attack: 38, defense: 10, exp: 250, gold: 220,
     drops: ['mithril-armor', 'strong-mana-potion', 'cinder-visor', 'rune-ember'], boss: true,
     special: { type: 'snipe', every: 2, mult: 2.2, name: 'Адское пламя', effect: 'burn' },
-    phases: [{ atHp: 0.5, atkMult: 1.4, msg: 'Пепельный Вестник раскрывает крылья пепельного пламени!', specialEvery: 1 }]
+    phases: [
+      { atHp: 0.5, atkMult: 1.4, msg: 'Пепельный Вестник раскрывает крылья пепельного пламени!', specialEvery: 1 },
+      { atHp: 0.25, atkMult: 1.65, msg: 'Пепельный Вестник сжигает остатки сил и переходит в неистовую фазу!', specialEvery: 1 }
+    ]
   },
 
   'frost-wolf': {
@@ -94,7 +97,10 @@ export const ENEMIES = {
     hp: 260, attack: 42, defense: 14, exp: 320, gold: 280,
     drops: ['ice-staff', 'frost-armor', 'glacier-greaves', 'pendant-last-oath'], boss: true,
     special: { type: 'snipe', every: 3, mult: 2.2, name: 'Ледяная стрела', effect: 'bleed' },
-    phases: [{ atHp: 0.5, atkMult: 1.4, msg: 'Ледяная Хватка сковывает арену вечным льдом!', specialEvery: 2 }]
+    phases: [
+      { atHp: 0.5, atkMult: 1.4, msg: 'Ледяная Хватка сковывает арену вечным льдом!', specialEvery: 2 },
+      { atHp: 0.25, atkMult: 1.6, msg: 'Ледяная Хватка раскалывает лёд и обрушивает последнюю бурю!', specialEvery: 1 }
+    ]
   },
 
   'sand-worm': {
