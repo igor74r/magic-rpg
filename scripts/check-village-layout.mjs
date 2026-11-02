@@ -17,9 +17,12 @@ assert.ok(map.every(row => row.length === 38));
 const start = { x: 19, y: 15 };
 assert.equal(isBlocked(map, start.x, start.y, 'village'), false, 'player must arrive beside the central portal');
 
+const buildings = village.statics.filter(item => item.decorative && item.buildingStyle);
+const doorTargets = buildings.map(item => ({ id: `${item.id}-door-approach`, x: item.x, y: item.y + 1 }));
 const targets = [
   ...village.npcs.map(({ id, x, y }) => ({ id, x, y })),
-  ...village.statics.filter(item => !item.decorative).map(({ id, x, y }) => ({ id, x, y }))
+  ...village.statics.filter(item => !item.decorative).map(({ id, x, y }) => ({ id, x, y })),
+  ...doorTargets
 ];
 const interactionCount = village.npcs.filter(item => !item.ambient).length
   + village.statics.filter(item => !item.decorative).length;
@@ -27,7 +30,6 @@ const interactionCount = village.npcs.filter(item => !item.ambient).length
 assert.ok(village.npcs.filter(item => item.ambient).every(item => item.wanderRadius >= 40 && item.wanderRadius <= 70),
   'ambient residents must have compact bounded walking areas');
 
-const buildings = village.statics.filter(item => item.decorative && item.buildingStyle);
 assert.equal(buildings.length, 10, 'Aurora must have six service buildings and four homes');
 for (const style of ['forge', 'healer', 'alchemy', 'market', 'hall', 'tavern', 'home']) {
   assert.ok(buildings.some(item => item.buildingStyle === style), `missing ${style} building`);
