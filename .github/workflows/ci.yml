@@ -169,6 +169,9 @@ jobs:
       - name: Check render and autosave lifecycle
         run: node scripts/check-render-lifecycle.mjs
 
+      - name: Check unified overworld depth sorting
+        run: node scripts/check-render-depth-order.mjs
+
       - name: Check NPC service guards
         run: node scripts/check-npc-services.mjs
 

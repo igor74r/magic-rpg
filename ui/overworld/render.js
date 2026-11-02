@@ -5,6 +5,7 @@ import { saveGame } from '../../systems/save.js';
 import { LOCATIONS } from '../../data/locations.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic } from './models.js';
+import { buildDepthItems } from './depth-order.js';
 import { drawAtlasTile, drawAtlasProp } from './tile-atlas.js';
 import { getTileDanger } from '../../systems/overworld/hazards.js';
 import { getActiveCampaignMission } from '../../systems/campaign.js';
@@ -438,15 +439,15 @@ function render() {
   }
 
   const p = ow.player; nearNpc = null;
-
-  nearNpc = null;
-  const depthItems = [
-    ...(ow.statics || []).map(item => ({ item, kind: 'static', footY: item.y + (item.depthOffset || 0) })),
-    ...(ow.npcs || []).map(item => ({ item, kind: 'npc', footY: item.y + (item.depthOffset || 0) })),
-    ...(ow.events || []).map(item => ({ item, kind: 'event', footY: item.y + (item.depthOffset || 0) })),
-    ...(ow.enemies || []).filter(item => !item.dead).map(item => ({ item, kind: 'enemy', footY: item.y + (item.depthOffset || 0) })),
-    { item: ow.player, kind: 'player', footY: ow.player.y + 12 }
-  ].sort((a, b) => a.footY - b.footY);
+  const now = performance.now();
+  let pLungeX = 0, pLungeY = 0;
+  if (ow.combat && ow.combat.turn === 'player' && ow.combat.lastPlayerAction) {
+    const pulse = Math.sin(now / 50);
+    if (pulse > 0) pLungeX = 5;
+  }
+  const heroKeys = ow.keys || {};
+  const heroMoving = !ow.combat && !ow.defeated && !!(heroKeys.w || heroKeys.a || heroKeys.s || heroKeys.d || heroKeys.arrowup || heroKeys.arrowdown || heroKeys.arrowleft || heroKeys.arrowright);
+  const depthItems = buildDepthItems(ow);
 
   for (const entry of depthItems) {
     const item = entry.item;
@@ -497,7 +498,7 @@ function render() {
         ctx.fillText(enemyDef.name, sx, sy - 43);
       }
     } else if (entry.kind === 'player') {
-      drawPlayerByClass(ctx, item, sx, sy, theme.shadow);
+      drawPlayerByClass(ctx, item, sx + pLungeX, sy + pLungeY, state.game.player.class, theme.shadow, heroMoving);
     }
   }
 
@@ -506,8 +507,6 @@ function render() {
   const questEnemyId = activeMission && missionLocationId === (ow.sourceLocationId || ow.locationId)
     ? activeMission.mission.enemyId
     : null;
-  const now = performance.now();
-
   for (const e of ow.enemies) {
     if (e.dead) {
       if (!e._hasExploded) {
@@ -566,16 +565,6 @@ function render() {
     ctx.beginPath(); ctx.arc(sx, sy, p.size, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
-
-  let pLungeX = 0, pLungeY = 0;
-  if (ow.combat && ow.combat.turn === 'player' && ow.combat.lastPlayerAction) {
-    const pulse = Math.sin(now / 50);
-    if (pulse > 0) pLungeX = 5; 
-  }
-
-  const heroKeys = ow.keys || {};
-  const heroMoving = !ow.combat && !ow.defeated && !!(heroKeys.w || heroKeys.a || heroKeys.s || heroKeys.d || heroKeys.arrowup || heroKeys.arrowdown || heroKeys.arrowleft || heroKeys.arrowright);
-  drawPlayerByClass(ctx, p.x - cam.x + pLungeX, p.y - cam.y + pLungeY, state.game.player.class, theme.shadow, heroMoving);
 
   const px = p.x - cam.x, py = p.y - cam.y;
   const bw = 50;
