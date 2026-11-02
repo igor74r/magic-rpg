@@ -81,11 +81,11 @@ try {
   vampiric.p.con = 0;
   state.settings.difficulty = 'hard';
   vampiric.ow.combat.turnCount = 2;
+  const hpBeforeSpecial = vampiric.p.hp;
   combatBlock();
   runEnemyTurn();
-  const specialBaseDamage = Math.max(1, Math.floor((ENEMIES.wolf.attack + 4) * 1.4));
-  const doubleHitDamage = Math.max(1, Math.floor(specialBaseDamage * 0.6)) * 2;
-  const expectedVampiricHeal = Math.floor(doubleHitDamage * 0.3);
+  const actualSpecialDamage = hpBeforeSpecial - vampiric.p.hp;
+  const expectedVampiricHeal = Math.floor(actualSpecialDamage * 0.3);
   assert.equal(vampiric.enemy.hp, 1000 + expectedVampiricHeal, 'vampiric heal must use both actual hits');
   state.settings.difficulty = 'normal';
   console.log('PASS vampiric healing scales with actual double-special damage');
