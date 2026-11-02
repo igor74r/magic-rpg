@@ -4,7 +4,7 @@ const map = readFileSync(new URL('../ui/locations.js', import.meta.url), 'utf8')
 const theme = readFileSync(new URL('../css/theme.css', import.meta.url), 'utf8');
 assert.match(map, /map-route-summary/);
 assert.match(map, /Следующая точка/);
-assert.match(map, /map-story-link ${routeState}/);
+assert.ok(map.includes('map-story-link ${routeState}'));
 assert.match(map, /lockDetail/);
 assert.match(map, /map-route-count/);
 assert.match(theme, /\.map-route-summary/);
