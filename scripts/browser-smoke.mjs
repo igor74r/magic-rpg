@@ -21,6 +21,13 @@ async function waitForServer() {
   throw new Error('Static game server did not start');
 }
 
+async function clickCanvasPoint(page, xRatio, yRatio) {
+  const canvas = page.locator('#overworld-canvas');
+  const bounds = await canvas.boundingBox();
+  assert.ok(bounds, 'overworld canvas must be visible before portal click');
+  await page.mouse.click(bounds.x + bounds.width * xRatio, bounds.y + bounds.height * yRatio);
+}
+
 async function checkViewport(page, label) {
   const metrics = await page.evaluate(() => {
     const settings = document.getElementById('screen-settings');
@@ -160,6 +167,37 @@ try {
       assert.ok(dashboard.mainScrollWidth <= dashboard.mainWidth + 1, `${viewport.name}/${tab}: main panel overflow: ${JSON.stringify(dashboard)}`);
       assert.ok(dashboard.contentScrollWidth <= dashboard.contentWidth + 1, `${viewport.name}/${tab}: content overflow: ${JSON.stringify(dashboard)}`);
     }
+
+    // Exercise the actual portal sprites and their navigation, not only static markup.
+    await page.evaluate(() => window.GameAPI.enterOverworld());
+    await page.locator('#screen-overworld.active').waitFor();
+    let worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
+    await clickCanvasPoint(page, 0.5, 0.404);
+    await worldDialog.waitFor({ state: 'visible' });
+    assert.equal(await worldDialog.getAttribute('aria-modal'), 'true',
+      `${viewport.name}: world portal must open an accessible modal`);
+    await page.keyboard.press('Escape');
+    await worldDialog.waitFor({ state: 'detached' });
+
+    await clickCanvasPoint(page, 0.5, 0.404);
+    worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
+    await worldDialog.waitFor({ state: 'visible' });
+    await worldDialog.getByRole('button', { name: /Тёмный лес/ }).click();
+    await worldDialog.waitFor({ state: 'detached' });
+
+    // The forest has its own themed waystone two cells left of the spawn.
+    await clickCanvasPoint(page, 0.38, 0.5);
+    worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
+    await worldDialog.waitFor({ state: 'visible' });
+    await worldDialog.getByRole('button', { name: /Деревня Аврора/ }).click();
+    await worldDialog.waitFor({ state: 'detached' });
+
+    // The separate amber gate must launch the existing 40-floor Tower menu.
+    await clickCanvasPoint(page, 0.74, 0.404);
+    await page.locator('#tower-map-overlay').waitFor({ state: 'visible' });
+    await page.getByRole('heading', { name: /Башня · 40 этажей/ }).waitFor();
+    await page.locator('[data-tower-close]').click();
+    await page.locator('#tower-map-overlay').waitFor({ state: 'detached' });
 
     assert.deepEqual(pageErrors, [], `${viewport.name}: uncaught browser errors: ${pageErrors.join('; ')}`);
     console.log(`PASS ${viewport.name} (${viewport.width}x${viewport.height}): settings labels, game creation, 9 dashboard tabs, responsive widths, no page errors`);
