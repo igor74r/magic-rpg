@@ -86,7 +86,6 @@ export function startNGPlus() {
   g.riftOpenedAt = null;
   g.player.riftClearedLocations = [];
   g.player.craftedHighTierByAct = {};
-  g.player.craftingJobs = [];
   g.shards = { forest: false, ruins: false, shadow: false };
   g.quests = {};
   STORY.quests.forEach(q => g.quests[q.id] = false);
