@@ -178,8 +178,29 @@ try {
       `${viewport.name}: world portal must open an accessible modal`);
 
     // A new character must not bypass the first campaign mission by selecting
-    // a later story region from the portal.
-    const forestLocked = worldDialog.getByRole('button', { name: /Тёмный лес/ });
+    // a later story region from the portal. The first lock is level-based.
+    let forestLocked = worldDialog.getByRole('button', { name: /Тёмный лес/ });
+    assert.equal(await forestLocked.isDisabled(), true,
+      `${viewport.name}: forest must remain locked for a level-one character`);
+    assert.match(await forestLocked.innerText(), /НУЖЕН УРОВЕНЬ 3/i,
+      `${viewport.name}: portal must explain the level requirement`);
+    await page.keyboard.press('Escape');
+    await worldDialog.waitFor({ state: 'detached' });
+
+    // Raise only the test character's level; the campaign prerequisite must
+    // still keep the forest closed until mission a1-m1 is claimed.
+    await page.evaluate(() => {
+      const raw = localStorage.getItem('magic-rpg-save-1');
+      if (!raw) throw new Error('test character save is missing');
+      const save = JSON.parse(raw);
+      save.player.level = 3;
+      localStorage.setItem('magic-rpg-save-1', JSON.stringify(save));
+      window.GameAPI.loadSlot(1);
+      window.GameAPI.enterOverworld();
+      window.GameAPI.interactNpc('world-portal');
+    });
+    await worldDialog.waitFor({ state: 'visible' });
+    forestLocked = worldDialog.getByRole('button', { name: /Тёмный лес/ });
     assert.equal(await forestLocked.isDisabled(), true,
       `${viewport.name}: forest must remain locked before the first campaign mission`);
     assert.match(await forestLocked.innerText(), /ЗАДАНИЕ a1-m1/i,
@@ -187,13 +208,10 @@ try {
     await page.keyboard.press('Escape');
     await worldDialog.waitFor({ state: 'detached' });
 
-    // Advance only the test save to the first region's required state, then
-    // reload it through the real save loader before testing travel.
+    // Claim the prerequisite in the test save and reload it through the real
+    // save loader before verifying that travel becomes available.
     await page.evaluate(() => {
-      const raw = localStorage.getItem('magic-rpg-save-1');
-      if (!raw) throw new Error('test character save is missing');
-      const save = JSON.parse(raw);
-      save.player.level = 3;
+      const save = JSON.parse(localStorage.getItem('magic-rpg-save-1'));
       save.player.campaignClaimed = { ...(save.player.campaignClaimed || {}), 'a1-m1': true };
       localStorage.setItem('magic-rpg-save-1', JSON.stringify(save));
       window.GameAPI.loadSlot(1);
