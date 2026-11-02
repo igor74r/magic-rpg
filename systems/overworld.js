@@ -27,7 +27,7 @@ export function enterOverworld(locationId, opts = {}) {
 
   let spawnX = cx;
   let spawnY = cy;
-  if (locationId === 'village') spawnY = cy + 4;
+  if (locationId === 'village') spawnY = cy + 1;
 
   const playerPos = { x: spawnX * TILE + TILE / 2, y: spawnY * TILE + TILE / 2 };
 
