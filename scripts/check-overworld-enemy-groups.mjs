@@ -25,7 +25,7 @@ const chain = [
   { x: 100, y: 0, homeX: 100, homeY: 0, state: 'idle' },
   { x: 200, y: 0, homeX: 200, homeY: 0, state: 'idle' }
 ];
-const chained = getEnemyGroupBehaviors(chain, { x: -150, y: 0 }, { groupRadius: 110 });
+const chained = getEnemyGroupBehaviors(chain, { x: -150, y: 0 }, { groupRadius: 110, assistRange: 400 });
 assert.equal(chained[2].state, 'chase', 'alarm should propagate through a connected nearby pack');
 
 console.log('Enemy group checks passed: shared alert, proximity, isolation, leash, dead actors and chained packs');
