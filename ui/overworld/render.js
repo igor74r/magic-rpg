@@ -9,6 +9,7 @@ import { drawAtlasTile, drawAtlasProp } from './tile-atlas.js';
 import { getTileDanger } from '../../systems/overworld/hazards.js';
 import { getActiveCampaignMission } from '../../systems/campaign.js';
 import { renderCombatPanel } from './combat-panel.js';
+import { escapeHtml } from '../screens.js';
 import {
   VIEW_W, VIEW_H, getTheme, MOD_LABEL,
   initWeather as initWeatherFx,
@@ -803,15 +804,20 @@ export function renderNpcPanel() {
   panel.style.display = 'block';
 
   const isEvent = !!nearNpc.isEvent;
+  const safeName = escapeHtml(nearNpc.name);
   const infoText = isEvent
-    ? `<b style="color:#ffd060;">✨ ${nearNpc.name}</b> — вы нашли что-то интересное.`
-    : `<b style="color:#c9a227;">${nearNpc.name}</b> — вы подошли к объекту. Выберите действие:`;
-  document.getElementById('npc-panel-info').innerHTML = infoText;
+    ? `<b style="color:#ffd060;">✨ ${safeName}</b> — вы нашли что-то интересное.`
+    : `<b style="color:#c9a227;">${safeName}</b> — вы подошли к объекту. Выберите действие:`;
+  const info = document.getElementById('npc-panel-info');
+  if (info) info.innerHTML = infoText;
 
   const actions = document.getElementById('npc-panel-actions');
+  if (!actions) return;
   const btnStyle = isEvent ? 'background:linear-gradient(180deg,#8a6a1a,#4a2a0a);border-color:#ffd060;' : 'background:linear-gradient(180deg,#2a5a3a,#1b3a2a);border-color:#60ff60;';
   const btnLabel = isEvent ? '✨ Исследовать' : '💬 Взаимодействовать';
-  actions.innerHTML = `<button onclick="GameAPI.interactNpc('${nearNpc.id}')" style="${btnStyle}">${btnLabel}</button>`;
+  actions.innerHTML = `<button type="button" style="${btnStyle}">${btnLabel}</button>`;
+  const button = actions.querySelector('button');
+  if (button) button.addEventListener('click', () => GameAPI.interactNpc(nearNpc.id));
 }
 
 function drawMinimap(ctx, ow) {
@@ -845,13 +851,16 @@ export function onCanvasMouseMove(e) {
 }
 
 function showMapTooltip(cx, cy, enemy) {
-  const def = ENEMIES[enemy.enemyId]; const modName = enemy.modifier ? ` (${MOD_LABEL[enemy.modifier]})` : '';
-  const nameColor = enemy.boss ? '#b060ff' : enemy.elite ? '#ffd060' : '#c9a227'; const prefix = enemy.boss ? '☠ ' : enemy.elite ? '★ ' : '';
-  let html = `<div class="map-tt-name" style="color:${nameColor};">${prefix}${def.name}${modName}</div>`;
-  html += `<div class="map-tt-row">❤️ HP: ${enemy.hp}/${enemy.maxHp}</div><div class="map-tt-row">⚔️ Атака: ${def.attack}</div><div class="map-tt-row">🛡️ Защита: ${def.defense}</div>`;
+  const def = ENEMIES[enemy?.enemyId];
+  if (!def) { hideMapTooltip(); return; }
+  const modName = enemy.modifier ? ` (${escapeHtml(MOD_LABEL[enemy.modifier] || enemy.modifier)})` : '';
+  const nameColor = enemy.boss ? '#b060ff' : enemy.elite ? '#ffd060' : '#c9a227';
+  const prefix = enemy.boss ? '☠ ' : enemy.elite ? '★ ' : '';
+  let html = `<div class="map-tt-name" style="color:${nameColor};">${prefix}${escapeHtml(def.name)}${modName}</div>`;
+  html += `<div class="map-tt-row">❤️ HP: ${escapeHtml(enemy.hp)}/${escapeHtml(enemy.maxHp)}</div><div class="map-tt-row">⚔️ Атака: ${escapeHtml(def.attack)}</div><div class="map-tt-row">🛡️ Защита: ${escapeHtml(def.defense)}</div>`;
   if (enemy.elite) html += `<div class="map-tt-row" style="color:#ffd060;">★ Элитный (HP×1.5, атака×1.3)</div>`;
   if (enemy.boss) html += `<div class="map-tt-row" style="color:#b060ff;">☠ Мини-босс</div>`;
-  if (def.special) html += `<div class="map-tt-row" style="color:#ffa500;">⚠️ ${def.special.name} (кажд. ${def.special.every} х.)</div>`;
+  if (def.special) html += `<div class="map-tt-row" style="color:#ffa500;">⚠️ ${escapeHtml(def.special.name)} (кажд. ${escapeHtml(def.special.every)} х.)</div>`;
   if (!mapTooltipEl) { mapTooltipEl = document.createElement('div'); mapTooltipEl.id = 'map-tooltip'; mapTooltipEl.className = 'map-tooltip'; document.body.appendChild(mapTooltipEl); }
   mapTooltipEl.innerHTML = html;
   const pad = 16; let x = cx + pad, y = cy + pad; const rect = mapTooltipEl.getBoundingClientRect();
