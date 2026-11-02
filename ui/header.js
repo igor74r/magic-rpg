@@ -121,44 +121,32 @@ export function renderHeader() {
       </div>
     </div>
 
-    <div class="bar">
-      <div
-        class="bar-fill bar-hp"
-        style="width:${p.maxHp > 0 ? p.hp / p.maxHp * 100 : 0}%"
-      ></div>
-
-      <div class="bar-text">
-        HP ${p.hp}/${p.maxHp}
+    <div class="hud-resource hud-health" role="group" aria-label="Здоровье">
+      <div class="hud-resource-top"><span>❤ Здоровье</span><b>${p.hp} <i>/ ${p.maxHp}</i></b></div>
+      <div class="bar hud-track" role="progressbar" aria-label="Здоровье героя" aria-valuemin="0" aria-valuemax="${p.maxHp}" aria-valuenow="${p.hp}">
+        <div class="bar-fill bar-hp" style="width:${p.maxHp > 0 ? Math.max(0, Math.min(100, p.hp / p.maxHp * 100)) : 0}%" aria-hidden="true"></div>
       </div>
     </div>
 
-    <div class="bar">
-      <div
-        class="bar-fill ${mpClass}"
-        style="width:${p.maxMp > 0 ? p.mp / p.maxMp * 100 : 0}%"
-      ></div>
-
-      <div class="bar-text">
-        ${mpLabel} ${p.mp}/${p.maxMp}
+    <div class="hud-resource hud-energy" role="group" aria-label="${mpLabel}">
+      <div class="hud-resource-top"><span>${mpLabel}</span><b>${p.mp} <i>/ ${p.maxMp}</i></b></div>
+      <div class="bar hud-track" role="progressbar" aria-label="${mpLabel}" aria-valuemin="0" aria-valuemax="${p.maxMp}" aria-valuenow="${p.mp}">
+        <div class="bar-fill ${mpClass}" style="width:${p.maxMp > 0 ? Math.max(0, Math.min(100, p.mp / p.maxMp * 100)) : 0}%" aria-hidden="true"></div>
       </div>
     </div>
 
-    <div class="bar">
-      <div
-        class="bar-fill bar-exp"
-        style="width:${p.expNext > 0 ? p.exp / p.expNext * 100 : 0}%"
-      ></div>
-
-      <div class="bar-text">
-        EXP ${p.exp}/${p.expNext}
+    <div class="hud-resource hud-experience" role="group" aria-label="Опыт">
+      <div class="hud-resource-top"><span>✦ Опыт</span><b>${p.exp} <i>/ ${p.expNext}</i></b></div>
+      <div class="bar hud-track" role="progressbar" aria-label="Опыт до следующего уровня" aria-valuemin="0" aria-valuemax="${p.expNext}" aria-valuenow="${p.exp}">
+        <div class="bar-fill bar-exp" style="width:${p.expNext > 0 ? Math.max(0, Math.min(100, p.exp / p.expNext * 100)) : 0}%" aria-hidden="true"></div>
       </div>
+      <div class="hud-exp-caption">До уровня осталось: ${Math.max(0, p.expNext - p.exp)} EXP</div>
     </div>
 
-    <div class="header-exp-caption">
-      До следующего уровня: ${p.expNext - p.exp} EXP
-    </div>
-
-    <div class="header-combat-stats">
+    <button type="button" class="hud-details-toggle" data-hud-toggle aria-expanded="false">
+      <span>Подробные характеристики</span><span aria-hidden="true">⌄</span>
+    </button>
+    <div class="header-combat-stats hud-details-panel" data-hud-details hidden>
       <span>СИЛ ${p.str}</span>
       <span>ИНТ ${p.int}</span>
       <span>МДР ${p.wis}</span>
@@ -188,9 +176,18 @@ export function renderHeader() {
     </div>
 
     ${statBlock}
+    </div>
   `;
 
   const header = document.getElementById('game-header');
+  const detailsToggle = header.querySelector('[data-hud-toggle]');
+  const detailsPanel = header.querySelector('[data-hud-details]');
+  detailsToggle?.addEventListener('click', () => {
+    const expanded = detailsToggle.getAttribute('aria-expanded') === 'true';
+    detailsToggle.setAttribute('aria-expanded', String(!expanded));
+    if (detailsPanel) detailsPanel.hidden = expanded;
+    detailsToggle.querySelector('span:last-child').textContent = expanded ? '⌄' : '⌃';
+  });
   header.querySelectorAll('[data-spend-stat]').forEach(button => {
     button.addEventListener('click', () => spendStat(button.dataset.spendStat));
   });
