@@ -126,9 +126,15 @@ function getItemUnitWeight(item) {
 }
 
 export function getInventoryWeight(player = state.game?.player) {
-  return (player?.inventory || []).reduce((total, inst) => {
-    const item = ITEMS[inst.id];
-    return total + getItemUnitWeight(item) * (inst.qty || 1);
+  return (Array.isArray(player?.inventory) ? player.inventory : []).reduce((total, inst) => {
+    const item = ITEMS[inst?.id];
+    // Invalid stack counts must not reduce weight or poison capacity with NaN.
+    const quantity = Number.isSafeInteger(inst?.qty) && inst.qty > 0 ? inst.qty : 1;
+    const unitWeight = getItemUnitWeight(item);
+    const addedWeight = unitWeight * quantity;
+    return Number.isFinite(addedWeight) && addedWeight >= 0
+      ? total + addedWeight
+      : total;
   }, 0);
 }
 
