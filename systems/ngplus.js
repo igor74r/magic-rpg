@@ -60,6 +60,8 @@ export function startNGPlus() {
     mp: p.class === 'warrior' ? 0 : newMaxMp, maxMp: newMaxMp,   // ⬅️ Воин — с 0 Ярости
     str: s.str, int: s.int, wis: s.wis, con: s.con, dex: s.dex || 10, luck: 5,
     statPoints: 0,
+    passivePoints: 0,
+    passives: ['start'],
     craftedHighTierByAct: {},
     craftingJobs: [],
     buyback: [],
