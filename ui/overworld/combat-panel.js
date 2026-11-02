@@ -16,6 +16,19 @@ let lastPanelKey = '';
 export function getSubPanel() { return subPanel; }
 export function setSubPanel(val) { subPanel = val; }
 
+function setCombatActionsMarkup(actions, markup) {
+  const active = actions.contains(document.activeElement) ? document.activeElement : null;
+  const activeAction = active?.dataset.combatAction;
+  const activeId = active?.dataset.actionId;
+  actions.innerHTML = markup;
+  if (!activeAction) return;
+  const next = [...actions.querySelectorAll('button[data-combat-action]')].find(button =>
+    button.dataset.combatAction === activeAction &&
+    (activeId === undefined || button.dataset.actionId === activeId)
+  );
+  (next || actions.querySelector('button:not(:disabled)'))?.focus();
+}
+
 export function renderCombatPanel() {
   const panel = document.getElementById('combat-panel'); if (!panel) return;
   const ow = state.overworld; if (!ow || !ow.combat) { panel.style.display = 'none'; lastPanelKey = ''; return; }
