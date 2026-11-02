@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import { playSound } from '../audio.js';
 import { TILE, isWalkable } from './map.js';
-import { canOccupyPlayerPosition } from './collisions.js';
+import { canOccupyPlayerPosition, PLAYER_COLLISION_RADIUS } from './collisions.js';
 import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
@@ -30,7 +30,7 @@ export function tryMovePlayer(dx, dy, deltaFrames = 1) {
   if (!ow || !ow.active || ow.combat || ow.defeated) return;
   const step = getMovementDelta(dx, dy, deltaFrames);
   if (step.x === 0 && step.y === 0) return;
-  const p = ow.player, r = 12;
+  const p = ow.player, r = PLAYER_COLLISION_RADIUS;
   // Sweep the full requested vector, then slide along whichever side of a
   // corner offers the best progress without preferring horizontal movement.
   const result = resolveSweptMovement(
