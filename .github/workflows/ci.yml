@@ -74,6 +74,9 @@ jobs:
       - name: Check story dragon spawn restrictions
         run: node scripts/check-story-dragon-spawns.mjs
 
+      - name: Check five act mini-bosses, gates and shard-free rewards
+        run: node scripts/check-story-mini-bosses.mjs
+
       - name: Check complete five-act campaign progression
         run: |
           node scripts/check-campaign-full.mjs
