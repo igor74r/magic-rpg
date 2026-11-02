@@ -68,9 +68,9 @@ export function renderCombatPanel() {
       if (!sp) return '';
       let disabled = p.mp < sp.cost;
       if (id === 'sacrifice') disabled = p.hp <= p.maxHp * sp.selfDamagePct;
-      return `<button data-combat-action="cast" data-action-id="${escapeHtml(id)}" ${disabled ? 'disabled' : ''} style="font-size:13px;">[${i + 1}] ${escapeHtml(sp.icon)} ${escapeHtml(sp.name)} ${sp.cost > 0 ? `(${sp.cost})` : '(0)'}</button>`;
+      return `<button type="button" data-combat-action="cast" data-action-id="${escapeHtml(id)}" ${disabled ? 'disabled' : ''} style="font-size:13px;">[${i + 1}] ${escapeHtml(sp.icon)} ${escapeHtml(sp.name)} ${sp.cost > 0 ? `(${sp.cost})` : '(0)'}</button>`;
     }).join('');
-    actions.innerHTML = btns + `<button data-combat-action="close-sub" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`;
+    setCombatActionsMarkup(actions, btns + `<button type="button" data-combat-action="close-sub" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`);
     return;
   }
 
@@ -79,7 +79,7 @@ export function renderCombatPanel() {
     const btns = items.map((it, i) => {
       const item = ITEMS[it.id];
       if (!item) return '';
-      return `<button data-combat-action="use-item" data-action-id="${escapeHtml(it.id)}" style="font-size:13px;">[${i + 1}] ${escapeHtml(item.icon)} ${escapeHtml(item.name)} ×${escapeHtml(it.qty)}</button>`;
+      return `<button type="button" data-combat-action="use-item" data-action-id="${escapeHtml(it.id)}" style="font-size:13px;">[${i + 1}] ${escapeHtml(item.icon)} ${escapeHtml(item.name)} ×${escapeHtml(it.qty)}</button>`;
     }).join('');
     actions.innerHTML = (btns || `<p style="color:#a89060;grid-column:1/-1;text-align:center;">Нет предметов</p>`) + `<button data-combat-action="close-sub" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`;
     return;
@@ -92,9 +92,9 @@ export function renderCombatPanel() {
       const noMp = p.mp < (a.cost || 0);
       const can = cd === 0 && !noMp;
       const label = cd > 0 ? `⌛ ${cd}` : (noMp ? 'мало' : `${a.cost || 0}`);
-      return `<button data-combat-action="use-ability" data-action-id="${escapeHtml(a.id)}" ${can ? '' : 'disabled'} style="font-size:13px;" title="${escapeHtml(a.desc)}">[${i + 1}] ${escapeHtml(a.icon)} ${escapeHtml(a.name)} <small style="color:#a89060;">(${escapeHtml(label)})</small></button>`;
+      return `<button type="button" data-combat-action="use-ability" data-action-id="${escapeHtml(a.id)}" ${can ? '' : 'disabled'} style="font-size:13px;" title="${escapeHtml(a.desc)}">[${i + 1}] ${escapeHtml(a.icon)} ${escapeHtml(a.name)} <small style="color:#a89060;">(${escapeHtml(label)})</small></button>`;
     }).join('');
-    actions.innerHTML = btns + `<button data-combat-action="close-sub" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`;
+    setCombatActionsMarkup(actions, btns + `<button type="button" data-combat-action="close-sub" style="grid-column:1/-1;background:#3a1a1a;">Отмена [Esc]</button>`);
     return;
   }
 
