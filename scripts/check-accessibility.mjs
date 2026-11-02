@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworldRender] = await Promise.all([
+const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworldRender, combatPanel] = await Promise.all([
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
   readFile(new URL('../main.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/header.js', import.meta.url), 'utf8'),
@@ -11,7 +11,8 @@ const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworl
   readFile(new URL('../ui/shop.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/npcs.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/overworld.js', import.meta.url), 'utf8'),
-  readFile(new URL('../ui/overworld/render.js', import.meta.url), 'utf8')
+  readFile(new URL('../ui/overworld/render.js', import.meta.url), 'utf8'),
+  readFile(new URL('../ui/overworld/combat-panel.js', import.meta.url), 'utf8')
 ]);
 
 const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
@@ -59,6 +60,12 @@ assert.match(npcs, /npcDialogReturnFocus\?\.isConnected\) npcDialogReturnFocus\.
   'closing NPC dialogue must restore focus to its opener');
 assert.match(npcs, /querySelector\('\.npc-modal-close'\)/,
   'NPC dialogue must move initial focus inside its modal');
+assert.match(html, /id="combat-panel" role="region" aria-label="Боевая панель"/, 'combat interface must be exposed as a named region');
+assert.match(html, /id="combat-panel-info" role="status" aria-live="polite" aria-atomic="true"/, 'combat status updates must be announced politely and atomically');
+assert.match(html, /id="combat-panel-actions" role="group" aria-label="Боевые действия"/, 'combat controls must form a labelled group');
+assert.match(combatPanel, /function setCombatActionsMarkup\(actions, markup\)/, 'combat submenu rendering must use a focus-preserving renderer');
+assert.match(combatPanel, /next\?\.focus\(\)/, 'combat submenu rerender must restore focus to the equivalent action');
+assert.match(combatPanel, /<button type="button" data-combat-action="attack"/, 'combat actions must declare button type');
 assert.match(html, /id="game-log" role="log" aria-live="polite"/,
   'game log updates must be announced politely to assistive technology');
 for (const [key, label] of [
