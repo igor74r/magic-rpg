@@ -1,4 +1,5 @@
 import { state } from './state.js';
+import { canEnterStoryLocation } from './campaign.js';
 import { LOCATIONS } from '../data/locations.js';
 import { on, emit } from './events.js';
 import { getRandomRiftLocation, getRiftLocation, getRiftLocations, endRift, recordRiftFloor } from './rift.js';
@@ -14,6 +15,14 @@ export { triggerShake, combatAttack, combatCastSpell, combatUseAbility, combatUs
 export { spawnParticles } from './overworld/particles.js';
 
 export function enterOverworld(locationId, opts = {}) {
+  if (!opts.rifMode && !opts.towerMode && state.game) {
+    const access = canEnterStoryLocation(state.game.player, locationId);
+    if (!access.allowed) {
+      const requirement = access.requirement;
+      emit('toast', `🔒 ${LOCATIONS[locationId]?.name || 'Область'} закрыта. Требуется ${requirement.recommendedLevel} уровень (${requirement.actNumber}-й акт). Ваш уровень: ${access.currentLevel}.`);
+      return false;
+    }
+  }
   const loc = LOCATIONS[locationId] || getRiftLocation(locationId) || (opts.towerMode ? getTowerLocation(opts.towerFloor || 1) : null);
   if (!loc) return;
   const sourceLocationId = loc.sourceId || locationId;
@@ -56,6 +65,7 @@ export function enterOverworld(locationId, opts = {}) {
   };
 
   emit('overworld:start');
+  return true;
 }
 
 export function exitOverworld() {
