@@ -42,6 +42,25 @@ import {
 const HERB_DROP_CHANCE = 0.30;
 const HERB_DROP_CHANCE_ELITE = 0.70;
 
+const COMBAT_ABILITY_IDS = new Set([
+  'aimed-shot', 'evasion', 'toxic-blade', 'charge', 'war-cry',
+  'bloodthirst', 'mana-shield', 'teleport', 'meteor', 'prayer', 'sanctify'
+]);
+
+function isFiniteNonNegative(value) {
+  return Number.isFinite(value) && value >= 0;
+}
+
+function hasValidCombatStats(stats, talent) {
+  return stats && talent &&
+    Number.isFinite(stats.atk) &&
+    Number.isFinite(stats.mag) &&
+    Number.isFinite(stats.def) &&
+    Number.isFinite(stats.armorPen || 0) &&
+    ['dmgMult', 'spellMult', 'healMult', 'critMult', 'meteorMult', 'prayerMult']
+      .every(key => Number.isFinite(talent[key]));
+}
+
 export function triggerShake(mag, dur = 0.25) {
   const ow = state.overworld;
   if (!ow) return;
@@ -282,6 +301,22 @@ export function combatCastSpell(spellId) {
     return;
   }
 
+  // Validate catalog values before any resource is spent or turn is advanced.
+  if (spellId === 'sacrifice') {
+    if (
+      !Number.isFinite(spell.selfDamagePct) ||
+      spell.selfDamagePct < 0 || spell.selfDamagePct > 1 ||
+      !isFiniteNonNegative(spell.restoreMp)
+    ) return;
+  } else if (
+    !isFiniteNonNegative(spell.cost) ||
+    (spell.damage !== undefined && (!Number.isFinite(spell.damage) || spell.damage <= 0)) ||
+    (spell.heal !== undefined && (!Number.isFinite(spell.heal) || spell.heal <= 0)) ||
+    (!!spell.damage === !!spell.heal)
+  ) {
+    return;
+  }
+
   if (spellId === 'sacrifice') {
     const hpCost = Math.ceil(p.maxHp * spell.selfDamagePct);
 
@@ -343,6 +378,8 @@ export function combatCastSpell(spellId) {
   const stats = getEffStats();
   const talent = getTalentBonus(p);
   const enemy = ow.combat.enemy;
+
+  if (!hasValidCombatStats(stats, talent)) return;
 
   if (spell.damage) {
     const damage = Math.max(
@@ -440,6 +477,13 @@ export function combatUseAbility(abilityId) {
 
   if (!ability || ability.passive) return;
 
+  // Every catalog action must have a handler and sane numeric parameters.
+  if (
+    !COMBAT_ABILITY_IDS.has(abilityId) ||
+    !isFiniteNonNegative(ability.cost ?? 0) ||
+    !isFiniteNonNegative(ability.cooldown)
+  ) return;
+
   const cooldown = p.cooldowns?.[abilityId] || 0;
 
   if (cooldown > 0) {
@@ -480,6 +524,8 @@ export function combatUseAbility(abilityId) {
   const enemy = ow.combat.enemy;
   const stats = getEffStats();
   const talent = getTalentBonus(p);
+
+  if (!hasValidCombatStats(stats, talent)) return;
 
   p.cooldowns[abilityId] = Math.max(
     1,
