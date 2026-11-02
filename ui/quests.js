@@ -30,7 +30,9 @@ export function openQuestBoard() {
   const newsHtml = villageNews.map(line => `<div class="npc-slot"><div style="color:#d8c39a;line-height:1.55;">🕯️ ${line}</div></div>`).join('');
 
   const html = quests.map(quest => {
-    const pct = Math.min(100, (quest.current / quest.max) * 100);
+    const current = Math.max(0, Math.min(Number(quest.current) || 0, Number(quest.max) || 0));
+    const max = Math.max(0, Number(quest.max) || 0);
+    const pct = max > 0 ? (current / max) * 100 : 0;
     const reward = [];
 
     if (quest.gold) reward.push(`${quest.gold}💰`);
@@ -42,9 +44,9 @@ export function openQuestBoard() {
           ${quest.completed ? '✅' : '⏳'} ${quest.text}
         </div>
 
-        <div class="bar" style="margin-top:8px;">
+        <div class="bar" role="progressbar" aria-label="Прогресс: ${quest.text}" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${current}" style="margin-top:8px;">
           <div class="bar-fill bar-exp" style="width:${pct}%"></div>
-          <div class="bar-text">${quest.current} / ${quest.max}</div>
+          <div class="bar-text">${current} / ${max}</div>
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
@@ -54,7 +56,7 @@ export function openQuestBoard() {
 
           ${
             quest.completed && !quest.claimed
-              ? `<button data-game-action="claim-quest" data-quest-id="${quest.id}" class="sell-btn" style="padding:6px 12px;font-size:12px;">Забрать</button>`
+              ? `<button type="button" data-game-action="claim-quest" data-quest-id="${quest.id}" class="sell-btn" style="padding:6px 12px;font-size:12px;">Забрать</button>`
               : quest.claimed
                 ? `<span style="color:#60ff60;font-size:12px;">Получено</span>`
                 : ''
@@ -158,7 +160,7 @@ function renderMission(player, act, actIndex, mission, missionIndex) {
         <b>${Math.min(missionProgress.current, mission.count)} / ${mission.count}</b>
       </div>
 
-      <div class="campaign-progress">
+      <div class="campaign-progress" role="progressbar" aria-label="Прогресс миссии: ${mission.title}" aria-valuemin="0" aria-valuemax="${mission.count}" aria-valuenow="${Math.min(missionProgress.current, mission.count)}">
         <i style="width:${missionProgress.active ? progress : done ? 100 : 0}%"></i>
       </div>
 
