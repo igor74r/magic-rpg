@@ -4,6 +4,7 @@ import { addExp, getExpNext, MAX_LEVEL } from '../systems/progression.js';
 import { STORY } from '../data/story.js';
 import { ENEMIES } from '../data/enemies.js';
 import { getMissionReward } from '../systems/campaign.js';
+import { migrateGame } from '../systems/save.js';
 
 const player = {
   class: 'warrior', level: 1, exp: 25, expNext: getExpNext(1),
@@ -50,6 +51,15 @@ for (const invalid of [NaN, Infinity, -Infinity, -1, 1.5, '7', Number.MAX_SAFE_I
   assert.equal(player.statPoints, 1);
   assert.equal(player.passivePoints, 1);
 }
+
+// Old saves keep their fractional progress when the XP curve is rebalanced.
+const legacyXpSave = {
+  version: 17,
+  player: { level: 10, exp: 1990, expNext: 3981, equipped: {}, inventory: [] }
+};
+migrateGame(legacyXpSave);
+assert.equal(legacyXpSave.player.expNext, getExpNext(10));
+assert.equal(legacyXpSave.player.exp, 62, 'legacy XP progress ratio must be preserved');
 
 // Simulate the campaign's guaranteed objective kills plus every turn-in reward.
 // This is the minimum intended progression, without optional farming or buffs.
