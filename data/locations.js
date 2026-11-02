@@ -50,15 +50,13 @@ export const LOCATIONS = {
       { id: 'ore-cart', name: 'Тележка с рудой', x: 10, y: 12, propStyle: 'cart', decorative: true },
       { id: 'market-barrels', name: 'Бочки с товаром', x: 29, y: 21, propStyle: 'barrels', decorative: true },
       { id: 'herb-rack', name: 'Сушёные травы', x: 9, y: 22, propStyle: 'herb-rack', decorative: true },
-      { id: 'hall-building', name: 'Дом старейшины', x: 19, y: 4, buildingStyle: 'hall', decorative: true },
+      { id: 'hall-building', name: 'Дом старейшины', x: 25, y: 4, buildingStyle: 'hall', decorative: true },
       { id: 'forge-building', name: 'Кузница Авроры', x: 7, y: 8, buildingStyle: 'forge', decorative: true },
       { id: 'healer-building', name: 'Лечебный дом', x: 31, y: 8, buildingStyle: 'healer', decorative: true },
       { id: 'alchemy-building', name: 'Алхимическая мастерская', x: 7, y: 20, buildingStyle: 'alchemy', decorative: true },
       { id: 'market-building', name: 'Рыночный дом', x: 31, y: 20, buildingStyle: 'market', decorative: true },
-      { id: 'tavern-building', name: 'Таверна «Тихий угол»', x: 19, y: 24, buildingStyle: 'tavern', decorative: true },
+      { id: 'tavern-building', name: 'Таверна «Тихий угол»', x: 13, y: 24, buildingStyle: 'tavern', decorative: true },
       { id: 'home-nw', name: 'Дом у северной дороги', x: 13, y: 4, buildingStyle: 'home', decorative: true },
-      { id: 'home-ne', name: 'Дом садовника', x: 25, y: 4, buildingStyle: 'home', decorative: true },
-      { id: 'home-sw', name: 'Дом плотника', x: 13, y: 24, buildingStyle: 'home', decorative: true },
       { id: 'home-se', name: 'Дом у южной дороги', x: 25, y: 24, buildingStyle: 'home', decorative: true }
     ]
   },
