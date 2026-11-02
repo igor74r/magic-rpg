@@ -807,7 +807,7 @@ function drawVillageProp(ctx, x, y, style) {
     ctx.strokeStyle = '#a9e9f0'; ctx.lineWidth = 2; ctx.globalAlpha = 0.7 + Math.sin(t * 2) * 0.2;
     ctx.beginPath(); ctx.moveTo(x, y - 22); ctx.quadraticCurveTo(x - 7, y - 32, x - 10, y - 26); ctx.moveTo(x, y - 22); ctx.quadraticCurveTo(x + 7, y - 32, x + 10, y - 26); ctx.stroke();
   } else if (style === 'world-portal' || style.startsWith('world-waystone')) {
-    const portalTone = style.includes('forest') || style.includes('briar') ? '#79bd78' : style.includes('ice') || style.includes('frost') ? '#8edfff' : style.includes('volcano') || style.includes('obsidian') ? '#ff9364' : style.includes('shadow') || style.includes('void') || style.includes('rift') ? '#bd91ff' : style.includes('swamp') ? '#b0bd6a' : '#6fd7d2';
+    const portalTone = style.includes('forest') || style.includes('briar') ? '#79bd78' : style.includes('ice') || style.includes('frost') ? '#8edfff' : style.includes('volcano') || style.includes('obsidian') || style.includes('dragon') ? '#ff9364' : style.includes('shadow') || style.includes('void') || style.includes('rift') ? '#bd91ff' : style.includes('swamp') ? '#b0bd6a' : style.includes('desert') || style.includes('wasteland') ? '#e7bd71' : style.includes('graveyard') || style.includes('ruins') || style.includes('sunken') ? '#b6a2c9' : style.includes('library') ? '#e5ca83' : '#6fd7d2';
     const pulse = 0.72 + Math.sin(t * 2.2 + x * 0.01) * 0.16;
     ctx.fillStyle = 'rgba(0,0,0,0.42)';
     ctx.beginPath(); ctx.ellipse(x, y + 18, 35, 12, 0, 0, Math.PI * 2); ctx.fill();
