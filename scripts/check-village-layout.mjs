@@ -65,6 +65,8 @@ for (const room of ['forge', 'healer', 'alchemy', 'market', 'hall', 'tavern']) {
 assert.ok(mainSource.includes('exitVillageInterior'), 'interiors must provide an exit to the village');
 assert.ok(mainSource.includes('openWorldPortalMenu'), 'world portal must open a navigation window');
 assert.ok(mainSource.includes('data-world-tower'), 'world navigation must expose the tower action');
+assert.ok(mainSource.includes('aria-modal="true"'), 'world portal window must expose dialog semantics');
+assert.ok(mainSource.includes("event.key === 'Escape'"), 'world portal window must close with Escape');
 const overworldInputSource = readFileSync(new URL('../ui/overworld.js', import.meta.url), 'utf8');
 assert.ok(overworldInputSource.includes("addEventListener('click', onOverworldCanvasClick)"), 'portal sprites must respond to direct canvas clicks');
 assert.ok(overworldInputSource.includes('window.GameAPI?.interactNpc?.(nearest.id)'), 'portal click must invoke the existing interaction contract');
