@@ -277,13 +277,8 @@ state.currentSlot = 2;
 const previousPlaytime = previousGame.player.playtimeSec;
 Date.now = () => previousNow() + 120000;
 failWrites = true;
-let saveFailed = false;
-try {
-  saveGame();
-} catch {
-  saveFailed = true;
-}
-assert.equal(saveFailed, true, 'storage write failure should be reported');
+const saveFailed = saveGame() === false;
+assert.equal(saveFailed, true, 'storage write failure should return false');
 assert.equal(previousGame.version, 16, 'failed write must not stamp the current schema version');
 assert.equal(previousGame.player.playtimeSec, previousPlaytime, 'failed write must not consume playtime');
 storage.set('magic-rpg-save-1', JSON.stringify(freshSave));
