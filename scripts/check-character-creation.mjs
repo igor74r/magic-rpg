@@ -5,7 +5,6 @@ const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const character = readFileSync(new URL('../ui/character.js', import.meta.url), 'utf8');
 const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../css/2d-art-direction.css', import.meta.url), 'utf8');
-const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
 
 assert.deepEqual(
   [...character.matchAll(/const PLAYABLE_CLASSES = \[([^\]]+)\]/g)].flatMap(match =>
