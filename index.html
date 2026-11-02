@@ -175,9 +175,9 @@
     <div style="position:relative;">
       <canvas id="overworld-canvas" width="800" height="500" tabindex="0" aria-label="Игровой мир. WASD или стрелки — движение, E — взаимодействие, Escape — пауза." style="border:2px solid #5a4a3a;border-radius:8px;width:100%;height:auto;display:block;background:#1a2e1a;image-rendering:pixelated;"></canvas>
       
-      <div id="combat-panel">
-        <div id="combat-panel-info"></div>
-        <div class="actions" id="combat-panel-actions"></div>
+      <div id="combat-panel" role="region" aria-label="Боевая панель">
+        <div id="combat-panel-info" role="status" aria-live="polite" aria-atomic="true"></div>
+        <div class="actions" id="combat-panel-actions" role="group" aria-label="Боевые действия"></div>
       </div>
       <div id="npc-panel" style="display:none; background:rgba(10,6,18,0.94); border:2px solid #c9a227; border-top:none; border-radius:0 0 8px 8px; padding:12px;">
         <div id="npc-panel-info" style="color:#d4c8a8; font-size:14px; margin-bottom:8px;"></div>
