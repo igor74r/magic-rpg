@@ -3,6 +3,16 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+
+assert.match(html, /__GAME_DIAGNOSTICS_EARLY__/,
+  'head bootstrap must collect errors before main.js loads');
+assert.match(html, /__GAME_DIAGNOSTICS_READY__/,
+  'early capture must stop after main.js initializes to avoid duplicates');
+assert.match(main, /earlyDiagnostics\.forEach/,
+  'early startup errors must be transferred to runtime diagnostics');
+assert.match(main, /showErrorToast\(`Не удалось загрузить ресурс:/,
+  'failed resource loads must also be surfaced to the player');
 
 assert.match(main, /window\.addEventListener\(['"]error['"],[\s\S]*?,\s*true\s*\)/,
   'capture-phase error listener must intercept failed resource loads');
