@@ -32,6 +32,18 @@ export function getRespawnMs() { const d = state.settings.difficulty; return d =
 export function getEliteChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.15 : d === 'hard' ? 0.35 : 0.20; }
 export function getDropChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.70 : d === 'hard' ? 0.30 : 0.50; }
 
+export function getEligibleSpawnEnemyIds(enemyIds, locationId, opts = {}, activeMissionId = state.game?.player?.activeCampaignMission || null) {
+  return (Array.isArray(enemyIds) ? enemyIds : []).filter(enemyId => {
+    const dragon = STORY_DRAGON_BY_ENEMY[enemyId];
+    return !dragon || (
+      !opts.rifMode &&
+      !opts.towerMode &&
+      locationId === dragon.locationId &&
+      activeMissionId === dragon.missionId
+    );
+  });
+}
+
 export function createSpawnRoster(enemyIds, count, random = Math.random) {
   const roster = Array.isArray(enemyIds) ? enemyIds.filter(Boolean) : [];
   const total = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
@@ -59,16 +71,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
 
   // Canonical story dragons are removed from ambient spawns. They appear only
   // in their designated finale region while that exact campaign mission is active.
-  const activeMissionId = state.game?.player?.activeCampaignMission || null;
-  const eligibleEnemyIds = loc.enemies.filter(enemyId => {
-    const dragon = STORY_DRAGON_BY_ENEMY[enemyId];
-    return !dragon || (
-      !opts.rifMode &&
-      !opts.towerMode &&
-      locationId === dragon.locationId &&
-      activeMissionId === dragon.missionId
-    );
-  });
+  const eligibleEnemyIds = getEligibleSpawnEnemyIds(loc.enemies, locationId, opts);
   const count = Math.min(Math.max(eligibleEnemyIds.length, 4), 7);
   const spawnRoster = createSpawnRoster(eligibleEnemyIds, count);
   const eliteChance = getEliteChance();
