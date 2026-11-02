@@ -6,6 +6,7 @@ import { checkAchievements } from '../achievements.js';
 import { saveGame } from '../save.js';
 import { playSound } from '../audio.js';
 import { emit } from '../events.js';
+import { emit } from '../events.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getRiftMult } from '../rift.js';
 import { getTowerMult } from '../tower.js';
