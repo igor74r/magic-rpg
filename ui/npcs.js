@@ -241,6 +241,16 @@ export function turnInElderQuestUI() {
     toast('Невозможно начислить награду: проверьте баланс золота.');
     return;
   }
+  let previousPlayer;
+  try {
+    previousPlayer = JSON.parse(JSON.stringify(p));
+  } catch {
+    toast('Не удалось подготовить награду. Попробуйте ещё раз.');
+    return;
+  }
+  const previousGoldEarned = Number.isSafeInteger(p.stats?.goldEarned) && p.stats.goldEarned >= 0
+    ? p.stats.goldEarned
+    : 0;
   const completed = claimCampaignMission(p);
   if (!completed) {
     toast('Поручение ещё не выполнено.');
@@ -255,8 +265,13 @@ export function turnInElderQuestUI() {
     ? ` Материал «${itemName}» отправлен в хранилище добычи.`
     : itemReward?.created?.length ? ` Материал: ${itemName}.` : '';
   if (!p.stats || typeof p.stats !== 'object') p.stats = {};
-  p.stats.goldEarned = (p.stats.goldEarned || 0) + reward.gold;
-  saveGame();
+  p.stats.goldEarned = previousGoldEarned + reward.gold;
+  if (!saveGame()) {
+    for (const key of Object.keys(p)) delete p[key];
+    Object.assign(p, previousPlayer);
+    toast('Не удалось сохранить награду. Поручение и ресурсы восстановлены.');
+    return;
+  }
   openElder();
   toast(`Награда получена: +${reward.gold} золота, +${reward.exp} опыта.${itemMessage}`);
   if (canCompleteMainQuest(state.game)) emit('victory');
