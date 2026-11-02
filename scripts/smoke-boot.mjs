@@ -207,7 +207,7 @@ try {
     api.switchTab(tab);
   }
   check('вкладки дашборда рендерятся', true);
-  check('HUD exposes compact Tower and Rift shortcuts', byId('game-header').innerHTML.includes('GameAPI.enterTower()') && byId('game-header').innerHTML.includes('GameAPI.enterRift()'));
+  check('HUD exposes compact Tower and Rift shortcuts', byId('game-header').innerHTML.includes('data-header-action=\\"tower\\"') && byId('game-header').innerHTML.includes('data-header-action=\\"rift\\"'));
   check('хроники мира рендерятся', byId('tab-content').innerHTML.includes('chronicles-page'));
   api.switchTab('talents');
   const talentHtml = byId('tab-content').innerHTML;
