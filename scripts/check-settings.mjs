@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { migrateSettings } from '../systems/save.js';
+import { migrateSettings, loadSettings, saveSettings } from '../systems/save.js';
+import { state } from '../systems/state.js';
 
 const legacy = migrateSettings({ volume: 42 });
 assert.equal(legacy.musicVolume, 42);
@@ -96,4 +97,35 @@ assert.ok(render.includes('settings.weatherEffects'), 'weather graphics setting 
 assert.ok(render.includes('settings.ambientFog'), 'ambient fog setting is not applied');
 assert.ok(render.includes('settings.bloomEffects'), 'bloom graphics setting is not applied');
 
-console.log('Settings migration and settings UI checks passed');
+
+const originalStorage = globalThis.localStorage;
+const originalSettings = state.settings;
+const settingsStorage = new Map();
+let storageBlocked = false;
+globalThis.localStorage = {
+  getItem(key) {
+    if (storageBlocked) throw new Error('storage blocked');
+    return settingsStorage.get(key) ?? null;
+  },
+  setItem(key, value) {
+    if (storageBlocked) throw new Error('storage blocked');
+    settingsStorage.set(key, String(value));
+  }
+};
+try {
+  state.settings = { musicVolume: 33, settingsVersion: 2 };
+  storageBlocked = true;
+  assert.equal(saveSettings(), false, 'settings save should report unavailable storage without throwing');
+  assert.equal(state.settings.settingsVersion, 2, 'failed settings write must not mark the live settings as persisted');
+  assert.equal(loadSettings(), false, 'settings load should safely fall back when storage is blocked');
+  assert.equal(state.settings.musicVolume, 33, 'blocked storage should retain in-memory preferences');
+  storageBlocked = false;
+  assert.equal(saveSettings(), true, 'settings should save after storage recovers');
+  assert.equal(JSON.parse(settingsStorage.get('magic-rpg-settings')).settingsVersion, 5);
+} finally {
+  state.settings = originalSettings;
+  if (originalStorage === undefined) delete globalThis.localStorage;
+  else globalThis.localStorage = originalStorage;
+}
+
+console.log('Settings migration, UI and storage resilience checks passed');
