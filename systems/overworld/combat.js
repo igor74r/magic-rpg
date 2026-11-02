@@ -1598,6 +1598,7 @@ function combatVictory() {
       emit('toast', notification);
     }
   }
+  }
 
   p.stats.goldEarned =
     (p.stats.goldEarned || 0) + gold;
