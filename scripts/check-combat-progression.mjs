@@ -130,6 +130,14 @@ try {
   assert.equal(f.enemy.phase, 1, 'burn tick must advance the boss phase at the 50% threshold');
   console.log('PASS boss phase advances when damage-over-time crosses a threshold');
 
+  // A configured multi-phase enemy must transition even when it is not a reward boss.
+  f = fixture('warrior', 'fire-drake');
+  assert.equal(f.enemy.boss, false);
+  f.enemy.hp = 70;
+  combatBlock();
+  assert.equal(f.enemy.phase, 1, 'fire-drake must enter its configured 40% phase');
+  console.log('PASS non-boss enemy with configured phases transitions correctly');
+
   // Enemy stun consumes exactly one player turn after the status tick.
   f = fixture('warrior', 'book-guardian');
   f.ow.combat.turnCount = 2;
