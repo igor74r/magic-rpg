@@ -33,7 +33,7 @@ function moveActor(ow, actor, dx, dy, radius, others) {
   actor.y = result.y;
   return result.moved;
 }
-const AGGRO_RANGE = 200, LEASH_RANGE = 340, COMBAT_RANGE = 44;
+const AGGRO_RANGE = 200, LEASH_RANGE = 340;
 
 export function initCamera(playerPos, cols, rows) {
   const mapW = cols * TILE, mapH = rows * TILE;
