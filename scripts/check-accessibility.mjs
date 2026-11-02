@@ -1,14 +1,15 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [html, main, header, menu, css, inventory, shop] = await Promise.all([
+const [html, main, header, menu, css, inventory, shop, npcs] = await Promise.all([
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
   readFile(new URL('../main.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/header.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/menu.js', import.meta.url), 'utf8'),
   readFile(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8'),
   readFile(new URL('../ui/inventory.js', import.meta.url), 'utf8'),
-  readFile(new URL('../ui/shop.js', import.meta.url), 'utf8')
+  readFile(new URL('../ui/shop.js', import.meta.url), 'utf8'),
+  readFile(new URL('../ui/npcs.js', import.meta.url), 'utf8')
 ]);
 
 const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
@@ -44,6 +45,16 @@ assert.match(menu, /aria-label="Удалить сохранение в слот�
   'icon-only save deletion buttons must have a descriptive accessible name');
 assert.match(html, /id="npc-dialog-modal" class="npc-modal" style="display:none;" role="dialog" aria-modal="true" aria-label="Диалог с персонажем"/,
   'NPC dialogue must expose modal dialog semantics');
+assert.match(npcs, /modal\.addEventListener\('keydown', event =>/,
+  'NPC dialogue must handle keyboard input at the modal level');
+assert.match(npcs, /if \(event\.key === 'Escape'\)/,
+  'NPC dialogue must close with Escape');
+assert.match(npcs, /if \(event\.key !== 'Tab'\) return;/,
+  'NPC dialogue must contain keyboard Tab navigation');
+assert.match(npcs, /npcDialogReturnFocus\?\.isConnected\) npcDialogReturnFocus\.focus\(\)/,
+  'closing NPC dialogue must restore focus to its opener');
+assert.match(npcs, /querySelector\('\.npc-modal-close'\)/,
+  'NPC dialogue must move initial focus inside its modal');
 assert.match(html, /id="game-log" role="log" aria-live="polite"/,
   'game log updates must be announced politely to assistive technology');
 for (const [key, label] of [
