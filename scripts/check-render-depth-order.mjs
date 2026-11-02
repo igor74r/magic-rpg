@@ -16,7 +16,7 @@ const ordered = buildDepthItems({
   player
 });
 
-assert.deepEqual(ordered.map(entry => entry.kind), ['npc', 'enemy', 'static', 'player', 'event']);
+assert.deepEqual(ordered.map(entry => entry.kind), ['npc', 'enemy', 'static', 'event', 'player']);
 assert.deepEqual(ordered.map(entry => entry.footY), [60, 72, 84, 96, 95].sort((a, b) => a - b));
 assert.equal(ordered.some(entry => entry.item === deadEnemy), false, 'dead enemies must not enter the draw order');
 assert.equal(ordered.find(entry => entry.kind === 'player').item, player, 'player must participate in depth sorting');
