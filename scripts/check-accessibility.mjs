@@ -28,5 +28,21 @@ assert.match(header, /setAttribute\('aria-labelledby', activeTab\.id\)/);
 assert.match(menu, /setAttribute\('aria-selected', String\(active\)\)/);
 assert.match(menu, /setAttribute\('aria-labelledby', activeTab\.id\)/);
 assert.match(css, /\.settings-tab:focus-visible/);
+const settingsControls = [
+  'set-music-volume', 'set-sfx-volume', 'set-sound',
+  'set-difficulty', 'set-autosave', 'set-autosave-interval', 'set-hotkeys', 'set-fps',
+  'set-graphics-quality', 'set-weather-effects', 'set-ambient-fog', 'set-bloom-effects',
+  'set-damage-numbers', 'set-screen-shake', 'set-low-health', 'set-reduced-motion'
+];
+for (const id of settingsControls) {
+  assert.match(menu, new RegExp(`<label for="${id}">[^<]+</label>\\s*<(?:input|select) id="${id}"`),
+    `settings control ${id} must have an explicitly associated label`);
+}
+assert.match(menu, /aria-label="Удалить сохранение в слоте \${slot}"/,
+  'icon-only save deletion buttons must have a descriptive accessible name');
+assert.match(html, /id="npc-dialog-modal" class="npc-modal" style="display:none;" role="dialog" aria-modal="true" aria-label="Диалог с персонажем"/,
+  'NPC dialogue must expose modal dialog semantics');
+assert.match(html, /id="game-log" role="log" aria-live="polite"/,
+  'game log updates must be announced politely to assistive technology');
 
 console.log('check-accessibility: PASS (14 keyboard-operable tabs, selected state and tab panels)');
