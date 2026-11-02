@@ -30,11 +30,11 @@ assert.match(source, /consumeEnemyAdaptation\(enemy, style\)/,
   'adaptive defense must be consumed after one matching attack');
 console.log('Adaptive enemy AI regression contract: OK');
 
-assert.match(source, /getEnemyCombatDecision\\(/,
+assert.match(source, /getEnemyCombatDecision\(/,
   'enemy turns must use the tactical decision engine');
-assert.match(source, /tacticalDecision\\.action === 'telegraph'/,
+assert.match(source, /tacticalDecision\.action === 'telegraph'/,
   'special attacks must be telegraphed one turn ahead');
-assert.match(source, /enemy\\.tacticalSpecialPending = true/,
+assert.match(source, /enemy\.tacticalSpecialPending = true/,
   'the warning must persist until the next enemy turn');
-assert.match(source, /enemy\\.tacticalSpecialPending = false/,
+assert.match(source, /enemy\.tacticalSpecialPending = false/,
   'the prepared special must be consumed exactly once');
