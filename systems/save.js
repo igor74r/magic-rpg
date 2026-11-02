@@ -484,7 +484,7 @@ export function migrateGame(game) {
 }
 
 export function loadGameData(slot) {
-  const selectedSlot = slot ?? state.currentSlot ?? 1;
+  const selectedSlot = slot === undefined ? (state.currentSlot ?? 1) : slot;
   if (!isValidSlot(selectedSlot)) return false;
   const data = localStorage.getItem(slotKey(selectedSlot));
 
@@ -545,7 +545,7 @@ export function hasAnySave() {
 }
 
 export function deleteSave(slot) {
-  const selectedSlot = slot ?? state.currentSlot ?? 1;
+  const selectedSlot = slot === undefined ? (state.currentSlot ?? 1) : slot;
   if (!isValidSlot(selectedSlot)) return;
 
   localStorage.removeItem(slotKey(selectedSlot));
