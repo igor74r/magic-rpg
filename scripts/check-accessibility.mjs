@@ -124,3 +124,13 @@ for (const action of ['attack', 'open-spells', 'open-items', 'flee', 'block', 'o
   assert.match(combatPanel, new RegExp('<button type="button" data-combat-action="' + action + '"'),
     `combat action "${action}" must be an explicit button`);
 }
+
+const headerActions = (await readFile(new URL('../ui/header.js', import.meta.url), 'utf8'));
+for (const stat of ['str', 'int', 'wis', 'con', 'dex']) {
+  assert.ok(headerActions.includes('type="button" data-spend-stat="' + stat + '"'),
+    `stat increase action "${stat} must be a non-submit button`);
+}
+for (const action of ['tower', 'rift']) {
+  assert.ok(headerActions.includes('type="button" data-header-action="' + action + '"'),
+    `header action "${action} must be a non-submit button`);
+}
