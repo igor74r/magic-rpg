@@ -161,10 +161,9 @@ export function canAddItem(id, qty = 1, player = state.game?.player) {
 export function addItem(id, qty = 1, opts = {}) {
   const inv = state.game.player.inventory;
   const item = ITEMS[id];
-  if (!item || !Number.isFinite(qty) || qty <= 0) return [];
+  if (!item || !Number.isSafeInteger(qty) || qty <= 0) return [];
 
-  const amount = Math.floor(qty);
-  if (amount < 1) return [];
+  const amount = qty;
   if (!canAddItem(id, amount, state.game.player).ok) return [];
 
   if (STACKABLE_TYPES.has(item.type)) {
@@ -223,7 +222,7 @@ export function addItemOrStore(id, qty = 1, opts = {}) {
 
   const item = ITEMS[id];
   const player = state.game?.player;
-  const amount = Number.isFinite(qty) ? Math.floor(qty) : 0;
+  const amount = Number.isSafeInteger(qty) ? qty : 0;
   if (!item || !player || amount < 1) return { created: [], stored: false };
 
   if (!Array.isArray(player.pendingLoot)) player.pendingLoot = [];
