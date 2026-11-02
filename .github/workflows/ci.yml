@@ -56,6 +56,9 @@ jobs:
       - name: Check adaptive enemy combat AI
         run: node scripts/check-adaptive-enemy-ai.mjs
 
+      - name: Check enemy weaknesses and resistances
+        run: node scripts/check-enemy-matchups.mjs
+
       - name: Check combat specials, defeat, rewards and floor progression
         run: node scripts/check-combat-progression.mjs
 
