@@ -44,5 +44,12 @@ assert.match(html, /id="npc-dialog-modal" class="npc-modal" style="display:none;
   'NPC dialogue must expose modal dialog semantics');
 assert.match(html, /id="game-log" role="log" aria-live="polite"/,
   'game log updates must be announced politely to assistive technology');
+for (const [key, label] of [
+  ['w', 'Двигаться вверх'], ['a', 'Двигаться влево'],
+  ['d', 'Двигаться вправо'], ['s', 'Двигаться вниз']
+]) {
+  assert.match(html, new RegExp(`class="dpad-btn" data-key="${key}" aria-label="${label}"`),
+    `mobile direction key ${key} must have a descriptive accessible name`);
+}
 
 console.log('check-accessibility: PASS (14 keyboard-operable tabs, 16 labelled settings controls, modal and live-region semantics)');
