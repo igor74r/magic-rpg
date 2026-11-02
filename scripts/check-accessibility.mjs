@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [html, main, header, menu, css, inventory, shop, npcs] = await Promise.all([
+const [html, main, header, menu, css, inventory, shop, npcs, overworld] = await Promise.all([
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
   readFile(new URL('../main.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/header.js', import.meta.url), 'utf8'),
@@ -9,7 +9,8 @@ const [html, main, header, menu, css, inventory, shop, npcs] = await Promise.all
   readFile(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8'),
   readFile(new URL('../ui/inventory.js', import.meta.url), 'utf8'),
   readFile(new URL('../ui/shop.js', import.meta.url), 'utf8'),
-  readFile(new URL('../ui/npcs.js', import.meta.url), 'utf8')
+  readFile(new URL('../ui/npcs.js', import.meta.url), 'utf8'),
+  readFile(new URL('../ui/overworld.js', import.meta.url), 'utf8')
 ]);
 
 const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
@@ -65,6 +66,12 @@ for (const [key, label] of [
     `mobile direction key ${key} must have a descriptive accessible name`);
 }
 
+for (const event of ['pointerdown', 'pointerup', 'pointercancel', 'keydown', 'keyup', 'blur']) {
+  assert.ok(overworld.includes(`btn.addEventListener('${event}'`),
+    `mobile d-pad must support ${event} to avoid stuck movement and enable keyboard input`);
+}
+assert.match(overworld, /event\.code !== 'Space' && event\.code !== 'Enter'/,
+  'mobile d-pad must support Space and Enter key activation');
 assert.match(inventory, /data-inv-filter="\$\{key\}" aria-pressed="\$\{invFilter === key\}"/,
   'inventory filters must expose their selected state');
 assert.match(inventory, /data-inv-sort="\$\{key\}" aria-pressed="\$\{invSort === key\}"/,
