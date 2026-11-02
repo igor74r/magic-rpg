@@ -6,7 +6,7 @@ import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
 import { getMovementDelta, resolveSweptMovement, getCameraPosition } from './movement.js';
-import { getEnemyBehavior, getEnemySteering } from './enemy-ai.js';
+import { getEnemyGroupBehaviors, getEnemySteering } from './enemy-ai.js';
 
 const VIEW_W = 800, VIEW_H = 500;
 
@@ -77,7 +77,9 @@ export function updateOverworld(dt) {
   ow.floatingNumbers = ow.floatingNumbers.filter(fn => { fn.life -= dt * 0.02; fn.y -= dt * 0.6; return fn.life > 0; });
 
   const now = performance.now();
-  for (const e of ow.enemies) {
+  const groupBehaviors = getEnemyGroupBehaviors(ow.enemies, ow.player, { aggroRange: AGGRO_RANGE, leashRange: LEASH_RANGE });
+  for (let enemyIndex = 0; enemyIndex < ow.enemies.length; enemyIndex++) {
+    const e = ow.enemies[enemyIndex];
     if (e.dead && e.respawnAt && now >= e.respawnAt) {
       e.dead = false; e.hp = e.maxHp; e.x = e.homeX; e.y = e.homeY; e.state = 'idle'; e.respawnAt = 0; e.effects = []; e.phase = 0;
     }
@@ -126,7 +128,7 @@ export function updateOverworld(dt) {
       enterCombat(e);
       return;
     }
-    const behavior = getEnemyBehavior(e, ow.player, { aggroRange: AGGRO_RANGE, leashRange: LEASH_RANGE });
+    const behavior = groupBehaviors[enemyIndex];
     e.state = behavior.state;
 
     const others = [...ow.enemies, ...ow.npcs, ow.player];
