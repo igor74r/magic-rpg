@@ -27,7 +27,14 @@ export function checkAchievements() {
   }
 
   if (any) {
-    saveGame();
+    const previousAchievements = [...p.achievements];
+    const previousGold = p.gold;
+    // Rewards are applied above; restore both unlocks and currency if persistence fails.
+    if (!saveGame()) {
+      p.achievements = previousAchievements.filter(id => !p.achievements.includes(id));
+      p.gold = previousGold;
+      return;
+    }
     emit('game:update');
   }
 }
