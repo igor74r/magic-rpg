@@ -1724,7 +1724,20 @@ function combatVictory() {
   }
 
   // Save after temporary combat effects and cooldowns have been cleared.
-  saveGame();
+  // If persistence fails, restore the full pre-victory snapshot and keep
+  // the encounter retryable instead of granting unsaved rewards.
+  if (!saveGame()) {
+    state.game = previousGame;
+    enemy.dead = previousEnemy.dead;
+    enemy.respawnAt = previousEnemy.respawnAt;
+    enemy.effects = previousEnemy.effects;
+    enemy.hp = enemy.maxHp;
+    enemy.state = previousEnemy.state || 'idle';
+    ow.player.hp = state.game.player.hp;
+    ow.combat.turn = 'player';
+    pushLog('Награда не сохранена. Победа отменена — попробуйте ещё раз.', 'warning');
+    return;
+  }
   endCombat();
   checkAchievements();
 
