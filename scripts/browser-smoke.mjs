@@ -119,8 +119,10 @@ try {
         await saleOpener.focus();
         // The sticky paperdoll can overlap this control in narrow layouts; trigger its real DOM click handler.
         await saleOpener.click({ force: true });
-        const saleDialog = page.getByRole('dialog', { name: 'Продажа предметов' });
-        await saleDialog.waitFor();
+        const saleDialog = page.locator('#inventory-sale-overlay [role="dialog"][aria-labelledby="inventory-sale-title"]');
+        await saleDialog.waitFor({ state: 'visible' });
+        assert.equal(await saleDialog.getAttribute('aria-labelledby'), 'inventory-sale-title', `${viewport.name}: sale dialog must reference its title`);
+        assert.equal(await page.getByRole('heading', { name: 'Продажа предметов' }).count(), 1, `${viewport.name}: sale dialog title must be exposed to assistive technology`);
         assert.equal(await saleDialog.getAttribute('aria-modal'), 'true',
           `${viewport.name}: sale window must be announced as modal`);
         await saleDialog.press('Escape');
