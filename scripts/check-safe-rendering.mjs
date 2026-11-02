@@ -11,6 +11,9 @@ assert.equal(escapeHtml(42), '42');
 const importedJobResult = '<svg onload=alert(1)>';
 assert.equal(escapeHtml(importedJobResult), '&lt;svg onload=alert(1)&gt;');
 const previousGame = state.game;
+const previousDocument = globalThis.document;
+const grid = { innerHTML: '' };
+globalThis.document = { getElementById: id => id === 'slots-grid' ? grid : null };
 state.game = {
   player: {
     name: 'Safe render test', class: 'warrior', level: 1, gold: 0, str: 10,
@@ -54,5 +57,7 @@ try {
   assert.ok(!inventoryHtml.includes('<img src=x onerror=alert(3)>'), 'invalid pending-loot quantities must not enter markup');
 } finally {
   state.game = previousGame;
+  if (previousDocument === undefined) delete globalThis.document;
+  else globalThis.document = previousDocument;
 }
 console.log('check-safe-rendering: PASS (text, quotes and markup are escaped)');
