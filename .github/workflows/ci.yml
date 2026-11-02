@@ -59,6 +59,9 @@ jobs:
       - name: Check enemy weaknesses and resistances
         run: node scripts/check-enemy-matchups.mjs
 
+      - name: Check elemental magic and reactions
+        run: node scripts/check-elemental-magic.mjs
+
       - name: Check combat specials, defeat, rewards and floor progression
         run: node scripts/check-combat-progression.mjs
 
