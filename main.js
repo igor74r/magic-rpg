@@ -139,7 +139,11 @@ function showHeroArrivalTransition() {
   `;
 
   const duration = state.settings?.reducedMotion ? 520 : 1450;
-  overlay.style.setProperty('--arrival-duration', `${duration}ms`);
+  if (typeof overlay.style?.setProperty === 'function') {
+    overlay.style.setProperty('--arrival-duration', `${duration}ms`);
+  } else if (overlay.style) {
+    overlay.style['--arrival-duration'] = `${duration}ms`;
+  }
   body.appendChild(overlay);
   window.setTimeout(() => overlay.remove(), duration + 100);
 }
