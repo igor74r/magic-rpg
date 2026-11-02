@@ -224,7 +224,7 @@ export function combatAttack() {
   });
 
   pushLog(
-    `Вы нанесли ${damage} СѓСЂРѕРЅР° (${enemyDisplayName(enemy)})${isCrit ? ' КРИТ!' : ''}`,
+    `Вы нанесли ${damage} урона (${enemyDisplayName(enemy)})${isCrit ? ' КРИТ!' : ''}`,
     'damage'
   );
 
@@ -372,7 +372,7 @@ export function combatCastSpell(spellId) {
       life: 1.2
     });
 
-    pushLog(`${spell.name}: нанесено ${damage} СѓСЂРѕРЅР°`, 'damage');
+    pushLog(`${spell.name}: нанесено ${damage} урона`, 'damage');
 
     playSound('cast');
     spawnParticles(enemy.x, enemy.y, 'spark', 5);
@@ -1160,7 +1160,7 @@ function enemyCombatTurn() {
     });
 
     pushLog(
-      `${name} использовал ${special.name} Рё нанёс вам ${damage1}+${damage2} СѓСЂРѕРЅР°`,
+      `${name} использовал ${special.name} и нанёс вам ${damage1}+${damage2} урона`,
       'damage'
     );
 
@@ -1188,7 +1188,7 @@ function enemyCombatTurn() {
     });
 
     pushLog(
-      `${name} использовал ${special.name} Рё нанёс вам ${damage} СѓСЂРѕРЅР°`,
+      `${name} использовал ${special.name} и нанёс вам ${damage} урона`,
       'damage'
     );
 
@@ -1222,7 +1222,7 @@ function enemyCombatTurn() {
     });
 
     pushLog(
-      `${name} использовал ${special.name} (${damage} СѓСЂРѕРЅР°) Рё восстановил ${damage} HP`,
+      `${name} использовал ${special.name} (${damage} урона) и восстановил ${damage} HP`,
       'damage'
     );
 
@@ -1244,7 +1244,7 @@ function enemyCombatTurn() {
     });
 
     pushLog(
-      `${name} нанёс вам ${baseDamage} СѓСЂРѕРЅР°`,
+      `${name} нанёс вам ${baseDamage} урона`,
       'damage'
     );
   }
