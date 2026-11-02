@@ -231,6 +231,25 @@ let audioBooted = false;
 let dashboardLogFilter = 'all';
 let dashboardLogQuery = '';
 
+function applyDashboardNavigationSearch(value) {
+  const query = String(value || '').trim().toLocaleLowerCase('ru');
+  const list = document.querySelector('.dashboard-tablist');
+  if (!list) return;
+  list.querySelectorAll('.tab[role="tab"]').forEach(tab => {
+    const matches = !query || (tab.textContent || '').toLocaleLowerCase('ru').includes(query);
+    tab.hidden = !matches;
+  });
+  list.querySelectorAll('.dashboard-nav-caption').forEach(caption => {
+    let next = caption.nextElementSibling;
+    let hasVisibleTab = false;
+    while (next && !next.classList.contains('dashboard-nav-caption')) {
+      if (next.matches('.tab[role="tab"]:not([hidden])')) hasVisibleTab = true;
+      next = next.nextElementSibling;
+    }
+    caption.hidden = Boolean(query) && !hasVisibleTab;
+  });
+}
+
 function applyDashboardLogFilters() {
   const log = document.getElementById('game-log');
   if (!log) return;
@@ -247,6 +266,10 @@ function applyDashboardLogFilters() {
 }
 
 document.addEventListener('input', event => {
+  if (event.target?.id === 'dashboard-nav-search') {
+    applyDashboardNavigationSearch(event.target.value);
+    return;
+  }
   if (event.target?.id !== 'game-log-search') return;
   dashboardLogQuery = event.target.value || '';
   applyDashboardLogFilters();
@@ -287,6 +310,19 @@ document.addEventListener('click', (e) => {
 
 // Tab-like navigation remains fully usable without a pointer.
 document.addEventListener('keydown', (event) => {
+  if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey
+      && !/INPUT|TEXTAREA|SELECT/.test(event.target?.tagName || '')
+      && document.getElementById('screen-game')?.classList.contains('active')) {
+    event.preventDefault();
+    document.getElementById('dashboard-nav-search')?.focus();
+    return;
+  }
+  if (event.key === 'Escape' && event.target?.id === 'dashboard-nav-search') {
+    event.target.value = '';
+    applyDashboardNavigationSearch('');
+    event.target.blur();
+    return;
+  }
   const tab = event.target.closest?.('[role="tab"]');
   if (!tab) return;
   const tabs = Array.from(tab.parentElement?.querySelectorAll('[role="tab"]') || []);
