@@ -5,7 +5,7 @@ import { buyItem, getBuybackItems, buybackItem } from '../systems/shop.js';
 import { EQUIPMENT_TYPES } from '../systems/inventory.js';
 import { getBuyPrice } from '../systems/economy.js';
 import { upgradeEquipment, healAtHealer, craftRecipe, reforgeItemByIndex } from '../systems/crafting.js';
-import { toast } from './screens.js';
+import { toast, escapeHtml } from './screens.js';
 import { renderHeader, switchTab } from './header.js';
 import { openBlacksmith, openHealer, openAlchemist } from './npcs.js';
 import { renderTooltip } from './inventory.js';
