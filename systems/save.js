@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { STORY } from '../data/story.js';
+import { getExpNext } from './progression.js';
 
 const SLOT_PREFIX = 'magic-rpg-save-';
 const LEGACY_KEY = 'magic-rpg-save';
@@ -504,6 +505,26 @@ export function migrateGame(game) {
       else if (entry && typeof entry === 'object' && entry.id === 'mana-crystal') entry.id = 'old-archive-seal';
     }
     game.version = 17;
+  }
+
+  // Rebase stored XP thresholds after progression balance changes while
+  // preserving the character's fractional progress toward the next level.
+  const player = game.player;
+  if (Number.isSafeInteger(player.level) && player.level >= 1 && player.level < 100) {
+    const nextExp = getExpNext(player.level);
+    const previousNext = Number.isSafeInteger(player.expNext) && player.expNext > 0
+      ? player.expNext
+      : 0;
+    const previousExp = Number.isSafeInteger(player.exp) && player.exp >= 0
+      ? player.exp
+      : 0;
+    if (previousNext !== nextExp) {
+      const progress = previousNext > 0
+        ? Math.min(1, previousExp / previousNext)
+        : 0;
+      player.exp = Math.min(nextExp - 1, Math.floor(progress * nextExp));
+    }
+    player.expNext = nextExp;
   }
 
   return game;
