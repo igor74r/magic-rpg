@@ -483,6 +483,15 @@ function handleWorldEvent(eventId) {
   const ev = (ow.events || []).find(e => e.id === eventId);
   if (!ev) return;
 
+  if (ev.resolved) return;
+  let previousGame;
+  try {
+    previousGame = JSON.parse(JSON.stringify(state.game));
+  } catch {
+    toast('⚠️ Не удалось подготовить событие. Попробуйте ещё раз.');
+    return;
+  }
+  ev.resolved = true;
   const p = state.game.player;
   if (!Array.isArray(p.effects)) p.effects = [];
 
@@ -526,11 +535,20 @@ function handleWorldEvent(eventId) {
     if (reward.stored) logClass = 'warning';
   }
 
-  saveGame();
+  ow.events = ow.events.filter(e => e.id !== eventId);
+  if (!saveGame()) {
+    state.game = previousGame;
+    ow.player.hp = state.game.player.hp;
+    const restoredEvent = ow.events.find(e => e.id === eventId);
+    if (restoredEvent) restoredEvent.resolved = false;
+    else ow.events.push({ ...ev, resolved: false });
+    ow.paused = false;
+    toast('⚠️ Награда не сохранена. Событие восстановлено — попробуйте снова.');
+    import('./ui/overworld.js').then(m => m.closeDialogAndResume());
+    return;
+  }
   emit('log', { channel: 'game', msg: logMsg, cls: logClass });
   toast(toastMsg);
-
-  ow.events = ow.events.filter(e => e.id !== eventId);
   ow.paused = false;
 
   import('./ui/overworld.js').then(m => m.closeDialogAndResume());
