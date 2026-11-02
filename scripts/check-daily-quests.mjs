@@ -29,9 +29,12 @@ try {
 
   state.game.player.dailyQuests = {
     date: now,
-    list: [{ id: 'q-kill-any', current: 10, completed: true, claimed: false, gold: 999999, exp: 999999 }]
+    list: [
+      { id: 'q-kill-any', current: 10, completed: true, claimed: false, gold: 999999, exp: 999999 },
+      { id: 'q-kill-goblin', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-skeleton', current: 0, completed: false, claimed: false }
+    ]
   };
-  // Fill remaining entries with valid definitions so the current day remains intact.
   const normalized = getDailyQuests();
   const target = normalized.find(quest => quest.id === 'q-kill-any');
   assert.ok(target);
