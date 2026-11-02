@@ -179,7 +179,7 @@ try {
     await page.keyboard.press('Escape');
     await worldDialog.waitFor({ state: 'detached' });
 
-    await page.evaluate(() => window.GameAPI.interactNpc('world-portal'));
+    await clickCanvasPoint(page, 0.5, 0.404);
     worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
     await worldDialog.waitFor({ state: 'visible' });
     await worldDialog.getByRole('button', { name: /Тёмный лес/ }).click();
