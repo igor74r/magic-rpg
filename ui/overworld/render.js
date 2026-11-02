@@ -25,7 +25,7 @@ let paused = false, nearNpc = null;
 let footprints = [], lastFootprintPos = { x: 0, y: 0 }, hurtFlash = 0, worldTime = 0;
 let deathParticles = [], bloodSplats = [], lowHpPulse = 0, corpses = [], snowAccum = 0;
 let lastTileKey = null, tileDamageTimer = 0, _weatherEffectApplied = null;
-let mapTooltipEl = null;
+let mapTooltipEl = null, pauseReturnFocus = null;
 
 // Reuse the darkness/light-mask surface instead of allocating a full canvas every frame.
 let darknessCanvas = null, darknessCtx = null;
@@ -894,8 +894,25 @@ export function hideMapTooltip() { if (mapTooltipEl) { mapTooltipEl.remove(); ma
 export function openPauseMenu() {
   if (document.getElementById('pause-overlay')) return;
   paused = true; hideMapTooltip();
-  const div = document.createElement('div'); div.id = 'pause-overlay'; div.className = 'pause-overlay';
-  div.innerHTML = `<div class="pause-panel"><h2>⏸️ Пауза</h2><button type="button" data-pause-action="owPauseResume">▶️ Продолжить</button><button type="button" data-pause-action="owPauseSaveVillage">💾 Сохранить и в деревню</button><button type="button" data-pause-action="owPauseExit">🚪 Сохранить и в меню</button></div>`;
+  pauseReturnFocus = document.activeElement?.nodeType === 1 ? document.activeElement : null;
+  const div = document.createElement('div');
+  div.id = 'pause-overlay';
+  div.className = 'pause-overlay';
+  div.innerHTML = `<div class="pause-panel" role="dialog" aria-modal="true" aria-labelledby="pause-title" tabindex="-1"><h2 id="pause-title">⏸️ Пауза</h2><button type="button" data-pause-action="owPauseResume">▶️ Продолжить</button><button type="button" data-pause-action="owPauseSaveVillage">💾 Сохранить и в деревню</button><button type="button" data-pause-action="owPauseExit">🚪 Сохранить и в меню</button></div>`;
+  div.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const focusable = [...div.querySelectorAll('button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])')];
+    if (!focusable.length) { event.preventDefault(); return; }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !div.contains(document.activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
   div.addEventListener('click', event => {
     const button = event.target.closest('[data-pause-action]');
     if (!button || !div.contains(button)) return;
@@ -904,9 +921,16 @@ export function openPauseMenu() {
     globalThis.GameAPI?.[action]?.();
   });
   document.body.appendChild(div);
+  (div.querySelector('button:not(:disabled)') || div.querySelector('[role="dialog"]'))?.focus();
 }
 
-export function closePauseMenu() { const el = document.getElementById('pause-overlay'); if (el) el.remove(); paused = false; }
+export function closePauseMenu() {
+  const el = document.getElementById('pause-overlay');
+  if (el) el.remove();
+  paused = false;
+  if (pauseReturnFocus?.isConnected) pauseReturnFocus.focus();
+  pauseReturnFocus = null;
+}
 
 // Сброс визуального состояния при входе в локацию
 export function initWeather(themeName) {
