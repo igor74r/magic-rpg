@@ -14,6 +14,11 @@ for (const invalid of [0, -1, 1.5, NaN, Infinity, -Infinity, Number.MAX_SAFE_INT
   addExp(invalid);
   assert.equal(JSON.stringify(player), snapshot, `invalid XP gain ${String(invalid)} must not mutate progression`);
 }
+player.exp = Number.MAX_SAFE_INTEGER - 10;
+const overflowSnapshot = JSON.stringify(player);
+addExp(100);
+assert.equal(JSON.stringify(player), overflowSnapshot, 'XP total overflow must be rejected');
+player.exp = 25;
 addExp(75);
 assert.equal(player.level, 2);
 assert.equal(player.exp, 0);
