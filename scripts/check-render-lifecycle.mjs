@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { state } from '../systems/state.js';
 
 const originalRaf = globalThis.requestAnimationFrame;
@@ -24,6 +25,16 @@ globalThis.clearInterval = id => cleared.push(id);
 
 try {
   const { start, startAutosave } = await import('../ui/overworld/render.js');
+  const renderSource = await readFile(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
+  assert.match(renderSource, /try\s*\{\s*if\s*\(saveGame\(\)\)/,
+    'autosave storage failures must be caught');
+  assert.match(renderSource, /autosaveErrorAt/);
+  assert.match(renderSource, /autosaveSavedAt/,
+    'the saved indicator must only appear after a successful write');
+  assert.match(renderSource, /ошибка сохранения/,
+    'the canvas should distinguish a failed write from a successful save');
+  assert.match(renderSource, /autosaveAt = now/,
+    'failed writes must be throttled instead of retried every second');
   state.overworld = null;
 
   start();
