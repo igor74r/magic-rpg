@@ -135,6 +135,29 @@ const storagePathOk = loaded && state.game?.version === 17 && rewritten.version 
 console.log(`${storagePathOk ? 'PASS' : 'FAIL'} loadGameData migrates and rewrites v16 slot without changing settings`);
 assert.ok(storagePathOk);
 
+// A crash/reload after defeat must not strand the player at zero HP.
+const defeatedSave = JSON.parse(JSON.stringify(freshSave));
+defeatedSave.location = 'dark-forest';
+defeatedSave.player.hp = 0;
+defeatedSave.player.maxHp = 120;
+defeatedSave.player.mp = 0;
+defeatedSave.player.maxMp = 60;
+defeatedSave.player.effects = [{ id: 'poison', duration: 3 }];
+defeatedSave.player.cooldowns = { fireball: 4 };
+defeatedSave.player.stats.deaths = 2;
+storage.set('magic-rpg-save-1', JSON.stringify(defeatedSave));
+state.game = null;
+assert.equal(loadGameData(1), true, 'defeated save should still load');
+assert.equal(state.game.player.hp, 60, 'defeated player should recover half HP');
+assert.equal(state.game.player.mp, 30, 'non-warrior should recover half MP');
+assert.equal(state.game.location, 'village', 'defeated player should return to village');
+assert.deepEqual(state.game.player.effects, [], 'temporary effects must clear on recovery');
+assert.deepEqual(state.game.player.cooldowns, {}, 'cooldowns must clear on recovery');
+assert.equal(state.game.player.stats.deaths, 2, 'death statistics must be preserved');
+const recovered = JSON.parse(storage.get('magic-rpg-save-1'));
+assert.equal(recovered.player.hp, 60, 'recovered state must be rewritten to storage');
+console.log('PASS zero-HP save recovers to village at half HP/MP without losing death stats');
+
 
 // Save-slot API must reject invalid indices rather than read, write or delete
 // arbitrary localStorage keys.
