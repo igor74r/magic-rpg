@@ -9,7 +9,7 @@ import { saveGame } from '../systems/save.js';
 import { renderGame } from './header.js';
 import { enterOverworld } from '../systems/overworld.js';
 import { isRiftReady } from '../systems/rift.js';
-import { getStoryLocationProgression, canEnterStoryLocation } from '../systems/campaign.js';
+import { getStoryLocationProgression, canEnterStoryLocation, getActiveCampaignMission, getMissionProgress } from '../systems/campaign.js';
 
 const MAP_SPEED_X = 26;
 const MAP_SPEED_Y = 20;
@@ -270,6 +270,13 @@ function initWorldMap() {
 
 export function renderLocations() {
   const nodes = ringNodes();
+  const activeMission = getActiveCampaignMission(state.game?.player);
+  const activeMissionLocation = activeMission
+    ? (activeMission.mission.locationId || activeMission.act.locationId)
+    : null;
+  const activeMissionProgress = activeMission
+    ? getMissionProgress(state.game.player, activeMission.mission)
+    : null;
   const storyNodes = nodes.filter(node => node.story).sort((a, b) => a.story.sequence - b.story.sequence);
   const storyLinks = storyNodes.map((node, index) => {
     const from = index === 0 ? { x: 50, y: 50 } : storyNodes[index - 1];
@@ -284,9 +291,13 @@ export function renderLocations() {
     const access = canEnterStoryLocation(state.game?.player, n.id);
     const locked = !access.allowed;
     const order = n.story ? `<span class="wnode-order" aria-hidden="true">#${n.story.sequence}</span>` : '';
-    return `<div class="wnode${n.id === state.game.location ? ' current' : ''}${locked ? ' locked' : ''}" data-loc="${n.id}" data-x="${n.x}" data-y="${n.y}"
-      style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%;${locked ? 'opacity:.48;filter:grayscale(.75)' : ''}" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}${n.story ? ` · маршрут #${n.story.sequence} · уровень ${n.story.recommendedLevel}` : ''}${locked ? ` · закрыто до ${n.story.requiredLevel} уровня` : ''}" aria-label="${loc.name}${locked ? ', закрыто' : ''}">
-      ${order}<span class="wnode-icon">${locked ? '🔒' : loc.emoji}</span>
+    const isQuestTarget = n.id === activeMissionLocation;
+    const questMarker = isQuestTarget
+      ? `<span class="wnode-quest-marker" aria-label="Цель активного задания: ${activeMissionProgress.current} из ${activeMissionProgress.required}">📜 ЗАДАНИЕ · ${activeMissionProgress.current}/${activeMissionProgress.required}</span>`
+      : '';
+    return `<div class="wnode${n.id === state.game.location ? ' current' : ''}${locked ? ' locked' : ''}${isQuestTarget ? ' quest-target' : ''}" data-loc="${n.id}" data-x="${n.x}" data-y="${n.y}"
+      style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%;${locked ? 'opacity:.48;filter:grayscale(.75)' : ''}" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}${isQuestTarget ? ` · цель задания: ${activeMission.mission.title} · ${activeMissionProgress.current}/${activeMissionProgress.required}` : ''}${n.story ? ` · маршрут #${n.story.sequence} · уровень ${n.story.recommendedLevel}` : ''}${locked ? ` · закрыто до ${n.story.requiredLevel} уровня` : ''}" aria-label="${loc.name}${isQuestTarget ? `, цель задания, ${activeMissionProgress.current} из ${activeMissionProgress.required}` : ''}${locked ? ', закрыто' : ''}">
+      ${order}${questMarker}<span class="wnode-icon">${locked ? '🔒' : loc.emoji}</span>
       <span class="wnode-name" aria-hidden="true">${n.story ? `#${n.story.sequence} · ` : ''}${loc.name}</span>
     </div>`;
   }).join('');
