@@ -188,6 +188,22 @@ try {
     await page.locator('[data-log-filter="all"]').click();
     const dashboardNav = await page.locator('.dashboard-sidebar').boundingBox();
     assert.ok(dashboardNav && dashboardNav.height > 0, `${viewport.name}: primary dashboard navigation must remain visible`);
+    const navSearch = page.locator('#dashboard-nav-search');
+    await navSearch.fill('таланты');
+    assert.equal(await page.locator('#game-tab-talents').isVisible(), true,
+      `${viewport.name}: navigation search must keep matching sections visible`);
+    assert.equal(await page.locator('#game-tab-inventory').isVisible(), false,
+      `${viewport.name}: navigation search must hide unrelated sections`);
+    await navSearch.fill('');
+    assert.equal(await page.locator('#game-tab-inventory').isVisible(), true,
+      `${viewport.name}: clearing navigation search must restore all sections`);
+    await page.locator('#game-header').click();
+    await page.keyboard.press('/');
+    assert.equal(await page.evaluate(() => document.activeElement?.id), 'dashboard-nav-search',
+      `${viewport.name}: slash shortcut must focus navigation search`);
+    await page.keyboard.press('Escape');
+    assert.equal(await navSearch.inputValue(), '',
+      `${viewport.name}: Escape must clear navigation search`);
 
     // Exercise the portal interaction contract and destination navigation.
     await page.evaluate(() => window.GameAPI.enterOverworld());
