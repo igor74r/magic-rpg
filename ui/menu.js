@@ -37,8 +37,8 @@ export function renderSlots() {
           <div class="slot-info">${loc.emoji} ${loc.name}</div>
         </div>
         <div class="slot-actions">
-          <button onclick="GameAPI.loadSlot(${slot})" class="slot-play">▶️ Продолжить</button>
-          <button onclick="GameAPI.deleteSlot(${slot})" class="slot-delete" title="Удалить слот" aria-label="Удалить сохранение в слоте ${slot}">🗑️</button>
+          <button type="button" onclick="GameAPI.loadSlot(${slot})" class="slot-play">▶️ Продолжить</button>
+          <button type="button" onclick="GameAPI.deleteSlot(${slot})" class="slot-delete" title="Удалить слот" aria-label="Удалить сохранение в слоте ${slot}">🗑️</button>
         </div>
       </div>`;
     } else {
@@ -48,7 +48,7 @@ export function renderSlots() {
           <div class="slot-info" style="color:#6a5a3a;font-style:italic;">Пустой слот</div>
         </div>
         <div class="slot-actions">
-          <button onclick="GameAPI.newGameSlot(${slot})" class="slot-new">⚔️ Новая игра</button>
+          <button type="button" onclick="GameAPI.newGameSlot(${slot})" class="slot-new">⚔️ Новая игра</button>
         </div>
       </div>`;
     }
@@ -216,15 +216,15 @@ function renderSettingsTab(tab) {
       <p style="color:#a89060;margin-bottom:16px;line-height:1.7;font-size:13px;">
         <b style="color:#60ff60;">💾 Резервная копия:</b> экспортируйте сохранение перед очисткой данных браузера или переносом на другое устройство.
       </p>
-      <button onclick="GameAPI.exportSave()" style="width:100%;border-color:#60ff60;background:linear-gradient(180deg,#2a5a3a,#1a3a2a);margin-bottom:10px;">💾 Экспортировать сейв (.json)</button>
+      <button type="button" onclick="GameAPI.exportSave()" style="width:100%;border-color:#60ff60;background:linear-gradient(180deg,#2a5a3a,#1a3a2a);margin-bottom:10px;">💾 Экспортировать сейв (.json)</button>
       <label style="display:block;width:100%;margin-bottom:16px;">
         <input type="file" id="import-save-input" accept=".json" style="display:none;" data-import-save-input>
         <button type="button" data-import-save-trigger style="width:100%;border-color:#60a0ff;background:linear-gradient(180deg,#1a3a6a,#0a1a3a);">📂 Импортировать сейв</button>
       </label>
       <div class="divider"></div>
       <p style="color:#ffb0a0;margin-bottom:16px;line-height:1.7;font-size:13px;"><b>⚠️ Опасные действия:</b> удаление сохранений необратимо.</p>
-      <button onclick="GameAPI.deleteAllSaves()" style="width:100%;border-color:#8b1a1a;background:linear-gradient(180deg,#5a1a1a,#2a0a0a);margin-bottom:10px;">🗑️ Удалить ВСЕ сохранения</button>
-      <button onclick="GameAPI.resetAllSettings()" style="width:100%;">🔄 Сбросить настройки</button>
+      <button type="button" onclick="GameAPI.deleteAllSaves()" style="width:100%;border-color:#8b1a1a;background:linear-gradient(180deg,#5a1a1a,#2a0a0a);margin-bottom:10px;">🗑️ Удалить ВСЕ сохранения</button>
+      <button type="button" onclick="GameAPI.resetAllSettings()" style="width:100%;">🔄 Сбросить настройки</button>
     `;
   }
 
