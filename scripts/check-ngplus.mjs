@@ -28,7 +28,7 @@ try {
       class: 'mage', name: 'NG+ test', level: 50, exp: 999, expNext: 1000,
       gold: 777, hp: 1, maxHp: 100, mp: 1, maxMp: 100,
       str: 20, int: 20, wis: 20, con: 20, dex: 20, luck: 20,
-      statPoints: 0, passivePoints: 7, passives: ['start', 'warrior-might-1', 'warrior-might-2'], ngPlus: 2, victoryAchieved: true,
+      statPoints: 0, passivePoints: 7, passives: ['start', 'mage-fire-1', 'mage-fire-2'], ngPlus: 2, victoryAchieved: true,
       inventory: [{ id: 'iron-sword', qty: 1 }], equipped: { weapon: { id: 'iron-sword', qty: 1 } },
       achievements: ['first-kill'], stats: { kills: { wolf: 20 }, deaths: 2 },
       weaponLevel: 2, armorLevel: 1, herbs: { 'herb-life': 3 }, talents: [],
