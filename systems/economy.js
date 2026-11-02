@@ -40,12 +40,16 @@ export function getSellPrice(instance, player) {
   const rarityMultiplier = rarity && RARITIES[rarity]?.multiplier
     ? RARITIES[rarity].multiplier
     : 1;
-  const quantity = item.type === 'consumable' || item.type === 'material' || item.type === 'rune'
-    ? Math.max(1, Math.floor(Number(instance.qty) || 1))
+  const stackable = item.type === 'consumable' || item.type === 'material' || item.type === 'rune';
+  const rawQuantity = instance?.qty;
+  const quantity = stackable
+    ? (rawQuantity === undefined ? 1 : rawQuantity)
     : 1;
+  if (!Number.isSafeInteger(quantity) || quantity < 1) return 0;
   const tierPrice = rarity && RARITIES[rarity]?.price
     ? RARITIES[rarity].price
     : item.price * rarityMultiplier;
   const base = Math.floor(tierPrice * getActPriceMultiplier(player) * 0.35);
-  return Math.max(1, base) * quantity;
+  const total = Math.max(1, base) * quantity;
+  return Number.isSafeInteger(total) ? total : 0;
 }
