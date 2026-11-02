@@ -76,11 +76,14 @@ export function claimQuestReward(questId) {
   const q = getDailyQuests().find(entry => entry.id === questId);
   const definition = POOL.find(entry => entry.id === questId);
   if (!q || !definition || q.completed !== true || q.claimed === true) return false;
-  const currentGold = Number.isSafeInteger(p.gold) && p.gold >= 0 ? p.gold : 0;
-  if (!Number.isSafeInteger(currentGold + definition.gold)) return false;
+
+  // Never replace an invalid balance with zero: a reward must not erase save data.
+  if (!Number.isSafeInteger(p.gold) || p.gold < 0) return false;
+  const nextGold = p.gold + definition.gold;
+  if (!Number.isSafeInteger(nextGold)) return false;
 
   q.claimed = true;
-  p.gold = currentGold + definition.gold;
+  p.gold = nextGold;
   if (definition.exp) addExp(definition.exp);
 
   const parts = [`+${definition.gold}💰`];
