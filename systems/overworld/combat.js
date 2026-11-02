@@ -57,7 +57,7 @@ function hasValidCombatStats(stats, talent) {
     Number.isFinite(stats.mag) &&
     Number.isFinite(stats.def) &&
     Number.isFinite(stats.armorPen || 0) &&
-    ['dmgMult', 'spellMult', 'healMult', 'critMult', 'meteorMult', 'prayerMult']
+    ['dmgMult', 'spellMult', 'healMult', 'critMult', 'meteorMult', 'prayerMult', 'abilityCdDelta']
       .every(key => Number.isFinite(talent[key]));
 }
 
@@ -312,7 +312,7 @@ export function combatCastSpell(spellId) {
     !isFiniteNonNegative(spell.cost) ||
     (spell.damage !== undefined && (!Number.isFinite(spell.damage) || spell.damage <= 0)) ||
     (spell.heal !== undefined && (!Number.isFinite(spell.heal) || spell.heal <= 0)) ||
-    (!!spell.damage === !!spell.heal)
+    ((spell.damage === undefined && spell.heal === undefined && !spell.selfEffect) ||\n    (spell.damage !== undefined && spell.heal !== undefined))
   ) {
     return;
   }
