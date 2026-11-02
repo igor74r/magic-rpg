@@ -48,92 +48,48 @@ export function generateVillageMap(cols, rows) {
     }
   };
 
-  // District layout scales from the requested 64x48 map.
   const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
-  const left = Math.max(3, Math.floor(cols * 0.12));
-  const right = Math.min(cols - 10, Math.floor(cols * 0.72));
-  const north = Math.max(3, Math.floor(rows * 0.10));
-  const south = Math.min(rows - 9, Math.floor(rows * 0.72));
+  // Compact, connected village: a generous central square with short lanes
+  // leading directly to each house and workshop entrance.
+  road(cx, 0, cx, rows - 1, 2);
+  road(0, cy, cols - 1, cy, 2);
+  putRect(cx - 7, cy - 5, 15, 11, 1);
+  road(cx, cy - 5, cx, 4, 2);
+  road(cx, cy + 5, cx, rows - 1, 2);
+  road(cx - 7, cy - 2, 7, cy - 2, 2);
+  road(cx + 7, cy - 2, cols - 7, cy - 2, 2);
+  road(cx - 7, cy + 5, 7, cy + 5, 2);
+  road(cx + 7, cy + 5, cols - 7, cy + 5, 2);
+  road(13, cy - 5, 13, 4, 1);
+  road(25, cy - 5, 25, 4, 1);
+  road(13, cy + 5, 13, rows - 4, 1);
+  road(25, cy + 5, 25, rows - 4, 1);
 
-  // Organic main roads: a gently winding north-south route and a curved
-  // east-west lane replace the old rigid cross. Coordinates are clamped by road().
-  const path = (points, width = 2) => {
-    for (let i = 0; i < points.length - 1; i++) {
-      const [ax, ay] = points[i], [bx, by] = points[i + 1];
-      road(ax, ay, bx, by, width);
-    }
-  };
-  path([[cx - 2, 0], [cx - 2, Math.floor(rows * .22)], [cx + 1, Math.floor(rows * .34)],
-    [cx + 2, Math.floor(rows * .47)], [cx - 1, Math.floor(rows * .61)],
-    [cx - 2, Math.floor(rows * .78)], [cx + 1, rows - 1]], 2);
-  path([[0, cy + 2], [Math.floor(cols * .18), cy + 1], [Math.floor(cols * .32), cy - 2],
-    [Math.floor(cols * .48), cy - 1], [Math.floor(cols * .64), cy + 2],
-    [Math.floor(cols * .82), cy + 1], [cols - 1, cy - 2]], 2);
-  // The central plaza is a compact walkable space, not a giant rectangular road slab.
-  putRect(cx - 4, cy - 4, 9, 9, 1);
+  // Small orchard and flower beds frame the village without narrowing lanes.
+  putRect(1, 1, 3, 4, 4);
+  putRect(cols - 4, 1, 3, 4, 4);
+  putRect(1, rows - 5, 3, 4, 4);
+  putRect(cols - 4, rows - 5, 3, 4, 4);
+  putRect(9, 1, 2, 2, 4);
+  putRect(cols - 11, 1, 2, 2, 4);
+  putRect(9, rows - 3, 2, 2, 4);
+  putRect(cols - 11, rows - 3, 2, 2, 4);
 
-  // All small residential buildings removed from Aurora.
-
-  // Curved side lanes branch toward homes, workshops and garden gates.
-  path([[left + 8, north + 7], [left + 7, north + 10], [left + 8, cy - 2], [left + 9, cy + 2]], 2);
-  path([[right, north + 7], [right - 1, north + 10], [right + 1, cy - 2], [right, cy + 2]], 2);
-  path([[left + 8, south], [left + 7, south + 3], [left + 8, rows - 1]], 2);
-  path([[right + 4, south], [right + 5, south + 3], [right + 4, rows - 1]], 2);
-  path([[cx - 5, north + 7], [cx - 4, north + 9], [cx - 5, cy - 5]], 1);
-  path([[cx + 5, north + 7], [cx + 4, north + 9], [cx + 5, cy - 5]], 1);
-
-  // Garden plots, orchard strips and dark overgrown boundary corners.
-  const gardens = [
-    [1, 2, 3, 8], [1, rows - 12, 3, 8],
-    [cols - 4, 2, 3, 8], [cols - 4, rows - 12, 3, 8],
-    [left + 10, 2, 4, 3], [right - 2, 2, 4, 3],
-    [left + 10, rows - 5, 4, 3], [right - 2, rows - 5, 4, 3],
-    [cx - 12, cy - 9, 3, 2], [cx + 9, cy + 7, 3, 2]
-  ];
-  for (const [x, y, w, h] of gardens) putRect(x, y, w, h, 4);
-
-  // Irregular greenery breaks the rigid rectangular silhouette at Aurora's edge.
-  // These patches are deterministic and only occupy empty ground, never roads or buildings.
-  const edgePatches = [
-    { x: 5, y: 4, rx: 3, ry: 2 }, { x: 9, y: 13, rx: 2, ry: 3 },
-    { x: 5, y: 25, rx: 3, ry: 2 }, { x: 8, y: 40, rx: 2, ry: 3 },
-    { x: 57, y: 5, rx: 3, ry: 2 }, { x: 55, y: 16, rx: 2, ry: 3 },
-    { x: 58, y: 29, rx: 3, ry: 2 }, { x: 55, y: 41, rx: 2, ry: 3 },
-    { x: 22, y: 5, rx: 3, ry: 2 }, { x: 42, y: 5, rx: 3, ry: 2 },
-    { x: 21, y: 43, rx: 3, ry: 2 }, { x: 43, y: 43, rx: 3, ry: 2 }
-  ];
-  for (const patch of edgePatches) {
-    for (let yy = patch.y - patch.ry; yy <= patch.y + patch.ry; yy++) {
-      for (let xx = patch.x - patch.rx; xx <= patch.x + patch.rx; xx++) {
-        const dx = (xx - patch.x) / patch.rx, dy = (yy - patch.y) / patch.ry;
-        if (dx * dx + dy * dy > 1.15) continue;
-        if (grid[yy]?.[xx] === 0) grid[yy][xx] = 4;
-      }
-    }
-  }
-
-  // Interaction spots and the player arrival point must stay walkable.
+  // Keep every interaction point, resident and front door on connected ground.
   const clearCells = [
     [cx, cy + 4], [cx, cy - 7], [cx - 3, cy - 2], [cx + 3, cy - 2],
-    [left + 8, north + 8], [right, north + 8],
-    [left + 8, south - 1], [right + 4, south - 1],
-    [cx - 1, rows - 9], [cx + 1, rows - 9],
-    [cx - 3, cy + 1], [cx + 3, cy + 1],
-    [cx - 2, cy + 4], [cx + 2, cy + 4],
-    [cx - 5, cy], [cx + 5, cy], [left + 8, cy], [right + 4, cy],
-    [27, 21], [29, 21], [35, 21], [15, 15], [46, 15],
-    [15, 37], [50, 37], [32, 11], [32, 38], [27, 27],
-    [25, 24], [39, 24], [32, 18], [43, 34],
-    [34, 27], [36, 26], [23, 18], [19, 35], [43, 27],
-    [32, 30], [28, 19], [36, 19], [28, 29], [36, 29],
-    [25, 18], [39, 18], [25, 30], [39, 30],
-    [23, 17], [18, 15], [18, 18], [20, 18], [47, 33], [18, 37]
+    [15, 14], [19, 14], [24, 14], [16, 11], [18, 11], [21, 11],
+    [7, 11], [31, 11], [7, 22], [31, 22], [19, 7], [19, 25],
+    [13, 16], [12, 13], [27, 13], [15, 10], [15, 18],
+    [12, 10], [27, 10], [12, 18], [27, 18], [10, 14], [29, 14],
+    [10, 19], [29, 19], [27, 22], [9, 10], [9, 12], [10, 12], [29, 21], [9, 22],
+    [19, 17], [17, 17], [19, 7], [7, 11], [31, 11], [7, 22], [31, 22],
+    [13, 7], [25, 7], [13, 25], [25, 25],
+    [19, 6], [7, 10], [31, 10], [7, 22], [31, 22]
   ];
   for (const [x, y] of clearCells) {
     if (grid[y]?.[x] !== undefined) grid[y][x] = 1;
   }
-  // Remove any legacy house tile IDs from this location.
-  for (let yy = 0; yy < rows; yy++) for (let xx = 0; xx < cols; xx++) if (grid[yy][xx] === 2) grid[yy][xx] = 0;
   return grid;
 }
 
