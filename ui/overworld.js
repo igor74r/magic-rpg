@@ -182,12 +182,31 @@ function initMobileDpad() {
   dpad.querySelectorAll('.dpad-btn').forEach(btn => {
     const key = btn.dataset.key;
     const setKey = (val) => { if (state.overworld) state.overworld.keys[key] = val; };
-    btn.addEventListener('touchstart', (e) => { e.preventDefault(); setKey(true); }, { passive: false });
-    btn.addEventListener('touchend', (e) => { e.preventDefault(); setKey(false); }, { passive: false });
-    btn.addEventListener('touchcancel', (e) => { e.preventDefault(); setKey(false); }, { passive: false });
-    btn.addEventListener('mousedown', (e) => { e.preventDefault(); setKey(true); });
-    btn.addEventListener('mouseup', () => setKey(false));
-    btn.addEventListener('mouseleave', () => setKey(false));
+    btn.addEventListener('pointerdown', event => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      event.preventDefault();
+      setKey(true);
+      btn.setPointerCapture?.(event.pointerId);
+    });
+    const releasePointer = event => {
+      event.preventDefault();
+      setKey(false);
+    };
+    btn.addEventListener('pointerup', releasePointer);
+    btn.addEventListener('pointercancel', releasePointer);
+    btn.addEventListener('lostpointercapture', () => setKey(false));
+    btn.addEventListener('keydown', event => {
+      if (event.code !== 'Space' && event.code !== 'Enter') return;
+      event.preventDefault();
+      if (!event.repeat) setKey(true);
+    });
+    btn.addEventListener('keyup', event => {
+      if (event.code === 'Space' || event.code === 'Enter') {
+        event.preventDefault();
+        setKey(false);
+      }
+    });
+    btn.addEventListener('blur', () => setKey(false));
   });
 }
 
