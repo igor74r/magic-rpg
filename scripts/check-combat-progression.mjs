@@ -74,6 +74,7 @@ try {
   }
 
   // Vampiric modifier must heal from actual multi-hit damage, not the pre-special base hit.
+  scheduled.length = 0;
   const vampiric = fixture('warrior', 'wolf');
   vampiric.enemy.modifier = 'vampiric';
   vampiric.enemy.hp = 1000;
