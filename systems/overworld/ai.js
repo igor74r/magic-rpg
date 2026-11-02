@@ -5,7 +5,7 @@ import { canOccupyPlayerPosition } from './collisions.js';
 import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
-import { getMovementDelta } from './movement.js';
+import { getMovementDelta, resolveSweptMovement } from './movement.js';
 
 const VIEW_W = 800, VIEW_H = 500;
 
@@ -31,18 +31,15 @@ export function tryMovePlayer(dx, dy, deltaFrames = 1) {
   const step = getMovementDelta(dx, dy, deltaFrames);
   if (step.x === 0 && step.y === 0) return;
   const p = ow.player, r = 12;
-  let moved = false;
-  // Sweep the player's circle in short increments so a long frame cannot
-  // tunnel through a wall. Resolve axes independently to keep wall sliding.
-  const distance = Math.hypot(step.x, step.y);
-  const substeps = Math.max(1, Math.ceil(distance / 4));
-  const stepX = step.x / substeps, stepY = step.y / substeps;
-  for (let i = 0; i < substeps; i++) {
-    const nx = p.x + stepX;
-    if (canOccupy(ow, nx, p.y, r)) { p.x = nx; moved = true; }
-    const ny = p.y + stepY;
-    if (canOccupy(ow, p.x, ny, r)) { p.y = ny; moved = true; }
-  }
+  // Sweep the full requested vector, then slide along whichever side of a
+  // corner offers the best progress without preferring horizontal movement.
+  const result = resolveSweptMovement(
+    p.x, p.y, step.x, step.y,
+    (x, y) => canOccupy(ow, x, y, r)
+  );
+  p.x = result.x;
+  p.y = result.y;
+  const moved = result.moved;
   p.x = Math.max(TILE / 2, Math.min(ow.cols * TILE - TILE / 2, p.x));
   p.y = Math.max(TILE / 2, Math.min(ow.rows * TILE - TILE / 2, p.y));
   if (moved) {
