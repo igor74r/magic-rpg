@@ -4,7 +4,7 @@ import { NPCS } from '../data/npcs.js';
 
 const nodes = new Map();
 const node = id => {
-  if (!nodes.has(id)) nodes.set(id, { innerHTML: '', style: {}, className: '', textContent: '', remove() {} });
+  if (!nodes.has(id)) nodes.set(id, { innerHTML: '', style: {}, className: '', textContent: '', classList: { add() {}, remove() {} }, remove() {} });
   return nodes.get(id);
 };
 const originalDocument = globalThis.document;
