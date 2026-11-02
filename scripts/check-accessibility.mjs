@@ -17,13 +17,24 @@ const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworl
 ]);
 
 const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
-assert.equal(tabs.length, 14, 'all game and settings navigation items must expose tab semantics');
+assert.equal(tabs.length, 15, 'all game and settings navigation items must expose tab semantics');
 for (const [tag] of tabs) {
   assert.match(tag, /aria-selected="(?:true|false)"/);
   assert.match(tag, /aria-controls="(?:tab-content|settings-content)"/);
   assert.match(tag, /tabindex="(?:0|-1)"/);
 }
 assert.match(html, /id="tab-content" role="tabpanel" aria-labelledby="game-tab-locations" tabindex="0"/);
+assert.match(html, /id="game-tab-hero" role="tab"[^>]*data-tab="hero"/, 'the hero dossier must be reachable from primary navigation');
+assert.match(html, /id="dashboard-context"[^>]*aria-label="Текущая цель"/, 'the dashboard must expose a persistent current-objective panel');
+assert.match(html, /id="game-log-search" class="log-search" type="search"/, 'the event journal must provide text search');
+for (const filter of ['all', 'combat', 'loot', 'story']) {
+  assert.match(html, new RegExp(`data-log-filter="${filter}"`), `event journal filter ${filter} must be available`);
+}
+assert.match(header, /renderDashboardContext\(\)/, 'game refreshes must update the live dashboard context');
+assert.match(header, /tab === 'hero'/, 'hero dossier must be rendered by the game tab router');
+assert.match(css, /\.dashboard-sidebar \.tab:focus-visible/, 'dashboard navigation must provide visible keyboard focus');
+assert.match(css, /@media \(max-width:700px\)/, 'dashboard must provide a compact mobile navigation layout');
+
 assert.match(html, /id="settings-content" role="tabpanel" aria-labelledby="settings-tab-sound" tabindex="0"/);
 for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter']) {
   assert.ok(main.includes(`event.key === '${key}'`), `keyboard navigation missing ${key}`);
