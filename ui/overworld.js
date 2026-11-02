@@ -11,6 +11,7 @@ import { ENEMIES } from '../data/enemies.js';
 import { ITEMS } from '../data/items.js';
 import { CLASSES } from '../data/classes.js';
 import { emit, on } from '../systems/events.js';
+import { escapeHtml } from './screens.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic, EFFECTS_DATA, MODIFIERS_LABEL } from './overworld/models.js';
 import { 
   renderCombatPanel, getSubPanel, setSubPanel, 
@@ -286,11 +287,11 @@ export function showAchievementNotification(data) {
     max-width: 320px; font-family: Georgia, serif;
   `;
   el.innerHTML = `
-    <div style="font-size: 32px; filter: drop-shadow(0 0 8px #ffd060);">${icon}</div>
+    <div style="font-size: 32px; filter: drop-shadow(0 0 8px #ffd060);">${escapeHtml(icon)}</div>
     <div style="flex: 1;">
       <div style="font-size: 10px; letter-spacing: 2px; color: #c9a227; text-transform: uppercase;">Достижение</div>
-      <div style="font-size: 16px; font-weight: bold; color: #ffd060; margin: 2px 0;">${name}</div>
-      <div style="font-size: 12px; color: #a89878;">${desc}</div>
+      <div style="font-size: 16px; font-weight: bold; color: #ffd060; margin: 2px 0;">${escapeHtml(name)}</div>
+      <div style="font-size: 12px; color: #a89878;">${escapeHtml(desc)}</div>
     </div>
   `;
   document.body.appendChild(el);
