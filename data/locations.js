@@ -21,7 +21,7 @@ export const LOCATIONS = {
     statics: [
       { id: 'well', name: 'Фонтан площади', x: 15, y: 14, propStyle: 'fountain', decorative: true },
       { id: 'world-portal', name: 'Врата миров', x: 19, y: 14, propStyle: 'world-portal', interactionRadius: 78, decorative: false },
-      { id: 'tower-portal', name: 'Врата Башни', x: 24, y: 14, propStyle: 'tower-gate', interactionRadius: 78, decorative: false },
+      { id: 'tower-portal', name: 'Врата Башни', x: 23, y: 14, propStyle: 'tower-gate', interactionRadius: 78, decorative: false },
       { id: 'questBoard', emoji: '📋', name: 'Доска объявлений', x: 16, y: 11 },
       { id: 'herald', emoji: '📢', name: 'Глашатай', x: 18, y: 11 },
       { id: 'bard', emoji: '🎵', name: 'Бард', x: 21, y: 11 },
