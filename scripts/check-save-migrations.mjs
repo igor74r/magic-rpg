@@ -1,6 +1,6 @@
 // Migration regression: exercise every supported save version v1-v16 without touching real browser storage.
 import assert from 'node:assert/strict';
-import { migrateGame, loadGameData, migrateLegacySave, hasSave, deleteSave, getSlotInfo } from '../systems/save.js';
+import { migrateGame, loadGameData, migrateLegacySave, hasSave, deleteSave, getSlotInfo, saveGame } from '../systems/save.js';
 import { state } from '../systems/state.js';
 import { EQUIPMENT_SLOTS } from '../systems/inventory.js';
 import { createCharacter } from '../systems/character.js';
@@ -104,9 +104,13 @@ const storage = new Map([
   })],
   ['magic-rpg-settings', '{"sentinel":"keep"}']
 ]);
+let failWrites = false;
 globalThis.localStorage = {
   getItem: key => storage.has(key) ? storage.get(key) : null,
-  setItem: (key, value) => storage.set(key, String(value)),
+  setItem: (key, value) => {
+    if (failWrites) throw new Error('QuotaExceededError');
+    storage.set(key, String(value));
+  },
   removeItem: key => storage.delete(key)
 };
 state.game = null;
@@ -250,6 +254,35 @@ assert.equal(incompleteCurrentRejected, true, 'incomplete v17 save must be rejec
 assert.equal(storage.get('magic-rpg-save-1'), incompleteCurrentSave, 'incomplete v17 save must not be rewritten');
 assert.equal(state.game, null, 'incomplete v17 save must not replace active game state');
 console.log('PASS incomplete current-version save is rejected without mutation');
+
+// Failed writes must not mutate live schema/playtime or replace the active slot.
+const previousNow = Date.now;
+const previousGame = {
+  version: 16,
+  player: { name: 'Active Character', playtimeSec: 120 }
+};
+state.game = previousGame;
+state.currentSlot = 2;
+const previousPlaytime = previousGame.player.playtimeSec;
+Date.now = () => previousNow() + 120000;
+failWrites = true;
+let saveFailed = false;
+try {
+  saveGame();
+} catch {
+  saveFailed = true;
+}
+assert.equal(saveFailed, true, 'storage write failure should be reported');
+assert.equal(previousGame.version, 16, 'failed write must not stamp the current schema version');
+assert.equal(previousGame.player.playtimeSec, previousPlaytime, 'failed write must not consume playtime');
+storage.set('magic-rpg-save-1', JSON.stringify(freshSave));
+const loadFailed = loadGameData(1) === false;
+assert.equal(loadFailed, true, 'load must fail when migrated save cannot be rewritten');
+assert.equal(state.game, previousGame, 'failed load must preserve the previous active character');
+assert.equal(state.currentSlot, 2, 'failed load must preserve the previous active slot');
+failWrites = false;
+Date.now = previousNow;
+console.log('PASS quota/write failure preserves live state, playtime and active slot');
 
 console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + load path + future-version and malformed-save guards passed; 12 equipment slots verified.`);
 if (failures.length) process.exitCode = 1;
