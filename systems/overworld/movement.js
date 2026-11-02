@@ -7,3 +7,44 @@ export function getMovementDelta(dx, dy, deltaFrames = 1, speed = 3.2) {
   const distance = speed * frames;
   return { x: (dx / length) * distance, y: (dy / length) * distance };
 }
+
+// Swept circle movement with balanced axis sliding. Try the intended diagonal
+// first; when a corner blocks it, advance along whichever axis is furthest
+// behind the requested direction. This avoids a permanent X-first bias.
+export function resolveSweptMovement(x, y, dx, dy, canOccupy, maxStep = 4) {
+  const distance = Math.hypot(dx, dy);
+  if (!Number.isFinite(distance) || distance === 0) return { x, y, moved: false };
+  const stepSize = Number.isFinite(maxStep) ? Math.max(1, maxStep) : 4;
+  const count = Math.max(1, Math.ceil(distance / stepSize));
+  const stepX = dx / count, stepY = dy / count;
+  let progressX = 0, progressY = 0, moved = false;
+
+  for (let i = 0; i < count; i++) {
+    const nextX = x + stepX, nextY = y + stepY;
+    if (canOccupy(nextX, nextY)) {
+      x = nextX; y = nextY;
+      progressX += Math.abs(stepX); progressY += Math.abs(stepY);
+      moved = true;
+      continue;
+    }
+
+    const canX = canOccupy(nextX, y);
+    const canY = canOccupy(x, nextY);
+    if (canX && canY) {
+      const wantedX = Math.abs(dx) / (Math.abs(dx) + Math.abs(dy));
+      const currentTotal = progressX + progressY;
+      const currentX = currentTotal > 0 ? progressX / currentTotal : wantedX;
+      if (currentX < wantedX) {
+        x = nextX; progressX += Math.abs(stepX);
+      } else {
+        y = nextY; progressY += Math.abs(stepY);
+      }
+      moved = true;
+    } else if (canX) {
+      x = nextX; progressX += Math.abs(stepX); moved = true;
+    } else if (canY) {
+      y = nextY; progressY += Math.abs(stepY); moved = true;
+    }
+  }
+  return { x, y, moved };
+}
