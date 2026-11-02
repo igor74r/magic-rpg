@@ -12,6 +12,7 @@ import { ITEMS } from '../data/items.js';
 import { CLASSES } from '../data/classes.js';
 import { emit, on } from '../systems/events.js';
 import { escapeHtml } from './screens.js';
+import { getSecretWallCount } from '../systems/overworld/secrets.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic, EFFECTS_DATA, MODIFIERS_LABEL } from './overworld/models.js';
 import { 
   renderCombatPanel, getSubPanel, setSubPanel, 
@@ -33,7 +34,7 @@ function generateSecrets(ow) {
 
   // В каждой боевой локации есть хотя бы одна секретная стена;
   // в 20% случаев появляется вторая. Добыча остаётся случайной.
-  const count = Math.random() < 0.20 ? 2 : 1;
+  const count = getSecretWallCount();
 
   // Ищем кандидатов — «стены» (камни 4 или деревья 2), рядом с которыми проходимый тайл
   const candidates = [];
