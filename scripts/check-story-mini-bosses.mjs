@@ -3,14 +3,10 @@ import { ENEMIES } from '../data/enemies.js';
 import { LOCATIONS } from '../data/locations.js';
 import { STORY } from '../data/story.js';
 import { getStoryLocationRequirement } from '../systems/campaign.js';
+import { STORY_MINI_BOSSES } from '../systems/story-mini-bosses.js';
+import { getEligibleSpawnEnemyIds } from '../systems/overworld/spawn.js';
 
-const miniBosses = [
-  { id: 'root-court-executioner', act: 1, location: 'briar-hollow', level: 8 },
-  { id: 'drowned-queen', act: 2, location: 'sunken-necropolis', level: 18 },
-  { id: 'oath-forge-warden', act: 3, location: 'obsidian-fields', level: 28 },
-  { id: 'mirror-icekeeper', act: 4, location: 'frost-citadel', level: 38 },
-  { id: 'echo-devourer', act: 5, location: 'void-crater', level: 48 }
-];
+const miniBosses = STORY_MINI_BOSSES;
 
 const shardIds = new Set(['flame', 'ice', 'blood']);
 for (const miniBoss of miniBosses) {
@@ -34,8 +30,10 @@ for (const miniBoss of miniBosses) {
   const requirement = getStoryLocationRequirement(miniBoss.location);
   assert.ok(requirement, `Region ${miniBoss.location} must have a campaign/level gate`);
   assert.equal(requirement.actNumber, miniBoss.act);
-  assert.ok(Number(requirement.requiredLevel) >= miniBoss.level - 2,
-    `Region gate too low for ${miniBoss.id}`);
+  assert.ok(getEligibleSpawnEnemyIds([miniBoss.id], miniBoss.location, {}, null, miniBoss.level - 1).length === 0,
+    `${miniBoss.id} must be hidden from spawn below level ${miniBoss.level}`);
+  assert.deepEqual(getEligibleSpawnEnemyIds([miniBoss.id], miniBoss.location, {}, null, miniBoss.level),
+    [miniBoss.id], `${miniBoss.id} must become eligible at level ${miniBoss.level}`);
 }
 
 assert.equal(miniBosses.length, 5, 'Exactly one mini-boss per act is expected');

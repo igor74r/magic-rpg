@@ -14,6 +14,7 @@ import { spawnParticles } from './particles.js';
 import { pushLog } from './log.js';
 import { updateQuestProgress } from '../dailyQuests.js';
 import { STORY_DRAGON_BY_ENEMY } from '../story-dragons.js';
+import { STORY_MINI_BOSS_LEVELS } from '../story-mini-bosses.js';
 
 export const ELITE_HP_MULT = 1.5;
 export const ELITE_ATK_MULT = 1.3;
@@ -33,8 +34,10 @@ export function getRespawnMs() { const d = state.settings.difficulty; return d =
 export function getEliteChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.15 : d === 'hard' ? 0.35 : 0.20; }
 export function getDropChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.70 : d === 'hard' ? 0.30 : 0.50; }
 
-export function getEligibleSpawnEnemyIds(enemyIds, locationId, opts = {}, activeMissionId = state.game?.player?.activeCampaignMission || null) {
+export function getEligibleSpawnEnemyIds(enemyIds, locationId, opts = {}, activeMissionId = state.game?.player?.activeCampaignMission || null, playerLevel = state.game?.player?.level || 1) {
   return (Array.isArray(enemyIds) ? enemyIds : []).filter(enemyId => {
+    const miniBossLevel = STORY_MINI_BOSS_LEVELS[enemyId];
+    if (miniBossLevel && Math.max(1, Number(playerLevel) || 1) < miniBossLevel) return false;
     const dragon = STORY_DRAGON_BY_ENEMY[enemyId];
     return !dragon || (
       !opts.rifMode &&
