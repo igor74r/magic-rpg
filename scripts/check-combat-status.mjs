@@ -19,6 +19,10 @@ assert.equal(recovering.stunImmunityTurns, 2);
 applyEffect(recovering, 'stun');
 assert.equal(isStunned(recovering), false, 'the next boss attack must not immediately re-stun the player');
 tickEffects(recovering);
+assert.equal(recovering.stunImmunityTurns, 1);
+applyEffect(recovering, 'stun');
+assert.equal(isStunned(recovering), false, 'stun immunity must last through the full intervening turn');
+tickEffects(recovering);
 assert.equal(recovering.stunImmunityTurns, 0);
 applyEffect(recovering, 'stun');
 assert.equal(isStunned(recovering), true, 'stun must be available again after one protected enemy turn');
@@ -29,4 +33,4 @@ const poisonTick = tickEffects(poisoned);
 assert.equal(poisonTick.totalDamage, 5, 'damage-over-time effects must still tick immediately');
 assert.equal(poisoned.effects[0].duration, 2, 'damage-over-time duration must still decrease');
 
-console.log('Combat status regression: 8/8 checks passed (player/enemy stun, anti-chain immunity, poison tick and duration).');
+console.log('Combat status regression: 10/10 checks passed (player/enemy stun, anti-chain immunity, poison tick and duration).');
