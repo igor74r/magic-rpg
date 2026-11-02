@@ -1,7 +1,7 @@
 import { state } from '../systems/state.js';
 import { CLASSES } from '../data/classes.js';
 import { createCharacter } from '../systems/character.js';
-import { toast } from './screens.js';
+import { toast, escapeHtml } from './screens.js';
 import { drawHero } from './overworld/sprites.js';
 
 const PLAYABLE_CLASSES = ['warrior', 'mage', 'archer'];
@@ -32,6 +32,7 @@ function drawClassModels() {
 }
 
 export function renderClassSelection() {
+  setCharacterStage('selection');
   const root = document.getElementById('classes-grid');
 
   if (!root) return;
@@ -116,6 +117,8 @@ export function renderClassSelection() {
     .join('');
 
   requestAnimationFrame(drawClassModels);
+  const nextButton = document.getElementById('class-review-next');
+  if (nextButton) nextButton.disabled = !PLAYABLE_CLASSES.includes(state.selectedClass);
 }
 
 export function selectClass(id) {
@@ -123,15 +126,80 @@ export function selectClass(id) {
 
   state.selectedClass = id;
   renderClassSelection();
+  setCharacterStage('selection');
+}
+
+let reviewName = 'Герой';
+
+function setCharacterStage(stage) {
+  const selection = document.getElementById('class-selection-stage');
+  const review = document.getElementById('class-review-stage');
+  if (selection) selection.style.display = stage === 'selection' ? '' : 'none';
+  if (review) review.style.display = stage === 'review' ? '' : 'none';
+}
+
+export function reviewClassSelection() {
+  if (!PLAYABLE_CLASSES.includes(state.selectedClass)) {
+    return toast('Сначала выберите класс');
+  }
+
+  const input = document.getElementById('char-name');
+  reviewName = (input?.value || '').trim().slice(0, 24) || 'Герой';
+  const cls = CLASSES[state.selectedClass];
+  const combat = cls.combat || {};
+  const resource = cls.resourceName || 'Ресурс';
+  const stats = cls.baseStats || {};
+  const root = document.getElementById('class-review-content');
+  if (!root) return;
+
+  root.innerHTML = `
+    <article class="class-review-card">
+      <div class="class-review-art">
+        <div class="class-review-glow" aria-hidden="true"></div>
+        <canvas id="class-model-review" width="180" height="210" aria-label="Портрет выбранного героя: ${cls.name}"></canvas>
+        <span class="class-review-level">УРОВЕНЬ 1 · НАЧАЛО ПУТИ</span>
+      </div>
+      <div class="class-review-details">
+        <span class="class-review-kicker">ВАШЕ РЕШЕНИЕ</span>
+        <h2>${escapeHtml(reviewName)}</h2>
+        <h3>${cls.emoji || '✦'} ${cls.name}</h3>
+        <p class="class-review-role">${cls.role || ''}</p>
+        <p class="class-review-description">${cls.desc || ''}</p>
+        <div class="class-review-stat-grid">
+          <div><span>❤️ Здоровье</span><b>${stats.maxHp || 0}</b></div>
+          <div><span>🔷 ${resource}</span><b>${stats.maxMp || 0}</b></div>
+          <div><span>⚔️ Сила</span><b>${stats.str || 0}</b></div>
+          <div><span>✨ Интеллект</span><b>${stats.int || 0}</b></div>
+          <div><span>🧠 Мудрость</span><b>${stats.wis || 0}</b></div>
+          <div><span>🛡️ Телосложение</span><b>${stats.con || 0}</b></div>
+          <div><span>🏹 Ловкость</span><b>${stats.dex || 0}</b></div>
+          <div><span>🎯 Критический удар</span><b>${Math.round((combat.critChance || 0) * 100)}%</b></div>
+        </div>
+      </div>
+    </article>
+  `;
+
+  setCharacterStage('review');
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById('class-model-review');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawHero(ctx, canvas.width / 2, canvas.height - 14, state.selectedClass, 'rgba(0,0,0,0.45)');
+  });
+}
+
+export function cancelClassReview() {
+  setCharacterStage('selection');
+  document.getElementById('char-name')?.focus();
 }
 
 export function confirmClassSelection() {
-  if (!state.selectedClass) {
+  if (!PLAYABLE_CLASSES.includes(state.selectedClass)) {
     return toast('Выберите класс');
   }
 
-  const name =
-    document.getElementById('char-name').value.trim() || 'Герой';
-
-  createCharacter(name, state.selectedClass);
+  if (!createCharacter(reviewName, state.selectedClass)) {
+    return toast('Не удалось создать героя. Попробуйте снова.');
+  }
 }

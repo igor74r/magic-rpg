@@ -225,17 +225,38 @@
   </div>
 </div>
 
-<!-- ================== ВЫБОР КЛАССА ================== -->
+<!-- ================== ВЫБОР И СОЗДАНИЕ ГЕРОЯ ================== -->
 <div id="screen-char" class="screen">
-  <div class="game-container" style="align-items:center;">
-    <h1>Выбор класса</h1>
-    <p class="subtitle">Каждый класс — свой путь через тьму</p>
-    <div class="classes-grid" id="classes-grid"></div>
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;align-items:center;">
-      <input type="text" id="char-name" placeholder="Имя героя" value="Герой" style="max-width:250px;">
-      <button onclick="GameAPI.confirmClassSelection()">Начать путь →</button>
+  <div class="game-container character-creation-container">
+    <div class="character-creation-heading">
+      <span class="character-creation-eyebrow">ПРОБУЖДЕНИЕ ПЕРЕД ПУТЁМ</span>
+      <h1>Выбери свою судьбу</h1>
+      <p class="subtitle">Три пути. Одна легенда. Каким героем ты станешь?</p>
     </div>
-    <button onclick="GameAPI.showScreen('screen-main');GameAPI.updateMainMenu();" style="margin-top:15px;">← Назад</button>
+
+    <section id="class-selection-stage" aria-labelledby="class-selection-title">
+      <h2 id="class-selection-title" class="class-stage-title">I · Выбери класс</h2>
+      <div class="classes-grid" id="classes-grid"></div>
+      <div class="character-name-panel">
+        <label for="char-name">ИМЯ БУДУЩЕГО ГЕРОЯ</label>
+        <input type="text" id="char-name" placeholder="Введи имя…" value="Герой" maxlength="24" autocomplete="nickname">
+        <p>Имя можно изменить до начала приключения.</p>
+      </div>
+      <div class="character-stage-actions">
+        <button id="class-review-next" type="button" class="character-primary-action" onclick="GameAPI.reviewClassSelection()" disabled>Проверить героя <span aria-hidden="true">→</span></button>
+        <button type="button" class="character-secondary-action" onclick="GameAPI.showScreen('screen-main');GameAPI.updateMainMenu();">← Вернуться к слотам</button>
+      </div>
+    </section>
+
+    <section id="class-review-stage" aria-labelledby="class-review-title" style="display:none;">
+      <h2 id="class-review-title" class="class-stage-title">II · Твой герой готов?</h2>
+      <p class="class-review-intro">Проверь имя и начальные характеристики. После подтверждения сохранение начнётся в выбранном слоте.</p>
+      <div id="class-review-content"></div>
+      <div class="character-stage-actions">
+        <button type="button" class="character-primary-action" onclick="GameAPI.confirmClassSelection()">✦ Создать героя и начать</button>
+        <button type="button" class="character-secondary-action" onclick="GameAPI.cancelClassReview()">← Изменить выбор</button>
+      </div>
+    </section>
   </div>
 </div>
 
