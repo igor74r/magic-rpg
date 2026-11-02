@@ -430,16 +430,6 @@ export const ITEMS = {
     desc: 'Сюжетный осколок Кровавой Короны. Нельзя продать или использовать в ремесле.',
     price: 0, type: 'quest', storyShard: true
   }
-};
-
-// Six equipment tiers. Weights are relative rolls and sum to 100.
-export const RARITIES = {
-  common:    { name: 'Обычный',     tier: 1, color: '#9a9a9a', multiplier: 1,    weight: 60, statRange: [1, 5],     mods: 0, price: 10 },
-  uncommon:  { name: 'Необычный',   tier: 2, color: '#55b96b', multiplier: 1.25, weight: 25, statRange: [6, 15],    mods: 1, price: 25 },
-  rare:      { name: 'Редкий',      tier: 3, color: '#4a9eff', multiplier: 1.5,  weight: 10, statRange: [16, 30],   mods: 2, price: 60 },
-  epic:      { name: 'Эпический',   tier: 4, color: '#b060ff', multiplier: 2.2,  weight: 4,  statRange: [31, 55],   mods: 3, price: 150 },
-  legendary: { name: 'Легендарный', tier: 5, color: '#ffa500', multiplier: 3.5,  weight: 0.9,statRange: [56, 90],   mods: 4, price: 400 },
-  mythic:    { name: 'Мифический',  tier: 6, color: '#e34d5b', multiplier: 4.5,  weight: 0.1,statRange: [91, 150],  mods: 5, price: 1000, bossOnly: true },
   // ---------- УНИКАЛЬНЫЕ ТРОФЕИ СЮЖЕТНЫХ МИНИ-БОССОВ ----------
   'root-court-seal': { name: 'Печать корневого суда', icon: '🌿', desc: 'Трофей Палача корневого суда. Основа для реликвии живой чащи.', price: 24, type: 'material' },
   'drowned-lament': { name: 'Слеза утопленной плакальщицы', icon: '💧', desc: 'Трофей плакальщицы. Внутри слышна песнь затонувшего некрополя.', price: 38, type: 'material' },
@@ -454,6 +444,16 @@ export const RARITIES = {
   'mirrorweave-cloak': { name: 'Плащ зеркального инея', icon: '🪞', desc: '+13 к защите и +4 к ловкости. Ткань отражает ледяные проклятия.', price: 220, type: 'cloak', sockets: 1, bonus: { defense: 13, dex: 4 } },
   'echo-prism-amulet': { name: 'Амулет эха', icon: '🔮', desc: '+11 к магии, +7 к защите и +3% к критическому шансу. Сила безмолвной Бездны.', price: 280, type: 'amulet', sockets: 1, bonus: { magic: 11, defense: 7, critChance: 0.03 } },
 
+};
+
+// Six equipment tiers. Weights are relative rolls and sum to 100.
+export const RARITIES = {
+  common:    { name: 'Обычный',     tier: 1, color: '#9a9a9a', multiplier: 1,    weight: 60, statRange: [1, 5],     mods: 0, price: 10 },
+  uncommon:  { name: 'Необычный',   tier: 2, color: '#55b96b', multiplier: 1.25, weight: 25, statRange: [6, 15],    mods: 1, price: 25 },
+  rare:      { name: 'Редкий',      tier: 3, color: '#4a9eff', multiplier: 1.5,  weight: 10, statRange: [16, 30],   mods: 2, price: 60 },
+  epic:      { name: 'Эпический',   tier: 4, color: '#b060ff', multiplier: 2.2,  weight: 4,  statRange: [31, 55],   mods: 3, price: 150 },
+  legendary: { name: 'Легендарный', tier: 5, color: '#ffa500', multiplier: 3.5,  weight: 0.9,statRange: [56, 90],   mods: 4, price: 400 },
+  mythic:    { name: 'Мифический',  tier: 6, color: '#e34d5b', multiplier: 4.5,  weight: 0.1,statRange: [91, 150],  mods: 5, price: 1000, bossOnly: true },
 };
 
 export const ITEM_AFFIXES = [
