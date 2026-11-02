@@ -172,6 +172,8 @@ jobs:
         run: node scripts/check-overworld-enemy-groups.mjs
       - name: Check enemy combat roles and tactical telegraphs
         run: node scripts/check-enemy-tactics.mjs
+      - name: Check boss intelligence and multi-phase dragon encounters
+        run: node scripts/check-boss-intelligence.mjs
 
       - name: Check overworld maps and region collision
         run: node scripts/check-overworld-map.mjs
