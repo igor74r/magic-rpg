@@ -164,9 +164,17 @@ export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null, 
 }
 
 export function openChest(chest) {
-  chest.opened = true;
   const ow = state.overworld;
-  const p = state.game.player;
+  const p = state.game?.player;
+  if (!ow || !p || !chest || chest.opened) return false;
+  let previousGame;
+  try {
+    previousGame = JSON.parse(JSON.stringify(state.game));
+  } catch {
+    pushLog('⚠️ Не удалось подготовить награду из сундука.', 'warning');
+    return false;
+  }
+  chest.opened = true;
   const pool = ['health-potion', 'mana-potion', 'iron-sword', 'apprentice-staff', 'leather-armor'];
   const id = pool[Math.floor(Math.random() * pool.length)];
   const result = addItemOrStore(id);
@@ -195,6 +203,13 @@ export function openChest(chest) {
 
   if (!p.stats) p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 };
   p.stats.chestsOpened = (p.stats.chestsOpened || 0) + 1;
-  saveGame();
+  if (!saveGame()) {
+    state.game = previousGame;
+    chest.opened = false;
+    pushLog('⚠️ Не удалось сохранить сундук. Награда отменена; сундук можно открыть повторно.', 'warning');
+    emit('game:update');
+    return false;
+  }
   checkAchievements();
+  return true;
 }
