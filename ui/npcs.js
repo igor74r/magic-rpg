@@ -4,7 +4,7 @@ import { ITEMS, RARITIES } from '../data/items.js';
 import { countItem, EQUIPMENT_TYPES, EQUIPMENT_SLOTS } from '../systems/inventory.js';
 import { saveGame } from '../systems/save.js';
 import { emit } from '../systems/events.js';
-import { showScreen, toast } from './screens.js';
+import { showScreen, toast, escapeHtml } from './screens.js';
 import { STORY } from '../data/story.js';
 import { LOCATIONS } from '../data/locations.js';
 import { addItemOrStore } from '../systems/inventory.js';
@@ -46,7 +46,7 @@ export function openBlacksmith() {
     return `<div class="recipe"><div class="recipe-result" style="color:${RARITIES.legendary.color};">✦ ${ITEMS[recipe.result].name} · T5</div><div class="recipe-ingredients">${ingList}</div><button onclick="GameAPI.craftRecipe('${recipe.id}')" ${check.ok ? '' : 'disabled'} class="sell-btn">⚒️ Создать в финальной кузнице</button>${!check.ok ? `<small>${check.msg}</small>` : ''}</div>`;
   }).join('') : '';
   const pendingJobs = getCraftingJobs();
-  const jobsHTML = pendingJobs.length ? `<div class="recipe"><b>Заказы в работе: ${pendingJobs.length}</b>${pendingJobs.map(job => `<div>${ITEMS[job.result]?.name || job.result} — готовность ${new Date(job.readyAt).toLocaleString('ru-RU')}</div>`).join('')}</div>` : '';
+  const jobsHTML = pendingJobs.length ? `<div class="recipe"><b>Заказы в работе: ${pendingJobs.length}</b>${pendingJobs.map(job => `<div>${escapeHtml(ITEMS[job.result]?.name || job.result)} — готовность ${new Date(job.readyAt).toLocaleString('ru-RU')}</div>`).join('')}</div>` : '';
   const renderSlot = (slot, label) => {
     const inst = p.equipped[slot]; if (!inst) return `<div class="npc-slot"><div class="npc-slot-title">${label}</div><div class="npc-slot-empty">Слот пуст</div></div>`;
     const obj = typeof inst === 'string' ? { id: inst, qty: 1 } : inst; const item = ITEMS[obj.id]; if (!item) return '';
@@ -70,7 +70,7 @@ export function openAlchemist() {
   collectCraftingJobs();
   const npc = NPCS.alchemist;
   const pendingJobs = getCraftingJobs();
-  const jobsHTML = pendingJobs.length ? `<div class="recipe"><b>Заказы в работе: ${pendingJobs.length}</b>${pendingJobs.map(job => `<div>${ITEMS[job.result]?.name || job.result} — готовность ${new Date(job.readyAt).toLocaleString('ru-RU')}</div>`).join('')}</div>` : '';
+  const jobsHTML = pendingJobs.length ? `<div class="recipe"><b>Заказы в работе: ${pendingJobs.length}</b>${pendingJobs.map(job => `<div>${escapeHtml(ITEMS[job.result]?.name || job.result)} — готовность ${new Date(job.readyAt).toLocaleString('ru-RU')}</div>`).join('')}</div>` : '';
   const herbsList = ['herb-life', 'herb-moon'].map(id => { const count = countItem(id); const it = ITEMS[id]; return `<div class="herb-item ${count > 0 ? '' : 'empty'}"><span class="herb-icon">${it.icon}</span><span class="herb-name">${it.name}</span><span class="herb-count">×${count}</span></div>`; }).join('');
   const recipesHTML = npc.recipes.map(r => { const result = ITEMS[r.result]; const canCraft = r.ingredients.every(ing => countItem(ing.id) >= ing.qty); const ingList = r.ingredients.map(ing => `<span style="color:${countItem(ing.id) >= ing.qty ? '#60ff60' : '#ff6060'};">${ITEMS[ing.id].icon} ${ITEMS[ing.id].name} (${countItem(ing.id)}/${ing.qty})</span>`).join(' + '); return `<div class="recipe"><div class="recipe-result">${result.icon} ${result.name}</div><div class="recipe-ingredients">${ingList}</div><button onclick="GameAPI.craftRecipe('${r.id}')" ${canCraft ? '' : 'disabled'} class="sell-btn">⚗️ Скрафтить</button></div>`; }).join('');
   const reforgeHTML = state.game.player.inventory.map((inst, index) => { const item = ITEMS[inst.id]; if (!item || !EQUIPMENT_TYPES.has(item.type)) return ''; const check = canReforgeItem(index); const rarity = RARITIES[inst.rarity || 'common']; return `<div class="recipe"><div class="recipe-result" style="color:${rarity?.color || '#c9a227'};">${item.icon} ${item.name} · ${rarity?.name || 'Обычный'}</div><button onclick="GameAPI.reforgeItem(${index})" ${check.ok ? '' : 'disabled'} class="sell-btn">⚒️ Перековать за эссенцию</button>${!check.ok ? `<small>${check.msg}</small>` : ''}</div>`; }).join('');
