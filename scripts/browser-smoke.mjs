@@ -176,8 +176,30 @@ try {
     await worldDialog.waitFor({ state: 'visible' });
     assert.equal(await worldDialog.getAttribute('aria-modal'), 'true',
       `${viewport.name}: world portal must open an accessible modal`);
+
+    // A new character must not bypass the first campaign mission by selecting
+    // a later story region from the portal.
+    const forestLocked = worldDialog.getByRole('button', { name: /Тёмный лес/ });
+    assert.equal(await forestLocked.isDisabled(), true,
+      `${viewport.name}: forest must remain locked before the first campaign mission`);
+    assert.match(await forestLocked.innerText(), /ЗАДАНИЕ a1-m1/i,
+      `${viewport.name}: portal must explain the campaign prerequisite`);
     await page.keyboard.press('Escape');
     await worldDialog.waitFor({ state: 'detached' });
+
+    // Advance only the test save to the first region's required state, then
+    // reload it through the real save loader before testing travel.
+    await page.evaluate(() => {
+      const raw = localStorage.getItem('magic-rpg-save-1');
+      if (!raw) throw new Error('test character save is missing');
+      const save = JSON.parse(raw);
+      save.player.level = 3;
+      save.player.campaignClaimed = { ...(save.player.campaignClaimed || {}), 'a1-m1': true };
+      localStorage.setItem('magic-rpg-save-1', JSON.stringify(save));
+      window.GameAPI.loadSlot(1);
+      window.GameAPI.enterOverworld();
+    });
+    await page.locator('#screen-overworld.active').waitFor();
 
     await clickCanvasPoint(page, 0.5, 0.404);
     worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
