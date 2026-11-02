@@ -440,6 +440,20 @@ export const RARITIES = {
   epic:      { name: 'Эпический',   tier: 4, color: '#b060ff', multiplier: 2.2,  weight: 4,  statRange: [31, 55],   mods: 3, price: 150 },
   legendary: { name: 'Легендарный', tier: 5, color: '#ffa500', multiplier: 3.5,  weight: 0.9,statRange: [56, 90],   mods: 4, price: 400 },
   mythic:    { name: 'Мифический',  tier: 6, color: '#e34d5b', multiplier: 4.5,  weight: 0.1,statRange: [91, 150],  mods: 5, price: 1000, bossOnly: true }
+  // ---------- УНИКАЛЬНЫЕ ТРОФЕИ СЮЖЕТНЫХ МИНИ-БОССОВ ----------
+  'root-court-seal': { name: 'Печать корневого суда', icon: '🌿', desc: 'Трофей Палача корневого суда. Основа для реликвии живой чащи.', price: 24, type: 'material' },
+  'drowned-lament': { name: 'Слеза утопленной плакальщицы', icon: '💧', desc: 'Трофей плакальщицы. Внутри слышна песнь затонувшего некрополя.', price: 38, type: 'material' },
+  'oathforge-heart': { name: 'Сердце расплавленной клятвы', icon: '🔥', desc: 'Трофей стража кузницы. Ещё хранит жар древних рун.', price: 52, type: 'material' },
+  'mirror-shard': { name: 'Осколок ледяного зеркала', icon: '🪞', desc: 'Трофей хранителя. Отражает не лицо, а боевые намерения.', price: 68, type: 'material' },
+  'echo-core': { name: 'Ядро пожирателя эха', icon: '🔮', desc: 'Трофей Пожирателя эха. Удерживает силу исчезающих голосов.', price: 90, type: 'material' },
+
+  // ---------- УНИКАЛЬНОЕ СНАРЯЖЕНИЕ ИЗ ТРОФЕЕВ ----------
+  'briar-court-mantle': { name: 'Мантия корневого суда', icon: '🍃', desc: '+8 к защите и +3% к уклонению. Создана из печати древнего лесного закона.', price: 105, type: 'shoulders', sockets: 1, bonus: { defense: 8, dodgeChance: 0.03 } },
+  'mourner-signet': { name: 'Перстень плакальщицы', icon: '💧', desc: '+6 к магии и +3 к защите. Хранит тихую песнь глубин.', price: 145, type: 'ring', sockets: 1, bonus: { magic: 6, defense: 3 } },
+  'oathfire-cleaver': { name: 'Секатор расплавленной клятвы', icon: '🔥', desc: '+17 к атаке и +2 к пробиванию брони. Закалён сердцем древней кузницы.', price: 190, type: 'weapon', sockets: 1, bonus: { attack: 17, armorPen: 2 } },
+  'mirrorweave-cloak': { name: 'Плащ зеркального инея', icon: '🪞', desc: '+13 к защите и +4 к ловкости. Ткань отражает ледяные проклятия.', price: 220, type: 'cloak', sockets: 1, bonus: { defense: 13, dex: 4 } },
+  'echo-prism-amulet': { name: 'Амулет эха', icon: '🔮', desc: '+11 к магии, +7 к защите и +3% к критическому шансу. Сила безмолвной Бездны.', price: 280, type: 'amulet', sockets: 1, bonus: { magic: 11, defense: 7, critChance: 0.03 } },
+
 };
 
 export const ITEM_AFFIXES = [
