@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import { playSound } from '../audio.js';
 import { TILE, isWalkable } from './map.js';
-import { canOccupyPlayerPosition, PLAYER_COLLISION_RADIUS } from './collisions.js';
+import { canOccupyPlayerPosition, canOccupyActorPosition, isActorPositionClear, PLAYER_COLLISION_RADIUS, NPC_COLLISION_RADIUS, ENEMY_COLLISION_RADIUS } from './collisions.js';
 import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
@@ -9,11 +9,27 @@ import { getMovementDelta, resolveSweptMovement, getCameraPosition } from './mov
 
 const VIEW_W = 800, VIEW_H = 500;
 
-function canOccupy(ow, x, y, radius = 9) {
+function canOccupy(ow, x, y, radius = PLAYER_COLLISION_RADIUS) {
   return canOccupyPlayerPosition(
     ow.map, ow.cols, ow.rows, x, y, radius,
     ow.sourceLocationId || ow.locationId
   );
+}
+
+function canOccupyActor(ow, actor, x, y, radius, others) {
+  return canOccupyActorPosition(
+    ow.map, ow.cols, ow.rows, x, y, radius,
+    ow.sourceLocationId || ow.locationId, others, actor
+  );
+}
+
+function moveActor(ow, actor, dx, dy, radius, others) {
+  if (!dx && !dy) return false;
+  const result = resolveSweptMovement(actor.x, actor.y, dx, dy,
+    (x, y) => canOccupyActor(ow, actor, x, y, radius, others), 3);
+  actor.x = result.x;
+  actor.y = result.y;
+  return result.moved;
 }
 const AGGRO_RANGE = 200, LEASH_RANGE = 340, COMBAT_RANGE = 44;
 
@@ -93,9 +109,11 @@ export function updateOverworld(dt) {
       npc.wanderDy = (npc.homeY - npc.y) / (dHome || 1);
     }
     const spd = (npc.wanderSpeed || 0.5) * dt;
-    const nx = npc.x + npc.wanderDx * spd, ny = npc.y + npc.wanderDy * spd;
-    if (canOccupy(ow, nx, npc.y, 8)) npc.x = nx; else npc.wanderDx = -npc.wanderDx;
-    if (canOccupy(ow, npc.x, ny, 8)) npc.y = ny; else npc.wanderDy = -npc.wanderDy;
+    const others = [...ow.npcs, ...ow.enemies, ow.player];
+    if (!moveActor(ow, npc, npc.wanderDx * spd, npc.wanderDy * spd, npc.collisionRadius || NPC_COLLISION_RADIUS, others)) {
+      npc.wanderDx = -npc.wanderDx;
+      npc.wanderDy = -npc.wanderDy;
+    }
   }
 
   for (const e of ow.enemies) {
@@ -108,9 +126,8 @@ export function updateOverworld(dt) {
     if (e.state === 'chase') {
       const dx = ow.player.x - e.x, dy = ow.player.y - e.y;
       const ln = Math.hypot(dx, dy) || 1, spd = 2.2 * dt;
-      const nx = e.x + (dx / ln) * spd, ny = e.y + (dy / ln) * spd;
-      if (canOccupy(ow, nx, e.y, 9)) e.x = nx;
-      if (canOccupy(ow, e.x, ny, 9)) e.y = ny;
+      const others = [...ow.enemies, ...ow.npcs, ow.player];
+      moveActor(ow, e, (dx / ln) * spd, (dy / ln) * spd, e.collisionRadius || ENEMY_COLLISION_RADIUS, others);
     } else {
       e.wanderTimer -= dt * 0.02;
       if (e.wanderTimer <= 0) {
@@ -124,9 +141,11 @@ export function updateOverworld(dt) {
         e.wanderDy = (e.homeY - e.y) / (dHome || 1);
       }
       const spd = 0.9 * dt;
-      const nx = e.x + e.wanderDx * spd, ny = e.y + e.wanderDy * spd;
-      if (isWalkable(ow.map, ow.cols, ow.rows, nx, e.y, (ow.sourceLocationId || ow.locationId))) e.x = nx; else e.wanderDx = -e.wanderDx;
-      if (isWalkable(ow.map, ow.cols, ow.rows, e.x, ny, (ow.sourceLocationId || ow.locationId))) e.y = ny; else e.wanderDy = -e.wanderDy;
+      const others = [...ow.enemies, ...ow.npcs, ow.player];
+      if (!moveActor(ow, e, e.wanderDx * spd, e.wanderDy * spd, e.collisionRadius || ENEMY_COLLISION_RADIUS, others)) {
+        e.wanderDx = -e.wanderDx;
+        e.wanderDy = -e.wanderDy;
+      }
     }
   }
 
