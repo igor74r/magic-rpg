@@ -1,5 +1,6 @@
 // Migration regression: exercise every supported save version v1-v16 without touching real browser storage.
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { migrateGame, loadGameData, migrateLegacySave, hasSave, deleteSave, getSlotInfo, saveGame } from '../systems/save.js';
 import { state } from '../systems/state.js';
 import { EQUIPMENT_SLOTS } from '../systems/inventory.js';
@@ -92,6 +93,16 @@ for (let version = 1; version <= 16; version++) {
   }
 }
 assert.deepEqual(EQUIPMENT_SLOTS, expectedSlots);
+
+const menuSource = await readFile(new URL('../ui/menu.js', import.meta.url), 'utf8');
+const newGameSlotBody = menuSource.match(/export function newGameSlot\(slot\) \{([\s\S]*?)\n\}/)?.[1] || '';
+const loadSlotBody = menuSource.match(/export function loadSlot\(slot\) \{([\s\S]*?)\n\}/)?.[1] || '';
+assert.match(newGameSlotBody, /state\.pendingSlot\s*=\s*slot/);
+assert.doesNotMatch(newGameSlotBody, /state\.currentSlot\s*=/,
+  'new-game selection must not change the active slot before character creation');
+assert.doesNotMatch(loadSlotBody, /state\.currentSlot\s*=/,
+  'failed slot loads must not switch the active slot in the UI');
+console.log('PASS menu defers slot switching until a new character is created and load succeeds');
 
 // Exercise the real load-and-rewrite path against disposable in-memory storage.
 const storage = new Map([
