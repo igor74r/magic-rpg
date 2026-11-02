@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { LOCATIONS } from '../data/locations.js';
 import { generateMap, isBlocked } from '../systems/overworld/map.js';
-import { getVillageBuildingColliders, isVillagePositionBlocked } from '../systems/overworld/collisions.js';
+import { getVillageBuildingColliders, getVillagePropColliders, isVillagePositionBlocked } from '../systems/overworld/collisions.js';
 
 const village = LOCATIONS.village;
 assert.equal(village.mapCols, 38, 'Aurora width must be compact');
@@ -48,6 +48,17 @@ assert.ok(plazaProps.every(item => item.decorative || ['world-portal', 'tower-po
   'only portals may intercept interactions among plaza props');
 
 const colliders = getVillageBuildingColliders();
+const propColliders = getVillagePropColliders();
+assert.ok(propColliders.length >= 8, 'solid service props must have collision footprints');
+assert.ok(propColliders.every(rect => rect.width > 0 && rect.height > 0), 'solid prop colliders must have positive dimensions');
+for (const prop of village.statics.filter(item => ['fountain', 'bench', 'memorial', 'anvil', 'woodpile', 'cart', 'barrels', 'stall', 'herb-rack'].includes(item.propStyle))) {
+  assert.equal(isVillagePositionBlocked(prop.x * 48 + 24, prop.y * 48 + 24, 8), true,
+    `${prop.id}: solid prop center must block player`);
+}
+for (const prop of village.statics.filter(item => ['lantern', 'planter', 'banner', 'brazier'].includes(item.propStyle))) {
+  assert.equal(isVillagePositionBlocked(prop.x * 48 + 24, prop.y * 48 + 24, 8), false,
+    `${prop.id}: lightweight plaza decor must not block player`);
+}
 assert.equal(colliders.length, 30, 'each of ten buildings must have three wall segments');
 assert.ok(colliders.every(rect => rect.width > 0 && rect.height > 0), 'wall rectangles must have positive dimensions');
 for (const building of buildings) {
