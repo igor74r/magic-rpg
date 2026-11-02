@@ -1644,6 +1644,9 @@ function combatDefeat() {
   ow.combat = null;
 
   clearPlayerEffects();
+  // Persist the death counter and zero-HP state immediately. loadGameData
+  // safely restores this state at half HP in the village after a restart.
+  saveGame();
 
   emit('rift:defeated');
   emit('overworld:defeat');
