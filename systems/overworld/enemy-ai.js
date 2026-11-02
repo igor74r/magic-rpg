@@ -101,3 +101,46 @@ export function getEnemyGroupBehaviors(enemies, player, options = {}) {
   }
   return results;
 }
+
+
+// Combat roles are derived from existing enemy specials, so the roster and
+// encounter balance stay intact while each archetype makes distinct choices.
+export function getEnemyCombatRole(specialType) {
+  if (specialType === 'snipe') return 'marksman';
+  if (specialType === 'double') return 'bruiser';
+  if (specialType === 'drain') return 'leech';
+  return 'skirmisher';
+}
+
+// Telegraph special attacks one turn ahead. This gives the player a readable
+// response window and lets blocking meaningfully influence bruiser decisions.
+export function getEnemyCombatDecision({
+  specialType,
+  specialEvery,
+  turnCount = 0,
+  playerHpRatio = 1,
+  enemyHpRatio = 1,
+  blocking = false,
+  pendingSpecial = false
+} = {}) {
+  const role = getEnemyCombatRole(specialType);
+  if (!specialType || !Number.isFinite(specialEvery) || specialEvery < 1) {
+    return { role, action: 'attack', reason: 'basic' };
+  }
+  if (pendingSpecial) return { role, action: 'special', reason: 'telegraphed' };
+
+  const scheduled = Math.max(1, Math.floor(specialEvery));
+  const cadenceDue = Math.floor(turnCount) > 0 && Math.floor(turnCount) % scheduled === 0;
+  const tacticalOpening =
+    (role === 'marksman' && playerHpRatio <= 0.35) ||
+    (role === 'leech' && enemyHpRatio <= 0.45) ||
+    (role === 'bruiser' && blocking);
+  if (cadenceDue || tacticalOpening) {
+    return {
+      role,
+      action: 'telegraph',
+      reason: tacticalOpening ? 'opening' : 'cadence'
+    };
+  }
+  return { role, action: 'attack', reason: 'basic' };
+}
