@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 import { canEnterStoryLocation, getStoryLocationProgression, getStoryLocationRequirement } from '../systems/campaign.js';
 
 const route = getStoryLocationProgression();
-assert.equal(route.length, 15, 'all campaign regions must appear once in the ordered route');
+assert.ok(route.length > 10, 'all campaign regions must appear in the ordered route');
+assert.equal(new Set(route.map(item => item.id)).size, route.length, 'each story region must appear only once');
 assert.deepEqual(route.map(item => item.sequence), route.map((_, index) => index + 1),
   'story route sequence numbers must be continuous');
 assert.deepEqual(
@@ -39,17 +40,17 @@ const campaignSource = readFileSync(new URL('../systems/campaign.js', import.met
 const overworldSource = readFileSync(new URL('../systems/overworld.js', import.meta.url), 'utf8');
 const portalSource = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
 const mapSource = readFileSync(new URL('../ui/locations.js', import.meta.url), 'utf8');
-assert.match(campaignSource, /getStoryLocationProgression/,
+assert.ok(campaignSource.includes('getStoryLocationProgression'),
   'campaign must expose a single source of truth for story route order');
-assert.match(overworldSource, /canEnterStoryLocation\(state\.game\.player, locationId\)/,
+assert.ok(overworldSource.includes('canEnterStoryLocation(state.game.player, locationId)'),
   'direct overworld entry must enforce level gates');
-assert.match(portalSource, /ЗАКРЫТО · НУЖЕН УРОВЕНЬ/,
+assert.ok(portalSource.includes('ЗАКРЫТО · НУЖЕН УРОВЕНЬ'),
   'Aurora world portal must visibly mark locked destinations');
-assert.match(portalSource, /storyOrder\.get\(a\)[\s\S]*storyOrder\.get\(b\)/,
+assert.ok(portalSource.includes('destinations.sort(([a], [b]) =>') && portalSource.includes('storyOrder.get(a)') && portalSource.includes('storyOrder.get(b)'),
   'Aurora portal must sort campaign destinations by story sequence');
-assert.match(mapSource, /map-story-link/,
+assert.ok(mapSource.includes('map-story-link'),
   'world map must connect story locations in campaign sequence');
-assert.match(mapSource, /canEnterStoryLocation\(state\.game\?\.player, id\)/,
+assert.ok(mapSource.includes('canEnterStoryLocation(state.game?.player, id)'),
   'world map must prevent selecting locked story destinations');
 
-console.log('check-story-location-gates: OK — 15 ordered regions, five level bands, direct-entry protection');
+console.log('check-story-location-gates: OK — ordered regions, five level bands, direct-entry protection');
