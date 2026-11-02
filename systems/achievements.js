@@ -9,6 +9,8 @@ export function checkAchievements() {
   if (!g || !g.player) return;
   const p = g.player;
   if (!Array.isArray(p.achievements)) p.achievements = [];
+  const previousAchievements = [...p.achievements];
+  const previousGold = p.gold;
 
   let any = false;
   for (const a of ACHIEVEMENTS) {
@@ -27,11 +29,9 @@ export function checkAchievements() {
   }
 
   if (any) {
-    const previousAchievements = [...p.achievements];
-    const previousGold = p.gold;
     // Rewards are applied above; restore both unlocks and currency if persistence fails.
     if (!saveGame()) {
-      p.achievements = previousAchievements.filter(id => !p.achievements.includes(id));
+      p.achievements = previousAchievements;
       p.gold = previousGold;
       return;
     }
