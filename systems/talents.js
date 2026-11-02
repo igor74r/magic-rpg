@@ -28,6 +28,19 @@ const BONUS_DEFAULTS = {
   dexFlat: 0
 };
 
+function snapshotPlayer(player) {
+  try {
+    return JSON.parse(JSON.stringify(player));
+  } catch {
+    return null;
+  }
+}
+
+function restorePlayer(player, snapshot) {
+  for (const key of Object.keys(player)) delete player[key];
+  Object.assign(player, snapshot);
+}
+
 function addEffects(bonus, effects = {}) {
   for (const key of ['dmgMult', 'healMult', 'spellMult', 'defMult', 'meteorMult', 'prayerMult']) {
     if (effects[key]) bonus[key] *= effects[key];
@@ -103,6 +116,10 @@ export function allocatePassive(player, nodeId) {
   const tree = getPassiveTree(player.class);
   const node = tree.nodes[nodeId];
 
+  const tracked = state.game?.player === player;
+  const snapshot = tracked ? snapshotPlayer(player) : null;
+  if (tracked && !snapshot) return false;
+
   if (!Array.isArray(player.passives)) {
     player.passives = ['start'];
   }
@@ -114,8 +131,9 @@ export function allocatePassive(player, nodeId) {
   player.passives.push(nodeId);
   player.passivePoints = Math.max(0, (player.passivePoints || 0) - 1);
 
-  if (state.game?.player === player) {
-    saveGame();
+  if (tracked && !saveGame()) {
+    restorePlayer(player, snapshot);
+    return false;
   }
 
   emit('toast', `✦ Изучено: ${node.name}`);
@@ -144,11 +162,18 @@ export function resetPassives(player) {
     return { ok: false, msg: `Нужно ${cost}💰` };
   }
 
+  const tracked = state.game?.player === player;
+  const snapshot = tracked ? snapshotPlayer(player) : null;
+  if (tracked && !snapshot) return { ok: false, msg: 'Не удалось подготовить сброс навыков' };
+
   player.gold -= cost;
   player.passivePoints = Math.max(0, player.passivePoints || 0) + allocated.length;
   player.passives = ['start'];
 
-  if (state.game?.player === player) saveGame();
+  if (tracked && !saveGame()) {
+    restorePlayer(player, snapshot);
+    return { ok: false, msg: 'Не удалось сохранить сброс навыков; изменения отменены' };
+  }
 
   emit('toast', `Пассивные навыки сброшены (−${cost}💰), возвращено очков: ${allocated.length}`);
   emit('log', {
@@ -186,6 +211,10 @@ export function takeTalent(player, talentId) {
   const talent = findTalentById(player?.class, talentId);
   if (!talent || !canTakeTalent(player, talent)) return false;
 
+  const tracked = state.game?.player === player;
+  const snapshot = tracked ? snapshotPlayer(player) : null;
+  if (tracked && !snapshot) return false;
+
   player.talents.push(talentId);
 
   const effects = talent.effects || {};
@@ -200,7 +229,10 @@ export function takeTalent(player, talentId) {
     player.mp = Math.min(player.maxMp, Math.round(player.mp * effects.mpMult));
   }
 
-  if (state.game?.player === player) saveGame();
+  if (tracked && !saveGame()) {
+    restorePlayer(player, snapshot);
+    return false;
+  }
 
   emit('toast', `✦ Талант: ${talent.name}`);
   emit('log', {
@@ -269,6 +301,10 @@ export function resetTalents(player) {
     if (effects.mpMult) mpMult *= effects.mpMult;
   }
 
+  const tracked = state.game?.player === player;
+  const snapshot = tracked ? snapshotPlayer(player) : null;
+  if (tracked && !snapshot) return { ok: false, msg: 'Не удалось подготовить сброс талантов' };
+
   player.gold -= cost;
   player.maxHp = Math.max(1, Math.round(player.maxHp / hpMult));
   player.hp = Math.min(player.hp, player.maxHp);
@@ -276,7 +312,10 @@ export function resetTalents(player) {
   player.mp = Math.min(player.mp, player.maxMp);
   player.talents = [];
 
-  if (state.game?.player === player) saveGame();
+  if (tracked && !saveGame()) {
+    restorePlayer(player, snapshot);
+    return { ok: false, msg: 'Не удалось сохранить сброс талантов; изменения отменены' };
+  }
 
   emit('toast', `Таланты сброшены (−${cost}💰)`);
   return { ok: true };
