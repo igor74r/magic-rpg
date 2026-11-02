@@ -344,10 +344,20 @@ function openWorldPortalMenu() {
   overlay.style.cssText = 'position:fixed;inset:0;z-index:10070;display:flex;align-items:center;justify-content:center;padding:clamp(10px,3vw,24px);background:radial-gradient(ellipse at 50% 25%,rgba(38,91,94,.42),rgba(5,9,16,.97) 72%);color:#f2eadb;overflow:auto;font-family:inherit;';
   const cards = destinations.map(([id, loc]) => {
     const here = id === currentId;
+    const story = storyOrder.get(id);
+    const access = canEnterStoryLocation(state.game?.player, id);
+    const locked = !access.allowed;
+    const disabled = here || locked;
     const description = escapeHtml(loc.desc || 'Неизведанная область');
-    return `<button type="button" data-world-location="${escapeHtml(id)}" data-search="${escapeHtml(`${loc.name} ${loc.desc || ''}`.toLocaleLowerCase())}" ${here ? 'disabled aria-current="location"' : ''} style="display:flex;align-items:flex-start;gap:12px;min-height:104px;width:100%;text-align:left;padding:14px;border:1px solid ${here ? '#b89a62' : '#426a70'};border-radius:13px;background:${here ? 'linear-gradient(135deg,#3a3023,#211c19)' : 'linear-gradient(145deg,#1a3039,#111923)'};color:#f2eadb;opacity:${here ? 0.92 : 1};cursor:${here ? 'default' : 'pointer'};font:inherit;transition:border-color .15s,transform .15s,background .15s">
+    const progressLabel = story
+      ? `ГЛАВА ${story.actNumber} · МАРШРУТ ${String(story.sequence).padStart(2, '0')} · УРОВЕНЬ ${story.recommendedLevel}`
+      : 'СВОБОДНОЕ ИССЛЕДОВАНИЕ';
+    const statusLabel = here ? '● ВЫ ЗДЕСЬ' : locked
+      ? `🔒 ЗАКРЫТО · НУЖЕН УРОВЕНЬ ${story.requiredLevel}`
+      : 'ПЕРЕЙТИ В ОБЛАСТЬ →';
+    return `<button type="button" data-world-location="${escapeHtml(id)}" data-search="${escapeHtml(`${loc.name} ${loc.desc || ''} ${progressLabel}`.toLocaleLowerCase())}" ${disabled ? 'disabled' : ''} ${here ? 'aria-current="location"' : ''} style="display:flex;align-items:flex-start;gap:12px;min-height:104px;width:100%;text-align:left;padding:14px;border:1px solid ${here ? '#b89a62' : locked ? '#60434a' : '#426a70'};border-radius:13px;background:${here ? 'linear-gradient(135deg,#3a3023,#211c19)' : locked ? 'linear-gradient(145deg,#241c25,#15151e)' : 'linear-gradient(145deg,#1a3039,#111923)'};color:#f2eadb;opacity:${locked ? 0.62 : here ? 0.92 : 1};cursor:${disabled ? 'not-allowed' : 'pointer'};font:inherit;transition:border-color .15s,transform .15s,background .15s">
       <span aria-hidden="true" style="display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:11px;background:rgba(116,185,178,.12);font-size:25px">${loc.emoji || '✦'}</span>
-      <span style="display:block;min-width:0;flex:1"><strong style="display:block;font-size:15px;line-height:1.35">${escapeHtml(loc.name)}</strong><span style="display:-webkit-box;margin-top:5px;color:#a9c0bf;font-size:12px;line-height:1.45;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2">${description}</span><small style="display:block;margin-top:8px;color:${here ? '#e0c58f' : '#80c9bd'};font-size:11px;font-weight:700;letter-spacing:.04em">${here ? '● ВЫ ЗДЕСЬ' : 'ПЕРЕЙТИ В ОБЛАСТЬ →'}</small></span>
+      <span style="display:block;min-width:0;flex:1"><strong style="display:block;font-size:15px;line-height:1.35">${story ? `#${story.sequence} · ` : ''}${escapeHtml(loc.name)}</strong><small style="display:block;margin-top:5px;color:${locked ? '#d59aa2' : '#80c9bd'};font-size:10px;font-weight:700;letter-spacing:.04em">${progressLabel}</small><span style="display:-webkit-box;margin-top:5px;color:#a9c0bf;font-size:12px;line-height:1.45;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2">${description}</span><small style="display:block;margin-top:8px;color:${here ? '#e0c58f' : locked ? '#d59aa2' : '#80c9bd'};font-size:11px;font-weight:700;letter-spacing:.04em">${statusLabel}</small></span>
     </button>`;
   }).join('');
 
