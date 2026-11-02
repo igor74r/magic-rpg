@@ -159,13 +159,13 @@ function renderSaleModal() {
   const left = valid.map(entry => {
     const rarity = RARITIES[entry.inst.rarity || 'common'];
     const checked = saleSelection.includes(entry.index);
-    return '<button class="sale-item ' + (checked ? 'selected' : '') + '" onclick="GameAPI.toggleSaleItem(' + entry.index + ')"><span>' + entry.item.icon + ' ' + entry.item.name + '</span><small>' + (rarity?.name || 'Обычный') + ' · ' + getSellPrice(entry.inst, p) + ' зол.</small></button>';
+    return '<button class="sale-item ' + (checked ? 'selected' : '') + '" data-sale-action="toggle" data-index="' + entry.index + '"><span>' + entry.item.icon + ' ' + entry.item.name + '</span><small>' + (rarity?.name || 'Обычный') + ' · ' + getSellPrice(entry.inst, p) + ' зол.</small></button>';
   }).join('');
   const right = selected.length ? selected.map(entry => '<div class="sale-summary-row"><span>' + entry.item.name + '</span><b>' + getSellPrice(entry.inst, p) + '💰</b></div>').join('') : '<small>Выбери предметы слева.</small>';
   const warning = saleConfirmState && needsConfirm
     ? '<p class="sale-warning">Внимание: выбраны предметы T4+ или сумма выше 500 золота. Подтверди продажу ещё раз.</p>'
     : needsConfirm ? '<p class="sale-warning">Для продажи T4+ или на сумму свыше 500 золота потребуется дополнительное подтверждение.</p>' : '';
-  overlay.innerHTML = '<div class="sale-dialog"><div class="sale-heading"><h3>Продажа предметов</h3><button onclick="GameAPI.cancelSale()">×</button></div><div class="sale-columns"><section class="sale-inventory"><b>Инвентарь</b><div class="sale-item-list">' + (left || '<small>Нет предметов для продажи.</small>') + '</div></section><section class="sale-display"><b>К продаже: ' + selected.length + '</b><div class="sale-summary-list">' + right + '</div><div class="sale-total">Итого: ' + total + '💰</div>' + warning + '</section></div><div class="sale-actions"><button onclick="GameAPI.selectSaleTiers()">Продать все T1–T2</button><button onclick="GameAPI.selectSaleFilter()">Выбрать по фильтру</button><button class="sell-btn" onclick="GameAPI.confirmSale()">' + (saleConfirmState && needsConfirm ? 'Подтвердить продажу' : 'Продать выбранное') + '</button><button onclick="GameAPI.cancelSale()">Отмена</button></div></div>';
+  overlay.innerHTML = '<div class="sale-dialog"><div class="sale-heading"><h3>Продажа предметов</h3><button data-sale-action="cancel">×</button></div><div class="sale-columns"><section class="sale-inventory"><b>Инвентарь</b><div class="sale-item-list">' + (left || '<small>Нет предметов для продажи.</small>') + '</div></section><section class="sale-display"><b>К продаже: ' + selected.length + '</b><div class="sale-summary-list">' + right + '</div><div class="sale-total">Итого: ' + total + '💰</div>' + warning + '</section></div><div class="sale-actions"><button data-sale-action="tiers">Продать все T1–T2</button><button data-sale-action="filter">Выбрать по фильтру</button><button class="sell-btn" data-sale-action="confirm">' + (saleConfirmState && needsConfirm ? 'Подтвердить продажу' : 'Продать выбранное') + '</button><button data-sale-action="cancel">Отмена</button></div></div>';
 }
 
 export function openSaleUI(initialSelection = []) {
@@ -176,7 +176,18 @@ export function openSaleUI(initialSelection = []) {
   overlay.id = 'inventory-sale-overlay';
   overlay.className = 'inventory-sale-overlay';
   document.body.appendChild(overlay);
-  overlay.addEventListener('click', event => { if (event.target === overlay) cancelSaleUI(); });
+  overlay.addEventListener('click', event => {
+    if (event.target === overlay) { cancelSaleUI(); return; }
+    const button = event.target.closest('[data-sale-action]');
+    if (!button || !overlay.contains(button) || button.disabled) return;
+    switch (button.dataset.saleAction) {
+      case 'toggle': toggleSaleItem(Number(button.dataset.index)); break;
+      case 'tiers': selectSaleTiersUI(); break;
+      case 'filter': selectSaleFilterUI(); break;
+      case 'confirm': confirmSaleUI(); break;
+      case 'cancel': cancelSaleUI(); break;
+    }
+  });
   renderSaleModal();
 }
 
