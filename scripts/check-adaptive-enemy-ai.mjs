@@ -29,3 +29,14 @@ assert.match(source, /prepareEnemyAdaptation\(ow, enemy\);/,
 assert.match(source, /consumeEnemyAdaptation\(enemy, style\)/,
   'adaptive defense must be consumed after one matching attack');
 console.log('Adaptive enemy AI regression contract: OK');
+
+assert.match(source, /specialOnCooldown/,
+  'existing special cadence must remain supported');
+assert.match(source, /playerHpRatio <= 0\.35/,
+  'sniping enemies should react to low player health');
+assert.match(source, /enemyHpRatio <= 0\.45/,
+  'draining enemies should use drain when critically injured');
+assert.match(source, /ow\.combat\.blocking\)/,
+  'double-strike enemies should punish a defensive stance');
+assert.match(source, /specialOnCooldown \|\| tacticalSpecial/,
+  'tactical openings must augment, not replace, normal special cadence');
