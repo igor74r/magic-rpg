@@ -100,7 +100,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
       id: i, enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
       homeX: pos.x * TILE + TILE / 2, homeY: pos.y * TILE + TILE / 2,
       hp, maxHp: hp, elite: isElite, boss: isBoss, modifier, collisionRadius: ENEMY_COLLISION_RADIUS,
-      effects: [], phase: 0, state: 'idle',
+      effects: [], phase: 0, state: 'idle', tacticalSpecialPending: false,
       wanderTimer: 1 + Math.random() * 2, wanderDx: 0, wanderDy: 0,
       dead: false, respawnAt: 0,
     });
