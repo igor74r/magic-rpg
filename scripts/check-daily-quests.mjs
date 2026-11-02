@@ -45,6 +45,25 @@ try {
   assert.equal(state.game.player.exp, 50);
   assert.equal(claimQuestReward('q-kill-any'), false, 'daily quest reward can only be claimed once');
 
+  updateQuestProgress('kill', 'goblin', '2');
+  const goblinQuest = normalized.find(quest => quest.id === 'q-kill-goblin');
+  assert.equal(goblinQuest.current, 2);
+  assert.equal(typeof goblinQuest.current, 'number', 'numeric progress input must not turn the counter into a string');
+
+  state.game.player.dailyQuests = {
+    date: now,
+    list: [
+      { id: 'q-kill-goblin', current: 5, completed: true, claimed: false },
+      { id: 'q-kill-any', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-skeleton', current: 0, completed: false, claimed: false }
+    ]
+  };
+  getDailyQuests();
+  state.game.player.gold = Number.MAX_SAFE_INTEGER;
+  assert.equal(claimQuestReward('q-kill-goblin'), false, 'daily reward must reject gold balance overflow');
+  assert.equal(state.game.player.gold, Number.MAX_SAFE_INTEGER);
+  assert.equal(state.game.player.dailyQuests.list[0].claimed, false, 'overflow rejection must not consume the reward');
+
   const before = target.current;
   updateQuestProgress('kill', 'any', -5);
   assert.equal(target.current, before, 'negative progress must be ignored');
