@@ -29,6 +29,9 @@ jobs:
       - name: Check GameAPI contract
         run: node scripts/check-gameapi.mjs
 
+      - name: Check character selection and confirmation flow
+        run: node scripts/check-character-creation.mjs
+
       - name: Check runtime error and resource diagnostics
         run: node scripts/check-runtime-diagnostics.mjs
 
