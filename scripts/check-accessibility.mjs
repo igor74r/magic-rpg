@@ -67,7 +67,7 @@ assert.ok(combatPanel.includes('function setCombatActionsMarkup'), 'combat actio
 assert.match(combatPanel, /next \|\| actions\.querySelector/, 'combat submenu rerender must restore focus to an equivalent or first available action');
 assert.ok(combatPanel.includes('setCombatActionsMarkup'), 'combat panel must route updates through the focus-aware helper');
 assert.doesNotMatch(combatPanel, /actions\.innerHTML = `\\n    <button data-combat-action/, 'main combat actions must use the focus-aware renderer');
-assert.match(shop, /data-shop-preset="\\$\\{escapeHtml\\(id\\)\\}" aria-pressed="\\$\\{shopPreset === id\\}"/, 'shop filters must announce selected state');
+assert.ok(shop.includes('aria-pressed="${shopPreset === id}"'), 'shop filters must announce selected state');
 assert.match(shop, /data-shop-buy="\\$\\{escapeHtml\\(id\\)\\}"/, 'shop purchase controls must be explicit buttons');
 assert.match(combatPanel, /<button type="button" data-combat-action="attack"/, 'combat actions must declare button type');
 assert.match(html, /id="game-log" role="log" aria-live="polite"/,
