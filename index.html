@@ -131,8 +131,9 @@
   <div class="dashboard-layout">
     
     <!-- ЛЕВАЯ ПАНЕЛЬ (ВКЛАДКИ) -->
-    <aside class="dashboard-sidebar" role="tablist" aria-label="Разделы игры">
+    <aside class="dashboard-sidebar">
       <div class="sidebar-title">Меню</div>
+      <div class="dashboard-tablist" role="tablist" aria-label="Разделы игры">
       <div class="tab active" role="tab" aria-selected="true" aria-controls="tab-content" tabindex="0" data-tab="locations" onclick="GameAPI.switchTab('locations')"><span class="tab-icon">🗺️</span> <span class="tab-text">Локации</span></div>
       <div class="tab" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="inventory" onclick="GameAPI.switchTab('inventory')"><span class="tab-icon">🎒</span> <span class="tab-text">Инвентарь</span></div>
       <div class="tab" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="spells" onclick="GameAPI.switchTab('spells')"><span class="tab-icon">✨</span> <span class="tab-text">Магия</span></div>
@@ -143,6 +144,7 @@
       <div class="tab" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="bestiary" onclick="GameAPI.switchTab('bestiary')"><span class="tab-icon">📖</span> <span class="tab-text">Бестиарий</span></div>
       
       <div class="tab" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="chronicles" onclick="GameAPI.switchTab('chronicles')"><span class="tab-icon">📚</span> <span class="tab-text">Хроники</span></div>
+      </div>
       <div class="sidebar-bottom">
         <button onclick="GameAPI.saveAndMenu()" class="save-menu-btn">💾 Сохранить и в меню</button>
       </div>
