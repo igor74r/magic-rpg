@@ -142,6 +142,14 @@ function renderMission(player, act, actIndex, mission, missionIndex) {
           ? '<span class="campaign-status locked">Закрыто</span>'
           : '<span class="campaign-status available">Выдаёт Эдвин</span>';
 
+  const prerequisite = !unlocked
+    ? actIndex > 0 && !actUnlocked(player, actIndex)
+      ? `Откройте акт «${STORY.acts[actIndex - 1].title}».`
+      : missionIndex > 0
+        ? `Сначала завершите миссию ${act.number}.${missionIndex} «${act.missions[missionIndex - 1].title}».`
+        : 'Предыдущий сюжетный этап ещё не завершён.'
+    : '';
+
   return `
     <article class="campaign-mission ${done ? 'done' : ''} ${missionProgress.active ? 'current' : ''} ${!unlocked ? 'locked' : ''}">
       <div class="campaign-mission-top">
@@ -151,6 +159,7 @@ function renderMission(player, act, actIndex, mission, missionIndex) {
 
       <h4>${mission.title}</h4>
       <p>${mission.desc}</p>
+      ${!unlocked ? `<p class="campaign-prerequisite">🔒 ${prerequisite}</p>` : ''}
       ${mission.briefing ? `<p class="campaign-story-beat"><b>Слова Эдвина:</b> ${mission.briefing}</p>` : ''}
       ${mission.clue ? `<p class="campaign-story-clue">◆ ${mission.clue}</p>` : ''}
       ${done && mission.aftermath ? `<p class="campaign-story-aftermath"><b>Итог:</b> ${mission.aftermath}</p>` : ''}
@@ -274,24 +283,29 @@ export function renderQuests() {
     ${
       currentMission
         ? `
-          <section class="campaign-current-objective campaign-quest-journal" aria-label="Журнал текущего задания">
-            <span>📜 ${currentProgress.active ? 'Журнал задания · принято' : 'Журнал задания · ожидает принятия'}</span>
-            <b>${currentMission.act.number}.${currentMission.missionIndex + 1} — ${currentMission.mission.title}</b>
+          <section class="campaign-current-objective campaign-quest-journal" aria-label="Журнал текущего задания" aria-live="polite">
+            <div class="campaign-journal-topline">
+              <span>📜 ${currentProgress.active ? 'Текущее поручение' : 'Следующее поручение'}</span>
+              <span class="campaign-journal-step">${currentMission.act.number}.${currentMission.missionIndex + 1} / ${totalMissions}</span>
+            </div>
+            <b class="campaign-journal-title">${currentMission.mission.title}</b>
             <p>${currentMission.mission.desc}</p>
             <div class="campaign-objective">
               <span>🎯 ${currentMission.mission.objective}</span>
               <b>${currentProgress.current}/${currentProgress.required}</b>
             </div>
-            <div class="campaign-progress" role="progressbar" aria-label="Выполнение текущего задания" aria-valuemin="0" aria-valuemax="${currentProgress.required}" aria-valuenow="${currentProgress.current}">
+            <div class="campaign-progress campaign-journal-progress" role="progressbar" aria-label="Выполнение текущего задания" aria-valuemin="0" aria-valuemax="${currentProgress.required}" aria-valuenow="${currentProgress.current}">
               <i style="width:${currentProgress.active ? Math.round(currentProgress.current / currentProgress.required * 100) : 0}%"></i>
             </div>
-            <p>📍 Место: ${LOCATIONS[currentMission.mission.locationId || currentMission.act.locationId]?.name || currentMission.mission.locationId || currentMission.act.locationId}</p>
-            <p>🎁 Награда: ${getMissionReward(currentMission.mission).gold}💰 · ${getMissionReward(currentMission.mission).exp} EXP</p>
-            <p>${currentProgress.active
+            <div class="campaign-journal-meta">
+              <span>📍 ${LOCATIONS[currentMission.mission.locationId || currentMission.act.locationId]?.name || currentMission.mission.locationId || currentMission.act.locationId}</span>
+              <span>🎁 ${getMissionReward(currentMission.mission).gold}💰 · ${getMissionReward(currentMission.mission).exp} EXP</span>
+            </div>
+            <p class="campaign-journal-next-step">${currentProgress.active
               ? currentProgress.complete
-                ? 'Цель достигнута. Вернитесь к Старейшине Эдвину в Аврору, чтобы сдать задание.'
-                : 'Задание принято. Побеждайте указанного врага в отмеченной локации.'
-              : 'Поговорите со Старейшиной Эдвином в Авроре, чтобы принять это задание.'}</p>
+                ? '✓ Цель выполнена — вернитесь к Старейшине Эдвину в Аврору.'
+                : 'Следующий шаг: победите указанного врага в этой локации.'
+              : 'Следующий шаг: поговорите со Старейшиной Эдвином в Авроре и примите задание.'}</p>
           </section>
         `
         : `

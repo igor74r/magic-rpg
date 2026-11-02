@@ -104,6 +104,9 @@ jobs:
       - name: Check mini-boss trophies, act-gated relic crafting and save rollback
         run: node scripts/check-mini-boss-trophies.mjs
 
+      - name: Check campaign journal and locked mission guidance
+        run: node scripts/check-campaign-journal.mjs
+
       - name: Check complete five-act campaign progression
         run: |
           node scripts/check-campaign-full.mjs
