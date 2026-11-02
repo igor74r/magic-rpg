@@ -117,12 +117,40 @@ window.addEventListener('unhandledrejection', (event) => {
 on('toast', toast);
 on('log', ({ channel, msg, cls }) => logTo('game-log', msg, cls));
 
+function showHeroArrivalTransition() {
+  const body = document.body;
+  if (!body || typeof document.createElement !== 'function') return;
+  document.getElementById('hero-arrival-transition')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'hero-arrival-transition';
+  overlay.className = 'hero-arrival-transition';
+  overlay.setAttribute('role', 'status');
+  overlay.setAttribute('aria-live', 'polite');
+  overlay.setAttribute('aria-label', 'Герой создан. Приключение начинается.');
+  overlay.innerHTML = `
+    <div class="hero-arrival-content">
+      <span class="hero-arrival-rune" aria-hidden="true">✦</span>
+      <span class="hero-arrival-kicker">ЛЕТОПИСЬ РАЗЛОМА · ГЛАВА ПЕРВАЯ</span>
+      <h1>Путь начинается</h1>
+      <p>Мир ждёт твоего решения</p>
+      <span class="hero-arrival-line" aria-hidden="true"></span>
+    </div>
+  `;
+
+  const duration = state.settings?.reducedMotion ? 520 : 1450;
+  overlay.style.setProperty('--arrival-duration', `${duration}ms`);
+  body.appendChild(overlay);
+  window.setTimeout(() => overlay.remove(), duration + 100);
+}
+
 on('game:started', () => {
   stopVoice();
   const log = document.getElementById('game-log');
   if (log) log.innerHTML = '';
   showScreen('screen-game');
   renderGame();
+  showHeroArrivalTransition();
   initAudio();
   updateVolume();
   playBGM('village');

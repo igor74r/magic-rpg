@@ -5,6 +5,7 @@ const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const character = readFileSync(new URL('../ui/character.js', import.meta.url), 'utf8');
 const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../css/2d-art-direction.css', import.meta.url), 'utf8');
+const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
 
 assert.deepEqual(
   [...character.matchAll(/const PLAYABLE_CLASSES = \[([^\]]+)\]/g)].flatMap(match =>
@@ -33,5 +34,9 @@ assert.match(main, /selectClass, reviewClassSelection, cancelClassReview, confir
   'GameAPI must expose selection, review, cancel and confirm actions');
 assert.match(css, /@media \(max-width: 800px\)/, 'hero cards and review must adapt to mobile');
 assert.match(css, /class-review-card/, 'confirmation must have a styled summary');
+assert.match(main, /showHeroArrivalTransition\(\)/, 'creating a hero must trigger the arrival transition');
+assert.match(main, /hero-arrival-transition/, 'arrival transition must use a dedicated overlay');
+assert.match(css, /heroArrivalFade/, 'arrival transition must fade out');
+assert.match(css, /pointer-events: none/, 'arrival transition must not block controls');
 
 console.log('Character creation selection/review/confirm contract: OK');
