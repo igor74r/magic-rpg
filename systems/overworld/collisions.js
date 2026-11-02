@@ -3,6 +3,10 @@ import { TILE, isWalkable } from './map.js';
 
 // The collision silhouette follows drawVillageBuilding() in ui/overworld/sprites.js.
 // The central south opening is intentionally left clear as the front doorway.
+// Hero body footprint: 18 px diameter, aligned with the visible torso/legs.
+// Weapons, staffs, bows and animated headwear are cosmetic and do not collide.
+export const PLAYER_COLLISION_RADIUS = 9;
+
 const BUILDING_BODY = Object.freeze({
   // Enlarged wall footprint follows the 3×3-tile pixel-art building sprite.
   left: -66,
