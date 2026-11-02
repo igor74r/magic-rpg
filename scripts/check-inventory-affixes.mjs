@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { ITEMS, RARITIES, rollRarity, rollItemAffixes } from '../data/items.js';
-import { addItem, countItem, removeItem, useItem } from '../systems/inventory.js';
+import { addItem, canAddItem, countItem, removeItem, useItem } from '../systems/inventory.js';
 import { craftRecipe } from '../systems/crafting.js';
 import { NPCS } from '../data/npcs.js';
 
@@ -26,6 +26,10 @@ const legendary = addItem('iron-sword', 1, { rarity: 'legendary', random: () => 
 assert.equal(legendary.rarity, 'legendary');
 assert.equal(legendary.affixes.length, 4);
 assert.ok(legendary.bonus.attack >= sword.bonus.attack);
+assert.equal(canAddItem('health-potion', 0.5).ok, false, 'fractional quantities must be rejected');
+assert.equal(canAddItem('health-potion', 1.5).ok, false, 'fractional quantities must be rejected');
+assert.deepEqual(addItem('health-potion', 0.5), [], 'fractional quantities must not silently round down');
+assert.deepEqual(addItem('health-potion', 1.5), [], 'fractional quantities must not silently round down');
 
 state.game.player.inventory = [
   { id: 'herb-life', qty: 2 },
