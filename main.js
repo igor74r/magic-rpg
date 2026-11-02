@@ -1,3 +1,4 @@
+import { initDiagnostics } from './systems/diagnostics.js';
 import { state } from './systems/state.js';
 import { LOCATIONS } from './data/locations.js';
 import { on, emit } from './systems/events.js';
@@ -51,6 +52,8 @@ import {
 } from './systems/voice.js';
 
 const ALWAYS_SHOW_PROLOGUE = false;
+
+initDiagnostics();
 
 // Lightweight runtime diagnostics: capture uncaught errors, rejected promises,
 // and failed resource loads without interrupting the game.
