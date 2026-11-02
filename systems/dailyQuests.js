@@ -83,6 +83,12 @@ export function claimQuestReward(questId) {
   const nextGold = p.gold + definition.gold;
   if (!Number.isSafeInteger(nextGold)) return false;
 
+  let previousPlayer;
+  try {
+    previousPlayer = JSON.parse(JSON.stringify(p));
+  } catch {
+    return false;
+  }
   q.claimed = true;
   p.gold = nextGold;
   if (definition.exp) addExp(definition.exp);
@@ -95,6 +101,10 @@ export function claimQuestReward(questId) {
     msg: `📜 Квест «${q.text}» — ${parts.join(', ')}`,
     cls: 'success'
   });
-  saveGame();
+  if (!saveGame()) {
+    for (const key of Object.keys(p)) delete p[key];
+    Object.assign(p, previousPlayer);
+    return false;
+  }
   return true;
 }
