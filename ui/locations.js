@@ -93,7 +93,7 @@ function panelHtml(id) {
   if (id === 'rift') {
     actions.push(`<button type="button" onclick="GameAPI.enterRift()">Войти в Разлом</button>`);
   } else if (here) {
-    if (loc.safe || loc.enemies?.length) actions.push(`<button type="button" onclick="GameAPI.enterOverworld()" ${access.allowed ? '' : 'disabled'}>${access.allowed ? 'Исследовать' : `🔒 Открывается с ${story.requiredLevel} уровня`}</button>`);
+    if (loc.safe || loc.enemies?.length) actions.push(`<button type="button" onclick="GameAPI.enterOverworld()" ${access.allowed ? '' : 'disabled'}>${access.allowed ? 'Исследовать' : access.reason === 'campaign' ? `🔒 После задания ${access.requiredMissionId}` : `🔒 С ${story.requiredLevel} уровня`}</button>`);
     if (loc.shop) actions.push(`<button type="button" onclick="GameAPI.openShop()">Магазин</button>`);
     if (id === 'village') {
       const canOpen = canOpenDaily();
@@ -105,7 +105,7 @@ function panelHtml(id) {
     }
   } else {
     // Если локация не текущая, кнопка "Перейти" всё ещё нужна для тех, кто хочет сначала прочитать описание
-    actions.push(`<button type="button" onclick="GameAPI.mapTravel('${id}')" ${access.allowed ? '' : 'disabled'}>${access.allowed ? 'Перейти сюда' : `🔒 Открывается с ${story.requiredLevel} уровня`}</button>`);
+    actions.push(`<button type="button" onclick="GameAPI.mapTravel('${id}')" ${access.allowed ? '' : 'disabled'}>${access.allowed ? 'Перейти сюда' : access.reason === 'campaign' ? `🔒 После задания ${access.requiredMissionId}` : `🔒 С ${story.requiredLevel} уровня`}</button>`);
   }
   return `
     <div class="map-panel-head">
