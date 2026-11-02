@@ -29,6 +29,21 @@ assert.equal(decision.role, 'bruiser');
 assert.equal(decision.reason, 'opening', 'bruisers should recognize a defensive stance as an opening');
 
 decision = getEnemyCombatDecision({
+  specialType: 'snipe', specialEvery: 3, turnCount: 1,
+  blocking: true, isBoss: true
+});
+assert.equal(decision.action, 'telegraph', 'bosses should prepare a counter when the player blocks');
+assert.equal(decision.reason, 'punish-block');
+
+decision = getEnemyCombatDecision({
+  specialType: 'drain', specialEvery: 3, turnCount: 1,
+  enemyHpRatio: 0.2, isBoss: true
+});
+assert.equal(decision.action, 'telegraph', 'bosses should enter an enrage sequence below 25% health');
+assert.equal(decision.reason, 'enrage');
+
+
+decision = getEnemyCombatDecision({
   specialType: 'drain', specialEvery: 3, turnCount: 1, enemyHpRatio: 0.4
 });
 assert.equal(decision.action, 'telegraph', 'leech enemies should prepare drain when critically injured');
