@@ -110,6 +110,9 @@ function panelHtml(id) {
           <div class="map-quest-progress-track" role="progressbar" aria-label="Прогресс задания" aria-valuemin="0" aria-valuemax="${progress.required}" aria-valuenow="${progress.current}"><span style="width:${Math.round(progress.current / progress.required * 100)}%"></span></div>
           ${mission.briefing ? `<p class="map-quest-briefing">${mission.briefing}</p>` : ''}
           ${shardNotice}
+          <button type="button" class="map-quest-journal-button" data-map-action="open-quest-journal">
+            📖 К журналу заданий
+          </button>
         </section>`;
       })()
     : '';
@@ -144,7 +147,10 @@ function panelHtml(id) {
 
 function renderPanel(id) {
   const el = document.getElementById('map-panel');
-  if (el) el.innerHTML = panelHtml(id || state.game.location);
+  if (!el) return;
+  el.innerHTML = panelHtml(id || state.game.location);
+  el.querySelector('[data-map-action="open-quest-journal"]')
+    ?.addEventListener('click', () => window.GameAPI?.switchTab?.('quests'));
 }
 
 function highlight() {
