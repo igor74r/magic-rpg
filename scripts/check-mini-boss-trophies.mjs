@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { ITEMS } from '../data/items.js';
+import { ITEMS, RARITIES } from '../data/items.js';
 import { ENEMIES } from '../data/enemies.js';
 import { NPCS } from '../data/npcs.js';
 import { STORY } from '../data/story.js';
@@ -17,6 +17,10 @@ const trophies = [
 const allRecipes = [...NPCS.blacksmith.recipes, ...NPCS.alchemist.recipes];
 
 for (const entry of trophies) {
+  assert.ok(ITEMS[entry.item], `Trophy must be registered in ITEMS: ${entry.item}`);
+  assert.ok(!Object.hasOwn(RARITIES, entry.item), `Trophy must not be registered as a rarity: ${entry.item}`);
+  assert.ok(ITEMS[entry.result], `Relic must be registered in ITEMS: ${entry.result}`);
+  assert.ok(!Object.hasOwn(RARITIES, entry.result), `Relic must not be registered as a rarity: ${entry.result}`);
   const enemy = ENEMIES[entry.enemy];
   const trophy = ITEMS[entry.item];
   const recipe = allRecipes.find(item => item.id === entry.recipe);
