@@ -80,7 +80,7 @@ export function updateOverworld(dt) {
   for (let enemyIndex = 0; enemyIndex < ow.enemies.length; enemyIndex++) {
     const e = ow.enemies[enemyIndex];
     if (e.dead && e.respawnAt && now >= e.respawnAt) {
-      e.dead = false; e.hp = e.maxHp; e.x = e.homeX; e.y = e.homeY; e.state = 'idle'; e.respawnAt = 0; e.effects = []; e.phase = 0;
+      e.dead = false; e.hp = e.maxHp; e.x = e.homeX; e.y = e.homeY; e.state = 'idle'; e.respawnAt = 0; e.effects = []; e.phase = 0; e.tacticalSpecialPending = false;
     }
   }
 
