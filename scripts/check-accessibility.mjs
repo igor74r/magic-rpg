@@ -116,10 +116,10 @@ assert.ok(quests.includes('role="progressbar" aria-label="Прогресс ми�
   'campaign mission progress must expose accessible progress semantics');
 console.log('check-accessibility: PASS (14 keyboard-operable tabs, labelled settings, modal/live-region/progress semantics)');
 
-const questBoard = (await readFile(new URL('../ui/quests.js', import.meta.url), 'utf8'));
+const questBoard = quests;
 assert.match(questBoard, /<button type="button" data-game-action="close-npc"/,
   'quest board exit control must not submit an enclosing form');
-const combatPanel = (await readFile(new URL('../ui/overworld/combat-panel.js', import.meta.url), 'utf8'));
+// combatPanel is loaded with the other accessibility fixtures above.
 for (const action of ['attack', 'open-spells', 'open-items', 'flee', 'block', 'open-abilities']) {
   assert.match(combatPanel, new RegExp('<button type="button" data-combat-action="' + action + '"'),
     `combat action "${action}" must be an explicit button`);
