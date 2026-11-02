@@ -1,24 +1,26 @@
 import assert from 'node:assert/strict';
-import { canOccupyPlayerPosition, isVillagePositionBlocked } from '../systems/overworld/collisions.js';
+import { canOccupyPlayerPosition, isVillagePositionBlocked, PLAYER_COLLISION_RADIUS } from '../systems/overworld/collisions.js';
 import { resolveSweptMovement } from '../systems/overworld/movement.js';
+
+assert.equal(PLAYER_COLLISION_RADIUS, 9, 'hero collision must match the visible 18px body footprint, not held equipment');
 
 const open = Array.from({ length: 8 }, () => Array(8).fill(0));
 const wall = open.map(row => [...row]);
 wall[3][3] = 2;
 
-assert.equal(canOccupyPlayerPosition(open, 8, 8, 3 * 48 + 24, 3 * 48 + 24, 12, 'forest'), true,
+assert.equal(canOccupyPlayerPosition(open, 8, 8, 3 * 48 + 24, 3 * 48 + 24, PLAYER_COLLISION_RADIUS, 'forest'), true,
   'player must move freely on clear ground');
-assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 + 24, 3 * 48 + 24, 12, 'forest'), false,
+assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 + 24, 3 * 48 + 24, PLAYER_COLLISION_RADIUS, 'forest'), false,
   'player center inside a blocked tile must be rejected');
-assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 - 8, 3 * 48 - 8, 12, 'forest'), false,
+assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 - 8, 3 * 48 - 8, PLAYER_COLLISION_RADIUS, 'forest'), false,
   'player circle must not clip a diagonal obstacle corner');
-assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 - 20, 3 * 48 + 24, 12, 'forest'), true,
+assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 - 18, 3 * 48 + 24, PLAYER_COLLISION_RADIUS, 'forest'), true,
   'player must remain able to pass beside a wall with sufficient clearance');
-assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 - 4, 3 * 48 + 24, 12, 'forest'), false,
+assert.equal(canOccupyPlayerPosition(wall, 8, 8, 3 * 48 - 4, 3 * 48 + 24, PLAYER_COLLISION_RADIUS, 'forest'), false,
   'player footprint must not overlap a wall from the side');
-assert.equal(canOccupyPlayerPosition(open, 8, 8, 24, 24, 12, 'forest'), true,
+assert.equal(canOccupyPlayerPosition(open, 8, 8, 24, 24, PLAYER_COLLISION_RADIUS, 'forest'), true,
   'walkable map interior must remain traversable');
-assert.equal(canOccupyPlayerPosition(open, 8, 8, 2, 24, 12, 'forest'), false,
+assert.equal(canOccupyPlayerPosition(open, 8, 8, 2, 24, PLAYER_COLLISION_RADIUS, 'forest'), false,
   'player footprint must remain inside map bounds');
 
 const building = { id: 'test-house', buildingStyle: 'home', x: 5, y: 5 };
