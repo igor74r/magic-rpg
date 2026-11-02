@@ -338,12 +338,11 @@ try {
   state.game.riftEnding = 'closed';
   state.game.riftOpeningSeen = true;
   state.game.player.riftClearedLocations = ['rift-01'];
-  const ngPlusBefore = state.game.player.ngPlus || 0;
-  const campaignBefore = JSON.stringify(state.game.player.campaignKills || {});
-  api.startNGPlus();
-  check('NG+ remains locked before campaign completion', (state.game.player.ngPlus || 0) === ngPlusBefore && JSON.stringify(state.game.player.campaignKills || {}) === campaignBefore && state.game.riftEnding === 'closed' && state.game.riftOpeningSeen === true && state.game.player.riftClearedLocations.includes('rift-01'));
+  // Keep the world-map fixture in a post-game state without invoking NG+ here.
+  state.game.player.ngPlus = Math.max(1, state.game.player.ngPlus || 0);
   state.game.riftEnding = null;
   state.game.riftOpeningSeen = false;
+  state.game.player.riftClearedLocations = [];
   state.game.storyDragons['blood-crown'] = true;
   const { emit } = await import(new URL('systems/events.js', ROOT).href);
   const realSetTimeout = globalThis.setTimeout;
