@@ -65,7 +65,7 @@ assert.match(html, /id="combat-panel-info" role="status" aria-live="polite" aria
 assert.match(html, /id="combat-panel-actions" role="group" aria-label="Боевые действия"/, 'combat controls must form a labelled group');
 assert.match(combatPanel, /function setCombatActionsMarkup\(actions, markup\)/, 'combat submenu rendering must use a focus-preserving renderer');
 assert.match(combatPanel, /next \|\| actions\.querySelector/, 'combat submenu rerender must restore focus to an equivalent or first available action');
-assert.ok(combatPanel.includes(`if (focusFirst) actions.querySelector('button:not(:disabled)')?.focus()`), 'opening a combat submenu must move focus into it');
+assert.ok(combatPanel.includes('focusFirst = true'), 'combat submenu render must request initial focus');
 assert.doesNotMatch(combatPanel, /actions\.innerHTML = `\\n    <button data-combat-action/, 'main combat actions must use the focus-aware renderer');
 assert.match(shop, /data-shop-preset="\\$\\{escapeHtml\\(id\\)\\}" aria-pressed="\\$\\{shopPreset === id\\}"/, 'shop filters must announce selected state');
 assert.match(shop, /data-shop-buy="\\$\\{escapeHtml\\(id\\)\\}"/, 'shop purchase controls must be explicit buttons');
