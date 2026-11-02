@@ -11,6 +11,7 @@ const originalDocument = globalThis.document;
 const originalStorage = globalThis.localStorage;
 const originalSetTimeout = globalThis.setTimeout;
 globalThis.document = {
+  querySelectorAll: () => [],
   getElementById: node,
   createElement: () => ({ className: '', textContent: '', remove() {} }),
   body: { appendChild() {} }
