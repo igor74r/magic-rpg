@@ -73,11 +73,11 @@ export function renderHeader() {
         </span>
 
         <div class="stat-buttons">
-          <button onclick="GameAPI.spendStat('str')">+1 СИЛ</button>
-          <button onclick="GameAPI.spendStat('int')">+1 ИНТ</button>
-          <button onclick="GameAPI.spendStat('wis')">+1 МДР</button>
-          <button onclick="GameAPI.spendStat('con')">+1 ТЕЛ</button>
-          <button onclick="GameAPI.spendStat('dex')">+1 ЛОВ</button>
+          <button data-spend-stat="str">+1 СИЛ</button>
+          <button data-spend-stat="int">+1 ИНТ</button>
+          <button data-spend-stat="wis">+1 МДР</button>
+          <button data-spend-stat="con">+1 ТЕЛ</button>
+          <button data-spend-stat="dex">+1 ЛОВ</button>
         </div>
       </div>
     `
@@ -183,12 +183,21 @@ export function renderHeader() {
     </div>
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
-      <button onclick="GameAPI.enterTower()" style="padding:6px 12px;font-size:12px">🏰 Башня</button>
-      <button onclick="GameAPI.enterRift()" style="padding:6px 12px;font-size:12px">🌀 Разлом</button>
+      <button data-header-action="tower" style="padding:6px 12px;font-size:12px">🏰 Башня</button>
+      <button data-header-action="rift" style="padding:6px 12px;font-size:12px">🌀 Разлом</button>
     </div>
 
     ${statBlock}
   `;
+
+  const header = document.getElementById('game-header');
+  header.querySelectorAll('[data-spend-stat]').forEach(button => {
+    button.addEventListener('click', () => spendStat(button.dataset.spendStat));
+  });
+  header.querySelector('[data-header-action="tower"]')
+    ?.addEventListener('click', () => window.GameAPI?.enterTower?.());
+  header.querySelector('[data-header-action="rift"]')
+    ?.addEventListener('click', () => window.GameAPI?.enterRift?.());
 }
 
 function renderEndgameHint(p) {
@@ -221,8 +230,8 @@ function renderActiveEffectsInline(effects) {
     return `
       <span
         class="fx-badge"
-        style="border-color:${data.color};color:${data.color};"
-        title="${data.name}${data.desc ? ': ' + data.desc : ''} (${effect.duration} ход.)"
+        style="border-color:${escapeHtml(data.color)};color:${escapeHtml(data.color)};"
+        title="${escapeHtml(data.name)}${data.desc ? ': ' + escapeHtml(data.desc) : ''} (${escapeHtml(effect.duration)} ход.)"
       >
         ${data.icon}${effect.duration}
       </span>
