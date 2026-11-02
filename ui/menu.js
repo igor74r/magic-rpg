@@ -38,7 +38,7 @@ export function renderSlots() {
         </div>
         <div class="slot-actions">
           <button onclick="GameAPI.loadSlot(${slot})" class="slot-play">▶️ Продолжить</button>
-          <button onclick="GameAPI.deleteSlot(${slot})" class="slot-delete" title="Удалить слот">🗑️</button>
+          <button onclick="GameAPI.deleteSlot(${slot})" class="slot-delete" title="Удалить слот" aria-label="Удалить сохранение в слоте ${slot}">🗑️</button>
         </div>
       </div>`;
     } else {
@@ -97,7 +97,7 @@ function renderSettingsTab(tab) {
         <span id="set-sfx-volume-val">${s.sfxVolume ?? 80}%</span>
       </div>
       <div class="settings-row">
-        <label>🔇 Общий звук</label>
+        <label for="set-sound">🔇 Общий звук</label>
         <select id="set-sound" onchange="GameAPI.applySettings()">
           <option value="on" ${s.soundEnabled !== false ? 'selected' : ''}>Включён</option>
           <option value="off" ${s.soundEnabled === false ? 'selected' : ''}>Выключен</option>
@@ -108,7 +108,7 @@ function renderSettingsTab(tab) {
   } else if (tab === 'game') {
     content.innerHTML = `
       <div class="settings-row">
-        <label>⚔️ Сложность</label>
+        <label for="set-difficulty">⚔️ Сложность</label>
         <select id="set-difficulty" onchange="GameAPI.applySettings()">
           <option value="easy" ${s.difficulty === 'easy' ? 'selected' : ''}>Лёгкая</option>
           <option value="normal" ${s.difficulty === 'normal' ? 'selected' : ''}>Обычная</option>
@@ -116,14 +116,14 @@ function renderSettingsTab(tab) {
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>💾 Автосохранение</label>
+        <label for="set-autosave">💾 Автосохранение</label>
         <select id="set-autosave" onchange="GameAPI.applySettings()">
           <option value="on" ${s.autoSave !== false ? 'selected' : ''}>Включено</option>
           <option value="off" ${s.autoSave === false ? 'selected' : ''}>Выключено</option>
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>⏱ Интервал сохранения</label>
+        <label for="set-autosave-interval">⏱ Интервал сохранения</label>
         <select id="set-autosave-interval" onchange="GameAPI.applySettings()">
           <option value="15" ${(s.autoSaveInterval ?? 30) === 15 ? 'selected' : ''}>15 секунд</option>
           <option value="30" ${(s.autoSaveInterval ?? 30) === 30 ? 'selected' : ''}>30 секунд</option>
@@ -131,14 +131,14 @@ function renderSettingsTab(tab) {
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>💡 Подсказки клавиш</label>
+        <label for="set-hotkeys">💡 Подсказки клавиш</label>
         <select id="set-hotkeys" onchange="GameAPI.applySettings()">
           <option value="on" ${s.showHotkeys !== false ? 'selected' : ''}>Показывать</option>
           <option value="off" ${s.showHotkeys === false ? 'selected' : ''}>Скрывать</option>
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>📊 Счётчик FPS</label>
+        <label for="set-fps">📊 Счётчик FPS</label>
         <select id="set-fps" onchange="GameAPI.applySettings()">
           <option value="off" ${s.showFps !== true ? 'selected' : ''}>Скрыт</option>
           <option value="on" ${s.showFps === true ? 'selected' : ''}>Показывать</option>
@@ -149,7 +149,7 @@ function renderSettingsTab(tab) {
   } else if (tab === 'graphics') {
     content.innerHTML = `
       <div class="settings-row">
-        <label>🎨 Качество графики</label>
+        <label for="set-graphics-quality">🎨 Качество графики</label>
         <select id="set-graphics-quality" onchange="GameAPI.applySettings()">
           <option value="low" ${s.graphicsQuality === 'low' ? 'selected' : ''}>Низкое — для слабых ПК</option>
           <option value="balanced" ${s.graphicsQuality === 'balanced' ? 'selected' : ''}>Сбалансированное</option>
@@ -157,21 +157,21 @@ function renderSettingsTab(tab) {
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>🌧️ Погодные эффекты</label>
+        <label for="set-weather-effects">🌧️ Погодные эффекты</label>
         <select id="set-weather-effects" onchange="GameAPI.applySettings()">
           <option value="on" ${s.weatherEffects !== false ? 'selected' : ''}>Включены</option>
           <option value="off" ${s.weatherEffects === false ? 'selected' : ''}>Выключены</option>
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>🌫️ Атмосферный туман</label>
+        <label for="set-ambient-fog">🌫️ Атмосферный туман</label>
         <select id="set-ambient-fog" onchange="GameAPI.applySettings()">
           <option value="on" ${s.ambientFog !== false ? 'selected' : ''}>Включён</option>
           <option value="off" ${s.ambientFog === false ? 'selected' : ''}>Выключен</option>
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>✨ Свечение (Bloom)</label>
+        <label for="set-bloom-effects">✨ Свечение (Bloom)</label>
         <select id="set-bloom-effects" onchange="GameAPI.applySettings()">
           <option value="on" ${s.bloomEffects !== false ? 'selected' : ''}>Включено</option>
           <option value="off" ${s.bloomEffects === false ? 'selected' : ''}>Выключено</option>
@@ -182,28 +182,28 @@ function renderSettingsTab(tab) {
   } else if (tab === 'accessibility') {
     content.innerHTML = `
       <div class="settings-row">
-        <label>🔢 Числа урона и лечения</label>
+        <label for="set-damage-numbers">🔢 Числа урона и лечения</label>
         <select id="set-damage-numbers" onchange="GameAPI.applySettings()">
           <option value="on" ${s.damageNumbers !== false ? 'selected' : ''}>Показывать</option>
           <option value="off" ${s.damageNumbers === false ? 'selected' : ''}>Скрывать</option>
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>📳 Тряска экрана</label>
+        <label for="set-screen-shake">📳 Тряска экрана</label>
         <select id="set-screen-shake" onchange="GameAPI.applySettings()">
           <option value="on" ${s.screenShake !== false ? 'selected' : ''}>Включена</option>
           <option value="off" ${s.screenShake === false ? 'selected' : ''}>Выключена</option>
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>❤️ Эффекты низкого здоровья</label>
+        <label for="set-low-health">❤️ Эффекты низкого здоровья</label>
         <select id="set-low-health" onchange="GameAPI.applySettings()">
           <option value="on" ${s.lowHealthEffects !== false ? 'selected' : ''}>Показывать</option>
           <option value="off" ${s.lowHealthEffects === false ? 'selected' : ''}>Скрывать</option>
         </select><span></span>
       </div>
       <div class="settings-row">
-        <label>🌿 Уменьшить анимацию</label>
+        <label for="set-reduced-motion">🌿 Уменьшить анимацию</label>
         <select id="set-reduced-motion" onchange="GameAPI.applySettings()">
           <option value="off" ${s.reducedMotion !== true ? 'selected' : ''}>Обычная</option>
           <option value="on" ${s.reducedMotion === true ? 'selected' : ''}>Уменьшенная</option>
