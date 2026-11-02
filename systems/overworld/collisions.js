@@ -92,3 +92,32 @@ export function canOccupyPlayerPosition(map, cols, rows, x, y, radius = 12, loca
   }
   return locationId !== 'village' || !isVillagePositionBlocked(x, y, radius);
 }
+
+
+// Physical radii for non-player actors, measured against their rendered body.
+export const NPC_COLLISION_RADIUS = 8;
+export const ENEMY_COLLISION_RADIUS = 10;
+
+// Actor-to-actor circle collision. If legacy placement already overlaps,
+// permit only movement that does not make that overlap worse, so actors can
+// separate instead of becoming permanently stuck.
+export function isActorPositionClear(x, y, radius, actors = [], self = null) {
+  if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(radius) || radius < 0) return false;
+  return actors.every(actor => {
+    if (!actor || actor === self || actor.dead || !Number.isFinite(actor.x) || !Number.isFinite(actor.y)) return true;
+    const otherRadius = Number.isFinite(actor.collisionRadius) ? actor.collisionRadius : PLAYER_COLLISION_RADIUS;
+    const minDistance = radius + otherRadius;
+    const dx = x - actor.x, dy = y - actor.y;
+    const distanceSquared = dx * dx + dy * dy;
+    if (distanceSquared >= minDistance * minDistance) return true;
+    const currentX = Number.isFinite(self?.x) ? self.x : x;
+    const currentY = Number.isFinite(self?.y) ? self.y : y;
+    const currentDistance = Math.hypot(currentX - actor.x, currentY - actor.y);
+    return currentDistance < minDistance && Math.sqrt(distanceSquared) >= currentDistance - 0.001;
+  });
+}
+
+export function canOccupyActorPosition(map, cols, rows, x, y, radius, locationId, actors = [], self = null) {
+  return canOccupyPlayerPosition(map, cols, rows, x, y, radius, locationId)
+    && isActorPositionClear(x, y, radius, actors, self);
+}
