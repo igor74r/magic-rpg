@@ -32,6 +32,7 @@ import { updateQuestProgress } from '../dailyQuests.js';
 import { canCompleteMainQuest, getActiveCampaignMission, getMissionProgress, recordCampaignKill, recordCampaignShard } from '../campaign.js';
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
+import { getEnemyCombatDecision } from './enemy-ai.js';
 import {
   MODIFIERS,
   ELITE_ATK_MULT,
@@ -1274,11 +1275,25 @@ function enemyCombatTurn() {
       ? (def.phases[enemy.phase - 1]?.specialEvery || special?.every)
       : special?.every;
 
-  const specialOnCooldown = Boolean(special && specialEvery && ow.combat.turnCount % specialEvery === 0);
   const playerHpRatio = p.maxHp > 0 ? p.hp / p.maxHp : 1;
   const enemyHpRatio = enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 1;
-  const tacticalSpecial = (special?.type === 'snipe' && playerHpRatio <= 0.35) || (special?.type === 'drain' && enemyHpRatio <= 0.45) || (special?.type === 'double' && ow.combat.blocking);
-  const useSpecial = Boolean(special && (specialOnCooldown || tacticalSpecial));
+  const tacticalDecision = getEnemyCombatDecision({
+    specialType: special?.type,
+    specialEvery,
+    turnCount: ow.combat.turnCount,
+    playerHpRatio,
+    enemyHpRatio,
+    blocking: ow.combat.blocking,
+    pendingSpecial: Boolean(enemy.tacticalSpecialPending)
+  });
+  const useSpecial = tacticalDecision.action === 'special';
+  if (tacticalDecision.action === 'telegraph') {
+    enemy.tacticalSpecialPending = true;
+    pushLog(`⚠️ ${name} готовит особый приём: ${special.name}!`, 'warning');
+  } else if (useSpecial) {
+    enemy.tacticalSpecialPending = false;
+    pushLog(`❗ ${name} применяет подготовленный приём: ${special.name}!`, 'warning');
+  }
 
   let actualDamage = 0;
 
