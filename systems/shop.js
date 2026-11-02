@@ -21,10 +21,16 @@ export function buyItem(id) {
   if (!Number.isFinite(p.gold) || p.gold < price) { emit('toast', 'Недостаточно золота'); return false; }
   const capacity = canAddItem(id, 1, p);
   if (!capacity.ok) { emit('toast', capacity.reason === 'slots' ? 'Сумка заполнена' : 'Превышен лимит переносимого веса'); return false; }
+  const previousInventory = p.inventory.map(inst => ({ ...inst, bonus: inst.bonus ? { ...inst.bonus } : inst.bonus }));
+  const previousGold = p.gold;
   const created = addItem(id, 1, { rarity: 'common' });
   if (!created.length) return false;
   p.gold -= price;
-  saveGame();
+  if (!saveGame()) {
+    p.inventory = previousInventory;
+    p.gold = previousGold;
+    return false;
+  }
   emit('toast', `Куплено: ${item.name} (${price}💰)`);
   return true;
 }
@@ -59,6 +65,11 @@ export function sellItemsByIndices(indices, options = {}) {
   }
   if (!candidates.length || total <= 0) return { ok: false, count: 0, total: 0 };
 
+  const previousInventory = p.inventory.map(inst => JSON.parse(JSON.stringify(inst)));
+  const previousGold = p.gold;
+  const previousBuyback = Array.isArray(p.buyback) ? p.buyback.map(record => JSON.parse(JSON.stringify(record))) : p.buyback;
+  const previousGoldEarned = p.stats?.goldEarned;
+  const hadStats = !!p.stats;
   if (!Array.isArray(p.buyback)) p.buyback = [];
   const soldAt = new Date().toDateString();
   p.buyback = p.buyback.filter(record => record?.soldAt === soldAt);
@@ -74,7 +85,16 @@ export function sellItemsByIndices(indices, options = {}) {
   p.gold = (p.gold || 0) + total;
   if (!p.stats) p.stats = {};
   p.stats.goldEarned = (p.stats.goldEarned || 0) + total;
-  saveGame();
+  if (!saveGame()) {
+    p.inventory = previousInventory;
+    p.gold = previousGold;
+    p.buyback = previousBuyback;
+    if (!p.stats) p.stats = {};
+    if (previousGoldEarned === undefined) delete p.stats.goldEarned;
+    else p.stats.goldEarned = previousGoldEarned;
+    if (!hadStats) delete p.stats;
+    return { ok: false, count: 0, total: 0, msg: 'Не удалось сохранить продажу; изменения отменены' };
+  }
   emit('toast', `Продано предметов: ${candidates.length} (+${total}💰)`);
   emit('game:update');
   return { ok: true, count: candidates.length, total };
@@ -119,6 +139,9 @@ export function buybackItem(index) {
   if (!Number.isFinite(p.gold) || p.gold < record.price) return { ok: false, msg: 'Не хватает золота для обратного выкупа' };
   const capacity = canAddItem(record.item.id, qty, p);
   if (!capacity.ok) return { ok: false, msg: capacity.reason === 'slots' ? 'Сумка заполнена' : 'Превышен лимит переносимого веса' };
+  const previousInventory = p.inventory.map(inst => JSON.parse(JSON.stringify(inst)));
+  const previousGold = p.gold;
+  const previousBuyback = p.buyback.map(entry => JSON.parse(JSON.stringify(entry)));
   if (STACKABLE_TYPES.has(ITEMS[record.item.id].type)) {
     if (!addItem(record.item.id, qty).length) return { ok: false, msg: 'Не удалось вернуть предмет в сумку' };
   } else {
@@ -126,7 +149,12 @@ export function buybackItem(index) {
   }
   p.gold -= record.price;
   p.buyback = p.buyback.filter(entry => entry !== record);
-  saveGame();
+  if (!saveGame()) {
+    p.inventory = previousInventory;
+    p.gold = previousGold;
+    p.buyback = previousBuyback;
+    return { ok: false, msg: 'Не удалось сохранить обратный выкуп; изменения отменены' };
+  }
   emit('toast', 'Предмет выкуплен обратно за ' + record.price + '💰');
   emit('game:update');
   return { ok: true, price: record.price };
