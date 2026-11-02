@@ -30,7 +30,22 @@ const interactionCount = village.npcs.filter(item => !item.ambient).length
 assert.ok(village.npcs.filter(item => item.ambient).every(item => item.wanderRadius >= 40 && item.wanderRadius <= 70),
   'ambient residents must have compact bounded walking areas');
 
-assert.equal(buildings.length, 10, 'Aurora must have six service buildings and four homes');
+assert.equal(buildings.length, 8, 'Aurora must have six service buildings and exactly two homes');
+assert.equal(buildings.filter(item => item.buildingStyle === 'home').length, 2,
+  'Aurora must retain exactly two residential homes');
+const roadCenterX = Math.floor(village.mapCols / 2);
+const roadCenterY = Math.floor(village.mapRows / 2);
+for (const building of buildings) {
+  assert.ok(Math.abs(building.x - roadCenterX) > 1 && Math.abs(building.y - roadCenterY) > 1,
+    `${building.id}: no building may occupy the straight road cross`);
+}
+for (let y = 0; y < village.mapRows; y++) {
+  for (let x = 0; x < village.mapCols; x++) {
+    const expectedRoad = Math.abs(x - roadCenterX) <= 1 || Math.abs(y - roadCenterY) <= 1;
+    assert.equal(map[y][x] === 1, expectedRoad,
+      `road tile at ${x},${y} must belong only to the straight cross`);
+  }
+}
 for (const style of ['forge', 'healer', 'alchemy', 'market', 'hall', 'tavern', 'home']) {
   assert.ok(buildings.some(item => item.buildingStyle === style), `missing ${style} building`);
 }
@@ -59,7 +74,7 @@ for (const prop of village.statics.filter(item => ['lantern', 'planter', 'banner
   assert.equal(isVillagePositionBlocked(prop.x * 48 + 24, prop.y * 48 + 24, 8), false,
     `${prop.id}: lightweight plaza decor must not block player`);
 }
-assert.equal(colliders.length, 30, 'each of ten buildings must have three wall segments');
+assert.equal(colliders.length, 24, 'each of eight buildings must have three wall segments');
 assert.ok(colliders.every(rect => rect.width > 0 && rect.height > 0), 'wall rectangles must have positive dimensions');
 for (const building of buildings) {
   const x = building.x * 48 + 24;
