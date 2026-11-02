@@ -180,12 +180,36 @@ try {
     assert.match(await heroPanel.innerText(), /UI audit/, `${viewport.name}: hero dossier must show the active character`);
     assert.equal(await page.locator('#dashboard-context').count(), 1, `${viewport.name}: persistent quest context must render`);
     assert.equal(await page.locator('[data-log-filter]').count(), 4, `${viewport.name}: event journal must expose four filters`);
+    await page.evaluate(() => {
+      const log = document.getElementById('game-log');
+      for (const [id, message] of [
+        ['combat', 'Игрок нанёс урон врагу'],
+        ['loot', 'Получен предмет: меч'],
+        ['story', 'Задание сюжета завершено']
+      ]) {
+        const line = document.createElement('div');
+        line.dataset.dashboardSmoke = id;
+        line.textContent = message;
+        log.appendChild(line);
+      }
+    });
     await page.locator('[data-log-filter="combat"]').click();
     assert.equal(await page.locator('[data-log-filter="combat"]').getAttribute('aria-pressed'), 'true',
       `${viewport.name}: selected event filter must expose its state`);
+    assert.equal(await page.locator('[data-dashboard-smoke="combat"]').isVisible(), true,
+      `${viewport.name}: combat filter must show combat events`);
+    assert.equal(await page.locator('[data-dashboard-smoke="loot"]').isVisible(), false,
+      `${viewport.name}: combat filter must hide loot events`);
+    await page.locator('[data-log-filter="loot"]').click();
+    assert.equal(await page.locator('[data-dashboard-smoke="loot"]').isVisible(), true,
+      `${viewport.name}: loot filter must show loot events`);
+    await page.locator('[data-log-filter="story"]').click();
+    assert.equal(await page.locator('[data-dashboard-smoke="story"]').isVisible(), true,
+      `${viewport.name}: story filter must show story events`);
     await page.locator('#game-log-search').fill('проверка');
     await page.locator('#game-log-search').fill('');
     await page.locator('[data-log-filter="all"]').click();
+    await page.locator('[data-dashboard-smoke]').evaluateAll(nodes => nodes.forEach(node => node.remove()));
     const dashboardNav = await page.locator('.dashboard-sidebar').boundingBox();
     assert.ok(dashboardNav && dashboardNav.height > 0, `${viewport.name}: primary dashboard navigation must remain visible`);
     const navSearch = page.locator('#dashboard-nav-search');
