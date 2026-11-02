@@ -19,7 +19,9 @@ export function addExp(amount) {
   if (!Number.isSafeInteger(p.expNext) || p.expNext <= 0) {
     p.expNext = getExpNext(p.level);
   }
-  p.exp += amount;
+  const nextExp = p.exp + amount;
+  if (!Number.isSafeInteger(nextExp)) return;
+  p.exp = nextExp;
 
   while (p.level < MAX_LEVEL && p.exp >= p.expNext) {
     p.exp -= p.expNext;
