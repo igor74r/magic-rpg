@@ -73,6 +73,11 @@ try {
     storyShards: { flame: false, ice: false, blood: false },
     storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false }
   };
+  const malformedLegacy = structuredClone(legacy);
+  malformedLegacy.player.level = 'not-a-number';
+  runImport(malformedLegacy);
+  assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE', 'legacy save with invalid core values must be rejected after migration');
+
   failImportWrite = true;
   runImport(legacy);
   assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE', 'failed import write must restore the previous slot');
