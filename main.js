@@ -334,9 +334,9 @@ function openWorldPortalMenu() {
   overlay.id = 'aurora-world-portal';
   overlay.style.cssText = 'position:fixed;inset:0;z-index:10070;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at 50% 35%,rgba(38,91,94,.34),rgba(5,9,16,.97) 70%);color:#f2eadb;overflow:auto;font-family:inherit;';
   overlay.innerHTML = `
-    <section style="width:min(900px,100%);max-height:92vh;overflow:auto;padding:clamp(18px,3vw,30px);border:1px solid #72b9b2;border-radius:18px;background:linear-gradient(145deg,rgba(24,37,44,.98),rgba(10,15,25,.99));box-shadow:0 0 55px rgba(69,190,182,.2),inset 0 0 35px rgba(99,188,175,.06)">
+    <section role="dialog" aria-modal="true" aria-labelledby="aurora-world-portal-title" style="width:min(900px,100%);max-height:92vh;overflow:auto;padding:clamp(18px,3vw,30px);border:1px solid #72b9b2;border-radius:18px;background:linear-gradient(145deg,rgba(24,37,44,.98),rgba(10,15,25,.99));box-shadow:0 0 55px rgba(69,190,182,.2),inset 0 0 35px rgba(99,188,175,.06)">
       <header style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px">
-        <div><small style="letter-spacing:.22em;color:#8bd7ce">СЕТЬ ДРЕВНИХ ВРАТ</small><h1 style="margin:7px 0 4px;font-size:clamp(25px,4vw,38px)">Пути между мирами</h1><p style="margin:0;color:#b5c6c5">Выберите область, куда направить портал</p></div>
+        <div><small style="letter-spacing:.22em;color:#8bd7ce">СЕТЬ ДРЕВНИХ ВРАТ</small><h1 id="aurora-world-portal-title" style="margin:7px 0 4px;font-size:clamp(25px,4vw,38px)">Пути между мирами</h1><p style="margin:0;color:#b5c6c5">Выберите область, куда направить портал</p></div>
         <button type="button" data-world-close style="padding:10px 15px;border:1px solid #719b9b;border-radius:9px;background:#182a32;color:#e9ffff">Закрыть</button>
       </header>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px">
@@ -353,6 +353,8 @@ function openWorldPortalMenu() {
     if (state.overworld) { state.overworld.active = true; state.overworld.paused = false; }
   };
   overlay.querySelector('[data-world-close]')?.addEventListener('click', resume);
+  overlay.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); resume(); } });
+  overlay.querySelector('[data-world-close]')?.focus();
   overlay.addEventListener('click', event => { if (event.target === overlay) resume(); });
   overlay.querySelector('[data-world-tower]')?.addEventListener('click', () => {
     overlay.remove();
