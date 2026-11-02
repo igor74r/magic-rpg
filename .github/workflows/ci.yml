@@ -38,6 +38,9 @@ jobs:
       - name: Check economy and campaign rewards
         run: node scripts/check-economy.mjs
 
+      - name: Check daily quest save integrity and rewards
+        run: node scripts/check-daily-quests.mjs
+
       - name: Check item rarity distribution
         run: node scripts/check-rarity.mjs
 

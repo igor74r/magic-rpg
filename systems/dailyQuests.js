@@ -13,30 +13,49 @@ const POOL = [
 ];
 
 export function getDailyQuests() {
-  const p = state.game.player;
-  if (!p.dailyQuests) p.dailyQuests = { date: 0, list: [] };
-
+  const p = state.game?.player;
+  if (!p) return [];
   const now = Date.now();
-  const lastDate = p.dailyQuests.date || 0;
   const dayMs = 24 * 60 * 60 * 1000;
+  const saved = p.dailyQuests && typeof p.dailyQuests === 'object' && !Array.isArray(p.dailyQuests)
+    ? p.dailyQuests
+    : { date: 0, list: [] };
+  const lastDate = Number.isFinite(saved.date) && saved.date >= 0 ? saved.date : 0;
+  const savedList = Array.isArray(saved.list) ? saved.list : [];
+  const seen = new Set();
+  const normalized = savedList.map(entry => {
+    const definition = POOL.find(quest => quest.id === entry?.id);
+    if (!definition || seen.has(definition.id)) return null;
+    seen.add(definition.id);
+    const rawCurrent = Number(entry.current);
+    const current = Number.isSafeInteger(rawCurrent) ? Math.max(0, Math.min(definition.max, rawCurrent)) : 0;
+    const completed = entry.completed === true || current >= definition.max;
+    return { ...definition, current, completed, claimed: completed && entry.claimed === true };
+  }).filter(Boolean);
+  const expired = now - lastDate > dayMs;
 
-  if (now - lastDate > dayMs || p.dailyQuests.list.length === 0) {
+  if (expired || normalized.length !== 3) {
     const shuffled = [...POOL].sort(() => 0.5 - Math.random());
-    p.dailyQuests.list = shuffled.slice(0, 3).map(q => ({
-      ...q, current: 0, completed: false, claimed: false
-    }));
-    p.dailyQuests.date = now;
+    p.dailyQuests = {
+      date: now,
+      list: shuffled.slice(0, 3).map(quest => ({ ...quest, current: 0, completed: false, claimed: false }))
+    };
+    saveGame();
+  } else if (p.dailyQuests !== saved || JSON.stringify(saved.list) !== JSON.stringify(normalized)) {
+    p.dailyQuests = { date: lastDate, list: normalized };
     saveGame();
   }
   return p.dailyQuests.list;
 }
 
 export function updateQuestProgress(type, target, amount = 1) {
-  const p = state.game.player;
-  if (!p.dailyQuests || !p.dailyQuests.list) return;
+  const p = state.game?.player;
+  const increment = Number(amount);
+  if (!p || !Number.isSafeInteger(increment) || increment <= 0) return;
+  const quests = getDailyQuests();
 
   let changed = false;
-  for (const q of p.dailyQuests.list) {
+  for (const q of quests) {
     if (q.completed || q.claimed || q.type !== type) continue;
     if (q.target !== 'any' && q.target !== target) continue;
 
@@ -52,17 +71,18 @@ export function updateQuestProgress(type, target, amount = 1) {
 }
 
 export function claimQuestReward(questId) {
-  const p = state.game.player;
-  if (!p.dailyQuests || !p.dailyQuests.list) return false;
-  const q = p.dailyQuests.list.find(x => x.id === questId);
-  if (!q || !q.completed || q.claimed) return false;
+  const p = state.game?.player;
+  if (!p) return false;
+  const q = getDailyQuests().find(entry => entry.id === questId);
+  const definition = POOL.find(entry => entry.id === questId);
+  if (!q || !definition || q.completed !== true || q.claimed === true) return false;
 
   q.claimed = true;
-  p.gold += q.gold;
-  if (q.exp) addExp(q.exp);
+  p.gold = (Number.isFinite(p.gold) ? p.gold : 0) + definition.gold;
+  if (definition.exp) addExp(definition.exp);
 
-  const parts = [`+${q.gold}💰`];
-  if (q.exp) parts.push(`+${q.exp} EXP`);
+  const parts = [`+${definition.gold}💰`];
+  if (definition.exp) parts.push(`+${definition.exp} EXP`);
   emit('toast', `📜 Награда: ${parts.join(', ')}`);
   emit('log', {
     channel: 'game',
