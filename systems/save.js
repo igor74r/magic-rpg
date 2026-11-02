@@ -500,6 +500,20 @@ export function loadGameData(slot) {
     validateCurrentSaveShape(game);
     migrateGame(game);
 
+    // A defeat is persisted immediately. If the browser was closed on the
+    // death screen, restore the character in the village instead of loading
+    // an unusable zero-HP state.
+    const player = game.player;
+    if (Number.isFinite(player.hp) && player.hp <= 0 &&
+        Number.isFinite(player.maxHp) && player.maxHp > 0) {
+      player.hp = Math.ceil(player.maxHp / 2);
+      player.mp = player.class === 'warrior' ? 0
+        : Number.isFinite(player.maxMp) ? Math.ceil(player.maxMp / 2) : (player.mp || 0);
+      player.effects = [];
+      player.cooldowns = {};
+      game.location = 'village';
+    }
+
     state.game = game;
     state.currentSlot = selectedSlot;
     lastSaveTime = Date.now();
