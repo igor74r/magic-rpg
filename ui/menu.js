@@ -449,6 +449,12 @@ export function exportSave() {
 export function importSave(event) {
   const file = event.target.files[0];
   if (!file) return;
+  const maxImportBytes = 5 * 1024 * 1024;
+  if (Number.isFinite(file.size) && file.size > maxImportBytes) {
+    toast('❌ Файл сохранения слишком большой (максимум 5 МБ)');
+    event.target.value = '';
+    return;
+  }
   const reader = new FileReader();
   reader.onload = (e) => {
     try {
