@@ -1,6 +1,6 @@
 // Migration regression: exercise every supported save version v1-v16 without touching real browser storage.
 import assert from 'node:assert/strict';
-import { migrateGame, loadGameData, migrateLegacySave } from '../systems/save.js';
+import { migrateGame, loadGameData, migrateLegacySave, hasSave, deleteSave, getSlotInfo } from '../systems/save.js';
 import { state } from '../systems/state.js';
 import { EQUIPMENT_SLOTS } from '../systems/inventory.js';
 
@@ -117,6 +117,20 @@ const storagePathOk = loaded && state.game?.version === 17 && rewritten.version 
   storage.get('magic-rpg-settings') === '{"sentinel":"keep"}';
 console.log(`${storagePathOk ? 'PASS' : 'FAIL'} loadGameData migrates and rewrites v16 slot without changing settings`);
 assert.ok(storagePathOk);
+
+
+// Save-slot API must reject invalid indices rather than read, write or delete
+// arbitrary localStorage keys.
+for (const invalidSlot of [0, -1, 4, 1.5, '1', null]) {
+  assert.equal(loadGameData(invalidSlot), false, `invalid slot ${String(invalidSlot)} must not load`);
+  assert.equal(hasSave(invalidSlot), false, `invalid slot ${String(invalidSlot)} must not be reported as saved`);
+  assert.equal(getSlotInfo(invalidSlot), null, `invalid slot ${String(invalidSlot)} must not expose slot info`);
+}
+storage.set('magic-rpg-save-4', '{"marker":"must-not-delete"}');
+deleteSave(4);
+assert.equal(storage.get('magic-rpg-save-4'), '{"marker":"must-not-delete"}',
+  'invalid slot must not delete storage outside the three supported slots');
+console.log('PASS save-slot APIs reject invalid slot indices');
 
 // Legacy single-slot saves must not be deleted if slot 1 is already occupied.
 storage.set('magic-rpg-save', JSON.stringify({ marker: 'legacy-character' }));
