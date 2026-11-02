@@ -36,6 +36,23 @@ export function renderClassSelection() {
 
   if (!root) return;
 
+  if (root.dataset.classSelectionBound !== 'true') {
+    root.addEventListener('click', event => {
+      const target = event.target instanceof Element ? event.target : null;
+      const card = target?.closest('[data-class-id]');
+      if (card && root.contains(card)) selectClass(card.dataset.classId);
+    });
+    root.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      const target = event.target instanceof Element ? event.target : null;
+      const card = target?.closest('[data-class-id]');
+      if (!card || !root.contains(card)) return;
+      event.preventDefault();
+      selectClass(card.dataset.classId);
+    });
+    root.dataset.classSelectionBound = 'true';
+  }
+
   root.innerHTML = Object.entries(CLASSES)
     .filter(([id]) => PLAYABLE_CLASSES.includes(id))
     .map(([id, cls]) => {
@@ -45,7 +62,10 @@ export function renderClassSelection() {
       return `
         <div
           class="class-card ${state.selectedClass === id ? 'selected' : ''}"
-          onclick="GameAPI.selectClass('${id}')"
+          data-class-id="${id}"
+          role="button"
+          tabindex="0"
+          aria-pressed="${state.selectedClass === id}"
         >
           <div class="class-model-frame">
             <canvas
