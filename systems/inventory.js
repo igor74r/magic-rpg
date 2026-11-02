@@ -143,9 +143,9 @@ export function getInventorySlotCount(player = state.game?.player) {
 
 export function canAddItem(id, qty = 1, player = state.game?.player) {
   const item = ITEMS[id];
-  if (!item || !player || !Number.isFinite(qty) || qty < 1) return { ok: false, reason: 'invalid' };
+  if (!item || !player || !Number.isSafeInteger(qty) || qty < 1) return { ok: false, reason: 'invalid' };
   if (item.type === 'quest') return { ok: true, weight: getInventoryWeight(player), capacity: getInventoryCapacity(player) };
-  const amount = Math.floor(qty);
+  const amount = qty;
   const nextWeight = getInventoryWeight(player) + getItemUnitWeight(item) * amount;
   const stackable = STACKABLE_TYPES.has(item.type);
   const existing = stackable && (player.inventory || []).some(inst => inst.id === id && !inst.rarity);
