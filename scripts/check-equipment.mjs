@@ -56,6 +56,11 @@ assert.equal(equipBest(), true);
 assert.equal(player.equipped.weapon.id, 'steel-sword');
 assert.equal(player.equipped.head.id, 'cinder-visor');
 
+player.inventory = [{ id: 'ring-quiet-tide', qty: 1, runes: ['rune-void'] }];
+player.equipped = { ring1: { id: 'ring-wolf-eye', qty: 1 }, ring2: null };
+assert.equal(equipBest(), true, 'equip-best must include socketed rune bonuses');
+assert.equal(player.equipped.ring1.id, 'ring-quiet-tide', 'rune-enhanced ring must replace weaker ring');
+
 const ui = await readFile(new URL('../ui/inventory.js', import.meta.url), 'utf8');
 assert.doesNotMatch(ui, /\son(?:click|mouseover|mouseout)\s*=/i, 'inventory UI must not emit inline event handlers');
 assert.match(ui, /data-inv-action="socket-rune"/);
