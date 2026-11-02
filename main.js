@@ -38,6 +38,7 @@ import {
 import { openDailyChest } from './ui/village.js';
 import { exitOverworld, enterOverworld } from './systems/overworld.js';
 import { isRiftReady, getRiftLocations } from './systems/rift.js';
+import { getStoryLocationProgression, canEnterStoryLocation } from './systems/campaign.js';
 import { getTowerBest, getTowerStartFloor, TOWER_MAX_FLOOR } from './systems/tower.js';
 import { startNGPlus } from './systems/ngplus.js';
 import { showScreen, toast, logTo, escapeHtml } from './ui/screens.js';
@@ -329,6 +330,12 @@ function openWorldPortalMenu() {
   const destinations = Object.entries(LOCATIONS).filter(([id, loc]) =>
     id !== 'rift' && (loc.safe || (Array.isArray(loc.enemies) && loc.enemies.length))
   );
+  const storyOrder = new Map(getStoryLocationProgression().map(item => [item.id, item]));
+  destinations.sort(([a], [b]) => {
+    const aOrder = storyOrder.get(a)?.sequence ?? Number.MAX_SAFE_INTEGER;
+    const bOrder = storyOrder.get(b)?.sequence ?? Number.MAX_SAFE_INTEGER;
+    return aOrder - bOrder;
+  });
   if (isRiftReady() && LOCATIONS.rift) destinations.push(['rift', LOCATIONS.rift]);
   document.getElementById('aurora-world-portal')?.remove();
 
@@ -348,19 +355,19 @@ function openWorldPortalMenu() {
     <section role="dialog" aria-modal="true" aria-labelledby="aurora-world-portal-title" aria-describedby="aurora-world-portal-description" style="width:min(960px,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid #72b9b2;border-radius:18px;background:linear-gradient(145deg,rgba(24,37,44,.99),rgba(10,15,25,.99));box-shadow:0 0 55px rgba(69,190,182,.22),inset 0 0 35px rgba(99,188,175,.06)">
       <header style="padding:clamp(17px,3vw,28px);padding-bottom:16px;border-bottom:1px solid rgba(114,185,178,.2)">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-          <div><small style="letter-spacing:.2em;color:#8bd7ce;font-size:10px">ДРЕВНЯЯ СЕТЬ ПЕРЕХОДОВ</small><h1 id="aurora-world-portal-title" style="margin:7px 0 5px;font-size:clamp(24px,4vw,36px);line-height:1.15">Пути между мирами</h1><p id="aurora-world-portal-description" style="margin:0;color:#b5c6c5;font-size:14px;line-height:1.5">Выберите область на карте вокруг деревни Аврора. Портал перенесёт вас прямо туда.</p></div>
+          <div><small style="letter-spacing:.2em;color:#8bd7ce;font-size:10px">ДРЕВНЯЯ СЕТЬ ПЕРЕХОДОВ</small><h1 id="aurora-world-portal-title" style="margin:7px 0 5px;font-size:clamp(24px,4vw,36px);line-height:1.15">Пути между мирами</h1><p id="aurora-world-portal-description" style="margin:0;color:#b5c6c5;font-size:14px;line-height:1.5">Сюжетные земли идут по маршруту кампании. Каждая следующая глава открывается по уровню героя; закрытые области нельзя выбрать.</p></div>
           <button type="button" data-world-close aria-label="Закрыть окно портала" style="flex:0 0 auto;padding:9px 13px;border:1px solid #719b9b;border-radius:9px;background:#182a32;color:#e9ffff;font:inherit;cursor:pointer">✕</button>
         </div>
         <label for="aurora-world-search" style="display:block;margin-top:17px;color:#a9c5c3;font-size:12px;font-weight:700">НАЙТИ ЛОКАЦИЮ</label>
         <input id="aurora-world-search" type="search" placeholder="Например: Тёмный лес, Ледяные пики…" autocomplete="off" style="box-sizing:border-box;width:100%;margin-top:7px;padding:12px 14px;border:1px solid #456b70;border-radius:10px;outline:none;background:#0d1a22;color:#f2eadb;font:inherit;font-size:14px">
-        <div style="display:flex;justify-content:space-between;gap:10px;margin-top:9px;color:#91aaa9;font-size:12px"><span>Области на карте мира</span><span data-world-count aria-live="polite">${destinations.length} локаций</span></div>
+        <div style="display:flex;justify-content:space-between;gap:10px;margin-top:9px;color:#91aaa9;font-size:12px"><span>Сюжетный маршрут · от ранних земель к финальным</span><span data-world-count aria-live="polite">${destinations.length} локаций</span></div>
       </header>
       <div data-world-list style="padding:16px clamp(14px,3vw,26px);overflow:auto;overscroll-behavior:contain">
         <div data-world-grid style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px">${cards}</div>
         <p data-world-empty hidden style="padding:26px 10px;text-align:center;color:#b5c6c5">Ничего не найдено. Попробуйте другое название.</p>
       </div>
       <footer style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px clamp(14px,3vw,26px);border-top:1px solid rgba(114,185,178,.22);background:rgba(5,12,18,.35)">
-        <span style="color:#9db5b6;font-size:12px">Башня открывается отдельно от обычных областей.</span>
+        <span style="color:#9db5b6;font-size:12px">Номер маршрута показывает порядок сюжета; расположение земель на карте остаётся разбросанным.</span>
         <button type="button" data-world-tower style="padding:12px 17px;border:1px solid #d49a5b;border-radius:10px;background:linear-gradient(135deg,#69401f,#2b1b18);color:#fff0d7;font-weight:700;font:inherit;cursor:pointer">🏰 Башня · 40 этажей</button>
       </footer>
     </section>`;
