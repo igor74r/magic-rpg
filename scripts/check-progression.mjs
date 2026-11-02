@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { addExp, getExpNext, MAX_LEVEL } from '../systems/progression.js';
+import { STORY } from '../data/story.js';
+import { ENEMIES } from '../data/enemies.js';
+import { getMissionReward } from '../systems/campaign.js';
 
 const player = {
   class: 'warrior', level: 1, exp: 25, expNext: getExpNext(1),
@@ -20,7 +23,7 @@ addExp(100);
 assert.equal(JSON.stringify(player), overflowSnapshot, 'XP total overflow must be rejected');
 player.exp = 25;
 player.expNext = 999999;
-addExp(75);
+addExp(100);
 assert.equal(player.level, 2);
 assert.equal(player.exp, 0);
 assert.equal(player.expNext, getExpNext(2));
@@ -42,11 +45,39 @@ for (const invalid of [NaN, Infinity, -Infinity, -1, 1.5, '7', Number.MAX_SAFE_I
   player.expNext = getExpNext(1);
   player.statPoints = invalid;
   player.passivePoints = invalid;
-  addExp(100);
+  addExp(getExpNext(1));
   assert.equal(player.level, 2);
   assert.equal(player.statPoints, 1);
   assert.equal(player.passivePoints, 1);
 }
 
+// Simulate the campaign's guaranteed objective kills plus every turn-in reward.
+// This is the minimum intended progression, without optional farming or buffs.
+let campaignExp = 0;
+const expectedActLevels = [10, 20, 30, 40, 50];
+for (const [actIndex, act] of STORY.acts.entries()) {
+  for (const mission of act.missions) {
+    const enemy = ENEMIES[mission.enemyId];
+    assert.ok(enemy, `${mission.id} must reference a defined enemy`);
+    campaignExp += enemy.exp * mission.count;
+    campaignExp += getMissionReward(mission).exp;
+  }
+
+  let simulatedLevel = 1;
+  let remainingExp = campaignExp;
+  while (simulatedLevel < MAX_LEVEL && remainingExp >= getExpNext(simulatedLevel)) {
+    remainingExp -= getExpNext(simulatedLevel);
+    simulatedLevel++;
+  }
+  assert.ok(
+    simulatedLevel >= expectedActLevels[actIndex],
+    `Act ${act.number} should naturally reach level ${expectedActLevels[actIndex]} (got ${simulatedLevel})`
+  );
+}
+
+assert.equal(getExpNext(50), 628, 'level 50 should use the final campaign XP band');
+assert.ok(getExpNext(51) > getExpNext(50), 'post-campaign XP requirements must continue increasing');
+assert.equal(getExpNext(MAX_LEVEL), Infinity, 'level cap must stop further XP requirements');
+
 state.game = null;
-console.log('check-progression: PASS (invalid XP guards, level-up and threshold recovery)');
+console.log('check-progression: PASS (XP guards, level-up, save thresholds and five-act pacing)');
