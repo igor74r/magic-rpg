@@ -59,7 +59,7 @@ export function updateQuestProgress(type, target, amount = 1) {
     if (q.completed || q.claimed || q.type !== type) continue;
     if (q.target !== 'any' && q.target !== target) continue;
 
-    q.current += amount;
+    q.current += increment;
     if (q.current >= q.max) {
       q.current = q.max;
       q.completed = true;
@@ -76,9 +76,11 @@ export function claimQuestReward(questId) {
   const q = getDailyQuests().find(entry => entry.id === questId);
   const definition = POOL.find(entry => entry.id === questId);
   if (!q || !definition || q.completed !== true || q.claimed === true) return false;
+  const currentGold = Number.isSafeInteger(p.gold) && p.gold >= 0 ? p.gold : 0;
+  if (!Number.isSafeInteger(currentGold + definition.gold)) return false;
 
   q.claimed = true;
-  p.gold = (Number.isFinite(p.gold) ? p.gold : 0) + definition.gold;
+  p.gold = currentGold + definition.gold;
   if (definition.exp) addExp(definition.exp);
 
   const parts = [`+${definition.gold}💰`];
