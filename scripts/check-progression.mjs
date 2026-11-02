@@ -35,5 +35,18 @@ assert.equal(player.expNext, getExpNext(player.level));
 assert.ok(Number.isFinite(player.exp));
 assert.ok(player.level < MAX_LEVEL);
 
+// Invalid point balances must be repaired before level-up rewards.
+for (const invalid of [NaN, Infinity, -Infinity, -1, 1.5, '7', Number.MAX_SAFE_INTEGER + 1]) {
+  player.level = 1;
+  player.exp = 0;
+  player.expNext = getExpNext(1);
+  player.statPoints = invalid;
+  player.passivePoints = invalid;
+  addExp(100);
+  assert.equal(player.level, 2);
+  assert.equal(player.statPoints, 1);
+  assert.equal(player.passivePoints, 1);
+}
+
 state.game = null;
 console.log('check-progression: PASS (invalid XP guards, level-up and threshold recovery)');
