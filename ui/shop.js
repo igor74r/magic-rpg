@@ -34,7 +34,7 @@ export function openShop() {
   const p = state.game.player;
   const filters = [['cheap', 'Дешёвое'], ['build', 'Сборка'], ['craft', 'Материалы крафта'], ['rare', 'Редкое'], ['all', 'Всё']];
   const filterHtml = filters.map(([id, label]) =>
-    `<button class="inv-filter-btn ${shopPreset === id ? 'active' : ''}" data-shop-preset="${escapeHtml(id)}">${escapeHtml(label)}</button>`
+    `<button class="inv-filter-btn ${shopPreset === id ? 'active' : ''}" data-shop-preset="${escapeHtml(id)}" aria-pressed="${shopPreset === id}">${escapeHtml(label)}</button>`
   ).join('');
   const html = getPresetItems().map(id => {
     const item = ITEMS[id];
