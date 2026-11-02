@@ -40,6 +40,7 @@ export const NPCS = {
   merchant: {
     id: 'merchant', name: 'Странствующий торговец', emoji: '🛒',
     greetings: ['Товар редкий, цена честная!', 'Смотри, не проходи мимо!', 'Золотишко водится?'],
+    rareStock: ['moonsteel-spear', 'rune-sword', 'astral-staff', 'warden-plate', 'void-robe', 'scroll-frost-nova', 'scroll-shadow-lance', 'scroll-arcane-surge'],
     stock: [
       "health-potion", "mana-potion", "strong-health-potion", "strong-mana-potion", "antidote",
       "strength-elixir", "mana-elixir", "scroll-lightning", "scroll-shield", "restorative-potion",
