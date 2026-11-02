@@ -1,6 +1,6 @@
 // Migration regression: exercise every supported save version v1-v16 without touching real browser storage.
 import assert from 'node:assert/strict';
-import { migrateGame, loadGameData } from '../systems/save.js';
+import { migrateGame, loadGameData, migrateLegacySave } from '../systems/save.js';
 import { state } from '../systems/state.js';
 import { EQUIPMENT_SLOTS } from '../systems/inventory.js';
 
@@ -117,6 +117,24 @@ const storagePathOk = loaded && state.game?.version === 17 && rewritten.version 
   storage.get('magic-rpg-settings') === '{"sentinel":"keep"}';
 console.log(`${storagePathOk ? 'PASS' : 'FAIL'} loadGameData migrates and rewrites v16 slot without changing settings`);
 assert.ok(storagePathOk);
+
+// Legacy single-slot saves must not be deleted if slot 1 is already occupied.
+storage.set('magic-rpg-save', JSON.stringify({ marker: 'legacy-character' }));
+storage.set('magic-rpg-save-1', JSON.stringify({ marker: 'slot-one-character' }));
+migrateLegacySave();
+assert.equal(storage.get('magic-rpg-save'), JSON.stringify({ marker: 'legacy-character' }),
+  'legacy save must remain untouched when slot 1 is occupied');
+assert.equal(storage.get('magic-rpg-save-1'), JSON.stringify({ marker: 'slot-one-character' }),
+  'existing slot 1 must not be overwritten');
+console.log('PASS legacy save is preserved when slot 1 is occupied');
+
+// When slot 1 is empty, migration copies the legacy save and then removes the old key.
+storage.delete('magic-rpg-save-1');
+migrateLegacySave();
+assert.equal(storage.get('magic-rpg-save-1'), JSON.stringify({ marker: 'legacy-character' }),
+  'legacy save must migrate into empty slot 1');
+assert.equal(storage.has('magic-rpg-save'), false, 'legacy key is removed only after successful copy');
+console.log('PASS legacy save migrates when slot 1 is empty');
 
 // Newer and malformed schema versions must be rejected without rewriting the slot.
 for (const unsupportedVersion of [18, 'future', 17.5, -1, true]) {
