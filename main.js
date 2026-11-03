@@ -380,11 +380,19 @@ function respawnInVillage() {
   p.mp = p.class === 'warrior' ? 0 : Math.ceil(p.maxMp / 2);
   p.effects = [];
   p.cooldowns = {};
+  // Clear the defeated map before creating a fresh, safe village scene.
+  // Merely showing the dashboard leaves the overworld canvas uninitialized
+  // and was the cause of the post-death freeze.
   state.game.location = 'village';
   state.overworld = null;
   saveGame();
-  showScreen('screen-game');
-  renderGame();
+
+  const entered = enterOverworld('village');
+  if (!entered) {
+    // Defensive fallback: never strand the player on the death screen.
+    showScreen('screen-game');
+    renderGame();
+  }
   playBGM('village');
   toast('Вы возродились в деревне');
 }
