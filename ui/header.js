@@ -48,8 +48,10 @@ export function renderGame() {
   syncMapFocusedLayout(state.currentTab);
   renderLocation();
   renderDashboardContext();
-  // The legacy inline #tab-content must never paint a section over the gameplay.
-  // Sections are rendered only inside #dashboard-tab-modal on explicit navigation.
+  // Clear stale legacy tab markup on every gameplay render. All navigation
+  // sections now belong exclusively to the modal overlay.
+  const legacyTabContent = document.getElementById('tab-content');
+  if (legacyTabContent) legacyTabContent.replaceChildren();
 }
 
 function totalKills() {
