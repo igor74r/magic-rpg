@@ -8,7 +8,7 @@ assert.notEqual(actionStart, -1, 'pause menu must expose save-and-return-to-vill
 assert.notEqual(actionEnd, -1, 'save-and-return action must have a clear boundary');
 const action = source.slice(actionStart, actionEnd);
 
-assert.match(source, /enterOverworld\s*\}\s*from ['"]\.\.\/systems\/overworld\.js['"]/,
+assert.match(source, /enterOverworld,?\\s*\\}\\s*from ['\"]\\.\\.\\/systems\\/overworld\\.js['\"],
   'the UI must import the overworld entry point');
 assert.ok(action.indexOf('if (!saveGame())') >= 0,
   'a failed save must prevent leaving the current location');
