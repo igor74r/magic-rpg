@@ -571,7 +571,8 @@ input[type="text"]:focus, select:focus { outline: none; border-color: var(--gold
 
 /* ============ ТУЛТИПЫ ============ */
 .item-tooltip {
-  position: fixed; z-index: 10000;
+  /* Dashboard inventory modal is z-index:100000; keep item details above it. */
+  position: fixed; z-index: 100100;
   background:
     linear-gradient(180deg, #f6e8cb, #e8d5b0);
   border: 2px solid var(--gold-dark);
