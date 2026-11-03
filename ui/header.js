@@ -308,6 +308,7 @@ let dashboardModalResumeWorld = false;
 let dashboardModalTrigger = null;
 let dashboardPreviousGameInert = false;
 let dashboardPreviousPaused = false;
+let dashboardPreviousActive = false;
 
 function getDashboardTabTitle(tab) {
   const element = document.querySelector(`.dashboard-tablist .tab[data-tab="${tab}"] .tab-text`);
@@ -338,10 +339,18 @@ function closeDashboardModal({ resumeWorld = true, restoreFocus = true } = {}) {
   // on close; the persistent game shell remains mounted beneath the overlay.
   // Resume exactly the scene that was running before the overlay opened.
   // Do not rely on a second render or sidebar click to unfreeze the game.
-  if (resumeWorld && dashboardModalResumeWorld && state.overworld) {
-    window.GameAPI?.resumeOverworld?.();
+  if (state.overworld) {
+    if (resumeWorld && dashboardModalResumeWorld) {
+      window.GameAPI?.resumeOverworld?.();
+    } else {
+      state.overworld.active = dashboardPreviousActive;
+      state.overworld.paused = dashboardPreviousPaused;
+      setPaused(dashboardPreviousPaused);
+    }
   }
   dashboardModalResumeWorld = false;
+  dashboardPreviousPaused = false;
+  dashboardPreviousActive = false;
 
   const trigger = dashboardModalTrigger;
   dashboardModalTrigger = null;
@@ -376,6 +385,7 @@ function openDashboardModal(tab) {
   dashboardModalTrigger = document.getElementById(`game-tab-${tab}`);
   dashboardModalResumeWorld = preserveWorldResume;
   dashboardPreviousPaused = !!state.overworld?.paused;
+  dashboardPreviousActive = !!state.overworld?.active;
   if (state.overworld) {
     // Pause the update loop without deactivating the overworld. Setting
     // active=false can strand the loop in a state that sidebar actions cannot resume.
