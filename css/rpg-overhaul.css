@@ -552,6 +552,28 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   .logo-gem img { animation:none; }
 }
 
+/* ---------- Игровая сцена внутри постоянного дашборда ---------- */
+.dashboard-overworld { display:none; min-width:0; width:100%; }
+#screen-game.overworld-active .dashboard-content { display:none !important; }
+#screen-game.overworld-active .dashboard-overworld { display:block; }
+#screen-game.overworld-active .dashboard-main { min-height:0; overflow-y:auto; }
+#screen-game.overworld-active .dashboard-main > .dashboard-overworld .game-container {
+  box-sizing:border-box; width:100% !important; max-width:none !important; padding:0 12px 12px;
+}
+#screen-game.overworld-active #overworld-canvas {
+  width:100%; max-height:calc(100dvh - 260px); object-fit:contain;
+}
+#screen-game.overworld-active #overworld-title { color:#e8d19b; font-size:clamp(18px,2vw,25px); }
+#screen-game.overworld-active .dashboard-sidebar,
+#screen-game.overworld-active .dashboard-log { display:flex !important; }
+#screen-game.overworld-active .dashboard-sidebar { flex-direction:column; }
+@media (max-width:700px) {
+  #screen-game.overworld-active .dashboard-main > .dashboard-overworld .game-container { padding:0 6px 10px; }
+  #screen-game.overworld-active #overworld-canvas { max-height:58dvh; }
+}
+@media (max-width:650px) {
+  #screen-game.overworld-active .dashboard-sidebar { flex-direction:row; }
+}
 /* ---------- Окно продажи предметов ---------- */
 .inventory-sale-overlay {
   position:fixed; inset:0; z-index:10060; display:grid; place-items:center;
