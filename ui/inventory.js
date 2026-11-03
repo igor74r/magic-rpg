@@ -16,6 +16,7 @@ import { renderGame } from './header.js';
 let invFilter = 'bag';
 let invSort = 'default';
 let invSearch = '';
+let invRarityFilter = 'all';
 let saleSelection = [];
 let saleConfirmState = false;
 let saleReturnFocus = null;
@@ -265,7 +266,19 @@ export function cancelSaleUI() {
   if (saleReturnFocus?.isConnected) saleReturnFocus.focus();
   saleReturnFocus = null;
 }
-function filterBarHTML(counts) {
+function filterBarHTML(counts, rarityCounts) {
+  const rarities = [
+    ['all', 'Все редкости', counts.filtered],
+    ['common', 'Обычные', rarityCounts.common || 0],
+    ['uncommon', 'Необычные', rarityCounts.uncommon || 0],
+    ['rare', 'Редкие', rarityCounts.rare || 0],
+    ['epic', 'Эпические', rarityCounts.epic || 0],
+    ['legendary', 'Легендарные', rarityCounts.legendary || 0],
+    ['mythic', 'Мифические', rarityCounts.mythic || 0]
+  ];
+  const rarityButtons = rarities.map(([key, label, count]) =>
+    `<button type="button" class="inv-rarity-chip ${invRarityFilter === key ? 'active' : ''}" data-inv-rarity="${key}" aria-pressed="${invRarityFilter === key}" ${key !== 'all' && !count ? 'disabled' : ''}><span class="rarity-chip-dot rarity-dot-${key}" aria-hidden="true"></span>${label}<span class="inv-filter-count">${count}</span></button>`
+  ).join('');
   const filters = [
     ['bag', '🎒 Сумка', counts.bag], ['equipment', '⚔️ Экипировка', counts.equipment],
     ['material', '🌿 Материалы', counts.materials], ['quest', '📜 Квесты', counts.quests],
@@ -278,14 +291,17 @@ function filterBarHTML(counts) {
   return `
     <div class="inv-controls">
       <div class="inv-filter-row">${filters.map(f).join('')}</div>
-      <div class="inv-filter-row">
-        <span class="inv-sort-label">Сортировка:</span>
+      <div class="inv-rarity-row" aria-label="Фильтр по редкости">${rarityButtons}</div>
+      <div class="inv-sort-group">
+        <span class="inv-sort-label">Сортировка предметов</span>
+        <div class="inv-filter-row">
         ${s('default', 'Порядок получения')}
         ${s('rarity', 'Редкость ↓')}
         ${s('price', 'Цена ↓')}
         ${s('type', 'Тип')}
         ${s('power', 'Сила ↓')}
         ${s('name', 'Название ↑')}
+        </div>
       </div>
       <label class="inv-search-wrap"><span aria-hidden="true">⌕</span><input type="search" data-inv-search value="${escapeHtml(invSearch)}" placeholder="Поиск предмета, типа или редкости…" aria-label="Поиск предметов в инвентаре"><button type="button" data-inv-search-clear aria-label="Очистить поиск" ${invSearch ? '' : 'hidden'}>×</button></label>
     </div>
@@ -401,10 +417,16 @@ function bindInventoryEvents() {
   });
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
-    const control = target?.closest('[data-inv-action], [data-inv-filter], [data-inv-sort]');
+    const control = target?.closest('[data-inv-action], [data-inv-filter], [data-inv-rarity], [data-inv-sort]');
     if (!control) return;
     if (control.hasAttribute('data-inv-search-clear')) { invSearch = ''; const el = (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content')); if (el) el.innerHTML = renderInventory(); return; }
     if (control.hasAttribute('data-inv-filter')) { setInvFilter(control.dataset.invFilter); return; }
+    if (control.hasAttribute('data-inv-rarity')) {
+      invRarityFilter = control.dataset.invRarity || 'all';
+      const el = (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content'));
+      if (el) el.innerHTML = renderInventory();
+      return;
+    }
     if (control.hasAttribute('data-inv-sort')) { setInvSort(control.dataset.invSort); return; }
     const index = Number(control.dataset.index);
     switch (control.dataset.invAction) {
@@ -440,8 +462,20 @@ export function renderInventory() {
   const junkCount = getJunkCount();
   const entries = p.inventory.map((inst, idx) => ({ inst, idx }));
   const visible = filterAndSort(entries);
+  const rarityCounts = entries.reduce((result, { inst }) => {
+    const key = RARITIES[inst.rarity] ? inst.rarity : 'common';
+    result[key] = (result[key] || 0) + 1;
+    return result;
+  }, {});
   const counts = {
     all: entries.length,
+    filtered: entries.filter(({ inst }) => invFilter === 'all' || invFilter === 'bag'
+      ? !['quest', 'material'].includes(ITEMS[inst.id]?.type)
+      : invFilter === 'equipment' ? EQUIPMENT_TYPES.has(ITEMS[inst.id]?.type)
+      : invFilter === 'material' ? ITEMS[inst.id]?.type === 'material'
+      : invFilter === 'quest' ? ITEMS[inst.id]?.type === 'quest' && !ITEMS[inst.id]?.storyShard
+      : invFilter === 'rift-shards' ? !!ITEMS[inst.id]?.storyShard
+      : (FILTER_TYPES[invFilter] || [invFilter]).includes(ITEMS[inst.id]?.type)).length,
     bag: entries.filter(({ inst }) => !['quest', 'material'].includes(ITEMS[inst.id]?.type)).length,
     equipment: entries.filter(({ inst }) => EQUIPMENT_TYPES.has(ITEMS[inst.id]?.type)).length,
     materials: entries.filter(({ inst }) => ITEMS[inst.id]?.type === 'material').length,
@@ -480,6 +514,7 @@ export function renderInventory() {
           data-inv-tooltip="${idx}" data-inv-action="slot" data-index="${idx}"
           aria-label="${escapeHtml(item.name)}">
           <span class="slot-icon">${item.icon}</span>${qty}${socket}
+          ${rarity !== 'common' ? `<span class="slot-rarity-label rarity-label-${rarity}" aria-hidden="true">${RARITIES[rarity]?.shortName || RARITIES[rarity]?.name || rarity}</span>` : ''}
         </button>`;
     } else {
       grid += '<div class="inv-slot empty"></div>';
@@ -495,7 +530,7 @@ export function renderInventory() {
           <div><h3>🎒 Сумка героя</h3><small>${usedSlots}/30 ячеек · ${weight.toFixed(1)}/${capacity} веса · ${counts.equipment} экипировки · ${counts.materials} материалов · ${counts.quests} квестов · ${counts.shards}/3 осколка</small></div>
           <div class="inv-wallet">💰 ${p.gold || 0}</div>
         </div>
-        ${filterBarHTML(counts)}
+        ${filterBarHTML(counts, rarityCounts)}
         ${visible.length ? `<div class="inv-grid rpg-inv-grid">${grid}</div>` : `<div class="inv-empty-state" role="status"><span>🧭</span><b>В этой категории пока пусто</b><small>Смените фильтр или продолжайте исследовать мир — новые предметы появятся в сумке.</small></div>`}
         <p class="inv-hint">Нажми на предмет, чтобы надеть или использовать. Руна устанавливается в свободное гнездо. Наведи курсор для сравнения характеристик.</p>
         ${renderPendingLoot(p)}
