@@ -900,6 +900,7 @@ function drawVillageProp(ctx, x, y, style) {
   // snap RGB to a compact fixed-step palette and remove translucent edge pixels.
   // This prevents antialiased curves and glow halos from surviving the downsample.
   const image = pixelCtx.getImageData(0, 0, 32, 32);
+  const colors = new Map();
   for (let i = 0; i < image.data.length; i += 4) {
     if (image.data[i + 3] < 112) {
       image.data[i + 3] = 0;
@@ -909,6 +910,33 @@ function drawVillageProp(ctx, x, y, style) {
     image.data[i + 1] = Math.round(image.data[i + 1] / 32) * 32;
     image.data[i + 2] = Math.round(image.data[i + 2] / 32) * 32;
     image.data[i + 3] = 255;
+    const key = (image.data[i] << 16) | (image.data[i + 1] << 8) | image.data[i + 2];
+    colors.set(key, (colors.get(key) || 0) + 1);
+  }
+
+  // Limit each prop to a small authored-looking palette. Keeping the most
+  // represented tones preserves its silhouette while eliminating noisy
+  // one-off colors left by rasterized curves and translucent effects.
+  const palette = [...colors.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12)
+    .map(([key]) => [(key >> 16) & 255, (key >> 8) & 255, key & 255]);
+  for (let i = 0; i < image.data.length; i += 4) {
+    if (!image.data[i + 3]) continue;
+    let nearest = palette[0], nearestDistance = Infinity;
+    for (const color of palette) {
+      const dr = image.data[i] - color[0];
+      const dg = image.data[i + 1] - color[1];
+      const db = image.data[i + 2] - color[2];
+      const distance = dr * dr + dg * dg + db * db;
+      if (distance < nearestDistance) {
+        nearest = color;
+        nearestDistance = distance;
+      }
+    }
+    image.data[i] = nearest[0];
+    image.data[i + 1] = nearest[1];
+    image.data[i + 2] = nearest[2];
   }
   pixelCtx.putImageData(image, 0, 0);
 
