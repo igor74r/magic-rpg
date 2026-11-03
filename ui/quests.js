@@ -151,9 +151,10 @@ function renderMission(player, act, actIndex, mission, missionIndex) {
     : '';
 
   return `
-    <article class="campaign-mission ${done ? 'done' : ''} ${missionProgress.active ? 'current' : ''} ${!unlocked ? 'locked' : ''}">
-      <div class="campaign-mission-top">
+    <article class="campaign-mission quest-card ${done ? 'done' : ''} ${missionProgress.active ? 'current' : ''} ${!unlocked ? 'locked' : ''}" data-quest-card="${mission.id}">
+      <div class="campaign-mission-top quest-card-top">
         <span class="campaign-mission-number">${act.number}.${missionIndex + 1}</span>
+        <span class="quest-card-location">📍 ${location?.name || act.locationId}</span>
         ${status}
       </div>
 
