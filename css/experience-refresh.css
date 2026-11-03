@@ -587,3 +587,77 @@
   #screen-main .slots-heading h2 { font-size: 16px; }
   #screen-main .slots-heading span { font-size: 8px; letter-spacing: .08em; }
 }
+
+
+/* Unified secondary menu actions: Settings, Achievements, Help and inert Prologue. */
+#screen-main .main-menu-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+  border-top-color: rgba(210, 177, 116, .28);
+}
+#screen-main .mm-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 11px 14px;
+  overflow: hidden;
+  border: 1px solid rgba(210, 177, 116, .3);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(40, 35, 31, .92), rgba(14, 15, 20, .96));
+  color: #d8c8a9;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .025em;
+  text-shadow: 0 1px 8px rgba(0,0,0,.4);
+  box-shadow: inset 0 1px rgba(255,255,255,.055), 0 5px 16px rgba(0,0,0,.2);
+  transition: border-color .18s ease, background .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+#screen-main .mm-btn:hover {
+  border-color: rgba(230, 194, 125, .72);
+  background:
+    linear-gradient(180deg, rgba(76, 55, 39, .92), rgba(28, 22, 22, .98));
+  color: #f4e2bc;
+  box-shadow: inset 0 1px rgba(255,255,255,.09), 0 8px 22px rgba(0,0,0,.32), 0 0 18px rgba(193, 151, 82, .08);
+  transform: translateY(-1px);
+}
+#screen-main .mm-btn:focus-visible {
+  outline: 2px solid #e7c77f;
+  outline-offset: 3px;
+}
+#screen-main .mm-btn-prologue {
+  border-color: rgba(169, 111, 120, .36);
+  background: linear-gradient(180deg, rgba(47, 30, 38, .92), rgba(17, 13, 20, .97));
+  color: #d8b8bd;
+}
+#screen-main .mm-btn-prologue:hover {
+  border-color: rgba(208, 145, 157, .68);
+  background: linear-gradient(180deg, rgba(75, 43, 53, .94), rgba(27, 17, 23, .98));
+  color: #f0d4d8;
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 8px 22px rgba(0,0,0,.32), 0 0 18px rgba(180, 82, 98, .1);
+}
+@media (max-width: 700px) {
+  #screen-main .main-menu-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  #screen-main .mm-btn {
+    min-height: 46px;
+    padding: 10px 8px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 360px) {
+  #screen-main .main-menu-buttons { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #screen-main .mm-btn { transition: none; }
+  #screen-main .mm-btn:hover { transform: none; }
+}
