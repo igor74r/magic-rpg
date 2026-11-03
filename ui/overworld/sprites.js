@@ -715,11 +715,18 @@ function drawVillageBuilding(ctx, x, y, style = 'home') {
   drawAuroraBuilding(ctx, x, y, style);
 }
 let villagePropAtlas = null;
+let auroraWorldPortalAtlas = null;
 function getVillagePropAtlas() {
   if (villagePropAtlas || typeof Image === 'undefined') return villagePropAtlas;
   villagePropAtlas = new Image();
   villagePropAtlas.src = new URL('../../assets/aurora/village-props-atlas.png', import.meta.url).href;
   return villagePropAtlas;
+}
+function getAuroraWorldPortalAtlas() {
+  if (auroraWorldPortalAtlas || typeof Image === 'undefined') return auroraWorldPortalAtlas;
+  auroraWorldPortalAtlas = new Image();
+  auroraWorldPortalAtlas.src = new URL('../../assets/aurora/world-portal.png', import.meta.url).href;
+  return auroraWorldPortalAtlas;
 }
 const VILLAGE_PROP_FRAMES = new Map([
   ['lantern', 0], ['memorial', 1], ['bench', 2], ['stall', 3],
@@ -730,11 +737,12 @@ const VILLAGE_PROP_FRAMES = new Map([
 ]);
 function drawVillageProp(ctx, x, y, style) {
   const frame = VILLAGE_PROP_FRAMES.get(style);
-  const atlas = getVillagePropAtlas();
+  const isWorldPortal = style === 'world-portal';
+  const atlas = isWorldPortal ? getAuroraWorldPortalAtlas() : getVillagePropAtlas();
   if (frame === undefined || !atlas || !atlas.complete || !atlas.naturalWidth) return;
   ctx.save();
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(atlas, frame * 64, 0, 64, 64,
+  ctx.drawImage(atlas, isWorldPortal ? 0 : frame * 64, 0, 64, 64,
     Math.round(x - 48), Math.round(y - 48), 96, 96);
   if (style === 'lantern' || style === 'frost-lantern' || style === 'brazier') {
     ctx.globalAlpha = 0.72 + Math.sin(performance.now() * 0.002 + x * 0.03) * 0.16;

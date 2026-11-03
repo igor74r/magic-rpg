@@ -13,7 +13,7 @@ for (const [biome, row] of Object.entries(manifest.biomeRows)) {
 for (const asset of [
   'assets/tiles/terrain/atlas.png',
   'assets/aurora/ground-atlas.png',
-  'assets/aurora/village-props-atlas.png',
+  'assets/aurora/village-props-atlas.png','assets/aurora/world-portal.png',
   'assets/tiles/dungeons/atlas.png',
   'assets/tiles/props/atlas.png',
   'assets/branding/mana-crystal.png',
@@ -26,6 +26,10 @@ assert.equal(groundPng.readUInt32BE(16), 768, 'Aurora ground atlas must contain 
 assert.equal(groundPng.readUInt32BE(20), 96, 'Aurora ground atlas must be 96px high');
 assert.equal(manifest.auroraGround?.columns, 8, 'Aurora ground atlas must define eight variants');
 assert.deepEqual(manifest.auroraGround?.types, ['grass', 'path']);
+const portalPng = readFileSync(new URL('../assets/aurora/world-portal.png', import.meta.url));
+assert.equal(portalPng.readUInt32BE(16), 64, 'Aurora world portal sprite must be 64px wide');
+assert.equal(portalPng.readUInt32BE(20), 64, 'Aurora world portal sprite must be 64px high');
+assert.equal(manifest.auroraWorldPortal?.columns, 1, 'Aurora world portal must use its dedicated authored sprite');
 const pngAssets = ['assets/aurora/ground-atlas.png','assets/aurora/village-props-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
 const villageArt = readFileSync(new URL('../ui/overworld/aurora-art.js', import.meta.url), 'utf8');
 assert.ok(villageArt.includes('drawAuroraBuilding(ctx,x,y,style'), 'Aurora buildings must use the rebuilt pixel-art renderer');
@@ -38,6 +42,8 @@ assert.ok(villageSprites.includes('frame * 64, 0, 64, 64'), 'village props must 
 assert.ok(villageSprites.includes('ctx.imageSmoothingEnabled = false'), 'village prop atlas must render with crisp nearest-neighbour pixels');
 assert.ok(!villageSprites.includes('function drawVillagePropRaw'), 'legacy procedural village prop rasterizer must be removed');
 assert.ok(villageSprites.includes("['planter', 5]"), 'Aurora planters must resolve to their authored pixel atlas frame');
+assert.ok(villageSprites.includes('getAuroraWorldPortalAtlas'), 'Aurora world portal must load its dedicated authored sprite');
+assert.ok(villageSprites.includes("style === 'world-portal'"), 'world portal must not reuse the rift ward frame');
 assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8').includes('SVG architecture'), 'Aurora sprite renderer must not depend on vector architecture');
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
 

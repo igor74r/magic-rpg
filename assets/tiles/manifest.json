@@ -95,5 +95,13 @@
       "tower-gate"
     ],
     "usage": "Authored 16-bit pixel-art village prop sprites with transparent backgrounds; nearest-neighbour rendering"
+  },
+  "auroraWorldPortal": {
+    "file": "../aurora/world-portal.png",
+    "tileSize": 64,
+    "columns": 1,
+    "rows": 1,
+    "displaySize": 96,
+    "usage": "Dedicated 16-bit pixel-art stone arch and rift aperture for Aurora's central world portal"
   }
 }
