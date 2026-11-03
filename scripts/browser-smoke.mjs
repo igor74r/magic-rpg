@@ -304,8 +304,8 @@ try {
     await navSearch.fill('');
     assert.equal(await page.locator('#game-tab-inventory').isVisible(), true,
       `${viewport.name}: clearing navigation search must restore all sections`);
-    assert.equal(await page.locator('.dashboard-tablist [role="tab"]').count(), 10,
-      `${viewport.name}: all ten dashboard sections must be present`);
+    assert.equal(await page.locator('.dashboard-tablist [role="tab"]').count(), 9,
+      `${viewport.name}: all nine remaining dashboard sections must be present`);
     assert.equal(await page.locator('#dashboard-context').isVisible(), true,
       `${viewport.name}: live quest context must remain visible`);
     const missionAnnouncements = page.locator('#dashboard-context .dashboard-context-mission');
