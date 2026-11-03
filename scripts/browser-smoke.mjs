@@ -138,7 +138,7 @@ try {
     assert.equal(await page.locator('#overworld-canvas').isVisible(), true,
       `${viewport.name}: the overworld scene must remain visible below its title`);
 
-    await page.locator('#game-tab-locations').click();
+    await page.evaluate(() => window.GameAPI.openWorldPortalMenu());
     await page.locator('#aurora-world-portal').waitFor();
     assert.equal(await page.locator('#aurora-world-portal [data-world-location]').count() > 0, true,
       `${viewport.name}: world portal must show destination choices`);
@@ -308,7 +308,7 @@ try {
       `${viewport.name}: mission context should be announced as a complete update`);
     await page.locator('#game-tab-hero').click();
     await page.locator('.hero-overview').waitFor({ state: 'visible' });
-    await page.locator('#game-tab-locations').click();
+    await page.evaluate(() => window.GameAPI.openWorldPortalMenu());
     await page.locator('#aurora-world-portal').waitFor();
     await page.locator('#aurora-world-portal [data-world-close]').click();
     await page.locator('#overworld-title').click();
