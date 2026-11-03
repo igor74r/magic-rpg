@@ -266,6 +266,23 @@ function drawTile(ctx, type, x, y, size, themeName, colors) {
         ctx.fillStyle = 'rgba(112,133,91,.18)';
         ctx.fillRect(x + 7 + noise(11) % 15, y + 20, 3, 2);
       }
+      // Fine, offset joints give the village road a hand-laid flagstone rhythm.
+      if (noise(12) < 62) {
+        const seamX = x + 9 + noise(13) % 25;
+        ctx.fillStyle = 'rgba(31,25,21,.13)';
+        ctx.fillRect(seamX, y + 2, 1, size - 5);
+        ctx.fillStyle = 'rgba(220,199,165,.07)';
+        ctx.fillRect(seamX + 1, y + 3, 1, size - 7);
+      }
+      if (noise(14) < 38) {
+        const seamY = y + 10 + noise(15) % 22;
+        ctx.fillStyle = 'rgba(31,25,21,.11)';
+        ctx.fillRect(x + 2, seamY, size - 5, 1);
+      }
+      if (noise(16) < 16) {
+        ctx.fillStyle = 'rgba(45,37,29,.17)';
+        ctx.fillRect(x + 11 + noise(17) % 20, y + 9 + noise(18) % 24, 4, 1);
+      }
     } else {
       // Small deterministic grass blades and occasional wildflower pixels.
       ctx.fillStyle = 'rgba(175,198,154,.11)';
