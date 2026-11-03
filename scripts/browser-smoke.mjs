@@ -121,32 +121,12 @@ try {
       `${viewport.name}: village scene must keep the left navigation visible`);
     assert.equal(await page.locator('#screen-game .dashboard-log').isVisible(), true,
       `${viewport.name}: village scene must keep the right journal visible`);
-    const hudPanels = await page.locator('#game-header .hud-overview-columns').evaluate(node => {
-      const resources = node.querySelector('.hud-overview-vitals')?.getBoundingClientRect();
-      const details = node.querySelector('.hud-overview-details')?.getBoundingClientRect();
-      return { resources: resources && { x: resources.x, y: resources.y, width: resources.width, height: resources.height },
-        details: details && { x: details.x, y: details.y, width: details.width, height: details.height },
-        columns: getComputedStyle(node).gridTemplateColumns };
-    });
-    assert.ok(hudPanels.resources?.width > 0 && hudPanels.details?.width > 0,
-      `${viewport.name}: central hero HUD must render both resource and detail panels: ${JSON.stringify(hudPanels)}`);
-    if (viewport.width > 760) {
-      assert.ok(hudPanels.details.x > hudPanels.resources.x + 20,
-        `${viewport.name}: hero resources and details must be side-by-side on desktop: ${JSON.stringify(hudPanels)}`);
-    } else {
-      assert.ok(hudPanels.details.y >= hudPanels.resources.y + hudPanels.resources.height - 2,
-        `${viewport.name}: hero panels must stack cleanly on mobile: ${JSON.stringify(hudPanels)}`);
-    }
-    const hudToggle = page.locator('#game-header [data-hud-toggle]');
-    assert.equal(await hudToggle.getAttribute('aria-expanded'), 'false',
-      `${viewport.name}: details start collapsed to preserve compact HUD`);
-    await hudToggle.click();
-    assert.equal(await hudToggle.getAttribute('aria-expanded'), 'true',
-      `${viewport.name}: details toggle must expose expanded state`);
-    assert.equal(await page.locator('#game-header [data-hud-details]').isVisible(), true,
-      `${viewport.name}: expanded details must be visible`);
-    await hudToggle.click();
-
+    assert.equal(await page.locator('#game-header').isVisible(), false,
+      `${viewport.name}: duplicate centered hero header must stay removed`);
+    assert.equal(await page.locator('#overworld-title').isVisible(), true,
+      `${viewport.name}: location title must be the first visible central game block`);
+    assert.equal(await page.locator('#overworld-canvas').isVisible(), true,
+      `${viewport.name}: the overworld scene must remain visible below its title`);
 
     await page.locator('#game-tab-locations').click();
     await page.locator('#aurora-world-portal').waitFor();
