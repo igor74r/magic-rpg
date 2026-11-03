@@ -970,3 +970,21 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   .gear-slot.filled { padding: 7px; grid-template-columns: 28px minmax(0,1fr); gap: 2px 6px; }
   .gear-slot.filled .gear-slot-icon { width: 28px; height: 28px; font-size: 18px; }
 }
+
+
+/* Campaign clarity: act completion and mission reward summary */
+.campaign-act-progress { min-width: 92px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.campaign-act-progress-track { width: 100%; min-width: 74px; height: 5px; overflow: hidden; border-radius: 999px; background: rgba(0,0,0,.42); border: 1px solid rgba(201,162,39,.12); }
+.campaign-act-progress-track i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #8a6b2b, #d8b85d); transition: width .2s ease; }
+.quest-card-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; }
+.quest-card-footer > small { color: #9e8e70; font-size: 10px; }
+.quest-card-rewards { display: flex; flex-wrap: wrap; gap: 6px; }
+.quest-card-rewards span { display: inline-flex; align-items: center; gap: 3px; padding: 3px 6px; border-radius: 4px; background: rgba(201,162,39,.08); border: 1px solid rgba(201,162,39,.14); color: #d9c28b; font-size: 10px; white-space: nowrap; }
+.quest-card-progress-caption { color: #9e8e70; font-size: 10px; text-align: right; }
+.quest-card.done .quest-card-progress-caption { color: #9ec68a; }
+.quest-card.locked .quest-card-progress-caption { color: #817762; }
+@media (max-width: 560px) {
+  .campaign-act-progress { min-width: 76px; }
+  .quest-card-footer { align-items: flex-start; flex-direction: column; }
+  .quest-card-progress-caption { text-align: left; }
+}
