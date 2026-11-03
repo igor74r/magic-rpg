@@ -71,7 +71,7 @@ export const ENEMIES = {
     name: 'Пепельный Вестник', emoji: '🐉',
     hp: 220, attack: 38, defense: 10, exp: 250, gold: 220,
     drops: ['mithril-armor', 'strong-mana-potion', 'cinder-visor', 'rune-ember'], boss: true,
-    special: { type: 'snipe', every: 2, mult: 2.2, name: 'Адское пламя', effect: 'burn' },
+    special: { type: 'snipe', every: 2, mult: 2.2, name: 'Адское пламя', effect: 'burn', element: 'fire' },
     phases: [
       { atHp: 0.5, atkMult: 1.4, msg: 'Пепельный Вестник раскрывает крылья пепельного пламени!', specialEvery: 1 },
       { atHp: 0.25, atkMult: 1.65, msg: 'Пепельный Вестник сжигает остатки сил и переходит в неистовую фазу!', specialEvery: 1 }
@@ -96,7 +96,7 @@ export const ENEMIES = {
     name: 'Ледяная Хватка', emoji: '🐉',
     hp: 260, attack: 42, defense: 14, exp: 320, gold: 280,
     drops: ['ice-staff', 'frost-armor', 'glacier-greaves', 'pendant-last-oath'], boss: true,
-    special: { type: 'snipe', every: 3, mult: 2.2, name: 'Ледяная стрела', effect: 'bleed' },
+    special: { type: 'snipe', every: 3, mult: 2.2, name: 'Ледяная стрела', effect: 'slow', element: 'ice' },
     phases: [
       { atHp: 0.5, atkMult: 1.4, msg: 'Ледяная Хватка сковывает арену вечным льдом!', specialEvery: 2 },
       { atHp: 0.25, atkMult: 1.6, msg: 'Ледяная Хватка раскалывает лёд и обрушивает последнюю бурю!', specialEvery: 1 }
@@ -173,7 +173,7 @@ export const ENEMIES = {
     name: 'Кровавая Корона', emoji: '🐉',
     hp: 450, attack: 52, defense: 16, exp: 600, gold: 600,
     drops: ['dragon-blade', 'dragon-scale-armor', 'scroll-poison-cloud'], boss: true,
-    special: { type: 'snipe', every: 2, mult: 2.4, name: 'Пламя древних', effect: 'burn' },
+    special: { type: 'drain', every: 2, name: 'Кровавый пир', effect: 'bleed', element: 'blood' },
     phases: [
       { atHp: 0.5, atkMult: 1.4, msg: 'Кровавая Корона раскрывает крылья!', specialEvery: 2 },
       { atHp: 0.25, atkMult: 1.6, msg: 'Кровавая Корона обрушивает ярость на героя!', specialEvery: 1 }
