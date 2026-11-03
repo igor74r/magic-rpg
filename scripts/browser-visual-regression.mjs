@@ -40,9 +40,9 @@ try {
     await page.getByRole('button',{name:/Создать героя и начать/}).click();
     await page.locator('#screen-game.active').waitFor();
     await page.locator('#overworld-canvas').waitFor({state:'visible'});
-    assert.equal(await page.locator('#dashboard-context-actions button').count(),1,
+    assert.equal(await page.locator('.dashboard-context-actions button').count(),1,
       `${vp.name}: context block must retain portal shortcut only; obsolete journal shortcut is gone`);
-    assert.equal(await page.locator('#dashboard-context-actions button').innerText(), '🌀 Портал миров',
+    assert.equal(await page.locator('.dashboard-context-actions button').innerText(), '🌀 Портал миров',
       `${vp.name}: portal shortcut must remain`);
     await capture(page, `${vp.name}-01-gameplay`);
 
