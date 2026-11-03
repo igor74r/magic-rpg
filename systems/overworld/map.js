@@ -66,11 +66,9 @@ export function generateVillageMap(cols, rows) {
   const cx = Math.floor(cols / 2);
   const cy = Math.floor(rows / 2);
 
-  // Keep a guaranteed connected pedestrian spine beneath the curved lanes.
-  // The surrounding branches add character, while this narrow cross ensures
-  // every district remains reachable even where rasterized bends meet.
-  for (let x = 0; x < cols; x++) stampRoad(x, cy, 1);
-  for (let y = 0; y < rows; y++) stampRoad(cx, y, 1);
+  // Build streets from authored curved waypoints below. Avoid the former
+  // full-width cross: it made the settlement read as a rigid grid and cut
+  // through gardens and courtyards.
 
   // Southern arrival lane bends into the village square instead of forming
   // a rigid cross. The central tile remains the stable arrival/navigation hub.

@@ -151,7 +151,13 @@ for (const target of targets) {
     `${target.id}: must be reachable from the village entrance`);
 }
 assert.ok(map.flat().includes(4), 'village must retain small garden/hedge areas');
-assert.ok(map.flat().filter(tile => tile === 1).length > 150,
-  'village must have a connected road network');
+const roadTiles = map.flat().filter(tile => tile === 1).length;
+assert.ok(roadTiles > 140, 'village must retain enough road tiles for its connected street network');
+const centerRowRoad = map[roadCenterY].map((tile, x) => tile === 1 ? x : -1).filter(x => x >= 0);
+assert.ok(centerRowRoad.length < village.mapCols - 4,
+  'the central street must not become a full-width rigid horizontal cross');
+const centerColumnRoad = map.map((row, y) => row[roadCenterX] === 1 ? y : -1).filter(y => y >= 0);
+assert.ok(centerColumnRoad.length < village.mapRows - 2,
+  'the central street must not become a full-height rigid vertical cross');
 
 console.log(`Aurora village layout passed: 38x28, ${village.npcs.length} residents, ${interactionCount} interaction points, ${buildings.length} buildings, ${colliders.length} wall segments, ${visited.size} reachable cells`);
