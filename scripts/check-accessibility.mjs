@@ -31,6 +31,17 @@ for (const filter of ['all', 'combat', 'loot', 'story']) {
   assert.match(html, new RegExp(`data-log-filter="${filter}"`), `event journal filter ${filter} must be available`);
 }
 assert.match(header, /renderDashboardContext\(\)/, 'game refreshes must update the live dashboard context');
+assert.match(header, /<div class="hud-overview-columns">[\\s\\S]*?<section class="hud-overview-vitals" aria-label="Ресурсы героя">[\\s\\S]*?<section class="hud-overview-details" aria-label="Боевые характеристики">/,
+  'central hero HUD must split resources and combat details into two labelled semantic panels');
+assert.match(header, /data-hud-toggle[^>]*aria-expanded="false"/,
+  'hero details toggle must expose its initial collapsed state');
+assert.match(header, /data-hud-details hidden/,
+  'hero details must start collapsed to keep the HUD compact');
+assert.match(css, /#game-header \.hud-overview-columns\\s*\\{[\\s\\S]*?grid-template-columns:minmax\\(220px,\.82fr\\) minmax\\(0,1\.18fr\\)/,
+  'central hero HUD must display resource and detail columns on desktop');
+assert.match(css, /@media \\(max-width:760px\\) \\{[\\s\\S]*?#game-header \\.hud-overview-columns \\{ grid-template-columns:minmax\\(0,1fr\\)/,
+  'central hero HUD must stack the two panels on mobile');
+
 assert.match(header, /tab === 'hero'/, 'hero dossier must be rendered by the game tab router');
 assert.match(css, /\.dashboard-sidebar \.tab:focus-visible/, 'dashboard navigation must provide visible keyboard focus');
 assert.match(css, /@media \(max-width:700px\)/, 'dashboard must provide a compact mobile navigation layout');
