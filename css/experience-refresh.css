@@ -5,6 +5,11 @@
   --experience-gold: #d9b978;
   --experience-muted: #a9a69f;
   --experience-line: rgba(210, 177, 116, .25);
+  --dash-ink: var(--experience-ink);
+  --dash-panel: var(--experience-panel);
+  --dash-edge: var(--experience-line);
+  --dash-gold: var(--experience-gold);
+  --dash-muted: var(--experience-muted);
 }
 #screen-prologue,
 #screen-main,
@@ -479,4 +484,29 @@
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+}
+
+/* The in-game dashboard inherits the same palette as the entry experience. */
+#screen-game .dashboard-sidebar,
+#screen-game .dashboard-main,
+#screen-game .dashboard-log {
+  border-color: var(--experience-line);
+  box-shadow: 0 16px 38px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.045);
+}
+#screen-game .dashboard-header,
+#screen-game #screen-overworld .game-container {
+  border-color: rgba(210,177,116,.3);
+  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 14px 34px rgba(0,0,0,.26);
+}
+#screen-game .dashboard-context-panel {
+  border-color: rgba(205,151,111,.3);
+  background: linear-gradient(145deg, rgba(55,37,35,.78), rgba(12,17,22,.96));
+}
+#screen-game .dashboard-sidebar .save-menu-btn,
+#screen-game .dashboard-context-actions button {
+  border-radius: 9px;
+}
+#screen-game .dashboard-sidebar .tab.active {
+  border-left-color: var(--experience-gold);
+  background: linear-gradient(90deg, rgba(153,112,55,.27), rgba(153,112,55,.055));
 }
