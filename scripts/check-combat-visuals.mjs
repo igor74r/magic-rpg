@@ -11,7 +11,7 @@ for (const effect of ['slash', 'arrow', 'fire', 'ice', 'blood', 'arcane', 'guard
 }
 assert.match(combat, /p\.class === 'archer' \? 'arrow' : 'slash'/,
   'weapon attacks must show class-appropriate hit effects');
-assert.match(combat, /playerGuarding && p\.hp > 0 && enemy\.hp > 0/,
+assert.match(combat, /playerGuarding && \(def\.boss \|\| enemy\.elite\) && p\.hp > 0 && enemy\.hp > 0/,
   'manual block should trigger a safe counterattack');
 assert.match(combat, /Контратака из блока/,
   'counterattack must be communicated to the player');
