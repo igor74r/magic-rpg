@@ -363,7 +363,20 @@ function renderPaperdoll(p) {
         <small>Уровень ${p.level || 1}</small>
       </div>
       <div class="equipment-slots">${slots}</div>
-      <div class="paperdoll-set-bonus">Экипировка усиливает характеристики и боевые параметры.</div>
+      <div class="paperdoll-combat-summary" aria-label="Сводка бонусов экипировки">
+        <b>Бонусы экипировки</b>
+        <div class="paperdoll-stat-grid">
+          ${[['attack','⚔ Атака'],['magic','✦ Магия'],['defense','🛡 Защита'],['dex','◇ Ловкость'],['critChance','✹ Крит'],['dodgeChance','↝ Уворот'],['blockChance','▣ Блок']].map(([key,label]) => {
+            const total = Object.values(eq).filter(Boolean).reduce((sum, raw) => {
+              const obj = typeof raw === 'string' ? { id: raw } : raw;
+              const item = ITEMS[obj.id];
+              return sum + (item?.bonus?.[key] || 0) + (obj.bonus?.[key] || 0);
+            }, 0);
+            return `<span>${label}<strong>${total.toFixed(key.endsWith('Chance') ? 1 : 0)}${key.endsWith('Chance') ? '%' : ''}</strong></span>`;
+          }).join('')}
+        </div>
+        <small>Суммарные базовые бонусы и бонусы предметов</small>
+      </div>
     </section>
   `;
 }
