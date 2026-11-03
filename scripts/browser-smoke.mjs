@@ -127,8 +127,8 @@ try {
       `${viewport.name}: location title must be visible above the world scene`);
     assert.equal(await page.locator('.overworld-toolbar').count(), 1,
       `${viewport.name}: opening screen must have exactly one location toolbar`);
-    assert.equal(await page.locator('.overworld-toolbar .overworld-exit').count(), 1,
-      `${viewport.name}: opening screen must have exactly one exit action`);
+    assert.equal(await page.locator('.overworld-toolbar .overworld-exit').count(), 0,
+      `${viewport.name}: the in-world screen must not show the exit action that returns to the old portal map`);
     const toolbar = await page.locator('.overworld-toolbar').evaluate(node => {
       const title = node.querySelector('#overworld-title').getBoundingClientRect();
       const exit = node.querySelector('.overworld-exit').getBoundingClientRect();
