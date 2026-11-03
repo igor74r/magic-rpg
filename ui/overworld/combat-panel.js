@@ -35,19 +35,46 @@ export function renderCombatPanel() {
   const c = ow.combat; const p = state.game.player; const cls = CLASSES[p.class];
   const cdKey = cls.abilities?.map(a => `${a.id}:${p.cooldowns?.[a.id] || 0}`).join(',') || '';
   const pEffKey = (p.effects || []).map(e => `${e.id}:${e.duration}`).join(','); const eEffKey = (c.enemy.effects || []).map(e => `${e.id}:${e.duration}`).join(',');
-  const key = `${c.turn}|${c.enemy.hp}|${subPanel}|${p.hp}|${p.mp}|${p.inventory.length}|${ow.log.length}|${c.turnCount}|${c.blocking}|${cdKey}|${pEffKey}|${eEffKey}|${c.playerChargeNext}|${ow.rifFloor}|${ow.rifMode}`;
+  const key = `${c.turn}|${c.enemy.hp}|${c.enemy.phase || 0}|${Boolean(c.enemy.tacticalSpecialPending)}|${subPanel}|${p.hp}|${p.mp}|${p.inventory.length}|${ow.log.length}|${c.turnCount}|${c.blocking}|${cdKey}|${pEffKey}|${eEffKey}|${c.playerChargeNext}|${ow.rifFloor}|${ow.rifMode}`;
   if (key === lastPanelKey) return; lastPanelKey = key;
   panel.style.display = 'block'; const def = ENEMIES[c.enemy.enemyId]; const prefix = c.enemy.boss ? '☠ ' : c.enemy.elite ? '★ ' : '';
   const nameColor = c.enemy.boss ? '#b060ff' : c.enemy.elite ? '#ffd060' : '#d4c8a8';
   let specialLine = '';
-  if (def.special) { const every = def.special.every; const rem = every - (c.turnCount % every); if (rem === 1) specialLine = ` · <span style="color:#ff4040;font-weight:bold;">⚠️ ${def.special.name} — следующий ход!</span>`; else specialLine = ` · <span style="color:#ffa500;">${def.special.name} через ${rem} хода</span>`; }
+  const specialEvery = c.enemy.phase > 0 && def.phases
+    ? (def.phases[c.enemy.phase - 1]?.specialEvery || def.special?.every)
+    : def.special?.every;
+  if (def.special && c.enemy.tacticalSpecialPending) {
+    specialLine = ` · <span style="color:#ff5d62;font-weight:800;">⚠️ ${escapeHtml(def.special.name)} — удар подготовлен!</span>`;
+  } else if (def.special && Number.isFinite(specialEvery) && specialEvery > 0) {
+    const rem = specialEvery - (c.turnCount % specialEvery);
+    specialLine = rem === 1
+      ? ` · <span style="color:#ff9b62;font-weight:700;">${escapeHtml(def.special.name)} скоро</span>`
+      : ` · <span style="color:#d6ad63;">${escapeHtml(def.special.name)} через ${rem} ход.</span>`;
+  }
+  const enemyHpRatio = c.enemy.maxHp > 0
+    ? Math.max(0, Math.min(1, c.enemy.hp / c.enemy.maxHp))
+    : 0;
+  const bossPhase = c.enemy.phase || 0;
+  const bossPhaseLabel = ['I', 'II', 'III', 'IV', 'V'][Math.min(4, bossPhase)];
+  const bossStatus = def.boss
+    ? `<section class="combat-boss-status" aria-label="Состояние босса" style="margin:9px 0 4px;padding:8px 10px;border:1px solid rgba(176,96,255,.32);border-radius:7px;background:linear-gradient(100deg,rgba(69,35,91,.28),rgba(12,9,18,.55));">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px;color:#d8c1f0;font-size:10px;letter-spacing:.08em;">
+          <span>ФАЗА ${bossPhaseLabel}</span><b style="color:#f0d6ff;">${Math.round(enemyHpRatio * 100)}% ЗДОРОВЬЯ</b>
+        </div>
+        <div role="progressbar" aria-label="Здоровье босса" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(enemyHpRatio * 100)}" style="position:relative;height:9px;overflow:hidden;border-radius:8px;background:#17101d;box-shadow:inset 0 1px 3px #000;">
+          <i style="display:block;width:${enemyHpRatio * 100}%;height:100%;border-radius:8px;background:linear-gradient(90deg,#762c8f,#d66b88,#f0bd72);box-shadow:0 0 9px rgba(207,105,188,.35);transition:width .22s ease;"></i>
+          ${(def.phases || []).map(phase => `<i aria-hidden="true" style="position:absolute;left:${(1 - phase.atHp) * 100}%;top:0;bottom:0;width:2px;background:#f4dc9b;box-shadow:0 0 3px #000;"></i>`).join('')}
+        </div>
+        <small style="display:block;margin-top:5px;color:#aa91bd;font-size:10px;">${(def.phases || []).length ? `Пороговые точки отмечают переходы фаз (${(def.phases || []).length}).` : 'Боссовый противник'}</small>
+      </section>`
+    : '';
   const blockLine = c.blocking ? ` · <span style="color:#60ff60;">🛡️ блок</span>` : ''; const modLine = c.enemy.modifier ? ` · <span style="color:${MODIFIERS_LABEL[c.enemy.modifier].color};">${MODIFIERS_LABEL[c.enemy.modifier].prefix} ${MODIFIERS_LABEL[c.enemy.modifier].name}</span>` : '';
   const chargeLine = c.playerChargeNext ? ` · <span style="color:#ffd060;">⚡ рывок готов</span>` : ''; const riftLine = ow.rifMode ? ` · <span style="color:#b060ff;font-weight:bold;">🌀 Этаж ${ow.rifFloor}</span>` : '';
   const renderEffectBadges = (effects) => { if (!effects || !effects.length) return ''; return '<div style="display:inline-flex;gap:4px;margin-left:6px;vertical-align:middle;">' + effects.map(e => { const d = EFFECTS_DATA[e.id]; if (!d) return ''; return `<span class="fx-badge" style="border-color:${d.color};color:${d.color};" title="${escapeHtml(d.name)} (${e.duration})">${escapeHtml(d.icon)}${e.duration}</span>`; }).join('') + '</div>'; };
   const playerEffects = renderEffectBadges(p.effects); const enemyEffects = renderEffectBadges(c.enemy.effects);
   const showHK = state.settings?.showHotkeys !== false;
   const hotkeyHint = !showHK ? '' : (subPanel ? `<div style="margin-top:4px;font-size:11px;color:#6a5a3a;">[1]–[9] — выбрать · [Esc] — отмена</div>` : `<div style="margin-top:4px;font-size:11px;color:#6a5a3a;">[1] Атака · [2] Магия · [3] Предмет · [4] Побег · [5] Блок · [6] Способность · [Пробел] — быстрая атака · [Esc] — выйти</div>`);
-  document.getElementById('combat-panel-info').innerHTML = `⚔️ <b style="color:${nameColor};">${prefix}${escapeHtml(def.name)}</b> — ${c.enemy.hp}/${c.enemy.maxHp} HP${enemyEffects}${riftLine} · Ход: ${c.turn === 'player' ? '<span style="color:#60ff60;">ваш</span>' : '<span style="color:#ff6060;">врага</span>'}${specialLine}${blockLine}${modLine}${chargeLine}<br><small style="color:#a89060;">Вы${playerEffects} · ${escapeHtml(ow.log.slice(-2).map(l => l.msg).join(' · '))}</small>` + hotkeyHint;
+  document.getElementById('combat-panel-info').innerHTML = `${bossStatus}⚔️ <b style="color:${nameColor};">${prefix}${escapeHtml(def.name)}</b> — ${c.enemy.hp}/${c.enemy.maxHp} HP${enemyEffects}${riftLine} · Ход: ${c.turn === 'player' ? '<span style="color:#60ff60;">ваш</span>' : '<span style="color:#ff6060;">врага</span>'}${specialLine}${blockLine}${modLine}${chargeLine}<br><small style="color:#a89060;">Вы${playerEffects} · ${escapeHtml(ow.log.slice(-2).map(l => l.msg).join(' · '))}</small>` + hotkeyHint;
 
   const actions = document.getElementById('combat-panel-actions');
   if (!actions) return;
