@@ -740,24 +740,27 @@ function drawVillageProp(ctx, x, y, style) {
   const atlas = isWorldPortal ? getAuroraWorldPortalAtlas() : getVillagePropAtlas();
   if (frame === undefined || !atlas || !atlas.complete || !atlas.naturalWidth) return;
   ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(atlas, isWorldPortal ? 0 : frame * 64, 0, 64, 64,
-    Math.round(x - 48), Math.round(y - 48), 96, 96);
-  if (style === 'lantern' || style === 'frost-lantern' || style === 'brazier') {
-    ctx.globalAlpha = 0.72 + Math.sin(performance.now() * 0.002 + x * 0.03) * 0.16;
-    ctx.fillStyle = style === 'frost-lantern' ? '#c9f5ff' : '#ffe39a';
-    ctx.fillRect(Math.round(x - 2), Math.round(y - 31), 4, 4);
-  } else if (style === 'fountain') {
-    ctx.globalAlpha = 0.55 + Math.sin(performance.now() * 0.002) * 0.2;
-    ctx.fillStyle = '#b9f2f2';
-    ctx.fillRect(Math.round(x - 7), Math.round(y - 27), 3, 2);
-    ctx.fillRect(Math.round(x + 4), Math.round(y - 24), 3, 2);
-  } else if (style === 'rift-ward' || style === 'world-portal') {
-    ctx.globalAlpha = 0.55 + Math.sin(performance.now() * 0.0018 + x * 0.02) * 0.2;
-    ctx.fillStyle = '#d7b4ff';
-    ctx.fillRect(Math.round(x - 1), Math.round(y - 31), 2, 5);
+  try {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(atlas, isWorldPortal ? 0 : frame * 64, 0, 64, 64,
+      Math.round(x - 48), Math.round(y - 48), 96, 96);
+    if (style === 'lantern' || style === 'frost-lantern' || style === 'brazier') {
+      ctx.globalAlpha = 0.72 + Math.sin(performance.now() * 0.002 + x * 0.03) * 0.16;
+      ctx.fillStyle = style === 'frost-lantern' ? '#c9f5ff' : '#ffe39a';
+      ctx.fillRect(Math.round(x - 2), Math.round(y - 31), 4, 4);
+    } else if (style === 'fountain') {
+      ctx.globalAlpha = 0.55 + Math.sin(performance.now() * 0.002) * 0.2;
+      ctx.fillStyle = '#b9f2f2';
+      ctx.fillRect(Math.round(x - 7), Math.round(y - 27), 3, 2);
+      ctx.fillRect(Math.round(x + 4), Math.round(y - 24), 3, 2);
+    } else if (style === 'rift-ward' || style === 'world-portal') {
+      ctx.globalAlpha = 0.55 + Math.sin(performance.now() * 0.0018 + x * 0.02) * 0.2;
+      ctx.fillStyle = '#d7b4ff';
+      ctx.fillRect(Math.round(x - 1), Math.round(y - 31), 2, 5);
+    }
+  } finally {
+    ctx.restore();
   }
-  ctx.restore();
 }
 
 // ---------- ОТРИСОВКА ПРЕДМЕТОВ И ОБЪЕКТОВ ----------

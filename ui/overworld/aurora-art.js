@@ -133,8 +133,11 @@ export function drawAuroraBuilding(ctx,x,y,style='home'){
   const key=PALETTES[style]?style:'home';
   if(!cache.has(key)) cache.set(key,makeBuilding(key));
   ctx.save();
-  ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(cache.get(key),Math.round(x-W*SCALE/2),Math.round(y-H*SCALE+8),W*SCALE,H*SCALE);
-  ctx.restore();
-  return true;
+  try {
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(cache.get(key),Math.round(x-W*SCALE/2),Math.round(y-H*SCALE+8),W*SCALE,H*SCALE);
+    return true;
+  } finally {
+    ctx.restore();
+  }
 }
