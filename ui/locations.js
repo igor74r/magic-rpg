@@ -127,7 +127,6 @@ function panelHtml(id) {
       const riftReady = isRiftReady();
       const best = state.game.player.riftBest || 0;
       actions.push(`<button type="button" onclick="GameAPI.enterRift()" ${riftReady ? '' : 'disabled'}>Разлом${best > 0 ? ` · рекорд ${best}` : ''}</button>`);
-      actions.push(`<button type="button" onclick="GameAPI.enterTower()">🏰 Башня · 40 этажей</button>`);
     }
   } else {
     // Если локация не текущая, кнопка "Перейти" всё ещё нужна для тех, кто хочет сначала прочитать описание
