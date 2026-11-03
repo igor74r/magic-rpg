@@ -131,6 +131,8 @@ function renderMission(player, act, actIndex, mission, missionIndex) {
   const missionLocationId = mission.locationId || act.locationId;
   const location = LOCATIONS[missionLocationId];
   const reward = getMissionReward(mission);
+  const rewardItem = ITEMS[reward.itemId];
+  const progressPct = mission.count > 0 ? Math.round(Math.min(missionProgress.current, mission.count) / mission.count * 100) : 0;
 
   const status = done
     ? '<span class="campaign-status complete">Сдано Эдвину</span>'
@@ -174,7 +176,14 @@ function renderMission(player, act, actIndex, mission, missionIndex) {
         <i style="width:${missionProgress.active ? progress : done ? 100 : 0}%"></i>
       </div>
 
-      <small>Регион: ${location?.name || act.locationId} · Награда: ${reward.gold}💰 / ${reward.exp} EXP</small>
+      <div class="quest-card-footer">
+        <small>Регион: ${location?.name || act.locationId}</small>
+        <div class="quest-card-rewards" aria-label="Награда за миссию">
+          <span>💰 ${reward.gold}</span><span>✨ ${reward.exp} EXP</span>
+          ${rewardItem ? `<span title="${escapeHtml(rewardItem.name)}">${rewardItem.icon} ${escapeHtml(rewardItem.name)}</span>` : ''}
+        </div>
+      </div>
+      <div class="quest-card-progress-caption">${done ? 'Миссия завершена' : missionProgress.active ? `Выполнено: ${progressPct}%` : unlocked ? 'Готово к принятию' : 'Ожидает предыдущую миссию'}</div>
     </article>
   `;
 }
@@ -233,9 +242,12 @@ export function renderQuests() {
             ${completed && act.revelation ? `<p class="campaign-act-revelation"><b>Открытая истина:</b> ${act.revelation}</p>` : ''}
           </div>
 
-          <div class="campaign-act-progress">
-            <b>${actDone}/5</b>
+          <div class="campaign-act-progress" aria-label="Прогресс акта ${act.number}: ${actDone} из ${act.missions.length}">
+            <b>${actDone}/${act.missions.length}</b>
             <span>${actStatus}</span>
+            <div class="campaign-act-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${act.missions.length}" aria-valuenow="${actDone}" aria-label="Завершение акта">
+              <i style="width:${Math.round(actDone / act.missions.length * 100)}%"></i>
+            </div>
           </div>
         </div>
 
