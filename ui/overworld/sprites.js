@@ -1,6 +1,6 @@
 import { drawAuroraBuilding } from './aurora-art.js';
 
-// Пиксельные 2D-модели героев и существ; архитектура Авроры использует новые векторные ассеты.
+// Пиксельные 2D-модели героев и существ; архитектура Авроры рисуется Canvas 2D.
 // Все спрайты создаются локально через Canvas 2D.
 // Маски: o — контур, a — основной цвет, b — тень,
 // s — кожа, e — глаза/свечение, w — металл, c — акцент.
@@ -711,12 +711,8 @@ export function drawEnemy(ctx, enemy, x, y, shadowColor) {
 }
 
 function drawVillageBuilding(ctx, x, y, style = 'home') {
-  // Dedicated high-resolution illustrated SVG architecture; gameplay anchors
-  // and collision footprints remain the original world coordinates.
-  if (!drawAuroraBuilding(ctx, x, y, style)) {
-    ctx.fillStyle = '#6f8156';
-    ctx.beginPath(); ctx.ellipse(x, y + 8, 48, 13, 0, 0, Math.PI * 2); ctx.fill();
-  }
+  // Detailed Canvas architecture; gameplay anchors and collision footprints stay unchanged.
+  drawAuroraBuilding(ctx, x, y, style);
 }
 function drawVillageProp(ctx, x, y, style) {
   const t = performance.now() * 0.001;

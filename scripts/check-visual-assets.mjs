@@ -20,6 +20,10 @@ for (const asset of [
 ]) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing asset: ${asset}`);
 
 const pngAssets = ['assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
+const villageArt = readFileSync(new URL('../ui/overworld/aurora-art.js', import.meta.url), 'utf8');
+assert.ok(villageArt.includes('drawBuilding(ctx,x,y,style)'), 'Aurora buildings must use the detailed Canvas renderer');
+assert.ok(!villageArt.includes('.svg'), 'Aurora renderer must not request vector asset files');
+assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8').includes('SVG architecture'), 'Aurora sprite renderer must not depend on vector architecture');
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
