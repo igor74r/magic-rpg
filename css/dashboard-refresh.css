@@ -533,3 +533,178 @@
   #screen-game .hud-overview-vitals { grid-template-columns: minmax(0, 1fr); }
   #screen-game .hud-resource-top { align-items: center; flex-direction: row; }
 }
+
+/* Stage 3 — character sheet: one clear identity, resources, attributes and journey. */
+#dashboard-tab-modal .hero-overview {
+  display: grid;
+  gap: 13px;
+  color: #e0d5bf;
+}
+#dashboard-tab-modal .hero-overview-identity {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid rgba(216,187,123,.34);
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse at 12% 50%, rgba(126,158,145,.13), transparent 54%),
+    linear-gradient(135deg, rgba(42,42,39,.96), rgba(12,17,23,.98));
+}
+#dashboard-tab-modal .hero-overview-emblem {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border: 1px solid rgba(216,187,123,.45);
+  border-radius: 12px;
+  background: radial-gradient(circle, rgba(201,166,107,.2), rgba(8,12,18,.7));
+  color: #f1d69a;
+  font-size: 30px;
+  box-shadow: inset 0 1px rgba(255,255,255,.07), 0 6px 18px rgba(0,0,0,.24);
+}
+#dashboard-tab-modal .hero-overview-identity > div:nth-child(2) {
+  min-width: 0;
+}
+#dashboard-tab-modal .hero-overview-identity h2 {
+  color: #f1dfba;
+  font-size: clamp(20px, 3vw, 27px);
+  overflow-wrap: anywhere;
+}
+#dashboard-tab-modal .hero-overview-identity p {
+  color: #9ebbb0;
+  font-size: 12px;
+}
+#dashboard-tab-modal .hero-overview-gold {
+  margin-left: auto;
+  padding: 7px 10px;
+  border: 1px solid rgba(219,181,99,.25);
+  border-radius: 7px;
+  background: rgba(94,67,28,.18);
+  color: #f5d48c;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+#dashboard-tab-modal .hero-overview .hero-overview-columns {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+#dashboard-tab-modal .hero-overview .hero-overview-left {
+  display: grid !important;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  align-items: stretch;
+  gap: 9px !important;
+  padding: 10px !important;
+  border: 1px solid rgba(142,200,188,.22) !important;
+  border-radius: 9px;
+  background: linear-gradient(145deg, rgba(16,29,31,.7), rgba(8,13,19,.8)) !important;
+}
+#dashboard-tab-modal .hero-overview .hero-vital {
+  min-width: 0;
+  padding: 11px !important;
+  border: 1px solid rgba(202,169,112,.2);
+  border-radius: 7px;
+  background: rgba(4,8,13,.42);
+}
+#dashboard-tab-modal .hero-overview .hero-vital span {
+  color: #b6b09e;
+  font-size: 10px;
+}
+#dashboard-tab-modal .hero-overview .hero-vital b {
+  color: #f0dfbd;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+#dashboard-tab-modal .hero-overview .hero-vital i { height: 7px; }
+#dashboard-tab-modal .hero-overview .hero-overview-right {
+  display: block !important;
+  min-width: 0;
+}
+#dashboard-tab-modal .hero-overview .hero-details {
+  overflow: hidden;
+  border: 1px solid rgba(202,169,112,.25);
+  border-radius: 9px;
+  background: rgba(8,12,18,.62);
+}
+#dashboard-tab-modal .hero-overview .hero-details > summary {
+  padding: 12px 14px;
+  color: #e6d1a4;
+  font-size: 12px;
+  font-weight: 800;
+}
+#dashboard-tab-modal .hero-overview .hero-stat-grid {
+  grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+  gap: 7px;
+  padding: 11px !important;
+}
+#dashboard-tab-modal .hero-overview .hero-stat {
+  min-width: 0;
+  align-items: center;
+  padding: 9px 10px !important;
+  border: 1px solid rgba(202,169,112,.15);
+  border-radius: 6px;
+  background: rgba(255,255,255,.025);
+}
+#dashboard-tab-modal .hero-overview .hero-stat span {
+  color: #aaa18e;
+  font-size: 10px;
+}
+#dashboard-tab-modal .hero-overview .hero-stat b {
+  color: #ecd59e;
+  font-size: 12px;
+}
+#dashboard-tab-modal .hero-overview .hero-progression-grid {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 7px;
+  padding: 10px !important;
+}
+#dashboard-tab-modal .hero-overview .hero-progression-grid > div {
+  min-width: 0;
+  padding: 10px !important;
+  border: 1px solid rgba(142,200,188,.15);
+  border-radius: 6px;
+  background: rgba(38,75,69,.09);
+}
+#dashboard-tab-modal .hero-overview .hero-progression-grid span {
+  color: #8fb2a8;
+  font-size: 10px;
+}
+#dashboard-tab-modal .hero-overview .hero-progression-grid b {
+  color: #e1d4b5;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+#dashboard-tab-modal .hero-overview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#dashboard-tab-modal .hero-overview-actions button {
+  flex: 1 1 150px;
+  min-height: 38px;
+  border: 1px solid rgba(202,169,112,.3);
+  border-radius: 7px;
+  background: linear-gradient(145deg, rgba(68,54,34,.6), rgba(20,23,27,.85));
+  color: #ead4a5;
+  font-size: 11px;
+  font-weight: 700;
+}
+#dashboard-tab-modal .hero-overview-actions button:hover {
+  border-color: rgba(232,203,143,.65);
+  background: rgba(115,88,48,.28);
+}
+@media (max-width: 760px) {
+  #dashboard-tab-modal .hero-overview .hero-stat-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  #dashboard-tab-modal .hero-overview .hero-progression-grid { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 480px) {
+  #dashboard-tab-modal .hero-overview-identity { flex-wrap: wrap; padding: 10px; }
+  #dashboard-tab-modal .hero-overview-emblem { width: 46px; height: 46px; flex-basis: 46px; font-size: 24px; }
+  #dashboard-tab-modal .hero-overview-gold { margin-left: 0; }
+  #dashboard-tab-modal .hero-overview .hero-overview-left { grid-template-columns: minmax(0,1fr); }
+  #dashboard-tab-modal .hero-overview .hero-vital { padding: 9px !important; }
+}
