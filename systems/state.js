@@ -20,6 +20,6 @@ export const state = {
     bloomEffects: true,
   },
   selectedClass: null,
-  currentTab: 'locations',
+  currentTab: 'quests',
   overworld: null,
 };
