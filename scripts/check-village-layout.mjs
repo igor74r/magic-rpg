@@ -106,7 +106,8 @@ const styleSource = readFileSync(new URL('../css/2d-art-direction.css', import.m
 assert.ok(styleSource.includes('.village-room-art'), 'interior scenes must have their own visual styling');
 const spriteSource = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
 assert.ok(spriteSource.includes("['tower-gate', 15]"), 'tower portal must use its dedicated authored atlas frame');
-assert.ok(spriteSource.includes("['world-portal', 14]"), 'Aurora world portal must use its dedicated authored atlas frame');
+assert.ok(spriteSource.includes("style === 'world-portal' ? getAuroraWorldPortalAtlas()") || (spriteSource.includes("const isWorldPortal = style === 'world-portal'") && spriteSource.includes("getAuroraWorldPortalAtlas()")), 'Aurora world portal must load its dedicated authored PNG atlas');
+assert.ok(spriteSource.includes("isWorldPortal ? 0 : frame * 64"), 'Aurora world portal must draw frame zero from its dedicated atlas');
 
 const effectsSource = readFileSync(new URL('../ui/overworld/effects.js', import.meta.url), 'utf8');
 assert.ok(effectsSource.includes("weather: 'ash'"), 'Aurora must have a restrained ash atmosphere');
