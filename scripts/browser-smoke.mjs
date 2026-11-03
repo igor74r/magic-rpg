@@ -178,6 +178,23 @@ try {
     const heroPanel = page.locator('.hero-overview');
     await heroPanel.waitFor();
     assert.match(await heroPanel.innerText(), /UI audit/, `${viewport.name}: hero dossier must show the active character`);
+    const heroColumns = await page.locator('.hero-overview-columns').evaluate(node => {
+      const left = node.querySelector('.hero-overview-left')?.getBoundingClientRect();
+      const right = node.querySelector('.hero-overview-right')?.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return { left: left && { x: left.x, y: left.y, width: left.width, height: left.height },
+        right: right && { x: right.x, y: right.y, width: right.width, height: right.height },
+        columns: style.gridTemplateColumns, gap: style.columnGap };
+    });
+    assert.ok(heroColumns.left?.width > 0 && heroColumns.right?.width > 0,
+      `${viewport.name}: hero must render both resource and detailed-stat panels: ${JSON.stringify(heroColumns)}`);
+    if (viewport.width > 760) {
+      assert.ok(heroColumns.right.x > heroColumns.left.x + 30,
+        `${viewport.name}: hero panels must be side by side on desktop: ${JSON.stringify(heroColumns)}`);
+    } else {
+      assert.ok(heroColumns.right.y >= heroColumns.left.y + heroColumns.left.height - 2,
+        `${viewport.name}: hero panels must stack on narrow screens: ${JSON.stringify(heroColumns)}`);
+    }
     assert.equal(await page.locator('#dashboard-context').count(), 1, `${viewport.name}: persistent quest context must render`);
     assert.equal(await page.locator('[data-log-filter]').count(), 4, `${viewport.name}: event journal must expose four filters`);
     await page.evaluate(() => {
