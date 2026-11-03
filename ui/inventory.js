@@ -685,7 +685,14 @@ function buildCompareHTML(inst, item) {
     const diff = (newBonus[key] || 0) - (oldBonus[key] || 0);
     if (diff) lines.push(`<div class="${diff > 0 ? 'compare-up' : 'compare-down'}">${label}: ${diff > 0 ? '+' : ''}${Math.round(diff * 100)}%</div>`);
   }
-  return lines.length ? `<div class="tooltip-compare"><b>Сравнение с: ${eqObj ? ITEMS[eqObj.id]?.name : 'пустым слотом'}</b>${lines.join('')}</div>` : '';
+  const oldScore = eqObj ? itemScore(eqObj) : 0;
+  const newScore = itemScore(inst);
+  const scoreDiff = newScore - oldScore;
+  const scoreLine = `<div class="compare-score ${scoreDiff > 0 ? 'compare-up' : scoreDiff < 0 ? 'compare-down' : ''}"><span>Сила предмета</span><b>${oldScore} → ${newScore} (${scoreDiff > 0 ? '+' : ''}${scoreDiff})</b></div>`;
+  const comparisonTitle = eqObj
+    ? `Сравнение: ${escapeHtml(ITEMS[eqObj.id]?.name || 'предмет')}`
+    : 'Сравнение: пустой слот';
+  return `<div class="tooltip-compare"><b>${comparisonTitle}</b>${scoreLine}${lines.length ? lines.join('') : '<div class="compare-neutral">Характеристики не изменятся</div>'}</div>`;
 }
 
 export function buildTooltipHTML(inst) {
