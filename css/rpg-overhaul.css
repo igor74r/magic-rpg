@@ -988,3 +988,33 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   .quest-card-footer { align-items: flex-start; flex-direction: column; }
   .quest-card-progress-caption { text-align: left; }
 }
+
+/* ---------- Accessible controls for the passive talent map ---------- */
+.passive-tree-controls {
+  display:flex; flex-wrap:wrap; align-items:center; gap:7px;
+  margin:10px 0 8px; color:#bcae91; font-size:11px;
+}
+.passive-tree-controls button {
+  min-width:32px; min-height:32px; padding:5px 10px;
+  border:1px solid rgba(201,162,39,.3); border-radius:5px;
+  background:rgba(201,162,39,.08); color:#e2cd91; cursor:pointer;
+}
+.passive-tree-controls button:hover { background:rgba(201,162,39,.17); border-color:rgba(224,189,88,.6); }
+#passive-tree-zoom-status { min-width:86px; color:#e2cd91; font-variant-numeric:tabular-nums; }
+.passive-tree-key-help { flex:1 1 100%; color:#9e8e70; line-height:1.5; }
+.passive-tree-viewport { outline:none; }
+.passive-tree-viewport:focus-visible {
+  outline:2px solid #ffe39a; outline-offset:3px;
+}
+.passive-tree-viewport .passive-node:focus-visible {
+  outline:3px solid #ffe39a; outline-offset:3px; z-index:6;
+}
+.passive-tree-viewport .passive-tree-expanded { transform-origin:top left; }
+@media (max-width:600px) {
+  .passive-tree-controls { gap:5px; font-size:10px; }
+  .passive-tree-key-help { font-size:10px; }
+  .passive-tree-viewport { height:480px; min-height:390px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .passive-tree-controls button { transition:none; }
+}
