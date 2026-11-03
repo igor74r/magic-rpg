@@ -47,13 +47,13 @@ export function renderHeroOverview() {
         <div><span class="dashboard-eyebrow">ЛИЧНОЕ ДЕЛО ПУТНИКА</span><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(cls.name)} · Уровень ${p.level}</p></div>
         <div class="hero-overview-gold">💰 ${Number(p.gold) || 0}</div>
       </div>
-      <div class="hero-overview-columns">
-        <section class="hero-overview-left" aria-label="Ресурсы героя">
+      <div class="hero-overview-columns" style="display:grid;grid-template-columns:minmax(250px,0.8fr) minmax(0,1.2fr);gap:12px;align-items:stretch;width:100%">
+        <section class="hero-overview-left" aria-label="Ресурсы героя" style="display:flex;flex-direction:column;gap:10px;min-width:0;padding:12px;border:1px solid rgba(201,162,39,.28);border-radius:8px;background:rgba(15,12,9,.65);box-sizing:border-box">
           <div class="hero-vital"><span>❤ Здоровье</span><b>${p.hp} / ${p.maxHp}</b><i><em class="vital-hp" style="width:${p.maxHp > 0 ? Math.max(0, Math.min(100, p.hp / p.maxHp * 100)) : 0}%"></em></i></div>
           <div class="hero-vital"><span>🔹 ${resourceName}</span><b>${p.mp} / ${p.maxMp}</b><i><em class="vital-mp" style="width:${p.maxMp > 0 ? Math.max(0, Math.min(100, p.mp / p.maxMp * 100)) : 0}%"></em></i></div>
           <div class="hero-vital hero-level-vital"><span>✦ Уровень ${p.level} · Опыт</span><b>${p.exp} / ${p.expNext}</b><i><em class="vital-exp" style="width:${p.expNext > 0 ? Math.max(0, Math.min(100, p.exp / p.expNext * 100)) : 0}%"></em></i><small>До следующего уровня: ${Math.max(0, (p.expNext || 0) - (p.exp || 0))} XP</small></div>
         </section>
-        <section class="hero-overview-right" aria-label="Подробные характеристики">
+        <section class="hero-overview-right" aria-label="Подробные характеристики" style="min-width:0;width:100%;box-sizing:border-box">
           <details class="hero-details" open>
             <summary>⚔️ Подробные характеристики</summary>
             <div class="hero-stat-grid">${cards.map(([label, value]) => `<div class="hero-stat"><span>${label}</span><b>${value ?? 0}</b></div>`).join('')}</div>
