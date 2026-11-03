@@ -212,6 +212,20 @@ try {
         `${viewport.name}: hero panels must stack on narrow screens: ${JSON.stringify(heroColumns)}`);
     }
     assert.equal(await page.locator('#dashboard-context').count(), 1, `${viewport.name}: persistent quest context must render`);
+    const questProgress = page.locator('#dashboard-context [role="progressbar"]');
+    if (await questProgress.count()) {
+      const values = await questProgress.evaluate(node => ({
+        label: node.getAttribute('aria-label'),
+        min: Number(node.getAttribute('aria-valuemin')),
+        max: Number(node.getAttribute('aria-valuemax')),
+        current: Number(node.getAttribute('aria-valuenow')),
+        text: node.getAttribute('aria-valuetext')
+      }));
+      assert.ok(values.label && values.text, `${viewport.name}: campaign progress must be announced accessibly`);
+      assert.equal(values.min, 0, `${viewport.name}: campaign progress must start at zero`);
+      assert.ok(values.max > 0 && values.current >= 0 && values.current <= values.max,
+        `${viewport.name}: campaign progress must be bounded: ${JSON.stringify(values)}`);
+    }
     assert.equal(await page.locator('[data-log-filter]').count(), 4, `${viewport.name}: event journal must expose four filters`);
     await page.evaluate(() => {
       const log = document.getElementById('game-log');
