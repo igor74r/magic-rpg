@@ -1065,8 +1065,7 @@ function tickPlayerEffects() {
   const result = tickEffects(p);
 
   if (result.totalDamage > 0) {
-    p.hp -= result.totalDamage;
-    ow.player.hp = Math.max(0, p.hp);
+    applyPlayerDamage(p, ow, result.totalDamage);
 
     ow.floatingNumbers.push({
       x: ow.player.x,
