@@ -77,7 +77,10 @@ export function openSettings() {
   switchSettingsTab('sound');
 }
 
+const SETTINGS_TABS = ['sound', 'game', 'graphics', 'accessibility', 'data'];
+
 export function switchSettingsTab(tab) {
+  if (!SETTINGS_TABS.includes(tab)) return;
   currentSettingsTab = tab;
   let activeTab = null;
   document.querySelectorAll('.settings-tab[role="tab"]').forEach(element => {
@@ -89,6 +92,21 @@ export function switchSettingsTab(tab) {
   });
   if (activeTab) document.getElementById('settings-content')?.setAttribute('aria-labelledby', activeTab.id);
   renderSettingsTab(tab);
+}
+
+export function handleSettingsTabKey(event) {
+  const index = SETTINGS_TABS.indexOf(event.currentTarget?.dataset?.tab);
+  if (index < 0) return;
+  let next = index;
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % SETTINGS_TABS.length;
+  else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index - 1 + SETTINGS_TABS.length) % SETTINGS_TABS.length;
+  else if (event.key === 'Home') next = 0;
+  else if (event.key === 'End') next = SETTINGS_TABS.length - 1;
+  else return;
+  event.preventDefault();
+  const tab = SETTINGS_TABS[next];
+  switchSettingsTab(tab);
+  document.getElementById('settings-tab-' + tab)?.focus();
 }
 
 function renderSettingsTab(tab) {
