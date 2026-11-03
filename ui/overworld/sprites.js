@@ -1,4 +1,6 @@
-// Пиксельные 2D-модели героев, существ и объектов.
+import { drawAuroraBuilding } from './aurora-art.js';
+
+// Пиксельные 2D-модели героев и существ; архитектура Авроры использует новые векторные ассеты.
 // Все спрайты создаются локально через Canvas 2D.
 // Маски: o — контур, a — основной цвет, b — тень,
 // s — кожа, e — глаза/свечение, w — металл, c — акцент.
@@ -709,140 +711,12 @@ export function drawEnemy(ctx, enemy, x, y, shadowColor) {
 }
 
 function drawVillageBuilding(ctx, x, y, style = 'home') {
-  // Presentation-only village architecture: warm timber, plaster, shingles and
-  // readable silhouettes. The world collision footprint remains unchanged.
-  const palettes = {
-    hall: ['#ddc99f', '#70443a', '#493039', '#f2c36d', '#9a6245'],
-    forge: ['#a8957d', '#49332e', '#302a30', '#ff914d', '#75604e'],
-    healer: ['#ded7bd', '#71815b', '#43543b', '#d5efaa', '#9b865f'],
-    alchemy: ['#c2b296', '#604b70', '#3d304a', '#a6e5c5', '#8d795f'],
-    market: ['#dfc493', '#8b5437', '#57372f', '#ffd27a', '#a34c3d'],
-    tavern: ['#d0b187', '#704a35', '#49302b', '#ffc16d', '#98613c'],
-    home: ['#d6c39e', '#79564a', '#514047', '#f5d18a', '#987454']
-  };
-  const [wall, timber, roof, glow, stone] = palettes[style] || palettes.home;
-  const t = performance.now() * 0.001;
-  const pulse = Math.round((Math.sin(t * 1.7 + x * 0.03) + 1) * 1.5);
-  const px = (left, top, width, height, color) => {
-    ctx.fillStyle = color;
-    ctx.fillRect(left, top, width, height);
-  };
-
-  ctx.save();
-  ctx.translate(Math.round(x), Math.round(y));
-  ctx.scale(1.8, 1.44);
-  ctx.imageSmoothingEnabled = false;
-
-  // Ground shadow, stone plinth and irregular foundation blocks.
-  px(-42, 18, 84, 8, '#17171b');
-  px(-38, 14, 76, 8, '#29282b');
-  px(-34, 10, 68, 7, '#51483e');
-  for (let i = 0; i < 8; i++) {
-    px(-32 + i * 8, 10, 7, 5, i % 2 ? stone : '#6e6251');
+  // Dedicated high-resolution illustrated SVG architecture; gameplay anchors
+  // and collision footprints remain the original world coordinates.
+  if (!drawAuroraBuilding(ctx, x, y, style)) {
+    ctx.fillStyle = '#6f8156';
+    ctx.beginPath(); ctx.ellipse(x, y + 8, 48, 13, 0, 0, Math.PI * 2); ctx.fill();
   }
-
-  // Tall, layered shingle roof with visible eaves and ridge.
-  px(-8, -72, 16, 4, '#211d22');
-  px(-16, -68, 32, 4, '#211d22');
-  px(-24, -64, 48, 4, '#211d22');
-  px(-32, -60, 64, 4, '#211d22');
-  px(-40, -56, 80, 4, '#211d22');
-  px(-44, -52, 88, 8, '#211d22');
-  px(-40, -52, 80, 4, roof);
-  px(-36, -48, 72, 4, roof);
-  px(-32, -44, 64, 4, roof);
-  px(-28, -40, 56, 4, roof);
-  px(-24, -36, 48, 4, roof);
-  px(-20, -32, 40, 4, roof);
-  px(-36, -28, 72, 4, timber);
-  // Individual shingle seams and subtle warm highlights.
-  for (let row = 0; row < 5; row++) {
-    const half = 40 - row * 4;
-    for (let col = -half + 8; col < half; col += 16) {
-      px(col, -50 + row * 4, 1, 3, '#ffffff22');
-      px(col + 7, -48 + row * 4, 5, 1, '#1d1820');
-    }
-  }
-
-  // Plaster facade, half-timber framing and stone sill.
-  px(-36, -24, 72, 44, '#211d22');
-  px(-32, -20, 64, 36, wall);
-  px(-32, -20, 5, 36, timber);
-  px(27, -20, 5, 36, timber);
-  px(-28, -16, 56, 3, '#ead8b5');
-  px(-28, 5, 56, 3, timber);
-  px(-28, 9, 56, 7, stone);
-  px(-24, -16, 3, 22, '#bda985');
-  px(21, -16, 3, 22, '#bda985');
-  // Exposed diagonal braces make the buildings read as timber-framed cottages.
-  ctx.strokeStyle = timber;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(-27, -15); ctx.lineTo(-14, -3);
-  ctx.moveTo(27, -15); ctx.lineTo(14, -3);
-  ctx.stroke();
-
-  // Arched-looking doorway, threshold and iron handle.
-  px(-10, -5, 20, 27, '#211916');
-  px(-7, -2, 14, 24, '#765035');
-  px(-5, 1, 10, 21, '#8c6040');
-  px(4, 10, 2, 3, '#e4b45f');
-  px(-12, 20, 24, 3, '#c5a77a');
-
-  // Two leaded windows with warm animated panes and flower boxes.
-  for (const wx of [-25, 13]) {
-    px(wx, -13, 14, 18, '#211d22');
-    px(wx + 3, -10, 8, 12, glow);
-    px(wx + 6, -10, 2, 12, timber);
-    px(wx + 3, -5, 8, 2, timber);
-    px(wx + 1, 5, 12, 3, '#5b3829');
-    px(wx + 2, 8, 10, 2, '#7b5036');
-    if (style === 'home' || style === 'healer' || style === 'tavern') {
-      px(wx + 3, 3, 2, 3, '#6e9a55');
-      px(wx + 8, 2, 2, 4, '#a65a62');
-    }
-  }
-
-  // Distinctive roof fittings and shop identity.
-  px(-5, -61, 10, 4, '#d0aa68');
-  if (style === 'forge' || style === 'tavern' || style === 'hall') {
-    px(17, -58, 12, 22, '#30282a');
-    px(13, -62, 20, 4, '#80604c');
-    px(20, -70, 8, 8, '#8e8980');
-    px(24, -78, 8, 8, '#aaa39a');
-    px(26, -82, 5, 4, '#c2b9a7');
-  }
-  if (style === 'forge') {
-    px(-4, 13, 8, 5, '#ff7435');
-    px(-1, 9, 5, 4, '#ffd27a');
-    px(12, 1, 5, 8, '#b9a18a');
-  }
-  if (style === 'market') {
-    // Striped awning and hanging shop sign.
-    px(-36, -27, 72, 5, '#a33f38');
-    for (let i = 0; i < 6; i++) px(-32 + i * 12, -27, 6, 5, i % 2 ? '#e9d19d' : '#a33f38');
-    px(31, -39, 3, 14, timber);
-    px(27, -42, 12, 8, '#e4c17d');
-    px(29, -40, 8, 4, '#70452f');
-  } else if (style === 'healer') {
-    px(-4, -57, 8, 12, '#f0ead7');
-    px(-2, -55, 4, 8, '#6c9a5a');
-    px(-7, -52, 14, 3, '#6c9a5a');
-  } else if (style === 'alchemy') {
-    px(30, -42, 3, 16, timber);
-    px(26, -44, 12, 8, '#c8b4d8');
-    px(29, -42, 6, 4, '#765a91');
-    px(-3, -58, 6, 8, '#a6e5c5');
-  } else if (style === 'hall') {
-    px(-5, -59, 10, 14, '#e7d8b4');
-    px(-2, -56, 4, 8, '#a54b3e');
-    px(-7, -53, 14, 3, '#a54b3e');
-  } else if (style === 'tavern') {
-    px(31, -40, 3, 15, timber);
-    px(26, -43, 13, 9, '#d7b36d');
-    px(29, -41, 7, 5, '#8b3f32');
-  }
-  ctx.restore();
 }
 function drawVillageProp(ctx, x, y, style) {
   const t = performance.now() * 0.001;
