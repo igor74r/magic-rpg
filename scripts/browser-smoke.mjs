@@ -301,7 +301,7 @@ try {
     await page.locator('#game-tab-locations').click();
     await page.locator('#aurora-world-portal').waitFor();
     await page.locator('#aurora-world-portal [data-world-close]').click();
-    await page.locator('#game-header').click();
+    await page.locator('#overworld-title').click();
     await page.keyboard.press('/');
     assert.equal(await page.evaluate(() => document.activeElement?.id), 'dashboard-nav-search',
       `${viewport.name}: slash shortcut must focus navigation search`);
