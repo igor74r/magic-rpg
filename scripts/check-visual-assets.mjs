@@ -31,7 +31,9 @@ assert.ok(html.includes('Три дракона удерживают его за�
 assert.ok(html.includes('Первые кровавые маги создали Кристалл Разлома'));
 assert.ok(html.includes('css/2d-art-direction.css'));
 
-const renderer = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');\nassert.ok(!renderer.includes('drawAuroraGround'), 'Aurora ground must use the authored terrain atlas');\nassert.ok(renderer.includes('ctx.imageSmoothingEnabled = false;'), 'world terrain must preserve pixel edges');
+const renderer = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
+assert.ok(!renderer.includes('drawAuroraGround'), 'Aurora ground must use the authored terrain atlas');
+assert.ok(renderer.includes('ctx.imageSmoothingEnabled = false;'), 'world terrain must preserve pixel edges');
 assert.ok(renderer.includes('getEventPropIndex'));
 assert.ok(renderer.includes('drawAtlasProp(ctx, eventPropIndex'));
 const atlasRenderer = readFileSync(new URL('../ui/overworld/tile-atlas.js', import.meta.url), 'utf8');
