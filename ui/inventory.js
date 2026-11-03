@@ -252,14 +252,14 @@ export function cancelSaleUI() {
   if (saleReturnFocus?.isConnected) saleReturnFocus.focus();
   saleReturnFocus = null;
 }
-function filterBarHTML() {
+function filterBarHTML(counts) {
   const filters = [
-    ['bag', '🎒 Сумка'], ['equipment', '⚔️ Экипировка'],
-    ['material', '🌿 Материалы'], ['quest', '📜 Квесты'],
-    ['rift-shards', '💎 Осколки']
+    ['bag', '🎒 Сумка', counts.bag], ['equipment', '⚔️ Экипировка', counts.equipment],
+    ['material', '🌿 Материалы', counts.materials], ['quest', '📜 Квесты', counts.quests],
+    ['rift-shards', '💎 Осколки', counts.shards]
   ];
-  const f = ([key, label]) =>
-    `<button type="button" class="inv-filter-btn ${invFilter === key ? 'active' : ''}" data-inv-filter="${key}" aria-pressed="${invFilter === key}">${label}</button>`;
+  const f = ([key, label, count]) =>
+    `<button type="button" class="inv-filter-btn ${invFilter === key ? 'active' : ''}" data-inv-filter="${key}" aria-pressed="${invFilter === key}">${label}<span class="inv-filter-count">${count}</span></button>`;
   const s = (key, label) =>
     `<button type="button" class="inv-filter-btn ${invSort === key ? 'active' : ''}" data-inv-sort="${key}" aria-pressed="${invSort === key}">${label}</button>`;
   return `
@@ -451,8 +451,8 @@ export function renderInventory() {
           <div><h3>🎒 Сумка героя</h3><small>${usedSlots}/30 ячеек · ${weight.toFixed(1)}/${capacity} веса · ${counts.equipment} экипировки · ${counts.materials} материалов · ${counts.quests} квестов · ${counts.shards}/3 осколка</small></div>
           <div class="inv-wallet">💰 ${p.gold || 0}</div>
         </div>
-        ${filterBarHTML()}
-        <div class="inv-grid rpg-inv-grid">${grid}</div>
+        ${filterBarHTML(counts)}
+        ${visible.length ? `<div class="inv-grid rpg-inv-grid">${grid}</div>` : `<div class="inv-empty-state" role="status"><span>🧭</span><b>В этой категории пока пусто</b><small>Смените фильтр или продолжайте исследовать мир — новые предметы появятся в сумке.</small></div>`}
         <p class="inv-hint">Нажми на предмет, чтобы надеть или использовать. Руна устанавливается в свободное гнездо. Наведи курсор для сравнения характеристик.</p>
         ${renderPendingLoot(p)}
       </section>
