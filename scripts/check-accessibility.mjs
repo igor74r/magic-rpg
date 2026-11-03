@@ -32,6 +32,15 @@ for (const filter of ['all', 'combat', 'loot', 'story']) {
 }
 assert.match(header, /renderDashboardContext\(\)/, 'game refreshes must update the live dashboard context');
 assert.ok(header.includes('<div class="hud-overview-columns">'), 'central hero HUD must use a split layout container');
+assert.ok(header.includes('hud-panel-kicker'), 'resource panel must have a clear visual section label');
+assert.ok(header.includes('aria-controls="game-header-combat-details"'), 'combat details toggle must be associated with its panel');
+assert.ok(header.includes('id="game-header-combat-details"'), 'combat details panel must have a stable accessible id');
+assert.ok(header.includes('hud-stat-group-label'), 'hero attributes must be visually grouped by type');
+assert.ok(header.includes('<b>${p.str}</b>') && header.includes('<b>${crit}%</b>'), 'combat stat values must be emphasized for quick scanning');
+assert.ok(css.includes('#game-header .hud-panel-kicker'), 'HUD resource section label must receive dedicated styling');
+assert.ok(css.includes('#game-header .header-combat-stats {\\n  display:grid;\\n  grid-template-columns:repeat(3,minmax(0,1fr));'), 'combat attributes must use compact responsive chips');
+assert.ok(css.includes('@media (prefers-reduced-motion: reduce)'), 'HUD transitions must respect reduced-motion preferences');
+
 assert.ok(header.includes('<section class="hud-overview-vitals" aria-label="Ресурсы героя">'), 'resource panel must be clearly labelled');
 assert.ok(header.includes('<section class="hud-overview-details" aria-label="Боевые характеристики">'), 'combat details panel must be clearly labelled');
 assert.ok(header.includes('data-hud-toggle aria-expanded="false"'), 'hero details toggle must expose its initial collapsed state');
