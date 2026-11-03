@@ -300,10 +300,6 @@ function syncMapFocusedLayout(tab) {
 }
 
 export function switchTab(tab) {
-  if (tab === 'locations' && state.overworld?.active) {
-    window.GameAPI?.openWorldPortalMenu?.();
-    return;
-  }
   if (tab !== 'locations' && state.overworld?.active) {
     window.GameAPI?.exitOverworld?.();
     if (state.overworld?.active) return;
