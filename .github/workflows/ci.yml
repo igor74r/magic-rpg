@@ -95,7 +95,7 @@ jobs:
       - name: Check combat actions for all playable classes
         run: node scripts/check-combat-actions.mjs
 
-      - name: Check world map route guidance and lock details
+      - name: Check world map route guidance, lock details and expanded layout
         run: node scripts/check-map-navigation.mjs
 
       - name: Check story location level gates and ordered route
