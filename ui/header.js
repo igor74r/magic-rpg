@@ -327,6 +327,16 @@ function closeDashboardModal({ resumeWorld = true } = {}) {
 }
 
 function openDashboardModal(tab) {
+  // Headless boot tests and lightweight embedded shells have no dashboard UI;
+  // preserve the legacy render target there while the real game uses overlays.
+  if (!document.getElementById('screen-game') || !document.querySelector('.dashboard-tablist')) {
+    if (dashboardModal) {
+      dashboardModal.remove();
+      dashboardModal = null;
+    }
+    renderTab(tab);
+    return;
+  }
   if (tab === 'locations') {
     window.GameAPI?.openWorldPortalMenu?.();
     return;
