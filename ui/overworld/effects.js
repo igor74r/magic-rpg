@@ -16,7 +16,7 @@ let bloomCanvas = null, bloomCtx = null;
 
 export const THEMES = {
   default:   { colors: { 0: '#0c1a1c', 1: '#22323a', 2: '#071014', 3: '#0c2230', 4: '#22303a' }, vignette: 0.7, shadow: 'rgba(0,0,0,0.55)', fog: 0.88, weather: 'none', tint: 'rgba(30, 90, 100, 0.16)' },
-  village:   { colors: { 0: '#1b2b29', 1: '#51483c', 2: '#2a2420', 3: '#1b3a4a', 4: '#3d4a45' }, vignette: 0.42, shadow: 'rgba(0,0,0,0.4)', fog: 0.62, weather: 'ash', tint: 'rgba(190, 150, 112, 0.09)' },
+  village:   { colors: { 0: '#1b2b29', 1: '#51483c', 2: '#2a2420', 3: '#1b3a4a', 4: '#3d4a45' }, vignette: 0.26, shadow: 'rgba(0,0,0,0.4)', fog: 0.38, weather: 'ash', tint: 'rgba(190, 150, 112, 0.09)' },
   forest:    { colors: { 0: '#08140f', 1: '#18241a', 2: '#040a08', 3: '#0a2230', 4: '#141f19' }, vignette: 0.75, shadow: 'rgba(0,0,0,0.6)', fog: 0.9, weather: 'rain', tint: 'rgba(20, 80, 60, 0.2)' },
   ruins:     { colors: { 0: '#1c2028', 1: '#2e3440', 2: '#10141c', 3: '#1c2c3c', 4: '#3a404a' }, vignette: 0.68, shadow: 'rgba(0,0,0,0.55)', fog: 0.85, weather: 'none', tint: 'rgba(70, 90, 120, 0.12)' },
   shadow:    { colors: { 0: '#08040e', 1: '#181028', 2: '#040208', 3: '#22103a', 4: '#14101c' }, vignette: 0.95, shadow: 'rgba(0,0,0,0.9)', fog: 0.98, weather: 'ash', tint: 'rgba(90, 40, 120, 0.22)' },

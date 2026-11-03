@@ -111,6 +111,7 @@ assert.ok(spriteSource.includes("isWorldPortal ? 0 : frame * 64"), 'Aurora world
 
 const effectsSource = readFileSync(new URL('../ui/overworld/effects.js', import.meta.url), 'utf8');
 assert.ok(effectsSource.includes("weather: 'ash'"), 'Aurora must have a restrained ash atmosphere');
+assert.ok(effectsSource.includes('vignette: 0.26') && effectsSource.includes('fog: 0.38'), 'Aurora ambient darkness must preserve village detail');
 assert.ok(effectsSource.includes("getCurrentBiome() === 'village' ? '#f3c879'"), 'Aurora night fireflies must use warm light');
 const renderSource = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
 assert.ok(renderSource.includes('villageNightAlpha'), 'Aurora must have a softer day/night tint');

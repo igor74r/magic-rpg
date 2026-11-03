@@ -655,7 +655,7 @@ function render() {
   }
 
   if (nightAlpha > 0 && ow.locationId !== 'library') {
-    const villageNightAlpha = ow.locationId === 'village' ? nightAlpha * 0.34 : nightAlpha;
+    const villageNightAlpha = ow.locationId === 'village' ? nightAlpha * 0.2 : nightAlpha;
     ctx.fillStyle = nightColor + villageNightAlpha + ')';
     ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
   }
