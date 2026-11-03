@@ -1033,3 +1033,24 @@
     max-width: none !important;
   }
 }
+
+/* New title emblem replacing the outdated crystal artwork. */
+#screen-main .logo-emblem {
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid rgba(218, 185, 120, .68) !important;
+  border-radius: 24px 8px 24px 8px !important;
+  background: radial-gradient(circle at 50% 42%, rgba(74, 99, 145, .52), rgba(12, 18, 32, .96) 68%) !important;
+  box-shadow: inset 0 0 18px rgba(217, 185, 120, .13), 0 0 22px rgba(42, 74, 132, .25) !important;
+  filter: none !important;
+  color: #e7c783 !important;
+  font-size: 64px !important;
+  line-height: 1 !important;
+  text-shadow: 0 0 16px rgba(224, 186, 102, .6) !important;
+}
+#screen-main .logo-emblem span {
+  transform: translateY(-2px);
+}
+@media (max-width: 520px) {
+  #screen-main .logo-emblem { font-size: 48px !important; }
+}
