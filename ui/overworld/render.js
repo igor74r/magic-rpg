@@ -484,7 +484,11 @@ function render() {
       ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.strokeText(item.name, sx, sy - 24);
       ctx.fillStyle = '#ffd060'; ctx.fillText(item.name, sx, sy - 24);
     } else if (entry.kind === 'enemy') {
-      drawEnemyByType(ctx, item, sx, sy, theme.shadow);
+      let enemyLungeX = 0;
+      if (ow.combat && ow.combat.enemy === item && ow.combat.turn === 'enemy') {
+        enemyLungeX = Math.cos(now / 50) * 5;
+      }
+      drawEnemyByType(ctx, item, sx + enemyLungeX, sy, theme.shadow);
       const enemyDef = ENEMIES[item.enemyId];
       if (enemyDef) {
         const hpPct = item.hp / item.maxHp;
@@ -535,13 +539,6 @@ function render() {
     }
     if (e.state === 'chase') { ctx.fillStyle = 'rgba(255,60,60,0.1)'; ctx.beginPath(); ctx.arc(sx, sy, 26, 0, Math.PI * 2); ctx.fill(); }
     
-    let eLungeX = 0, eLungeY = 0;
-    if (ow.combat && ow.combat.enemy === e && ow.combat.turn === 'enemy') {
-       eLungeX = Math.cos(now / 50) * 5; 
-    }
-    
-    drawEnemyByType(ctx, e, sx + eLungeX, sy + eLungeY, theme.shadow);
-
     const distToPlayer = Math.hypot(e.x - ow.player.x, e.y - ow.player.y);
     if (distToPlayer < 300) {
       const def = ENEMIES[e.enemyId];
