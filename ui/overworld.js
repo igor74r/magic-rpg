@@ -182,8 +182,9 @@ export function resumeOverworld() {
 
 export function initOverworld() {
   if (!overworldInputBound) {
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
+    // Capture movement before UI widgets can consume arrow/WASD events.
+    window.addEventListener('keydown', onKeyDown, { capture: true });
+    window.addEventListener('keyup', onKeyUp, { capture: true });
     window.addEventListener('blur', clearMovementKeys);
     document.addEventListener('visibilitychange', () => { if (document.hidden) clearMovementKeys(); });
     overworldInputBound = true;
@@ -211,7 +212,8 @@ function initMobileDpad() {
   const dpad = document.getElementById('mobile-dpad');
   if (!dpad) return;
   if (dpad.dataset.bound) return;
-  if (!window.matchMedia('(pointer: coarse)').matches && window.innerWidth >= 900) return;
+  // Keep the on-screen pad available on every device as a reliable fallback,
+  // including desktop and hybrid touch/keyboard devices.
   dpad.style.display = 'block';
   dpad.dataset.bound = '1';
   dpad.querySelectorAll('.dpad-btn').forEach(btn => {
@@ -247,7 +249,17 @@ function initMobileDpad() {
 
 
 function getLogicalKey(e) {
-  const code = e.code;
+  const code = e.code || '';
+  const key = String(e.key || '').toLowerCase();
+  const keyCode = e.keyCode || e.which;
+  if (keyCode === 87) return 'w';
+  if (keyCode === 65) return 'a';
+  if (keyCode === 83) return 's';
+  if (keyCode === 68) return 'd';
+  if (keyCode === 38) return 'w';
+  if (keyCode === 37) return 'a';
+  if (keyCode === 40) return 's';
+  if (keyCode === 39) return 'd';
   if (code === 'KeyW' || code === 'ArrowUp') return 'w';
   if (code === 'KeyS' || code === 'ArrowDown') return 's';
   if (code === 'KeyA' || code === 'ArrowLeft') return 'a';
@@ -261,11 +273,17 @@ function getLogicalKey(e) {
   if (code === 'Digit4' || code === 'Numpad4') return '4';
   if (code === 'Digit5' || code === 'Numpad5') return '5';
   if (code === 'Digit6' || code === 'Numpad6') return '6';
-  return e.key.toLowerCase();
+  if (['w', 'a', 's', 'd'].includes(key)) return key;
+  if (key === 'arrowup') return 'w';
+  if (key === 'arrowleft') return 'a';
+  if (key === 'arrowdown') return 's';
+  if (key === 'arrowright') return 'd';
+  return key;
 }
 
 function onKeyDown(e) {
   if (!state.overworld || !state.overworld.active) return;
+  state.overworld.keys ||= {};
   const k = getLogicalKey(e);
   if (isPaused()) { if (k === 'escape') { e.preventDefault(); closePauseMenu(); } return; }
   if (k === 'escape') {
@@ -310,6 +328,7 @@ function onKeyDown(e) {
 
 function onKeyUp(e) {
   if (!state.overworld) return;
+  state.overworld.keys ||= {};
   const k = getLogicalKey(e);
   state.overworld.keys[k] = false;
 }
