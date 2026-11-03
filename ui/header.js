@@ -360,10 +360,13 @@ function openDashboardModal(tab) {
     window.GameAPI?.openWorldPortalMenu?.();
     return;
   }
+  const preserveWorldResume = dashboardModal
+    ? dashboardModalResumeWorld
+    : !!(state.overworld?.active && !state.overworld?.paused);
   if (dashboardModal) closeDashboardModal({ resumeWorld: false, restoreFocus: false });
 
   dashboardModalTrigger = document.getElementById(`game-tab-${tab}`);
-  dashboardModalResumeWorld = !!(state.overworld?.active && !state.overworld?.paused);
+  dashboardModalResumeWorld = preserveWorldResume;
   if (state.overworld) {
     state.overworld.active = false;
     state.overworld.paused = true;
