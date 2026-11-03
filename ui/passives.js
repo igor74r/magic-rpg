@@ -245,14 +245,12 @@ export function renderPassives() {
       <button
         type="button"
         class="passive-node ${classes}"
-        style="left:${node.x}%;top:${node.y}%"\n        data-x="${node.x}" data-y="${node.y}"
+        style="left:${node.x}%;top:${node.y}%"
         data-x="${node.x}" data-y="${node.y}"
-        ${
-          available
-            ? `onclick="GameAPI.allocatePassive('${node.id}')"`
-            : 'disabled'
-        }
-        aria-label="${node.name}. ${node.desc}. ${getPassiveNodeStatus(player, node.id)}"\n        title="${node.name}: ${node.desc} — ${getPassiveNodeStatus(player, node.id)}"
+        ${available ? `onclick="GameAPI.allocatePassive('${node.id}')"` : ''}
+        aria-disabled="${!available}"
+        aria-label="${node.name}. ${node.desc}. ${getPassiveNodeStatus(player, node.id)}"
+        title="${node.name}: ${node.desc} — ${getPassiveNodeStatus(player, node.id)}"
       >
         <span class="node-icon">${node.icon}</span>
         <span class="node-name">${label}</span>
