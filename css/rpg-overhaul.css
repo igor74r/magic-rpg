@@ -1605,7 +1605,17 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   margin-bottom: 5px;
 }
 #screen-game.map-focused #game-header .hud-overview-columns {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+#screen-game.map-focused #game-header .hud-overview-details {
+  min-width: 160px;
+}
+#screen-game.map-focused #game-header .hud-details-toggle {
+  margin: 0;
+  padding: 6px 9px;
 }
 #screen-game.map-focused #game-header .hud-overview-vitals {
   display: grid;
@@ -1614,7 +1624,6 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   gap: 12px;
 }
 #screen-game.map-focused #game-header .hud-panel-kicker,
-#screen-game.map-focused #game-header .hud-overview-details,
 #screen-game.map-focused #game-header .hud-exp-caption,
 #screen-game.map-focused #game-header .effects-inline,
 #screen-game.map-focused #game-header .rpg-endgame-area,
