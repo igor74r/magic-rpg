@@ -339,7 +339,6 @@
     overflow: visible;
   }
   #screen-game .dashboard-brand { padding: 2px 4px 7px; }
-  #screen-game .dashboard-nav-search,
   #screen-game .sidebar-title,
   #screen-game .sidebar-bottom,
   #screen-game .dashboard-nav-caption { display: none; }
