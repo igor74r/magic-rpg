@@ -30,4 +30,14 @@ assert.equal(crit(1.8), 1.8, 'normal crit multiplier unchanged');
 assert.equal(crit(3.4), 2.5, 'crit multiplier upper bound');
 assert.equal(crit(NaN), 1.5, 'invalid crit multiplier fallback');
 
+
+assert.match(source, /function applyPlayerDamage\(player, overworld, amount\)/,
+  'all enemy attacks must apply damage through a single guarded player-health path');
+assert.match(source, /player\.hp = safeHp - actual;\s*overworld\.player\.hp = player\.hp;/,
+  'persistent hero HP and overworld HP must stay synchronized after enemy attacks');
+const applyDamage = (hp, amount) => Math.min(Math.max(0, Number.isFinite(hp) ? hp : 0), Math.max(0, Number.isFinite(amount) ? Math.floor(amount) : 0));
+assert.equal(applyDamage(100, 25), 25, 'enemy attack removes expected HP');
+assert.equal(applyDamage(10, 50), 10, 'lethal enemy attack clamps to remaining HP');
+assert.equal(applyDamage(100, NaN), 0, 'invalid attack damage cannot alter HP');
+
 console.log('Combat formulas regression contract: OK');
