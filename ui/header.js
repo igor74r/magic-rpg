@@ -321,15 +321,24 @@ function getDashboardTabTitle(tab) {
 }
 
 function closeDashboardModal({ resumeWorld = true, restoreFocus = true } = {}) {
-  if (!dashboardModal) return;
-  const modal = dashboardModal;
+  // Recover even if an earlier UI transition detached the JS reference but
+  // left the modal DOM behind. Such an orphan can cover the game and keep
+  // the entire dashboard inert, making every control appear frozen.
+  const modal = dashboardModal || document.getElementById('dashboard-tab-modal');
+  const hadModal = !!modal;
   dashboardModal = null;
-  modal.remove();
+  document.querySelectorAll('#dashboard-tab-modal').forEach(element => element.remove());
   document.body.classList.remove('dashboard-modal-open');
 
   const gameScreen = document.getElementById('screen-game');
-  if (gameScreen) gameScreen.inert = dashboardPreviousGameInert;
+  if (gameScreen) gameScreen.inert = false;
   dashboardPreviousGameInert = false;
+  if (!hadModal) {
+    dashboardModalResumeWorld = false;
+    dashboardPreviousPaused = false;
+    dashboardPreviousActive = false;
+    return;
+  }
 
   document.querySelectorAll('.dashboard-tablist [role="tab"]').forEach(tab => {
     tab.setAttribute('aria-controls', 'tab-content');
@@ -362,6 +371,15 @@ function closeDashboardModal({ resumeWorld = true, restoreFocus = true } = {}) {
 }
 
 function openDashboardModal(tab) {
+  // A stale tab overlay must never survive into another dashboard action.
+  // Remove orphaned copies and release inert state before mounting a fresh one.
+  if (!dashboardModal) {
+    document.querySelectorAll('#dashboard-tab-modal').forEach(element => element.remove());
+    document.body.classList.remove('dashboard-modal-open');
+    const gameScreen = document.getElementById('screen-game');
+    if (gameScreen) gameScreen.inert = false;
+  }
+
   // Headless boot tests and lightweight embedded shells have no dashboard UI;
   // preserve the legacy render target there while the real game uses overlays.
   if (!document.getElementById('screen-game') || !document.querySelector('.dashboard-tablist')) {
