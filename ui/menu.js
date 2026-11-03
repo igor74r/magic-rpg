@@ -18,6 +18,17 @@ export function updateMainMenu() {
   renderSlots();
 }
 
+export function startNewGame() {
+  for (let slot = 1; slot <= getMaxSlot(); slot++) {
+    if (!getSlotInfo(slot)) {
+      newGameSlot(slot);
+      return true;
+    }
+  }
+  toast('Все три слота заняты. Удали или освободи слот, чтобы начать новое приключение.');
+  return false;
+}
+
 export function renderSlots() {
   const grid = document.getElementById('slots-grid');
   if (!grid) return;
