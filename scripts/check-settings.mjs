@@ -9,7 +9,8 @@ assert.equal(legacy.sfxVolume, 42);
 assert.equal(legacy.autoSave, true);
 assert.equal(legacy.autoSaveInterval, 30);
 assert.equal(legacy.difficulty, 'normal');
-assert.equal(legacy.settingsVersion, 5);
+assert.equal(legacy.settingsVersion, 6);
+assert.equal(legacy.fontScale, 1);
 assert.equal(legacy.graphicsQuality, 'high');
 assert.equal(legacy.weatherEffects, true);
 assert.equal(legacy.ambientFog, true);
@@ -31,7 +32,8 @@ const complete = migrateSettings({
   graphicsQuality: 'balanced',
   weatherEffects: false,
   ambientFog: false,
-  bloomEffects: false
+  bloomEffects: false,
+  fontScale: 1.25
 });
 assert.equal(complete.musicVolume, 25);
 assert.equal(complete.sfxVolume, 90);
@@ -48,6 +50,7 @@ assert.equal(complete.graphicsQuality, 'balanced');
 assert.equal(complete.weatherEffects, false);
 assert.equal(complete.ambientFog, false);
 assert.equal(complete.bloomEffects, false);
+assert.equal(complete.fontScale, 1.25);
 
 const invalid = migrateSettings({
   musicVolume: 140,
@@ -69,6 +72,7 @@ assert.equal(empty.musicVolume, 60);
 assert.equal(empty.sfxVolume, 80);
 assert.equal(empty.reducedMotion, false);
 assert.equal(empty.graphicsQuality, 'high');
+assert.equal(empty.fontScale, 1);
 
 
 const menu = readFileSync(new URL('../ui/menu.js', import.meta.url), 'utf8');
@@ -79,7 +83,7 @@ for (const controlId of [
   'set-music-volume', 'set-sfx-volume', 'set-sound',
   'set-difficulty', 'set-autosave', 'set-autosave-interval',
   'set-hotkeys', 'set-fps', 'set-damage-numbers',
-  'set-screen-shake', 'set-low-health', 'set-reduced-motion',
+  'set-screen-shake', 'set-low-health', 'set-reduced-motion', 'set-font-scale',
   'set-graphics-quality', 'set-weather-effects', 'set-ambient-fog', 'set-bloom-effects'
 ]) {
   assert.ok(menu.includes(`id="${controlId}"`), `missing settings control: ${controlId}`);
@@ -89,6 +93,8 @@ assert.ok(html.includes("switchSettingsTab('accessibility')"), 'accessibility ta
 assert.ok(html.includes("switchSettingsTab('graphics')"), 'graphics tab is not reachable');
 assert.ok(menu.includes("tab === 'graphics'"), 'graphics settings are not rendered');
 assert.ok(menu.includes("tab === 'accessibility'"), 'accessibility settings are not rendered');
+assert.ok(menu.includes('applyFontScale();'), 'font scale is not applied live');
+assert.ok(css.includes('zoom: var(--ui-font-scale, 1)'), 'font scale is not reflected in the UI');
 assert.match(css, /@media\s*\(max-width:\s*600px\)/, 'mobile settings layout breakpoint missing');
 assert.ok(css.includes('#settings-content .settings-row'), 'settings row styles missing');
 assert.ok(menu.includes('saveSettings();'), 'settings are not persisted after applying');
@@ -129,7 +135,7 @@ try {
   assert.equal(state.game.player.name, 'Keep me', 'failed deletion must not clear the active character');
   storageBlocked = false;
   assert.equal(saveSettings(), true, 'settings should save after storage recovers');
-  assert.equal(JSON.parse(settingsStorage.get('magic-rpg-settings')).settingsVersion, 5);
+  assert.equal(JSON.parse(settingsStorage.get('magic-rpg-settings')).settingsVersion, 6);
 } finally {
   state.settings = originalSettings;
   state.game = originalGame;
