@@ -214,8 +214,7 @@ function initMobileDpad() {
 
   // Desktop/laptop users control the character with WASD or arrow keys.
   // Do not mount pointer handlers or show a floating pad on a mouse/trackpad.
-  const isTouchDevice = window.matchMedia?.('(hover: none) and (pointer: coarse)').matches
-    || navigator.maxTouchPoints > 0;
+  const isTouchDevice = window.matchMedia?.('(hover: none) and (pointer: coarse)').matches === true;
   if (!isTouchDevice) {
     dpad.hidden = true;
     dpad.style.display = 'none';
