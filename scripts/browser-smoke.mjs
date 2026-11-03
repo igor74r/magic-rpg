@@ -121,6 +121,10 @@ try {
     assert.equal(await page.locator('#game-tab-locations').isVisible(), false,
       `${viewport.name}: the redundant world-map sidebar entry must remain hidden`);
     await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#tab-content').innerHTML(), '',
+      `${viewport.name}: legacy inline tab content must stay empty on gameplay`);
+    assert.equal(await page.locator('#dashboard-tab-modal').count(), 0,
+      `${viewport.name}: dashboard section must not open automatically during gameplay`);
     assert.equal(await page.locator('#screen-game .dashboard-sidebar').isVisible(), true,
       `${viewport.name}: village scene must keep the left navigation visible`);
     assert.equal(await page.locator('#screen-game .dashboard-log').isVisible(), true,
