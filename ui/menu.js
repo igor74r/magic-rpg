@@ -307,7 +307,7 @@ export function resetAllSettings() {
     showHotkeys: true, showFps: false, screenShake: true,
     damageNumbers: true, lowHealthEffects: true, reducedMotion: false, fontScale: 1,
     graphicsQuality: 'high', weatherEffects: true, ambientFog: true, bloomEffects: true,
-    settingsVersion: 5
+    settingsVersion: 6
   };
   saveSettings();
   updateVolume();
