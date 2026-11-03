@@ -133,6 +133,9 @@ jobs:
       - name: Check inventory, affixes and crafting
         run: node scripts/check-inventory-affixes.mjs
 
+      - name: Check inventory UI search, sorting and responsive layout
+        run: node scripts/check-inventory-ui-enhancements.mjs
+
       - name: Check overflow loot persistence and claiming
         run: node scripts/check-loot-overflow.mjs
 
