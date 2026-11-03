@@ -1703,6 +1703,13 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
     padding: 3px 7px;
     font-size: 11px;
   }
+  #screen-game.map-focused #game-header .hud-overview-columns {
+    grid-template-columns: minmax(0,1fr);
+    gap: 5px;
+  }
+  #screen-game.map-focused #game-header .hud-overview-details {
+    min-width: 0;
+  }
   #screen-game.map-focused #game-header .hud-overview-vitals {
     gap: 7px;
   }
