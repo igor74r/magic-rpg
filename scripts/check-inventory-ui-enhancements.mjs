@@ -19,3 +19,11 @@ const modalZ = Number(dashboardStyles.match(/#dashboard-tab-modal\s*\{[^}]*z-ind
 assert.ok(Number.isFinite(tooltipZ) && Number.isFinite(modalZ) && tooltipZ > modalZ,
   `Item tooltip must render above inventory modal (tooltip=${tooltipZ}, modal=${modalZ}).`);
 console.log('Inventory UI enhancements: search, clear, sort, rarity and responsive styles verified.');
+
+assert.ok(inventory.indexOf("const rarities = [") >= 0, 'Inventory rarity filter controls should exist.');
+assert.match(inventory, /data-inv-rarity/);
+assert.match(inventory, /invRarityFilter !== 'all'/);
+assert.match(inventory, /rarityCounts = entries\.reduce/);
+assert.match(inventory, /slot-rarity-label/);
+assert.match(styles, /\.inv-rarity-row/);
+assert.match(styles, /\.slot-rarity-label/);
