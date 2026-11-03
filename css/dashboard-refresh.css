@@ -708,3 +708,193 @@
   #dashboard-tab-modal .hero-overview .hero-overview-left { grid-template-columns: minmax(0,1fr); }
   #dashboard-tab-modal .hero-overview .hero-vital { padding: 9px !important; }
 }
+
+/* Stage 4 — equipment and backpack: stable paperdoll + focused searchable bag. */
+#dashboard-tab-modal .rpg-inventory-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, .78fr) minmax(0, 1.42fr);
+  align-items: start;
+  gap: 14px;
+  min-width: 0;
+}
+#dashboard-tab-modal .rpg-paperdoll,
+#dashboard-tab-modal .rpg-backpack {
+  min-width: 0;
+  border: 1px solid rgba(202,169,112,.25);
+  border-radius: 10px;
+  background: linear-gradient(155deg, rgba(27,30,34,.96), rgba(9,13,19,.98));
+  box-shadow: inset 0 1px rgba(255,255,255,.04), 0 8px 22px rgba(0,0,0,.2);
+}
+#dashboard-tab-modal .rpg-paperdoll { padding: 12px; }
+#dashboard-tab-modal .paperdoll-hero {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 13px 10px;
+  border: 1px solid rgba(216,187,123,.22);
+  border-radius: 8px;
+  background: radial-gradient(ellipse at 50% 15%, rgba(201,166,107,.16), transparent 68%), rgba(5,9,14,.45);
+}
+#dashboard-tab-modal .paperdoll-hero .paperdoll-silhouette {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgba(216,187,123,.3);
+  border-radius: 12px;
+  background: rgba(0,0,0,.3);
+  color: #f0d69c;
+  font-size: 34px;
+}
+#dashboard-tab-modal .paperdoll-hero b { color: #eee0c1; font-size: 14px; }
+#dashboard-tab-modal .paperdoll-hero small { color: #9ebbb0; font-size: 10px; }
+#dashboard-tab-modal .equipment-slots {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 7px;
+}
+#dashboard-tab-modal .gear-slot {
+  min-width: 0;
+  min-height: 70px;
+  border-radius: 7px;
+}
+#dashboard-tab-modal .gear-slot-name { padding-right: 12px; }
+#dashboard-tab-modal .paperdoll-combat-summary {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid rgba(202,169,112,.2);
+  border-radius: 8px;
+  background: rgba(4,8,13,.4);
+}
+#dashboard-tab-modal .paperdoll-combat-summary > b {
+  color: #e5d09e;
+  font-size: 11px;
+}
+#dashboard-tab-modal .paperdoll-stat-grid { gap: 5px; }
+#dashboard-tab-modal .paperdoll-stat-grid > span {
+  padding: 7px;
+  border: 1px solid rgba(202,169,112,.1);
+  border-radius: 5px;
+  background: rgba(255,255,255,.025);
+  color: #b7b09f;
+  font-size: 10px;
+}
+#dashboard-tab-modal .paperdoll-stat-grid strong { color: #e8d4a5; }
+#dashboard-tab-modal .rpg-backpack { padding: 12px; }
+#dashboard-tab-modal .inv-top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+#dashboard-tab-modal .inv-top-actions button {
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(202,169,112,.3);
+  border-radius: 7px;
+  background: rgba(93,69,37,.24);
+  color: #ead4a5;
+  font-size: 10px;
+  font-weight: 700;
+}
+#dashboard-tab-modal .inv-title-row {
+  align-items: flex-start;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(202,169,112,.18);
+}
+#dashboard-tab-modal .inv-title-row h3 {
+  color: #f0d69c;
+  font-size: 17px;
+}
+#dashboard-tab-modal .inv-title-row small {
+  display: block;
+  max-width: 560px;
+  margin-top: 5px;
+  color: #9d9b8e;
+  font-size: 10px;
+  line-height: 1.55;
+}
+#dashboard-tab-modal .inv-wallet {
+  padding: 6px 9px;
+  border: 1px solid rgba(219,181,99,.22);
+  border-radius: 7px;
+  background: rgba(94,67,28,.16);
+  color: #f2d58e;
+  font-size: 12px;
+}
+#dashboard-tab-modal .inv-controls {
+  display: grid;
+  gap: 8px;
+  margin: 11px 0;
+  padding: 10px;
+  border: 1px solid rgba(202,169,112,.16);
+  border-radius: 8px;
+  background: rgba(5,9,14,.34);
+}
+#dashboard-tab-modal .inv-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+#dashboard-tab-modal .inv-filter-btn {
+  min-height: 30px;
+  padding: 6px 8px;
+  border: 1px solid rgba(202,169,112,.18);
+  border-radius: 6px;
+  background: rgba(255,255,255,.025);
+  color: #bcb5a4;
+  font-size: 10px;
+}
+#dashboard-tab-modal .inv-filter-btn.active {
+  border-color: rgba(216,187,123,.55);
+  background: rgba(153,112,55,.2);
+  color: #f1dfb7;
+}
+#dashboard-tab-modal .inv-sort-label {
+  margin-right: 3px;
+  color: #9b927f;
+  font-size: 10px;
+}
+#dashboard-tab-modal .inv-search-wrap {
+  margin: 0;
+  min-height: 38px;
+  border-color: rgba(202,169,112,.24);
+  border-radius: 7px;
+  background: rgba(0,0,0,.3);
+}
+#dashboard-tab-modal .rpg-inv-grid {
+  grid-template-columns: repeat(6,minmax(0,1fr));
+  gap: 7px;
+}
+#dashboard-tab-modal .rpg-inv-grid .inv-slot {
+  min-width: 0;
+  min-height: 58px;
+  aspect-ratio: 1;
+  border-radius: 7px;
+  background-color: rgba(4,8,13,.72);
+}
+#dashboard-tab-modal .rpg-inv-grid .slot-icon { font-size: clamp(19px, 2.4vw, 27px); }
+#dashboard-tab-modal .inv-hint {
+  margin: 10px 0 0;
+  color: #9e9a8c;
+  font-size: 10px;
+  line-height: 1.55;
+}
+@media (max-width: 760px) {
+  #dashboard-tab-modal .rpg-inventory-layout { grid-template-columns: minmax(0,1fr); }
+  #dashboard-tab-modal .equipment-slots { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  #dashboard-tab-modal .rpg-paperdoll { order: 0; }
+  #dashboard-tab-modal .rpg-backpack { order: 1; }
+  #dashboard-tab-modal .rpg-inv-grid { grid-template-columns: repeat(5,minmax(0,1fr)); }
+}
+@media (max-width: 420px) {
+  #dashboard-tab-modal .rpg-paperdoll,
+  #dashboard-tab-modal .rpg-backpack { padding: 9px; }
+  #dashboard-tab-modal .rpg-inv-grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 5px; }
+  #dashboard-tab-modal .inv-title-row { flex-wrap: wrap; }
+  #dashboard-tab-modal .inv-filter-btn { flex: 1 1 auto; }
+}
