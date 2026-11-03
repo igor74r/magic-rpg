@@ -1,107 +1,140 @@
-// Aurora village artwork rendered entirely with Canvas 2D.
-// No external vector artwork: buildings are layered, palette-driven illustrations.
-const BUILDINGS = Object.freeze({
-  hall:    { wall:'#c7a477', shade:'#866044', roof:'#4b3942', roofHi:'#80606a', trim:'#e5c99b', sign:'#d6b66e', window:'#f4c875', chimney:true, crest:'✦' },
-  forge:   { wall:'#a87954', shade:'#674735', roof:'#46363a', roofHi:'#765044', trim:'#d6a66e', sign:'#b96c3d', window:'#ff9b4e', chimney:true, crest:'⚒' },
-  healer:  { wall:'#d3c39a', shade:'#91845e', roof:'#64704e', roofHi:'#91a16a', trim:'#f0dfb2', sign:'#71965e', window:'#f8d78a', chimney:false, crest:'✚' },
-  alchemy: { wall:'#b69b78', shade:'#76634e', roof:'#4c5960', roofHi:'#71868a', trim:'#d9c59b', sign:'#789b83', window:'#b7e6bc', chimney:true, crest:'⚗' },
-  market:  { wall:'#c9a06e', shade:'#896442', roof:'#9a5840', roofHi:'#c47b4c', trim:'#f0d19a', sign:'#bd7444', window:'#f7d18a', chimney:false, crest:'◆' },
-  tavern:  { wall:'#bd8c5f', shade:'#78513c', roof:'#553b36', roofHi:'#8a5945', trim:'#e6bd83', sign:'#a84e39', window:'#ffc66e', chimney:true, crest:'★' },
-  home:    { wall:'#c9b18a', shade:'#88745b', roof:'#59604a', roofHi:'#89916a', trim:'#e5d1aa', sign:'#8a7452', window:'#f5d28a', chimney:false, crest:'' }
+// Aurora's rebuilt 16-bit pixel-art architecture.
+// Every structure is authored on a low-resolution pixel canvas and enlarged
+// with nearest-neighbour sampling. No gradients, blur, SVG, emoji or old art.
+const PALETTES = Object.freeze({
+  hall:    { wall:'#d6bd91', shade:'#9a7958', timber:'#513b30', roof:'#394653', roof2:'#536578', trim:'#e7d3a8', glass:'#ffd27a', stone:'#77796f', accent:'#c7a45e' },
+  forge:   { wall:'#b98b63', shade:'#80573f', timber:'#49352c', roof:'#3d3438', roof2:'#65464a', trim:'#d9b17c', glass:'#ff9b45', stone:'#69645d', accent:'#e36b36' },
+  healer:  { wall:'#e0d2aa', shade:'#a99a73', timber:'#65533c', roof:'#526a4e', roof2:'#718b60', trim:'#f0e2bd', glass:'#ffe09a', stone:'#858575', accent:'#79a66b' },
+  alchemy: { wall:'#c6b092', shade:'#89755e', timber:'#493e3c', roof:'#405761', roof2:'#607c82', trim:'#dfc99d', glass:'#9de0c2', stone:'#6f7370', accent:'#9a83c6' },
+  market:  { wall:'#d2ad7b', shade:'#9b754e', timber:'#65412f', roof:'#a94f3d', roof2:'#d17b4f', trim:'#f1d39c', glass:'#ffdc91', stone:'#8b806c', accent:'#e3b85f' },
+  tavern:  { wall:'#c69a70', shade:'#8a6045', timber:'#51372c', roof:'#4a3835', roof2:'#795247', trim:'#e7c18c', glass:'#ffca70', stone:'#777064', accent:'#b95e43' },
+  home:    { wall:'#d0bd96', shade:'#9b8768', timber:'#594532', roof:'#59634c', roof2:'#7d8a61', trim:'#e8d4aa', glass:'#f8d58c', stone:'#817c6c', accent:'#b78b55' }
 });
-
-function drawRoof(ctx,p) {
-  polygon(ctx,[[-132,-111],[-91,-190],[4,-218],[133,-151],[133,-112],[4,-174],[-91,-151]],p.roof,'#302a2b',5);
-  polygon(ctx,[[-132,-111],[-91,-190],[4,-218],[4,-174],[-91,-151]],p.roofHi,'rgba(255,225,174,.28)',2);
-  polygon(ctx,[[4,-218],[133,-151],[133,-112],[4,-174]],p.roof,'rgba(25,25,24,.4)',2);
-  // Individual roof courses and shingle highlights.
-  for(let row=0;row<4;row++){
-    const yy=-184+row*17, inset=row*8;
-    line(ctx,-88+inset,yy,0,yy-25,p.roofHi,2);
-    line(ctx,8,yy-24,119-inset,yy+31,p.roofHi,2);
-  }
-  line(ctx,-91,-190,4,-218,'#d6b58a',4);
-  line(ctx,4,-218,133,-151,'#d6b58a',4);
-  polygon(ctx,[[-139,-111],[-91,-151],[4,-174],[4,-160],[-91,-137],[-139,-98]],'#352b2a','#211f20',2);
-  polygon(ctx,[[4,-174],[133,-112],[133,-96],[4,-160]],'#30282a','#211f20',2);
+const cache = new Map();
+const W = 104, H = 92, SCALE = 3;
+function rect(c,x,y,w,h,color){ c.fillStyle=color; c.fillRect(x,y,w,h); }
+function row(c,x,y,w,color){ rect(c,x,y,w,1,color); }
+function pixel(c,x,y,color){ rect(c,x,y,1,1,color); }
+function windowBox(c,x,y,p,wide=9){
+  rect(c,x-1,y-1,wide+2,13,p.timber); rect(c,x,y,wide,11,p.glass);
+  rect(c,x+Math.floor(wide/2),y,1,11,p.timber); rect(c,x,y+5,wide,1,p.timber);
+  rect(c,x-2,y-2,wide+4,2,p.trim); rect(c,x-2,y+11,wide+4,2,p.trim);
+  rect(c,x-3,y+13,wide+6,2,p.timber);
 }
-function drawWindow(ctx,x,y,p,glow=true){
+function door(c,x,y,p){
+  rect(c,x-2,y-2,15,23,p.timber); rect(c,x,y,11,20,'#69452f');
+  rect(c,x+2,y+2,7,7,'#875b3a'); rect(c,x+2,y+11,7,7,'#805337');
+  rect(c,x+9,y+10,1,2,p.accent); rect(c,x-4,y+20,19,3,p.stone);
+}
+function roofGable(c,p,left=12,right=92,peak=50,base=35){
+  // Stepped roof silhouette: crisp one-pixel courses and a strong dark eave.
+  rect(c,left+12,peak+8,right-left-24,base-peak-8,p.roof);
+  for(let n=0;n<12;n++){
+    const inset=n*2, yy=peak+Math.floor(n*1.25);
+    rect(c,left+inset,yy,right-left-inset*2,2,n%3===0?p.roof2:p.roof);
+  }
+  rect(c,left+8,base-1,right-left-16,4,p.timber);
+  for(let x=left+13;x<right-12;x+=8) rect(c,x,peak+8+Math.floor((x-left)/8),2,base-peak-10,p.roof2);
+  row(c,left+10,peak+1,right-left-20,p.trim);
+}
+function baseBuilding(c,p,variant){
+  rect(c,8,43,88,37,p.timber);
+  rect(c,11,42,82,34,p.wall); rect(c,53,42,40,34,p.shade);
+  rect(c,11,72,82,8,p.stone);
+  for(let x=13;x<92;x+=13){rect(c,x,73,1,6,p.trim);rect(c,x+5,77,5,1,'#55564f');}
+  rect(c,11,43,4,30,p.trim); rect(c,89,43,4,30,p.timber);
+  rect(c,49,43,4,34,p.timber);
+  if(variant!=='market') {windowBox(c,20,52,p,9);windowBox(c,73,52,p,9);}
+  door(c,46,57,p);
+  rect(c,7,79,90,3,'#4b4037');
+}
+function drawHall(c,p){
+  // Town hall: high central tower, two wings, bell openings and royal crest.
+  baseBuilding(c,p,'hall'); roofGable(c,p,8,96,20,48);
+  rect(c,38,4,29,39,p.timber);rect(c,41,7,23,35,p.wall);rect(c,53,7,11,35,p.shade);
+  roofGable(c,p,32,73,1,15);rect(c,44,0,15,4,p.accent);
+  rect(c,46,20,5,10,p.timber);rect(c,56,20,5,10,p.timber);
+  rect(c,48,22,1,6,p.glass);rect(c,58,22,1,6,p.glass);
+  rect(c,50,13,5,3,p.trim);rect(c,52,10,1,9,p.accent);
+  rect(c,48,36,10,4,p.timber);rect(c,14,40,76,3,p.trim);
+  rect(c,44,46,17,4,p.accent);rect(c,50,45,5,7,p.trim);
+  rect(c,18,33,6,9,p.timber);rect(c,79,33,6,9,p.timber);
+}
+function drawForge(c,p){
+  baseBuilding(c,p,'forge'); roofGable(c,p,8,95,20,48);
+  rect(c,75,5,13,37,p.timber);rect(c,78,8,7,31,p.stone);rect(c,73,4,17,5,p.trim);
+  rect(c,79,12,5,7,p.accent);rect(c,80,13,3,4,'#ffb45b');
+  rect(c,17,46,19,3,p.timber);rect(c,18,49,3,9,p.stone);rect(c,32,49,3,9,p.stone);
+  rect(c,21,44,12,3,p.accent);rect(c,24,41,6,3,'#ffb35a');
+  rect(c,11,61,20,10,p.timber);rect(c,14,59,14,3,p.stone);rect(c,18,55,7,5,'#8c9390');
+  rect(c,34,66,7,3,p.accent);rect(c,35,63,5,3,'#ff9b45');
+}
+function drawHealer(c,p){
+  baseBuilding(c,p,'healer'); roofGable(c,p,9,95,24,48);
+  rect(c,40,27,24,16,p.trim);rect(c,43,30,18,10,p.wall);
+  rect(c,51,28,3,13,p.accent);rect(c,46,33,13,3,p.accent);
+  rect(c,12,44,18,4,p.timber);rect(c,14,39,14,5,p.accent);
+  rect(c,13,37,3,7,'#638d58');rect(c,19,34,3,10,'#779d5b');rect(c,25,37,3,7,'#638d58');
+  rect(c,72,44,18,4,p.timber);rect(c,74,39,14,5,p.accent);
+  for(let x=15;x<31;x+=5){pixel(c,x,55,'#83a65e');pixel(c,x+1,53,'#d6a7c0');}
+  rect(c,37,78,30,3,p.accent);
+}
+function drawAlchemy(c,p){
+  baseBuilding(c,p,'alchemy'); roofGable(c,p,7,96,18,48);
+  rect(c,69,5,13,38,p.timber);rect(c,72,8,7,30,p.stone);rect(c,67,3,17,5,p.trim);
+  rect(c,72,14,7,7,p.accent);rect(c,74,16,3,3,p.glass);
+  rect(c,15,43,18,5,p.timber);rect(c,17,48,14,3,p.accent);
+  rect(c,20,51,7,10,p.glass);rect(c,22,48,3,4,p.trim);rect(c,21,59,5,2,p.accent);
+  rect(c,76,48,8,12,p.glass);rect(c,78,45,4,4,p.trim);
+  rect(c,44,43,17,5,p.timber);rect(c,49,39,7,4,p.accent);
+  rect(c,47,34,12,5,p.glass);rect(c,50,30,6,5,p.trim);
+  pixel(c,53,32,'#d8f6df');
+}
+function drawMarket(c,p){
+  // Open trade hall with two vivid awnings and stall tables, not a closed house.
+  rect(c,8,45,88,35,p.timber);rect(c,12,53,80,25,p.wall);
+  rect(c,9,41,86,5,p.timber);rect(c,13,46,78,3,p.trim);
+  for(let x=12;x<94;x+=8){rect(c,x,25,7,18,x%2?p.roof:p.roof2);rect(c,x,24,7,3,p.trim);}
+  roofGable(c,p,8,96,17,30);
+  rect(c,14,56,76,4,p.timber);rect(c,17,60,4,15,p.timber);rect(c,83,60,4,15,p.timber);
+  rect(c,20,52,20,7,p.accent);rect(c,44,52,20,7,'#6b8d68');rect(c,68,52,18,7,'#bd7650');
+  rect(c,20,64,64,4,p.timber);
+  for(let x=22;x<83;x+=9){rect(c,x,68,5,6,p.accent);pixel(c,x+1,67,p.trim);}
+  rect(c,8,78,88,3,p.stone);
+}
+function drawTavern(c,p){
+  baseBuilding(c,p,'tavern');roofGable(c,p,6,98,17,48);
+  rect(c,17,35,70,5,p.timber);rect(c,20,30,64,5,p.roof2);
+  rect(c,19,29,4,13,p.timber);rect(c,81,29,4,13,p.timber);
+  rect(c,24,33,56,3,p.trim);
+  rect(c,33,49,38,5,p.timber);rect(c,36,46,32,4,p.glass);
+  rect(c,37,46,2,8,p.timber);rect(c,65,46,2,8,p.timber);
+  rect(c,37,57,30,3,p.accent);rect(c,42,60,3,8,p.timber);rect(c,60,60,3,8,p.timber);
+  rect(c,73,5,12,38,p.timber);rect(c,76,8,6,31,p.stone);rect(c,71,3,16,5,p.trim);
+}
+function drawHome(c,p){
+  baseBuilding(c,p,'home');roofGable(c,p,8,96,26,48);
+  rect(c,76,17,9,26,p.timber);rect(c,78,19,5,20,p.stone);rect(c,75,15,11,4,p.trim);
+  rect(c,16,43,15,4,p.accent);rect(c,18,47,11,2,p.trim);
+  rect(c,75,43,14,4,p.accent);
+}
+function makeBuilding(style){
+  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+  const p=PALETTES[style]||PALETTES.home;
+  rect(g,4,82,96,6,'#384034');rect(g,8,80,88,3,'#59624a');
+  ({hall:drawHall,forge:drawForge,healer:drawHealer,alchemy:drawAlchemy,market:drawMarket,tavern:drawTavern,home:drawHome}[style]||drawHome)(g,p);
+  // Individual stone chips, moss and timber pegs; all aligned to the pixel grid.
+  for(let i=0;i<16;i++){const x=9+(i*29)%86,y=73+(i*7)%9;pixel(g,x,y,i%3===0?p.accent:p.stone);}
+  return c;
+}
+export function drawAuroraBuilding(ctx,x,y,style='home'){
+  if(!ctx||typeof document==='undefined') return false;
+  const key=PALETTES[style]?style:'home';
+  if(!cache.has(key)) cache.set(key,makeBuilding(key));
   ctx.save();
-  rounded(ctx,x-16,y-24,32,45,5,'#332a28','#2a2422');
-  rounded(ctx,x-12,y-20,24,37,3,glow?p.window:'#52604c','#d5b27b');
-  ctx.fillStyle='rgba(255,239,183,.45)';ctx.fillRect(x-9,y-17,5,29);
-  line(ctx,x,y-20,x,y+17,'#513b2d',3);line(ctx,x-12,y-2,x+12,y-2,'#513b2d',3);
-  polygon(ctx,[[x-20,y-25],[x,y-34],[x+20,y-25],[x+16,y-19],[x-16,y-19]],p.trim,'#3a2b26',2);
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(cache.get(key),Math.round(x-W*SCALE/2),Math.round(y-H*SCALE+8),W*SCALE,H*SCALE);
   ctx.restore();
+  return true;
 }
-function drawBuilding(ctx,x,y,style){
-  const p=BUILDINGS[style]||BUILDINGS.home;
-  ctx.save();ctx.translate(x,y);
-  // Broad contact shadow and stone plinth.
-  ctx.fillStyle='rgba(17,25,17,.36)';ctx.beginPath();ctx.ellipse(0,8,145,31,0,0,Math.PI*2);ctx.fill();
-  polygon(ctx,[[-126,-111],[0,-143],[126,-111],[126,2],[0,35],[-126,2]],'#5c5142','#332e29',3);
-  polygon(ctx,[[-126,-111],[0,-143],[0,18],[-126,2]],p.wall,'#47382d',2);
-  polygon(ctx,[[0,-143],[126,-111],[126,2],[0,18]],p.shade,'#47382d',2);
-  // Limewash, aged plaster and exposed timber framing.
-  for(let i=0;i<7;i++){
-    const yy=-98+i*17;
-    line(ctx,-116,yy,-7,yy+13,'rgba(255,231,184,.13)',1);
-    line(ctx,8,yy+13,116,yy-yy*.0+yy*0+yy+27,'rgba(32,27,25,.12)',1);
-  }
-  line(ctx,-119,-103,-119,-2,'#49372b',8);line(ctx,-8,-132,-8,17,'#49372b',8);
-  line(ctx,119,-108,119,-1,'#382d28',8);line(ctx,8,-132,119,-104,'#49372b',7);
-  line(ctx,-119,-3,-8,25,'#49372b',7);line(ctx,8,25,119,-3,'#382d28',7);
-  // Lower stone courses, each block offset like real masonry.
-  for(let row=0;row<2;row++) for(let col=0;col<5;col++){
-    const bx=-119+col*23+(row%2)*7, by=-1+row*13;
-    rounded(ctx,bx,by,20,10,2,row?'#756b59':'#8d8067','#5a5145');
-  }
-  // Roof is drawn over the upper wall, then its edge receives carved fascia.
-  drawRoof(ctx,p);
-  line(ctx,-137,-108,4,-169,'#d4b58a',5);line(ctx,4,-169,139,-105,'#d4b58a',5);
-  // Gable vent and decorative braces.
-  polygon(ctx,[[-35,-184],[4,-202],[43,-181],[4,-165]],'#40342f','#b99569',2);
-  rounded(ctx,-5,-185,18,13,3,'#29292a','#d0a976');
-  line(ctx,-112,-124,-83,-140,'#d9b47d',4);line(ctx,84,-140,117,-124,'#d9b47d',4);
-  // Door with inset panels, stone step, iron handle.
-  polygon(ctx,[[-20,17],[-20,-57],[0,-68],[20,-57],[20,22],[0,30]],'#3b2925','#241f1d',3);
-  polygon(ctx,[[-15,15],[-15,-53],[0,-61],[0,25]],'#86583a','#d1a16b',2);
-  polygon(ctx,[[2,-60],[15,-53],[15,18],[2,23]],'#65422f','#332721',2);
-  line(ctx,-12,-24,12,-24,'#c1945e',3);line(ctx,-12,-4,12,-4,'#c1945e',3);
-  ctx.fillStyle='#e4c17d';ctx.beginPath();ctx.arc(11,-20,2.7,0,Math.PI*2);ctx.fill();
-  polygon(ctx,[[-28,22],[0,29],[29,20],[26,29],[0,39],[-28,31]],'#b5a184','#51473b',2);
-  // Windows, flower boxes and shutters.
-  drawWindow(ctx,-76,-55,p);drawWindow(ctx,76,-55,p);
-  for(const wx of [-76,76]){
-    rounded(ctx,wx-23,-27,46,7,2,'#65412e','#382b24');
-    for(let f=0;f<4;f++){ctx.fillStyle=['#d35c56','#e8b85f','#9eaf65'][f%3];ctx.beginPath();ctx.arc(wx-15+f*10,-31-(f%2)*3,4,0,Math.PI*2);ctx.fill();}
-  }
-  // Business sign unique to each building.
-  if(p.crest){
-    ctx.fillStyle='#302722';ctx.fillRect(86,-92,4,34);
-    rounded(ctx,72,-113,34,25,5,p.sign,'#3b2b25');
-    ctx.fillStyle='#f6e1b6';ctx.font='bold 16px Georgia,serif';ctx.textAlign='center';ctx.fillText(p.crest,89,-95);
-  }
-  // Chimney, smoke and roof-side dormer.
-  if(p.chimney){
-    polygon(ctx,[[77,-185],[77,-224],[105,-232],[105,-168]],'#815a48','#3e302a',3);
-    polygon(ctx,[[73,-224],[91,-235],[109,-228],[105,-217],[77,-214]],'#bd9872','#4b382e',2);
-    for(let i=0;i<3;i++){ctx.fillStyle='rgba(239,224,196,.15)';ctx.beginPath();ctx.arc(93+i*5,-245-i*8,7+i*2,0,Math.PI*2);ctx.fill();}
-  }
-  // Warm wall lamps and foundation moss.
-  for(const lx of [-108,108]){
-    ctx.fillStyle='#392a23';ctx.fillRect(lx-2,-49,4,13);
-    ctx.fillStyle='#f4bd64';ctx.beginPath();ctx.arc(lx,-53,5,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='rgba(255,190,87,.16)';ctx.beginPath();ctx.arc(lx,-53,17,0,Math.PI*2);ctx.fill();
-  }
-  for(let i=0;i<12;i++){ctx.fillStyle=i%2?'#637b4d':'#87915a';ctx.fillRect(-119+i*21,7+(i%3)*3,5,3);}
-  // Small identifying details per service building.
-  if(style==='forge'){ctx.fillStyle='#f08a3d';ctx.beginPath();ctx.arc(49,7,8+Math.sin(performance.now()/250)*2,0,Math.PI*2);ctx.fill();line(ctx,38,13,58,13,'#392b24',3);}
-  if(style==='healer'){ctx.fillStyle='#6d9a61';ctx.fillRect(-4,-104,8,25);ctx.fillRect(-13,-95,26,7);}
-  if(style==='alchemy'){for(let i=0;i<3;i++){ctx.fillStyle=['#9bd5ae','#b5a3df','#e4c16d'][i];ctx.beginPath();ctx.arc(48+i*13,3,5,0,Math.PI*2);ctx.fill();}}
-  if(style==='market'){ctx.fillStyle='#e0bd79';ctx.fillRect(-111,5,29,7);ctx.fillStyle='#a44e3c';ctx.fillRect(-108,12,24,4);}
-  if(style==='tavern'){ctx.fillStyle='#f4c875';ctx.font='bold 10px Georgia';ctx.textAlign='center';ctx.fillText('ТРАКТИР',0,-79);}
-  if(style==='hall'){polygon(ctx,[[-5,-218],[4,-239],[13,-218]],'#d8bd7d','#5b4633',2);}
-  ctx.restore();
-}
-export function drawAuroraBuilding(ctx,x,y,style='home'){drawBuilding(ctx,x,y,style);return true;}
