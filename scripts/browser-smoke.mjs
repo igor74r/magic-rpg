@@ -178,6 +178,22 @@ try {
     const heroPanel = page.locator('.hero-overview');
     await heroPanel.waitFor();
     assert.match(await heroPanel.innerText(), /UI audit/, `${viewport.name}: hero dossier must show the active character`);
+    const heroProgress = await page.locator('.hero-overview-left [role="progressbar"]').evaluateAll(nodes =>
+      nodes.map(node => ({
+        label: node.getAttribute('aria-label'),
+        min: Number(node.getAttribute('aria-valuemin')),
+        max: Number(node.getAttribute('aria-valuemax')),
+        value: Number(node.getAttribute('aria-valuenow'))
+      }))
+    );
+    assert.equal(heroProgress.length, 3, `${viewport.name}: hero must expose health, resource and XP progress`);
+    for (const progress of heroProgress) {
+      assert.ok(progress.label, `${viewport.name}: hero progress bar must have an accessible label`);
+      assert.equal(progress.min, 0, `${viewport.name}: hero progress minimum must be zero`);
+      assert.equal(progress.max, 100, `${viewport.name}: hero progress maximum must be 100`);
+      assert.ok(Number.isFinite(progress.value) && progress.value >= 0 && progress.value <= 100,
+        `${viewport.name}: hero progress value must be bounded: ${JSON.stringify(progress)}`);
+    }
     const heroColumns = await page.locator('.hero-overview-columns').evaluate(node => {
       const left = node.querySelector('.hero-overview-left')?.getBoundingClientRect();
       const right = node.querySelector('.hero-overview-right')?.getBoundingClientRect();
