@@ -61,10 +61,15 @@ try {
       if (tab==='locations') {
         await page.evaluate(() => window.GameAPI.openWorldPortalMenu());
         await page.locator('#aurora-world-portal').waitFor({state:'visible'});
-        await capture(page, `${vp.name}-04-map-portal-destinations`);
-        const destinations=page.locator('#aurora-world-portal [data-world-location]');
-        assert.ok(await destinations.count()>0,`${vp.name}: portal map must show destination cards`);
-        await capture(page, `${vp.name}-05-world-portal`);
+        assert.ok(await page.locator('#aurora-world-portal .portal-map-stage').isVisible(),
+          `${vp.name}: portal must show the large interactive world map`);
+        const destinations=page.locator('#aurora-world-portal [data-portal-node]');
+        assert.ok(await destinations.count()>0,`${vp.name}: world atlas must show interactive destination points`);
+        assert.ok(await page.locator('#aurora-world-portal #portal-destination h2').isVisible(),
+          `${vp.name}: atlas must show selected destination details`);
+        assert.equal(await page.locator('#aurora-world-portal [data-portal-travel]').count(),1,
+          `${vp.name}: atlas must expose a single travel action`);
+        await capture(page, `${vp.name}-04-world-atlas`);
         await page.locator('#aurora-world-portal [data-world-close]').click();
       } else {
         await trigger.click();
