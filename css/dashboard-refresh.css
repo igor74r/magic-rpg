@@ -898,3 +898,219 @@
   #dashboard-tab-modal .inv-title-row { flex-wrap: wrap; }
   #dashboard-tab-modal .inv-filter-btn { flex: 1 1 auto; }
 }
+
+/* Stage 5 — consistent journal, magic and talent section hierarchy. */
+#dashboard-tab-modal .campaign-header {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: end;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(202,169,112,.28);
+  border-radius: 10px;
+  background: radial-gradient(ellipse at 0% 0%, rgba(201,166,107,.12), transparent 60%), rgba(8,13,19,.58);
+}
+#dashboard-tab-modal .campaign-header h2 {
+  margin: 5px 0;
+  color: #f0d69c;
+  font-size: clamp(19px,2vw,25px);
+}
+#dashboard-tab-modal .campaign-header p {
+  margin: 5px 0 0;
+  color: #b8b09e;
+  font-size: 12px;
+  line-height: 1.55;
+}
+#dashboard-tab-modal .campaign-kicker {
+  color: #8fb9ac;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+#dashboard-tab-modal .campaign-total {
+  min-width: 76px;
+  padding: 9px 11px;
+  border: 1px solid rgba(216,187,123,.28);
+  border-radius: 8px;
+  background: rgba(92,69,35,.18);
+  color: #f0d69c;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+#dashboard-tab-modal .campaign-total small {
+  display: block;
+  color: #a99a7c;
+  font-size: 9px;
+  font-weight: 600;
+}
+#dashboard-tab-modal .campaign-current-objective {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid rgba(216,187,123,.34);
+  border-radius: 9px;
+  background: linear-gradient(145deg, rgba(47,39,27,.72), rgba(9,14,20,.94));
+}
+#dashboard-tab-modal .campaign-act {
+  margin: 12px 0;
+  padding: 13px;
+  border: 1px solid rgba(202,169,112,.22);
+  border-radius: 9px;
+  background: linear-gradient(150deg, rgba(29,32,35,.94), rgba(10,14,19,.98));
+}
+#dashboard-tab-modal .campaign-act.completed {
+  border-color: rgba(126,181,103,.34);
+}
+#dashboard-tab-modal .campaign-act.locked {
+  opacity: .74;
+}
+#dashboard-tab-modal .campaign-act-heading {
+  gap: 12px;
+  align-items: flex-start;
+}
+#dashboard-tab-modal .campaign-act-heading h3 {
+  margin: 4px 0;
+  color: #ead5aa;
+  font-size: 15px;
+}
+#dashboard-tab-modal .campaign-act-kicker {
+  color: #9ebbb0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+#dashboard-tab-modal .campaign-act-heading p {
+  color: #b8b09e;
+  font-size: 11px;
+  line-height: 1.5;
+}
+#dashboard-tab-modal .campaign-missions {
+  grid-template-columns: repeat(auto-fit,minmax(min(100%,240px),1fr));
+  gap: 8px;
+}
+#dashboard-tab-modal .campaign-mission {
+  padding: 11px;
+  border: 1px solid rgba(202,169,112,.16);
+  border-radius: 7px;
+  background: rgba(4,8,13,.38);
+}
+#dashboard-tab-modal .campaign-mission.current {
+  border-color: rgba(216,187,123,.55);
+  background: rgba(103,78,39,.13);
+}
+#dashboard-tab-modal .campaign-mission.done {
+  border-color: rgba(126,181,103,.28);
+}
+#dashboard-tab-modal .campaign-mission h4 {
+  color: #e8d5ab;
+  font-size: 12px;
+}
+#dashboard-tab-modal .campaign-mission p {
+  color: #b7b09e;
+  font-size: 11px;
+  line-height: 1.5;
+}
+#dashboard-tab-modal .campaign-shards {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid rgba(202,169,112,.2);
+  border-radius: 9px;
+  background: rgba(5,9,14,.4);
+}
+#dashboard-tab-modal .campaign-shards h3 { color: #e8d5ab; font-size: 13px; }
+#dashboard-tab-modal .campaign-shards .item-list { display: grid; gap: 6px; }
+
+#dashboard-tab-modal .item-list {
+  display: grid;
+  gap: 7px;
+}
+#dashboard-tab-modal .item-list > .item {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(202,169,112,.17);
+  border-radius: 7px;
+  background: linear-gradient(145deg, rgba(28,31,34,.84), rgba(8,12,18,.92));
+}
+#dashboard-tab-modal .item-info { min-width: 0; }
+#dashboard-tab-modal .item-name {
+  color: #ead5aa;
+  font-size: 12px;
+  font-weight: 800;
+}
+#dashboard-tab-modal .item-desc {
+  color: #b6b09f;
+  font-size: 11px;
+  line-height: 1.55;
+}
+#dashboard-tab-modal .ability-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+#dashboard-tab-modal .ability-status {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border: 1px solid rgba(202,169,112,.2);
+  border-radius: 999px;
+  background: rgba(0,0,0,.25);
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+#dashboard-tab-modal .ability-status.ready { color: #a9d58b; border-color: rgba(126,181,103,.3); }
+#dashboard-tab-modal .ability-status.cooldown { color: #e5c27c; border-color: rgba(216,187,123,.3); }
+#dashboard-tab-modal .ability-status.nomana { color: #e69b87; border-color: rgba(213,119,96,.3); }
+#dashboard-tab-modal .ability-status.passive { color: #9ebbb0; border-color: rgba(142,200,188,.25); }
+
+#dashboard-tab-modal .passive-heading {
+  padding: 12px 14px;
+  border: 1px solid rgba(202,169,112,.2);
+  border-radius: 8px;
+  background: rgba(7,12,18,.48);
+}
+#dashboard-tab-modal .passive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 10px 0;
+}
+#dashboard-tab-modal .passive-actions button {
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(202,169,112,.28);
+  border-radius: 7px;
+  background: rgba(87,67,36,.2);
+  color: #ead5aa;
+  font-size: 10px;
+}
+#dashboard-tab-modal .passive-tree-controls {
+  padding: 8px;
+  border: 1px solid rgba(202,169,112,.18);
+  border-radius: 8px;
+  background: rgba(4,8,13,.36);
+}
+#dashboard-tab-modal .passive-tree-expanded {
+  border-color: rgba(202,169,112,.28);
+  border-radius: 9px;
+}
+#dashboard-tab-modal .passive-detail-grid {
+  grid-template-columns: repeat(auto-fit,minmax(min(100%,220px),1fr));
+  gap: 8px;
+}
+#dashboard-tab-modal .talent-card {
+  padding: 11px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(27,31,34,.9), rgba(9,13,18,.96));
+}
+#dashboard-tab-modal .talent-card.ready { border-color: rgba(126,181,103,.42); }
+#dashboard-tab-modal .talent-card.taken { border-color: rgba(216,187,123,.45); }
+#dashboard-tab-modal .talent-card.locked { opacity: .76; }
+@media (max-width: 600px) {
+  #dashboard-tab-modal .campaign-header { grid-template-columns: minmax(0,1fr); }
+  #dashboard-tab-modal .campaign-total { justify-self: start; }
+  #dashboard-tab-modal .campaign-act-heading { display: grid; }
+  #dashboard-tab-modal .ability-item { align-items: flex-start; flex-direction: column; }
+}
