@@ -252,13 +252,10 @@ try {
     });
     assert.ok(heroColumns.left?.width > 0 && heroColumns.right?.width > 0,
       `${viewport.name}: hero must render both resource and detailed-stat panels: ${JSON.stringify(heroColumns)}`);
-    if (viewport.width > 760) {
-      assert.ok(heroColumns.right.x > heroColumns.left.x + 30,
-        `${viewport.name}: hero panels must be side by side on desktop: ${JSON.stringify(heroColumns)}`);
-    } else {
-      assert.ok(heroColumns.right.y >= heroColumns.left.y + heroColumns.left.height - 2,
-        `${viewport.name}: hero panels must stack on narrow screens: ${JSON.stringify(heroColumns)}`);
-    }
+    assert.ok(heroColumns.right.y >= heroColumns.left.y + heroColumns.left.height - 2,
+      `${viewport.name}: hero resources must sit above the detailed attributes section: ${JSON.stringify(heroColumns)}`);
+    assert.equal(await page.locator('.hero-overview-left .hero-vital').count(), 3,
+      `${viewport.name}: hero resource row must contain health, class resource and experience`);
     await page.locator('#dashboard-tab-modal [data-dashboard-modal-close]').click();
     await page.locator('#dashboard-tab-modal').waitFor({ state: 'detached' });
     assert.equal(await page.locator('#dashboard-context').count(), 1, `${viewport.name}: persistent quest context must render`);
