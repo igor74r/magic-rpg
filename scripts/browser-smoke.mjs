@@ -311,7 +311,17 @@ try {
     assert.equal(await missionAnnouncements.getAttribute('aria-atomic'), 'true',
       `${viewport.name}: mission context should be announced as a complete update`);
     await page.locator('#game-tab-hero').click();
-    await page.locator('.hero-overview').waitFor({ state: 'visible' });
+    const heroModal = page.locator('#dashboard-tab-modal');
+    await heroModal.waitFor({ state: 'visible' });
+    await heroModal.locator('.hero-overview').waitFor({ state: 'visible' });
+    assert.equal(await heroModal.getAttribute('aria-modal'), 'true',
+      `${viewport.name}: sidebar sections must open as an accessible modal overlay`);
+    await page.keyboard.press('Escape');
+    await heroModal.waitFor({ state: 'detached' });
+    await page.locator('#game-tab-hero').click();
+    await heroModal.waitFor({ state: 'visible' });
+    await heroModal.locator('[data-dashboard-modal-close]').click();
+    await heroModal.waitFor({ state: 'detached' });
     await page.evaluate(() => window.GameAPI.openWorldPortalMenu());
     await page.locator('#aurora-world-portal').waitFor();
     await page.locator('#aurora-world-portal [data-world-close]').click();
