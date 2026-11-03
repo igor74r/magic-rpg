@@ -517,12 +517,12 @@ function openWorldPortalMenu() {
     const story = storyOrder.get(id);
     let hash = 0;
     for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-    const angle = story
-      ? -Math.PI * 0.72 + (story.sequence - 1) * 2.399963229728653
-      : (hash % 6283) / 1000;
-    const ring = story ? 0.72 + (story.sequence % 3) * 0.075 : 0.42 + (hash % 25) / 100;
-    const x = id === 'village' ? 500 : Math.max(105, Math.min(895, 500 + Math.cos(angle) * 390 * ring));
-    const y = id === 'village' ? 310 : Math.max(80, Math.min(540, 310 + Math.sin(angle) * 245 * ring));
+    // Distribute all destination points around a fixed perimeter. Random
+    // radial rings caused overlapping buttons, making some map points
+    // impossible to click with a pointer on desktop and mobile.
+    const angle = -Math.PI / 2 + (index - 1) * (Math.PI * 2 / Math.max(1, destinations.length));
+    const x = id === 'village' ? 500 : 500 + Math.cos(angle) * 360;
+    const y = id === 'village' ? 310 : 310 + Math.sin(angle) * 220;
     return { id, loc, story, x, y, index };
   });
   const storyPoints = points.filter(point => point.story)
