@@ -301,6 +301,8 @@ function syncMapFocusedLayout(tab) {
 
 let dashboardModal = null;
 let dashboardModalResumeWorld = false;
+let dashboardModalTrigger = null;
+let dashboardPreviousGameInert = false;
 
 function getDashboardTabTitle(tab) {
   const element = document.querySelector(`.dashboard-tablist .tab[data-tab="${tab}"] .tab-text`);
@@ -311,18 +313,35 @@ function getDashboardTabTitle(tab) {
   }[tab] || 'Раздел игры');
 }
 
-function closeDashboardModal({ resumeWorld = true } = {}) {
+function closeDashboardModal({ resumeWorld = true, restoreFocus = true } = {}) {
   if (!dashboardModal) return;
   const modal = dashboardModal;
   dashboardModal = null;
   modal.remove();
   document.body.classList.remove('dashboard-modal-open');
+
+  const gameScreen = document.getElementById('screen-game');
+  if (gameScreen) gameScreen.inert = dashboardPreviousGameInert;
+  dashboardPreviousGameInert = false;
+
+  document.querySelectorAll('.dashboard-tablist [role="tab"]').forEach(tab => {
+    tab.setAttribute('aria-controls', 'tab-content');
+    tab.removeAttribute('aria-expanded');
+  });
+
   renderTab(state.currentTab);
   if (resumeWorld && dashboardModalResumeWorld && state.overworld) {
     dashboardModalResumeWorld = false;
     window.GameAPI?.resumeOverworld?.();
   } else {
     dashboardModalResumeWorld = false;
+  }
+
+  const trigger = dashboardModalTrigger;
+  dashboardModalTrigger = null;
+  if (restoreFocus) {
+    const activeTrigger = trigger?.isConnected ? trigger : document.getElementById(`game-tab-${state.currentTab}`);
+    activeTrigger?.focus({ preventScroll: true });
   }
 }
 
@@ -341,8 +360,9 @@ function openDashboardModal(tab) {
     window.GameAPI?.openWorldPortalMenu?.();
     return;
   }
-  if (dashboardModal) closeDashboardModal({ resumeWorld: false });
+  if (dashboardModal) closeDashboardModal({ resumeWorld: false, restoreFocus: false });
 
+  dashboardModalTrigger = document.getElementById(`game-tab-${tab}`);
   dashboardModalResumeWorld = !!(state.overworld?.active && !state.overworld?.paused);
   if (state.overworld) {
     state.overworld.active = false;
@@ -356,6 +376,11 @@ function openDashboardModal(tab) {
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-labelledby', 'dashboard-tab-modal-title');
+  overlay.setAttribute('tabindex', '-1');
+  overlay.setAttribute('data-dashboard-tab', tab);
+  const gameScreen = document.getElementById('screen-game');
+  dashboardPreviousGameInert = !!gameScreen?.inert;
+  if (gameScreen) gameScreen.inert = true;
   overlay.innerHTML = `
     <section class="dashboard-tab-dialog">
       <header class="dashboard-tab-dialog-header">
@@ -368,9 +393,32 @@ function openDashboardModal(tab) {
   dashboardModal = overlay;
   document.body.classList.add('dashboard-modal-open');
   overlay.querySelector('#dashboard-tab-modal-title').textContent = getDashboardTabTitle(tab);
+  if (dashboardModalTrigger) {
+    dashboardModalTrigger.setAttribute('aria-controls', 'dashboard-tab-modal-body');
+    dashboardModalTrigger.setAttribute('aria-expanded', 'true');
+  }
   overlay.querySelector('[data-dashboard-modal-close]')?.addEventListener('click', () => closeDashboardModal());
   overlay.addEventListener('click', event => {
     if (event.target === overlay) closeDashboardModal();
+  });
+  overlay.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const focusable = [...overlay.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+      .filter(element => element.getClientRects().length > 0);
+    if (!focusable.length) {
+      event.preventDefault();
+      overlay.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === overlay)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   });
   renderTab(tab);
   overlay.querySelector('[data-dashboard-modal-close]')?.focus();
