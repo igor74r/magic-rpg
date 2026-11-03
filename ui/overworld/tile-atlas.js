@@ -179,16 +179,17 @@ export function drawAtlasProp(ctx, index, x, y, width = 48, height = 48) {
   if (!propsReady || !propsImage) return false;
   const col = index % 8;
   const row = Math.floor(index / 8);
+  const previousSmoothing = ctx.imageSmoothingEnabled;
   try {
-    const previousSmoothing = ctx.imageSmoothingEnabled;
     ctx.imageSmoothingEnabled = false;
-    
     ctx.drawImage(propsImage, col * 96, row * 96, 96, 96, x, y, width, height);
-    ctx.imageSmoothingEnabled = previousSmoothing;
     return true;
   } catch (error) {
     propsFailed = true;
     return false;
+  } finally {
+    // Keep a failed atlas draw from leaking Canvas state into later layers.
+    ctx.imageSmoothingEnabled = previousSmoothing;
   }
 }
 
