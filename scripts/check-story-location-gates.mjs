@@ -64,8 +64,8 @@ assert.ok(campaignSource.includes('getStoryLocationProgression'),
   'campaign must expose a single source of truth for story route order');
 assert.ok(overworldSource.includes('canEnterStoryLocation(state.game.player, locationId)'),
   'direct overworld entry must enforce level gates');
-assert.ok(portalSource.includes('ЗАКРЫТО · НУЖЕН УРОВЕНЬ'),
-  'Aurora world portal must visibly mark locked destinations');
+assert.ok(portalSource.includes('Требуется уровень') && portalSource.includes("classList.toggle('is-locked'"),
+  'Aurora world atlas must visibly mark locked destinations and explain level requirements');
 assert.ok(portalSource.includes('destinations.sort(([a], [b]) =>') && portalSource.includes('storyOrder.get(a)') && portalSource.includes('storyOrder.get(b)'),
   'Aurora portal must sort campaign destinations by story sequence');
 assert.ok(mapSource.includes('map-story-link'),
