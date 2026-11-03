@@ -1,7 +1,7 @@
 ﻿# Осколки Разлома / Shards of the Rift
 
 [![CI](https://github.com/igor74r/magic-rpg/actions/workflows/ci.yml/badge.svg)](https://github.com/igor74r/magic-rpg/actions/workflows/ci.yml)
-<a href="https://igor74r.github.io/magic-rpg/" target="_blank" rel="noopener"><img alt="Играть в браузере" src="https://img.shields.io/badge/Играть_в_браузере-Запустить-7c3aed?style=for-the-badge"></a>
+<a href="https://igor74r.github.io/magic-rpg/index.html" target="_blank" rel="noopener"><img alt="Играть в браузере" src="https://img.shields.io/badge/Играть_в_браузере-Запустить-7c3aed?style=for-the-badge"></a>
 
 
 Автономная браузерная 2D-RPG в жанре тёмного фэнтези. Игра запускается как статический сайт: без backend, серверной БД и сетевых игровых функций.
