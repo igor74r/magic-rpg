@@ -52,6 +52,20 @@ try {
   start();
   assert.equal(frames.length, 1, 'render loop should be restartable on re-entry');
 
+  assert.match(renderSource, /finally\s*\{[\s\S]*requestAnimationFrame\(tick\)/,
+    'the animation loop must schedule its next frame from finally');
+  const originalGame = state.game;
+  state.overworld = { active: true, paused: false };
+  state.game = null; // Force an update exception inside the frame callback.
+  frames.shift()(33.34);
+  assert.equal(frames.length, 1,
+    'a frame exception must not permanently stop the overworld animation loop');
+  state.overworld = null;
+  frames.shift()(50.01);
+  assert.equal(frames.length, 0,
+    'the animation loop must still stop cleanly after leaving the overworld');
+  state.game = originalGame;
+
   state.overworld = null;
   startAutosave();
   assert.equal(intervals.length, 1, 'autosave timer should start with the overworld');
