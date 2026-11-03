@@ -299,11 +299,85 @@ function syncMapFocusedLayout(tab) {
   document.getElementById('screen-game')?.classList.toggle('map-focused', tab === 'locations');
 }
 
-export function switchTab(tab) {
-  if (state.overworld?.active) {
+let dashboardModal = null;
+let dashboardModalResumeWorld = false;
+
+function getDashboardTabTitle(tab) {
+  const element = document.querySelector(`.dashboard-tablist .tab[data-tab="${tab}"] .tab-text`);
+  return element?.textContent?.trim() || ({
+    inventory: 'Экипировка', spells: 'Магия и навыки', quests: 'Журнал заданий',
+    hero: 'Мой герой', talents: 'Древо талантов', bestiary: 'Бестиарий',
+    achievements: 'Достижения', statistics: 'Статистика', chronicles: 'Хроники мира'
+  }[tab] || 'Раздел игры');
+}
+
+function closeDashboardModal({ resumeWorld = true } = {}) {
+  if (!dashboardModal) return;
+  const modal = dashboardModal;
+  dashboardModal = null;
+  modal.remove();
+  document.body.classList.remove('dashboard-modal-open');
+  renderTab(state.currentTab);
+  if (resumeWorld && dashboardModalResumeWorld && state.overworld) {
+    dashboardModalResumeWorld = false;
+    window.GameAPI?.resumeOverworld?.();
+  } else {
+    dashboardModalResumeWorld = false;
+  }
+}
+
+function openDashboardModal(tab) {
+  if (tab === 'locations') {
+    window.GameAPI?.openWorldPortalMenu?.();
+    return;
+  }
+  if (dashboardModal) closeDashboardModal({ resumeWorld: false });
+
+  dashboardModalResumeWorld = !!(state.overworld?.active && !state.overworld?.paused);
+  if (state.overworld) {
     state.overworld.active = false;
     state.overworld.paused = true;
-    document.getElementById('screen-game')?.classList.remove('overworld-active');
+    // Keep the scene mounted and visible behind the modal overlay.
+    document.getElementById('screen-game')?.classList.add('overworld-active');
+  }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'dashboard-tab-modal';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'dashboard-tab-modal-title');
+  overlay.innerHTML = `
+    <section class="dashboard-tab-dialog">
+      <header class="dashboard-tab-dialog-header">
+        <h2 class="dashboard-tab-dialog-title" id="dashboard-tab-modal-title"></h2>
+        <button type="button" class="dashboard-tab-dialog-close" data-dashboard-modal-close aria-label="Закрыть раздел (Escape)">×</button>
+      </header>
+      <div class="dashboard-tab-dialog-body" id="dashboard-tab-modal-body"></div>
+    </section>`;
+  document.body.appendChild(overlay);
+  dashboardModal = overlay;
+  document.body.classList.add('dashboard-modal-open');
+  overlay.querySelector('#dashboard-tab-modal-title').textContent = getDashboardTabTitle(tab);
+  overlay.querySelector('[data-dashboard-modal-close]')?.addEventListener('click', () => closeDashboardModal());
+  overlay.addEventListener('click', event => {
+    if (event.target === overlay) closeDashboardModal();
+  });
+  renderTab(tab);
+  overlay.querySelector('[data-dashboard-modal-close]')?.focus();
+}
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && dashboardModal) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    closeDashboardModal();
+  }
+}, true);
+
+export function switchTab(tab) {
+  if (tab === 'locations') {
+    openDashboardModal(tab);
+    return;
   }
   state.currentTab = tab;
   syncMapFocusedLayout(tab);
@@ -318,11 +392,12 @@ export function switchTab(tab) {
   });
   if (activeTab) document.getElementById('tab-content')?.setAttribute('aria-labelledby', activeTab.id);
 
-  renderTab(tab);
+  openDashboardModal(tab);
 }
 
 function renderTab(tab) {
-  const element = document.getElementById('tab-content');
+  const element = dashboardModal?.querySelector('#dashboard-tab-modal-body')
+    || document.getElementById('tab-content');
   if (!element) return;
 
   if (
