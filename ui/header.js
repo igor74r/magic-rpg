@@ -51,7 +51,7 @@ export function renderGame() {
   // Clear stale legacy tab markup on every gameplay render. All navigation
   // sections now belong exclusively to the modal overlay.
   const legacyTabContent = document.getElementById('tab-content');
-  if (legacyTabContent) legacyTabContent.replaceChildren();
+  if (legacyTabContent) legacyTabContent.innerHTML = '';
 }
 
 function totalKills() {
