@@ -295,8 +295,22 @@ function drawAuroraGroundDetails(ctx, type, tileX, tileY, x, y, size) {
       const value = hash(seed + i * 1877);
       const px = 5 + (value % 38);
       const py = 5 + ((value >>> 8) % 38);
+      const stoneX = Math.round(x + px * size / 48);
+      const stoneY = Math.round(y + py * size / 48);
       ctx.fillStyle = stones[(value >>> 16) % stones.length];
-      ctx.fillRect(Math.round(x + px * size / 48), Math.round(y + py * size / 48), Math.max(1, Math.round(size / 24)), Math.max(1, Math.round(size / 48)));
+      ctx.fillRect(stoneX, stoneY, Math.max(1, Math.round(size / 24)), Math.max(1, Math.round(size / 48)));
+      if (i === 1 || i === 3) {
+        // A one-pixel offset edge gives selected cobbles a hand-laid,
+        // irregular silhouette while keeping every mark on the pixel grid.
+        ctx.fillStyle = '#c8b28d';
+        ctx.fillRect(stoneX + 1, stoneY - 1, 1, 1);
+        ctx.fillStyle = '#675d50';
+        ctx.fillRect(stoneX - 1, stoneY + 1, 1, 1);
+      }
+      if (i === 0) {
+        ctx.fillStyle = '#6e8150';
+        ctx.fillRect(stoneX + 3, stoneY + 1, 2, 1);
+      }
     }
   }
   ctx.restore();
