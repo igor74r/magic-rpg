@@ -98,6 +98,9 @@ jobs:
       - name: Check world map route guidance, lock details and expanded layout
         run: node scripts/check-map-navigation.mjs
 
+      - name: Check interactive portal world atlas and legacy list removal
+        run: node scripts/check-portal-world-map.mjs
+
       - name: Check story location level gates and ordered route
         run: node scripts/check-story-location-gates.mjs
 
