@@ -329,7 +329,8 @@ function closeDashboardModal({ resumeWorld = true, restoreFocus = true } = {}) {
     tab.removeAttribute('aria-expanded');
   });
 
-  renderTab(state.currentTab);
+  // The modal owns section rendering. Do not repaint the legacy #tab-content
+  // on close; the persistent game shell remains mounted beneath the overlay.
   if (resumeWorld && dashboardModalResumeWorld && state.overworld) {
     dashboardModalResumeWorld = false;
     window.GameAPI?.resumeOverworld?.();
