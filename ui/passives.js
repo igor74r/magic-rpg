@@ -2,6 +2,7 @@ import { state } from '../systems/state.js';
 import { getPassiveTree } from '../data/passives.js';
 import {
   canAllocatePassive,
+  getPassiveNodeStatus,
   allocatePassive,
   resetPassives
 } from '../systems/talents.js';
@@ -100,7 +101,7 @@ export function renderPassives() {
       </h3>
 
       <p style="color:#b7a989;font-size:13px;">
-        ${points} очков пассивных навыков · ${allocated.length - 1} узлов изучено
+        ${points} свободных очков · ${allocated.length - 1} узлов изучено · уровень ${player.level || 1}
       </p>
       <div class="passive-actions">
         <span>Сброс древа возвращает все вложенные очки. Стоимость: 500 золота.</span>
@@ -156,7 +157,7 @@ export function renderPassives() {
             ? `onclick="GameAPI.allocatePassive('${node.id}')"`
             : 'disabled'
         }
-        title="${node.name}: ${node.desc}"
+        aria-label="${node.name}. ${node.desc}. ${getPassiveNodeStatus(player, node.id)}"\n        title="${node.name}: ${node.desc} — ${getPassiveNodeStatus(player, node.id)}"
       >
         <span class="node-icon">${node.icon}</span>
         <span class="node-name">${label}</span>
