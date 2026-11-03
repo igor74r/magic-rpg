@@ -182,7 +182,6 @@ export function renderHeader() {
     </div>
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
-      <button type="button" data-header-action="tower" style="padding:6px 12px;font-size:12px">🏰 Башня</button>
       <button type="button" data-header-action="rift" style="padding:6px 12px;font-size:12px">🌀 Разлом</button>
     </div>
 
