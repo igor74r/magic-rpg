@@ -56,5 +56,15 @@
     "obsidian-fields": 5,
     "frost-citadel": 6,
     "void-crater": 3
+  },
+  "auroraGround": {
+    "file": "../aurora/ground-atlas.png",
+    "tileSize": 96,
+    "columns": [
+      "grass",
+      "cobblestone-path"
+    ],
+    "rows": 1,
+    "style": "original 16-bit pixel art; flat palette; nearest-neighbour"
   }
 }

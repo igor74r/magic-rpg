@@ -7,6 +7,44 @@ const BIOME_ROW = Object.freeze({
   'frost-citadel': 6, 'void-crater': 3
 });
 
+
+let auroraGroundImage = null;
+let auroraGroundRequested = false;
+let auroraGroundReady = false;
+let auroraGroundFailed = false;
+
+function requestAuroraGroundAtlas() {
+  if (auroraGroundRequested || typeof Image === 'undefined') return;
+  auroraGroundRequested = true;
+  try {
+    auroraGroundImage = new Image();
+    auroraGroundImage.onload = () => { auroraGroundReady = true; };
+    auroraGroundImage.onerror = () => { auroraGroundFailed = true; auroraGroundImage = null; };
+    auroraGroundImage.src = new URL('../../assets/aurora/ground-atlas.png', import.meta.url).href;
+  } catch (error) {
+    auroraGroundFailed = true;
+    auroraGroundImage = null;
+  }
+}
+
+/** Draws authored Aurora grass (0) or cobblestone path (1) pixel tiles. */
+export function drawAuroraGroundTile(ctx, type, x, y, size) {
+  if ((type !== 0 && type !== 1) || auroraGroundFailed) return false;
+  if (!auroraGroundRequested) requestAuroraGroundAtlas();
+  if (!auroraGroundReady || !auroraGroundImage) return false;
+  const previousSmoothing = ctx.imageSmoothingEnabled;
+  try {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(auroraGroundImage, type * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, size, size);
+    return true;
+  } catch (error) {
+    auroraGroundFailed = true;
+    return false;
+  } finally {
+    ctx.imageSmoothingEnabled = previousSmoothing;
+  }
+}
+
 let atlasImage = null;
 let atlasRequested = false;
 let atlasReady = false;

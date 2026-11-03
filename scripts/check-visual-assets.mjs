@@ -12,6 +12,7 @@ for (const [biome, row] of Object.entries(manifest.biomeRows)) {
 
 for (const asset of [
   'assets/tiles/terrain/atlas.png',
+  'assets/aurora/ground-atlas.png',
   'assets/tiles/dungeons/atlas.png',
   'assets/tiles/props/atlas.png',
   'assets/branding/mana-crystal.png',
@@ -19,7 +20,10 @@ for (const asset of [
   'css/2d-art-direction.css'
 ]) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing asset: ${asset}`);
 
-const pngAssets = ['assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
+const groundPng = readFileSync(new URL('../assets/aurora/ground-atlas.png', import.meta.url));
+assert.equal(groundPng.readUInt32BE(16), 192, 'Aurora ground atlas must contain two 96px tiles');
+assert.equal(groundPng.readUInt32BE(20), 96, 'Aurora ground atlas must be 96px high');
+const pngAssets = ['assets/aurora/ground-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
 const villageArt = readFileSync(new URL('../ui/overworld/aurora-art.js', import.meta.url), 'utf8');
 assert.ok(villageArt.includes('drawAuroraBuilding(ctx,x,y,style'), 'Aurora buildings must use the rebuilt pixel-art renderer');
 assert.ok(villageArt.includes('imageSmoothingEnabled=false'), 'Aurora pixel art must use nearest-neighbour scaling');
@@ -39,6 +43,8 @@ assert.ok(renderer.includes('drawAtlasProp(ctx, eventPropIndex'));
 const atlasRenderer = readFileSync(new URL('../ui/overworld/tile-atlas.js', import.meta.url), 'utf8');
 assert.ok(atlasRenderer.includes('const TILE_SIZE = 96'));
 assert.ok(atlasRenderer.includes('ctx.imageSmoothingEnabled = false'));
+assert.ok(atlasRenderer.includes('drawAuroraGroundTile'));
+assert.ok(renderer.includes('drawAuroraGroundTile(ctx, type'), 'Aurora village must use its dedicated authored ground atlas');
 const styles = readFileSync(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8');
 assert.ok(styles.includes('#mobile-dpad .dpad-btn'));
 assert.ok(styles.includes('prefers-reduced-motion'));
