@@ -1421,3 +1421,30 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
 .rpg-inv-grid .inv-slot[class*="rarity-frame-"]:focus-visible { transform:translateY(-1px); filter:brightness(1.14); outline:2px solid rgba(230,204,132,.55); outline-offset:1px; }
 .inv-filter-row [data-inv-sort] { white-space:nowrap; }
 @media (prefers-reduced-motion: reduce) { .rpg-inv-grid .inv-slot[class*="rarity-frame-"] { transition:none; transform:none; } }
+
+
+/* Searchable inventory controls and mobile-first panel polish. */
+.inv-search-wrap { display:flex; align-items:center; gap:8px; width:100%; min-width:0; margin:8px 0 10px; padding:7px 10px; border:1px solid rgba(201,162,39,.28); border-radius:7px; background:rgba(5,5,5,.38); color:#cbb77c; box-sizing:border-box; }
+.inv-search-wrap:focus-within { border-color:rgba(232,201,112,.78); box-shadow:0 0 0 2px rgba(201,162,39,.12); }
+.inv-search-wrap > span { font-size:20px; line-height:1; }
+.inv-search-wrap input { flex:1; min-width:0; border:0; outline:0; color:#eadbb0; background:transparent; font:inherit; font-size:12px; }
+.inv-search-wrap input::placeholder { color:#887a60; }
+.inv-search-wrap button { flex:0 0 auto; border:0; color:#d7c18a; background:transparent; cursor:pointer; font-size:18px; }
+.inv-search-wrap button[hidden] { display:none; }
+.rpg-inventory-layout { align-items:start; }
+.rpg-paperdoll, .rpg-backpack { min-width:0; }
+@media (max-width:760px) {
+  .rpg-inventory-layout { grid-template-columns:minmax(0,1fr) !important; }
+  .rpg-paperdoll { order:2; }
+  .rpg-backpack { order:1; }
+  .inv-filter-row { flex-wrap:wrap; }
+  .inv-filter-row [data-inv-sort] { flex:1 1 auto; }
+  .inv-search-wrap { margin:7px 0; }
+  .rpg-inv-grid { grid-template-columns:repeat(5,minmax(0,1fr)) !important; gap:5px; }
+  .rpg-inv-grid .inv-slot { min-width:0; aspect-ratio:1; }
+}
+@media (max-width:380px) {
+  .rpg-inv-grid { grid-template-columns:repeat(4,minmax(0,1fr)) !important; }
+  .inv-title-row { flex-wrap:wrap; gap:6px; }
+}
+@media (prefers-reduced-motion: reduce) { .inv-search-wrap { scroll-behavior:auto; } }
