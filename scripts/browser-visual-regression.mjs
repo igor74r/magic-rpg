@@ -100,8 +100,8 @@ try {
       if(tab==='talents') {
         assert.ok(await page.locator('#dashboard-tab-modal .passive-tree-viewport').count()>0,
           `${vp.name}: talent section must render the interactive tree`);
-        assert.ok(await page.locator('#dashboard-tab-modal .talent-card').count()>0,
-          `${vp.name}: talent section must render the talent catalogue`);
+        assert.ok(await page.locator('#dashboard-tab-modal .passive-node').count()>0,
+          `${vp.name}: talent tree must render its skill nodes`);
       }
       await capture(page,`${vp.name}-06-${tab}`);
       await page.locator('#dashboard-tab-modal [data-dashboard-modal-close]').click();
