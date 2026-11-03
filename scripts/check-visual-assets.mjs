@@ -77,6 +77,7 @@ assert.ok(atlasRenderer.includes('const TILE_SIZE = 96'));
 assert.ok(atlasRenderer.includes('ctx.imageSmoothingEnabled = false'));
 assert.ok(atlasRenderer.includes('drawAuroraGroundTile'));
 assert.ok(atlasRenderer.includes('drawAuroraGroundTransitions'), 'Aurora cobblestone edges must blend into adjacent grass with pixel-stepped overlays');
+assert.ok(atlasRenderer.includes("ctx.fillStyle = '#526b3f';\n    ctx.fillRect(x, y, size, size);"), 'Aurora ground tiles must paint an opaque grass base beneath transparent atlas pixels');
 assert.ok(atlasRenderer.includes('const corners = ['), 'diagonal grass neighbours must soften isolated Aurora path corners');
 assert.ok(atlasRenderer.includes('corner.sides.some'), 'diagonal overlays must not duplicate cardinal grass transitions');
 assert.ok(atlasRenderer.includes('const paintPatch = (points)'), 'each pixel transition patch must restore canvas state safely');

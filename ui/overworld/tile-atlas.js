@@ -40,6 +40,10 @@ export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0
   const sourceColumn = type * 4 + variant;
   const previousSmoothing = ctx.imageSmoothingEnabled;
   try {
+    // Keep transparent pixels in the authored path edges on grass instead
+    // of exposing the dark scene clear color as repeated horizontal bands.
+    ctx.fillStyle = '#526b3f';
+    ctx.fillRect(x, y, size, size);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(auroraGroundImage, sourceColumn * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, size, size);
     return true;
