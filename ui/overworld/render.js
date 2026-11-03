@@ -237,8 +237,8 @@ function tick(ts) {
   }
 }
 
-function drawTile(ctx, type, x, y, size, themeName, colors) {
-  if (themeName === 'village' && drawAuroraGroundTile(ctx, type, x, y, size)) {
+function drawTile(ctx, type, x, y, size, themeName, colors, tileX = 0, tileY = 0) {
+  if (themeName === 'village' && drawAuroraGroundTile(ctx, type, x, y, size, tileX, tileY)) {
     return;
   }
   if (drawAtlasTile(ctx, type, x, y, size, themeName)) {
@@ -368,7 +368,7 @@ function render() {
       if (tile !== undefined) {
         const screenX = x * ow.tile - cam.x;
         const screenY = y * ow.tile - cam.y;
-        drawTile(ctx, tile, screenX, screenY, ow.tile, ow.locationId, theme.colors);
+        drawTile(ctx, tile, screenX, screenY, ow.tile, ow.locationId, theme.colors, x, y);
       }
     }
   }

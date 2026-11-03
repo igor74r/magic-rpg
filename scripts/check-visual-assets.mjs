@@ -21,7 +21,7 @@ for (const asset of [
 ]) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing asset: ${asset}`);
 
 const groundPng = readFileSync(new URL('../assets/aurora/ground-atlas.png', import.meta.url));
-assert.equal(groundPng.readUInt32BE(16), 192, 'Aurora ground atlas must contain two 96px tiles');
+assert.equal(groundPng.readUInt32BE(16), 768, 'Aurora ground atlas must contain four variants for each of two terrain types');
 assert.equal(groundPng.readUInt32BE(20), 96, 'Aurora ground atlas must be 96px high');
 const pngAssets = ['assets/aurora/ground-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
 const villageArt = readFileSync(new URL('../ui/overworld/aurora-art.js', import.meta.url), 'utf8');
@@ -44,6 +44,7 @@ const atlasRenderer = readFileSync(new URL('../ui/overworld/tile-atlas.js', impo
 assert.ok(atlasRenderer.includes('const TILE_SIZE = 96'));
 assert.ok(atlasRenderer.includes('ctx.imageSmoothingEnabled = false'));
 assert.ok(atlasRenderer.includes('drawAuroraGroundTile'));
+assert.ok(atlasRenderer.includes('sourceColumn = type * 4 + variant'), 'Aurora ground must select deterministic authored terrain variants');
 assert.ok(renderer.includes('drawAuroraGroundTile(ctx, type'), 'Aurora village must use its dedicated authored ground atlas');
 const styles = readFileSync(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8');
 assert.ok(styles.includes('#mobile-dpad .dpad-btn'));

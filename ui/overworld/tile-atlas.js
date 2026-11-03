@@ -28,14 +28,20 @@ function requestAuroraGroundAtlas() {
 }
 
 /** Draws authored Aurora grass (0) or cobblestone path (1) pixel tiles. */
-export function drawAuroraGroundTile(ctx, type, x, y, size) {
+export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0) {
   if ((type !== 0 && type !== 1) || auroraGroundFailed) return false;
   if (!auroraGroundRequested) requestAuroraGroundAtlas();
   if (!auroraGroundReady || !auroraGroundImage) return false;
+  // Four authored variants per terrain type break up visible repetition.
+  let seed = Math.imul(tileX + 17, 374761393) ^ Math.imul(tileY + 31, 668265263);
+  seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b);
+  seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b);
+  const variant = (seed ^ (seed >>> 16)) >>> 0 & 3;
+  const sourceColumn = type * 4 + variant;
   const previousSmoothing = ctx.imageSmoothingEnabled;
   try {
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(auroraGroundImage, type * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, size, size);
+    ctx.drawImage(auroraGroundImage, sourceColumn * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, size, size);
     return true;
   } catch (error) {
     auroraGroundFailed = true;
