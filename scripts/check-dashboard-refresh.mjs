@@ -47,4 +47,13 @@ assert.ok(css.includes('#dashboard-tab-modal .inv-controls') &&
   'inventory filters, sorting and search must share a clear control group');
 assert.ok(css.includes('#dashboard-tab-modal .paperdoll-combat-summary'),
   'equipment bonus summary must remain visible below the paperdoll');
+assert.ok(css.includes('#dashboard-tab-modal .campaign-current-objective') &&
+  css.includes('#dashboard-tab-modal .campaign-mission.current'),
+  'quest journal must distinguish the active objective and mission cards');
+assert.ok(css.includes('#dashboard-tab-modal .ability-status.ready') &&
+  css.includes('#dashboard-tab-modal .ability-status.cooldown'),
+  'magic section must clearly distinguish ability readiness states');
+assert.ok(css.includes('#dashboard-tab-modal .passive-tree-controls') &&
+  css.includes('#dashboard-tab-modal .talent-card.ready'),
+  'talent section must retain tree controls and readable talent states');
 console.log('Dashboard refresh layout contract passed.');
