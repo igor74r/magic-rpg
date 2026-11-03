@@ -1321,6 +1321,28 @@ function enemyCombatTurn() {
     if (def.boss) triggerShake(7, 0.28);
   }
 
+  if (playerGuarding && p.hp > 0 && enemy.hp > 0) {
+    const counterDamage = Math.max(1, Math.floor(
+      stats.atk * (0.28 + Math.min(0.25, (stats.blockPower || 0.5) * 0.25))
+    ));
+    enemy.hp = Math.max(0, enemy.hp - counterDamage);
+    ow.floatingNumbers.push({
+      x: enemy.x,
+      y: enemy.y - 34,
+      text: 'КОНТР -' + counterDamage,
+      type: 'crit',
+      life: 1.25
+    });
+    spawnParticles(enemy.x, enemy.y, 'impact', 13);
+    spawnParticles(ow.player.x, ow.player.y, 'guard', 8);
+    triggerShake(4, 0.16);
+    pushLog(`⚔️ Контратака из блока: ${counterDamage} урона!`, 'success');
+    if (enemy.hp <= 0) {
+      enemy.hp = 0;
+      return combatVictory();
+    }
+  }
+
   let actualDamage = 0;
 
   if (useSpecial && special.type === 'double') {
@@ -1433,24 +1455,6 @@ function enemyCombatTurn() {
       `${name} нанёс вам ${baseDamage} урона`,
       'damage'
     );
-  }
-
-  if (playerGuarding && p.hp > 0 && enemy.hp > 0) {
-    const counterDamage = Math.max(1, Math.floor(
-      stats.atk * (0.28 + Math.min(0.25, (stats.blockPower || 0.5) * 0.25))
-    ));
-    enemy.hp = Math.max(0, enemy.hp - counterDamage);
-    ow.floatingNumbers.push({
-      x: enemy.x,
-      y: enemy.y - 34,
-      text: 'КОНТР -' + counterDamage,
-      type: 'crit',
-      life: 1.25
-    });
-    spawnParticles(enemy.x, enemy.y, 'impact', 13);
-    spawnParticles(ow.player.x, ow.player.y, 'guard', 8);
-    triggerShake(4, 0.16);
-    pushLog(`⚔️ Контратака из блока: ${counterDamage} урона!`, 'success');
   }
 
   if (enemy.modifier === 'vampiric' && actualDamage > 0 && enemy.hp > 0) {
