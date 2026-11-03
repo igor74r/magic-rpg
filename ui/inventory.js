@@ -326,12 +326,15 @@ function renderPaperdoll(p) {
     const sockets = Number.isSafeInteger(rawSockets) && rawSockets > 0 ? Math.min(rawSockets, 12) : 0;
     const forgeLevel = Number.isSafeInteger(obj.forgeLevel) && obj.forgeLevel > 0 ? obj.forgeLevel : 0;
     return `
-      <div class="gear-slot filled" style="--gear-color:${color}"
-        data-eq-tooltip="${slot}">
+      <div class="gear-slot filled ${obj.rarity || 'common'}" style="--gear-color:${color}"
+        data-eq-tooltip="${slot}" data-equipment-card="true">
         <span class="gear-slot-icon">${item.icon}</span>
         <span class="gear-slot-label">${label}</span>
         <span class="gear-slot-name">${affixes.length ? affixes.map(affix => escapeHtml(affix?.name ?? '')).join(' ') + ' ' : ''}${item.name}${forgeLevel ? ` +${forgeLevel}` : ''}</span>
-        <span class="gear-slot-sockets">${sockets ? `◈ ${runes}/${sockets}` : ''}</span>
+        <span class="gear-slot-meta">
+          <span class="gear-rarity-label">${RARITIES[obj.rarity]?.name || 'Обычный'}</span>
+          <span class="gear-slot-sockets">${sockets ? `◈ ${runes}/${sockets}` : ''}</span>
+        </span>
         <button type="button" class="gear-slot-remove" data-inv-action="unequip" data-slot="${slot}" title="Снять" aria-label="Снять: ${escapeHtml(label)}">×</button>
       </div>`;
   }).join('');
