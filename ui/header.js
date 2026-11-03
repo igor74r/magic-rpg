@@ -45,6 +45,7 @@ export function renderGame() {
   if (!state.game) return;
 
   renderHeader();
+  syncMapFocusedLayout(state.currentTab);
   renderLocation();
   renderDashboardContext();
   renderTab(state.currentTab);
@@ -297,8 +298,13 @@ function renderLocation() {
   }
 }
 
+function syncMapFocusedLayout(tab) {
+  document.getElementById('screen-game')?.classList.toggle('map-focused', tab === 'locations');
+}
+
 export function switchTab(tab) {
   state.currentTab = tab;
+  syncMapFocusedLayout(tab);
 
   let activeTab = null;
   document.querySelectorAll('.tab[role="tab"]').forEach(element => {
