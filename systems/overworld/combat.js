@@ -312,6 +312,7 @@ export function combatAttack() {
     triggerShake(8, 0.3);
     spawnParticles(enemy.x, enemy.y, 'spark', 10);
   }
+  spawnParticles(enemy.x, enemy.y, p.class === 'archer' ? 'arrow' : 'slash', isCrit ? 14 : 7);
 
   if (ow.combat.playerChargeNext) {
     damage = Math.floor(damage * 2);
@@ -532,7 +533,10 @@ export function combatCastSpell(spellId) {
 
     playSound(isCrit ? 'crit' : 'cast');
     if (isCrit) triggerShake(8, 0.3);
-    spawnParticles(enemy.x, enemy.y, 'spark', isCrit ? 10 : 5);
+    const spellBurst = spell.element === 'fire' ? 'fire'
+      : spell.element === 'ice' ? 'ice'
+        : spell.element === 'lightning' ? 'arcane' : 'spark';
+    spawnParticles(enemy.x, enemy.y, spellBurst, isCrit ? 16 : 9);
     if (enemy.hp <= 0) {
       enemy.hp = 0;
       return combatVictory();
@@ -994,6 +998,7 @@ export function combatBlock() {
   }
 
   ow.combat.blocking = true;
+  spawnParticles(ow.player.x, ow.player.y, 'guard', 12);
 
   const blockPower = getEffStats().blockPower || 0.6;
 
@@ -1246,6 +1251,7 @@ function enemyCombatTurn() {
   }
 
   // Автоматический блок от экипировки и пассивных характеристик.
+  const playerGuarding = Boolean(ow.combat.blocking);
   const automaticBlock =
     !ow.combat.blocking &&
     Math.random() < Math.max(
@@ -1308,6 +1314,11 @@ function enemyCombatTurn() {
   } else if (useSpecial) {
     enemy.tacticalSpecialPending = false;
     pushLog(`❗ ${name} применяет подготовленный приём: ${special.name}!`, 'warning');
+    const signatureEffect = special.element === 'ice' ? 'ice'
+      : special.element === 'blood' ? 'blood'
+        : special.element === 'fire' ? 'fire' : 'arcane';
+    spawnParticles(ow.player.x, ow.player.y, signatureEffect, def.boss ? 24 : 12);
+    if (def.boss) triggerShake(7, 0.28);
   }
 
   let actualDamage = 0;
@@ -1424,7 +1435,25 @@ function enemyCombatTurn() {
     );
   }
 
-  if (enemy.modifier === 'vampiric' && actualDamage > 0) {
+  if (playerGuarding && p.hp > 0 && enemy.hp > 0) {
+    const counterDamage = Math.max(1, Math.floor(
+      stats.atk * (0.28 + Math.min(0.25, (stats.blockPower || 0.5) * 0.25))
+    ));
+    enemy.hp = Math.max(0, enemy.hp - counterDamage);
+    ow.floatingNumbers.push({
+      x: enemy.x,
+      y: enemy.y - 34,
+      text: 'КОНТР -' + counterDamage,
+      type: 'crit',
+      life: 1.25
+    });
+    spawnParticles(enemy.x, enemy.y, 'impact', 13);
+    spawnParticles(ow.player.x, ow.player.y, 'guard', 8);
+    triggerShake(4, 0.16);
+    pushLog(`⚔️ Контратака из блока: ${counterDamage} урона!`, 'success');
+  }
+
+  if (enemy.modifier === 'vampiric' && actualDamage > 0 && enemy.hp > 0) {
     const heal = Math.floor(
       actualDamage * (MODIFIERS.vampiric.vampiricPct || 0.3)
     );
@@ -1459,6 +1488,10 @@ function enemyCombatTurn() {
   if (p.hp <= 0) {
     p.hp = 0;
     return combatDefeat();
+  }
+  if (enemy.hp <= 0) {
+    enemy.hp = 0;
+    return combatVictory();
   }
 
   tickPlayerEffects();
