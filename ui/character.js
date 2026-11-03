@@ -136,6 +136,12 @@ function setCharacterStage(stage) {
   const review = document.getElementById('class-review-stage');
   if (selection) selection.style.display = stage === 'selection' ? '' : 'none';
   if (review) review.style.display = stage === 'review' ? '' : 'none';
+  document.querySelectorAll('[data-character-step]').forEach(step => {
+    const active = step.dataset.characterStep === stage;
+    if (active) step.setAttribute('aria-current', 'step');
+    else step.removeAttribute('aria-current');
+    step.classList.toggle('completed', stage === 'review' && step.dataset.characterStep === 'selection');
+  });
 }
 
 export function reviewClassSelection() {
