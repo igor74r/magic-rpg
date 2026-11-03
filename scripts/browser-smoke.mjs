@@ -319,6 +319,8 @@ try {
     await page.locator('#game-tab-hero').click();
     await page.locator('.hero-overview').waitFor({ state: 'visible' });
     await page.locator('#game-tab-locations').click();
+    await page.locator('#aurora-world-portal').waitFor();
+    await page.locator('#aurora-world-portal [data-world-close]').click();
     await page.locator('#game-header').click();
     await page.keyboard.press('/');
     assert.equal(await page.evaluate(() => document.activeElement?.id), 'dashboard-nav-search',
@@ -329,7 +331,8 @@ try {
 
     // Exercise the portal interaction contract and destination navigation.
     await page.evaluate(() => window.GameAPI.enterOverworld());
-    await page.locator('#screen-overworld.active').waitFor();
+    await page.locator('#screen-game.overworld-active').waitFor();
+    await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
     let worldDialog = page.locator('#aurora-world-portal [role="dialog"][aria-labelledby="aurora-world-portal-title"]');
     await page.evaluate(() => window.GameAPI.interactNpc('world-portal'));
     await worldDialog.waitFor({ state: 'visible' });
