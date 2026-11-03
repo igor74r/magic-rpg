@@ -169,7 +169,7 @@ try {
           `${viewport.name}: active inventory filter must expose its selected state`);
         await bagFilter.focus();
         await bagFilter.press('Enter');
-        const saleOpener = page.locator('[data-inv-action="open-sale"]');
+        const saleOpener = page.locator('#dashboard-tab-modal [data-inv-action="open-sale"]');
         await saleOpener.focus();
         // The sticky paperdoll can overlap this control in narrow layouts; trigger its real DOM click handler.
         await page.evaluate(() => window.GameAPI.openSaleUI());
