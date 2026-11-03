@@ -191,16 +191,17 @@ export function renderPassives() {
 
   for (const node of nextNodes) {
     const taken = allocated.includes(node.id);
+    const nodeAvailable = canAllocatePassive(player, node.id);
 
     html += `
-      <article class="passive-detail talent-card ${taken ? 'taken' : available ? 'ready' : 'locked'}" data-talent-card="${node.id}">
+      <article class="passive-detail talent-card ${taken ? 'taken' : nodeAvailable ? 'ready' : 'locked'}" data-talent-card="${node.id}">
         <div class="talent-card-heading">
           <span class="talent-card-icon">${node.icon}</span>
           <div>
             <b>${node.name}</b>
             <small>${node.branch || 'Центр'}</small>
           </div>
-          <span class="talent-card-state">${taken ? 'Изучено' : available ? 'Доступно' : 'Закрыто'}</span>
+          <span class="talent-card-state">${taken ? 'Изучено' : nodeAvailable ? 'Доступно' : 'Закрыто'}</span>
         </div>
         <p>${node.desc}</p>
       </article>
