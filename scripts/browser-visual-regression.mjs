@@ -71,6 +71,14 @@ try {
             `${vp.name}: hero profile must retain four progression indicators`);
         }
         if(tab==='inventory') assert.ok(await page.locator('#dashboard-tab-modal [data-inv-filter]').count()>0,`${vp.name}: inventory controls missing`);
+        if(tab==='inventory') {
+          assert.ok(await page.locator('#dashboard-tab-modal .rpg-paperdoll .gear-slot').count()>0,
+            `${vp.name}: equipment paperdoll must show gear slots`);
+          assert.ok(await page.locator('#dashboard-tab-modal .rpg-backpack .inv-search-wrap').count()>0,
+            `${vp.name}: backpack must retain item search`);
+          const inventoryColumns=await page.locator('#dashboard-tab-modal .rpg-inv-grid').evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(' ').length);
+          assert.ok(inventoryColumns>=4,`${vp.name}: inventory grid must keep at least four visible columns`);
+        }
         await capture(page,`${vp.name}-0${tab==='hero'?2:3}-${tab}`);
         await page.locator('#dashboard-tab-modal [data-dashboard-modal-close]').click();
         await page.locator('#overworld-canvas').waitFor({state:'visible'});
