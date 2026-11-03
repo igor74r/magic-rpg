@@ -168,7 +168,11 @@ for (const action of ['rift']) {
     `header action "${action} must be a non-submit button`);
 }
 
-for (const [name, source] of [['inventory', inventory], ['locations', await readFile(new URL('../ui/locations.js', import.meta.url), 'utf8')], ['menu', await readFile(new URL('../ui/menu.js', import.meta.url), 'utf8')]]) {
+const portalStart = main.indexOf('function openWorldPortalMenu() {');
+const portalEnd = main.indexOf('function interactNpc(npcId) {', portalStart);
+assert.ok(portalStart >= 0 && portalEnd > portalStart, 'portal atlas handler must exist');
+const portalAtlas = main.slice(portalStart, portalEnd);
+for (const [name, source] of [['inventory', inventory], ['portal atlas', portalAtlas], ['menu', await readFile(new URL('../ui/menu.js', import.meta.url), 'utf8')]]) {
   const buttonTags = source.match(/<button\b[^>]*>/g) || [];
   assert.ok(buttonTags.length > 0, `${name} should render interactive buttons`);
   for (const tag of buttonTags) assert.match(tag, /\btype="button"/, `${name} button must explicitly declare type=button: ${tag}`);
