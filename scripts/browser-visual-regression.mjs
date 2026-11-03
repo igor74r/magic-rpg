@@ -70,6 +70,9 @@ try {
           `${vp.name}/${tab}: closing tab must remove only the overlay`);
         assert.equal(await page.locator('#screen-overworld').isVisible(),true,
           `${vp.name}/${tab}: playable village scene must remain visible behind tabs`);
+        const worldState=await page.evaluate(()=>({active:window.__gameState?.overworld?.active,paused:window.__gameState?.overworld?.paused}));
+        assert.equal(await page.evaluate(()=>window.GameAPI?.isOverworldRunning?.() ?? true),true,
+          `${vp.name}/${tab}: gameplay input/update loop must resume after closing modal`);
       }
     }
     assert.deepEqual(errors,[], `${vp.name}: browser runtime errors: ${errors.join('; ')}`);
