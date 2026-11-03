@@ -1796,3 +1796,51 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
 .dashboard-tablist > #game-tab-locations {
   display: none !important;
 }
+
+
+/* ---------- Верхние модальные панели навигации ---------- */
+#dashboard-tab-modal {
+  position: fixed; inset: 0; z-index: 12000;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: clamp(12px, 3vh, 28px) clamp(10px, 3vw, 30px);
+  box-sizing: border-box; overflow: auto;
+  background: rgba(4, 6, 12, .78); backdrop-filter: blur(5px);
+}
+#dashboard-tab-modal .dashboard-tab-dialog {
+  position: relative; width: min(1080px, 100%);
+  max-height: calc(100dvh - 2 * clamp(12px, 3vh, 28px));
+  display: flex; flex-direction: column; overflow: hidden;
+  border: 1px solid rgba(201, 162, 39, .72); border-radius: 12px;
+  background: linear-gradient(160deg, #151c32, #090d1c 75%);
+  box-shadow: 0 24px 90px rgba(0,0,0,.72), inset 0 1px rgba(255,230,160,.08);
+}
+#dashboard-tab-modal .dashboard-tab-dialog-header {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  min-height: 54px; padding: 10px 16px;
+  border-bottom: 1px solid rgba(201, 162, 39, .35); background: rgba(10, 13, 25, .97);
+}
+#dashboard-tab-modal .dashboard-tab-dialog-title {
+  margin: 0; color: #e8ce8d; font: 700 clamp(16px, 2.2vw, 22px)/1.35 Georgia, serif;
+}
+#dashboard-tab-modal .dashboard-tab-dialog-close {
+  flex: 0 0 40px; width: 40px; height: 40px; display: grid; place-items: center;
+  padding: 0; border: 1px solid rgba(201, 162, 39, .6); border-radius: 8px;
+  background: #241a20; color: #f4dfaa; font-size: 24px; line-height: 1; cursor: pointer;
+}
+#dashboard-tab-modal .dashboard-tab-dialog-close:hover,
+#dashboard-tab-modal .dashboard-tab-dialog-close:focus-visible {
+  background: #493020; border-color: #f0cf7b; outline: 2px solid rgba(240,207,123,.3);
+}
+#dashboard-tab-modal .dashboard-tab-dialog-body {
+  min-height: 0; overflow: auto; overscroll-behavior: contain;
+  padding: clamp(12px, 2vw, 22px);
+}
+body.dashboard-modal-open { overflow: hidden; }
+@media (max-width: 600px) {
+  #dashboard-tab-modal { padding: 8px; }
+  #dashboard-tab-modal .dashboard-tab-dialog { max-height: calc(100dvh - 16px); border-radius: 9px; }
+  #dashboard-tab-modal .dashboard-tab-dialog-header { min-height: 48px; padding: 8px 10px; }
+  #dashboard-tab-modal .dashboard-tab-dialog-close { width: 36px; height: 36px; flex-basis: 36px; }
+  #dashboard-tab-modal .dashboard-tab-dialog-body { padding: 10px; }
+}
