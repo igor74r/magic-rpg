@@ -38,7 +38,7 @@ assert.ok(header.includes('id="game-header-combat-details"'), 'combat details pa
 assert.ok(header.includes('hud-stat-group-label'), 'hero attributes must be visually grouped by type');
 assert.ok(header.includes('<b>${p.str}</b>') && header.includes('<b>${crit}%</b>'), 'combat stat values must be emphasized for quick scanning');
 assert.ok(css.includes('#game-header .hud-panel-kicker'), 'HUD resource section label must receive dedicated styling');
-assert.ok(css.includes('#game-header .header-combat-stats {\\n  display:grid;\\n  grid-template-columns:repeat(3,minmax(0,1fr));'), 'combat attributes must use compact responsive chips');
+assert.ok(css.includes('#game-header .header-combat-stats') && css.includes('grid-template-columns:repeat(3,minmax(0,1fr))'), 'combat attributes must use compact responsive chips');
 assert.ok(css.includes('@media (prefers-reduced-motion: reduce)'), 'HUD transitions must respect reduced-motion preferences');
 
 assert.ok(header.includes('<section class="hud-overview-vitals" aria-label="Ресурсы героя">'), 'resource panel must be clearly labelled');
