@@ -104,7 +104,7 @@ export function renderDashboardContext() {
     <div class="dashboard-context-mission" role="status" aria-live="polite" aria-atomic="true">${missionHtml}</div>
     <div class="dashboard-context-shards"><span>Осколки</span><b>${shards}/3</b></div>
     <div class="dashboard-context-actions">
-      <button type="button" onclick="GameAPI.switchTab('locations')">🗺️ Карта</button>
+      <button type="button" onclick="GameAPI.interactNpc('world-portal')">🌀 Портал миров</button>
       <button type="button" onclick="GameAPI.switchTab('quests')">📜 Журнал заданий</button>
     </div>
   `;
