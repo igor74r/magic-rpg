@@ -376,13 +376,15 @@ function openDashboardModal(tab) {
   overlay.querySelector('[data-dashboard-modal-close]')?.focus();
 }
 
-document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && dashboardModal) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    closeDashboardModal();
-  }
-}, true);
+if (typeof document !== 'undefined') {
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && dashboardModal) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      closeDashboardModal();
+    }
+  }, true);
+}
 
 export function switchTab(tab) {
   if (tab === 'locations') {
