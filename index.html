@@ -123,12 +123,13 @@
 <link rel="stylesheet" href="css/rpg-overhaul.css?v=20261103-hud-polish" id="rpg-overhaul-css">
 <link rel="stylesheet" href="css/2d-art-direction.css">
 <link rel="stylesheet" href="css/dashboard-refresh.css?v=20261103-dashboard-refresh">
+<link rel="stylesheet" href="css/experience-refresh.css?v=20261103-experience-refresh">
 </head>
 <body>
 
 <!-- ================== ПРОЛОГ ================== -->
 <div id="screen-prologue" class="screen">
-  <div class="center-flex" style="max-width:700px;text-align:center;">
+  <div class="center-flex prologue-shell" style="max-width:700px;text-align:center;">
     <div style="font-size:80px;margin-bottom:20px;filter:drop-shadow(0 0 30px rgba(177,55,70,0.75));animation:gemPulse 3s ease-in-out infinite;">🔮</div>
     <h1>Осколки Разлома</h1>
     <p class="subtitle" style="font-size:16px;line-height:1.85;max-width:620px;color:#cbb89d;">
@@ -149,27 +150,42 @@
 
 <!-- ================== ГЛАВНОЕ МЕНЮ ================== -->
 <div id="screen-main" class="screen">
-  <div class="main-menu">
-    <div class="logo-block">
-      <div class="logo-gem"><img src="assets/branding/mana-crystal.png" alt="Кристалл Разлома" width="88" height="88"></div>
-      <h1 class="game-title">Осколки<br><span>Разлома</span></h1>
-      <p class="subtitle">Тёмное фэнтези · Магия · RPG</p>
+  <main class="main-menu" aria-label="Главное меню игры">
+    <header class="menu-topline">
+      <div class="logo-block">
+        <div class="logo-gem"><img src="assets/branding/mana-crystal.png" alt="Кристалл Разлома" width="88" height="88"></div>
+        <h1 class="game-title">Осколки<br><span>Разлома</span></h1>
+        <p class="subtitle">Тёмное фэнтези · Магия · RPG</p>
+      </div>
+    </header>
+
+    <div class="menu-content-grid">
+      <section class="menu-story-panel" aria-labelledby="menu-story-title">
+        <span class="menu-kicker">ЛЕГЕНДА ПРОДОЛЖАЕТСЯ</span>
+        <h2 id="menu-story-title">Три печати. Пять земель. Один выбор.</h2>
+        <p>Драконы всё ещё удерживают Разлом. Собери осколки древнего Кристалла, раскрой тайну пяти земель и реши судьбу мира. Продолжи свой путь или создай нового героя.</p>
+        <button type="button" class="menu-primary-action" onclick="GameAPI.startNewGame()">⚔️ Начать новое приключение</button>
+      </section>
+
+      <section class="slots-area" aria-labelledby="slots-heading-title">
+        <div class="slots-heading">
+          <h2 id="slots-heading-title">Сохранения</h2>
+          <span>3 СЛОТА</span>
+        </div>
+        <div class="slots-grid" id="slots-grid" aria-live="polite"></div>
+      </section>
     </div>
 
-    <div class="slots-area">
-      <div class="slots-grid" id="slots-grid"></div>
-    </div>
+    <nav class="main-menu-buttons" aria-label="Дополнительные разделы">
+      <button type="button" onclick="GameAPI.openSettings()" class="mm-btn">⚙️ Настройки</button>
+      <button type="button" onclick="GameAPI.openAchievementsMenu()" class="mm-btn">🏆 Достижения</button>
+      <button type="button" onclick="GameAPI.openHelp()" class="mm-btn">❓ Как играть</button>
+    </nav>
 
-    <div class="main-menu-buttons">
-      <button onclick="GameAPI.openSettings()" class="mm-btn">⚙️ Настройки</button>
-      <button onclick="GameAPI.openAchievementsMenu()" class="mm-btn">🏆 Достижения</button>
-      <button onclick="GameAPI.openHelp()" class="mm-btn">❓ Как играть</button>
-    </div>
-
-    <div class="menu-footer">
+    <footer class="menu-footer">
       <span>v0.27 · Осколки Разлома</span>
-    </div>
-  </div>
+    </footer>
+  </main>
 </div>
 
 <!-- ================== НАСТРОЙКИ ================== -->
@@ -234,6 +250,11 @@
       <h1>Выбери свою судьбу</h1>
       <p class="subtitle">Три пути. Одна легенда. Каким героем ты станешь?</p>
     </div>
+
+    <nav class="character-stepper" aria-label="Этапы создания героя">
+      <span class="character-step" data-character-step="selection" aria-current="step"><b>1</b> Выбор класса</span>
+      <span class="character-step" data-character-step="review"><b>2</b> Подтверждение</span>
+    </nav>
 
     <section id="class-selection-stage" aria-labelledby="class-selection-title">
       <h2 id="class-selection-title" class="class-stage-title">I · Выбери класс</h2>
