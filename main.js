@@ -165,6 +165,7 @@ on('game:update', renderGame);
 
 on('overworld:start', () => {
   showScreen('screen-game');
+  document.getElementById('screen-game')?.classList.remove('map-focused');
   document.getElementById('screen-game')?.classList.add('overworld-active');
   initOverworld();
   if (state.overworld.locationId === 'village') playBGM('village');
