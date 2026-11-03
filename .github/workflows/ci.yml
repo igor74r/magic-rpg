@@ -218,3 +218,15 @@ jobs:
 
       - name: Run desktop and mobile browser smoke checks
         run: node scripts/browser-smoke.mjs
+
+      - name: Run desktop and mobile gameplay visual regression checks
+        run: node scripts/browser-visual-regression.mjs
+
+      - name: Upload visual regression screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpg-visual-regression-screenshots
+          path: test-artifacts/visual-regression/*.png
+          if-no-files-found: ignore
+          retention-days: 14
