@@ -368,6 +368,10 @@ function openDashboardModal(tab) {
   const preserveWorldResume = dashboardModal
     ? dashboardModalResumeWorld
     : !!(state.overworld?.active && !state.overworld?.paused);
+  // Retire the old central tab renderer. In the real game, sidebar sections
+  // belong only to the modal; the center must remain the persistent village.
+  const legacyCenterPanel = document.getElementById('tab-content');
+  if (legacyCenterPanel) legacyCenterPanel.innerHTML = '';
   if (dashboardModal) closeDashboardModal({ resumeWorld: false, restoreFocus: false });
 
   dashboardModalTrigger = document.getElementById(`game-tab-${tab}`);
