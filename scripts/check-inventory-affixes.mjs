@@ -8,6 +8,13 @@ assert.match(inventoryUI, /class="inv-filter-count"/, 'filter totals need a dedi
 assert.match(inventoryUI, /class="inv-empty-state" role="status"/, 'empty inventory filters should explain the empty state accessibly');
 assert.match(inventoryCSS, /\.inv-filter-count/);
 assert.match(inventoryCSS, /\.inv-empty-state/);
+assert.match(inventoryUI, /class="compare-heading"/, 'equipment comparison should identify the equipped item and slot');
+assert.match(inventoryUI, /class="compare-rarity-row"/, 'comparison should show current and candidate rarity');
+assert.match(inventoryUI, /class="compare-verdict \\${directionClass\\}"/, 'comparison should summarize upgrade/downgrade/equivalent');
+assert.match(inventoryCSS, /\.tooltip-compare \.compare-heading/);
+assert.match(inventoryCSS, /\.tooltip-compare \.compare-rarity-row/);
+assert.match(inventoryCSS, /\.tooltip-compare \.compare-verdict\.compare-up/);
+
 import { state } from '../systems/state.js';
 import { ITEMS, RARITIES, rollRarity, rollItemAffixes } from '../data/items.js';
 import { addItem, canAddItem, countItem, removeItem, useItem, getInventoryWeight } from '../systems/inventory.js';
