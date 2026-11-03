@@ -203,13 +203,21 @@ export function renderPassives() {
       </p>
     </div>
 
-    <div class="passive-tree-viewport"
+    <div class="passive-tree-controls" role="group" aria-label="Управление масштабом древа">
+      <button type="button" class="secondary-btn" aria-label="Уменьшить масштаб" title="Уменьшить масштаб (−)" onclick="GameAPI.passiveTreeZoom(-0.1)">−</button>
+      <button type="button" class="secondary-btn" aria-label="Увеличить масштаб" title="Увеличить масштаб (+)" onclick="GameAPI.passiveTreeZoom(0.1)">+</button>
+      <button type="button" class="secondary-btn" aria-label="Сбросить положение и масштаб" title="Сбросить вид (0)" onclick="GameAPI.passiveTreeResetView()">Сброс вида</button>
+      <span id="passive-tree-zoom-status" aria-live="polite">Масштаб 100%</span>
+      <span class="passive-tree-key-help">Перетаскивание · ← ↑ → ↓ узлы · Home — старт · +/− масштаб · 0 сброс</span>
+    </div>
+    <div class="passive-tree-viewport" tabindex="0" role="group" aria-label="Древо пассивных навыков. Стрелками перемещайтесь между узлами, Home — к старту, плюс и минус — масштаб."
+      onkeydown="GameAPI.passiveTreeKeyDown(event)"
       onpointerdown="GameAPI.passiveTreePointerDown(event)"
       onpointermove="GameAPI.passiveTreePointerMove(event)"
       onpointerup="GameAPI.passiveTreePointerUp(event)"
       onpointercancel="GameAPI.passiveTreePointerUp(event)">
       <div class="passive-tree-expanded" id="passive-tree-world"
-        style="transform:translate(${treePan.x}px,${treePan.y}px)">
+        style="transform:translate(${treePan.x}px,${treePan.y}px) scale(${treeZoom})">
       <svg
         class="passive-lines"
         viewBox="0 0 100 100"
@@ -237,7 +245,7 @@ export function renderPassives() {
       <button
         type="button"
         class="passive-node ${classes}"
-        style="left:${node.x}%;top:${node.y}%"
+        style="left:${node.x}%;top:${node.y}%"\n        data-x="${node.x}" data-y="${node.y}"
         data-x="${node.x}" data-y="${node.y}"
         ${
           available
