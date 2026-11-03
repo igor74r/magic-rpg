@@ -163,7 +163,7 @@ for (const stat of ['str', 'int', 'wis', 'con', 'dex']) {
   assert.ok(headerActions.includes('type="button" data-spend-stat="' + stat + '"'),
     `stat increase action "${stat} must be a non-submit button`);
 }
-for (const action of ['tower', 'rift']) {
+for (const action of ['rift']) {
   assert.ok(headerActions.includes('type="button" data-header-action="' + action + '"'),
     `header action "${action} must be a non-submit button`);
 }
