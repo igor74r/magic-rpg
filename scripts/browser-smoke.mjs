@@ -245,6 +245,8 @@ try {
       assert.ok(heroColumns.right.y >= heroColumns.left.y + heroColumns.left.height - 2,
         `${viewport.name}: hero panels must stack on narrow screens: ${JSON.stringify(heroColumns)}`);
     }
+    await page.locator('#dashboard-tab-modal [data-dashboard-modal-close]').click();
+    await page.locator('#dashboard-tab-modal').waitFor({ state: 'detached' });
     assert.equal(await page.locator('#dashboard-context').count(), 1, `${viewport.name}: persistent quest context must render`);
     const questProgress = page.locator('#dashboard-context [role="progressbar"]');
     if (await questProgress.count()) {
