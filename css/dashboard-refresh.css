@@ -1457,3 +1457,97 @@
   #screen-game.map-focused .world-map .wnode,
   #screen-game.map-focused .world-map .wnode-icon { transition: none; animation: none; }
 }
+
+/* Stage 8 — interaction and overflow consistency across all dashboard dialogs. */
+#dashboard-tab-modal .dashboard-tab-dialog {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+#dashboard-tab-modal .dashboard-tab-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: clamp(10px,1.4vw,16px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201,166,107,.42) rgba(0,0,0,.12);
+}
+#dashboard-tab-modal .dashboard-tab-dialog-body > * {
+  min-width: 0;
+  max-width: 100%;
+}
+#dashboard-tab-modal .dashboard-tab-dialog-body button:not(.inv-slot):not(.gear-slot-remove) {
+  min-height: 36px;
+  max-width: 100%;
+  border-radius: 7px;
+  font-family: inherit;
+}
+#dashboard-tab-modal .dashboard-tab-dialog-body input:not([type="checkbox"]):not([type="radio"]),
+#dashboard-tab-modal .dashboard-tab-dialog-body select {
+  min-height: 38px;
+  max-width: 100%;
+  border-radius: 7px;
+  box-sizing: border-box;
+}
+#dashboard-tab-modal .dashboard-tab-dialog-body textarea {
+  min-height: 88px;
+  max-width: 100%;
+  border-radius: 7px;
+  box-sizing: border-box;
+}
+#dashboard-tab-modal .dashboard-tab-dialog-body button:focus-visible,
+#dashboard-tab-modal .dashboard-tab-dialog-body a:focus-visible,
+#dashboard-tab-modal .dashboard-tab-dialog-body input:focus-visible,
+#dashboard-tab-modal .dashboard-tab-dialog-body select:focus-visible,
+#dashboard-tab-modal .dashboard-tab-dialog-body textarea:focus-visible,
+#screen-game .dashboard-sidebar .tab:focus-visible,
+#screen-game .dashboard-context-actions button:focus-visible,
+#screen-game .log-filter:focus-visible {
+  outline: 2px solid #f0d69c;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(216,187,123,.12);
+}
+#dashboard-tab-modal .dashboard-tab-dialog-body button:disabled,
+#dashboard-tab-modal .dashboard-tab-dialog-body [aria-disabled="true"] {
+  cursor: not-allowed;
+  filter: saturate(.55);
+}
+#dashboard-tab-modal .dashboard-tab-dialog-body img,
+#dashboard-tab-modal .dashboard-tab-dialog-body canvas,
+#dashboard-tab-modal .dashboard-tab-dialog-body svg {
+  max-width: 100%;
+}
+#screen-game .dashboard-layout,
+#screen-game .dashboard-main,
+#screen-game .dashboard-content,
+#screen-game .dashboard-header,
+#screen-game .dashboard-log {
+  min-width: 0;
+  max-width: 100%;
+}
+#screen-game .dashboard-content {
+  overflow-wrap: anywhere;
+}
+#screen-game .dashboard-log .log-body {
+  overscroll-behavior: contain;
+}
+@media (max-width: 720px) {
+  #dashboard-tab-modal .dashboard-tab-dialog-body { padding: 9px; }
+  #dashboard-tab-modal .dashboard-tab-dialog-body button:not(.inv-slot):not(.gear-slot-remove) {
+    min-height: 38px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #dashboard-tab-modal *,
+  #screen-game .dashboard-layout * {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
