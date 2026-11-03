@@ -191,11 +191,46 @@
   transform: translateY(-1px);
 }
 #screen-main .slots-area {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
   min-width: 0;
   padding: clamp(16px, 2.4vw, 26px);
   border: 1px solid rgba(194, 160, 105, .22);
   border-radius: 16px;
   background: rgba(4, 7, 13, .42);
+}
+#screen-main .slots-heading {
+  width: 100%;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+}
+#screen-main .slots-heading h2 {
+  min-width: 0;
+  white-space: nowrap;
+}
+#screen-main .slots-heading span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+#screen-main .slots-grid {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin-top: 0;
+}
+#screen-main .slot-card {
+  min-width: 0;
+  align-items: center;
+}
+#screen-main .slot-body {
+  min-width: 0;
+}
+#screen-main .slot-actions {
+  min-width: 0;
+  flex-wrap: nowrap;
 }
 #screen-main .slots-heading {
   display: flex;
@@ -457,6 +492,10 @@
   #screen-main .logo-gem img { width: 82px; height: 82px; }
   #screen-main .menu-story-panel { padding: 18px 14px; }
   #screen-main .slots-area { padding: 13px 10px; }
+  #screen-main .slots-heading { gap: 8px; }
+  #screen-main .slots-heading h2 { font-size: 17px; }
+  #screen-main .slots-heading span { font-size: 9px; }
+  #screen-main .slots-grid { gap: 8px; }
   #screen-main .slot-card { grid-template-columns: 54px minmax(0,1fr); gap: 8px; padding: 10px; }
   #screen-main .slot-actions { grid-column: 2; justify-content: flex-start; }
   #screen-main .slot-actions button { min-height: 40px; }
