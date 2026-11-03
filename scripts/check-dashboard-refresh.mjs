@@ -56,4 +56,13 @@ assert.ok(css.includes('#dashboard-tab-modal .ability-status.ready') &&
 assert.ok(css.includes('#dashboard-tab-modal .passive-tree-controls') &&
   css.includes('#dashboard-tab-modal .talent-card.ready'),
   'talent section must retain tree controls and readable talent states');
+assert.ok(css.includes('#screen-game .dashboard-context-actions button') &&
+  css.includes('grid-template-columns: minmax(0,1fr)'),
+  'single portal shortcut must use the full context panel width');
+assert.ok(css.includes('#screen-game .context-progress') &&
+  css.includes('#screen-game .dashboard-log .log-body > div'),
+  'right rail must distinguish the current mission progress and individual log events');
+assert.ok(css.includes('#screen-game .log-filter.active') &&
+  css.includes('#screen-game .log-search:focus-visible'),
+  'event filters and log search must retain clear active and keyboard-focus states');
 console.log('Dashboard refresh layout contract passed.');
