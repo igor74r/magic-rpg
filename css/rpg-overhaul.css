@@ -1753,13 +1753,38 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
 }
 
 
-/* The overworld is the primary game header now.
-   Permanently remove the duplicate centered hero panel; hero details stay in the in-world HUD. */
+/* Opening-game composition: the location scene replaces the duplicate central hero header.
+   Character resources and the minimap are drawn once inside the world canvas. */
 #screen-game .dashboard-main > .dashboard-header,
 #screen-game #game-header {
   display: none !important;
 }
 #screen-game.overworld-active .dashboard-main > .dashboard-overworld {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
+  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+#screen-game.overworld-active .overworld-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  margin: 0 12px 8px;
+}
+#screen-game.overworld-active #overworld-title {
+  margin: 0;
+  color: #e8d19b;
+  font-size: clamp(18px, 2vw, 25px);
+  line-height: 1.2;
+}
+#screen-game.overworld-active .overworld-exit {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 6px 12px;
+}
+@media (max-width: 700px) {
+  #screen-game.overworld-active .overworld-toolbar {
+    margin: 0 6px 6px;
+  }
 }
