@@ -14,10 +14,8 @@ import {
 } from './ui/menu.js';
 import { selectClass, reviewClassSelection, cancelClassReview, confirmClassSelection } from './ui/character.js';
 import {
-  renderGame, switchTab, travelTo, useItemOutside,
+  renderGame, switchTab, useItemOutside,
   equipItemByIndexUI, unequipItemUI, openShop, buyItemUI,
-  enterOverworldFromUI,
-  mapSelect, mapTravel, mapEnter,
   showInvTooltip, showEqTooltip, hideTooltip,
   spendStat, sellItemByIndexUI,
   setInvFilter, setInvSort, invSlotClick, claimPendingLootUI, openSaleUI, toggleSaleItem, selectSaleTiersUI, selectSaleFilterUI, confirmSaleUI, cancelSaleUI,
@@ -894,13 +892,11 @@ window.GameAPI = {
   saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
   selectClass, reviewClassSelection, cancelClassReview, confirmClassSelection,
-  switchTab, travelTo, useItemOutside,
+  switchTab, useItemOutside,
   equipByIndex: equipItemByIndexUI, unequip: unequipItemUI,
   sellByIndex: sellItemByIndexUI,
   sellJunk: sellJunkUI,
   openShop, buy: buyItemUI, setShopPreset, buybackItem: buybackItemUI,
-  enterOverworld: enterOverworldFromUI,
-  mapSelect, mapTravel, mapEnter,
   openWorldPortalMenu,
   resumeOverworld,
   exitOverworld,
