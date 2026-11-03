@@ -1259,3 +1259,99 @@
 #screen-char #class-selection-stage > .class-stage-title,
 #screen-char #class-review-stage > .class-stage-title { margin-top: 0 !important; margin-bottom: 4px !important; }
 #screen-char .class-review-intro { margin-top: 3px !important; }
+
+
+/* Character creation: compact vertical rhythm, prevent inherited empty space. */
+#screen-char.screen.active {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  padding: 0 0 8px !important;
+  overflow-y: auto !important;
+}
+#screen-char .character-creation-container {
+  width: min(1000px, calc(100% - 20px)) !important;
+  max-width: 1000px !important;
+  margin: 0 auto !important;
+  padding: 4px 12px 10px !important;
+  gap: 0 !important;
+}
+#screen-char .character-creation-heading {
+  margin: 0 !important;
+  padding: 0 0 2px !important;
+  gap: 0 !important;
+}
+#screen-char .character-creation-eyebrow {
+  margin: 0 0 2px !important;
+  padding: 2px 6px !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+}
+#screen-char .character-creation-heading h1 {
+  margin: 0 !important;
+  font-size: clamp(19px, 2.2vw, 26px) !important;
+  line-height: 1.05 !important;
+}
+#screen-char .character-creation-heading .subtitle {
+  margin: 2px 0 0 !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+}
+#screen-char .character-stepper {
+  margin: 3px auto 4px !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  gap: 6px !important;
+}
+#screen-char .character-step {
+  min-height: 24px !important;
+  padding: 3px 9px !important;
+  line-height: 1 !important;
+}
+#screen-char #class-selection-stage,
+#screen-char #class-review-stage {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+#screen-char #class-selection-stage > .class-stage-title,
+#screen-char #class-review-stage > .class-stage-title {
+  margin: 0 0 4px !important;
+  padding: 0 !important;
+  line-height: 1.15 !important;
+  font-size: 12px !important;
+}
+#screen-char .classes-grid {
+  margin-top: 0 !important;
+}
+#screen-char .character-name-panel {
+  margin-top: 8px !important;
+}
+#screen-char .character-stage-actions {
+  margin-top: 8px !important;
+  gap: 6px !important;
+}
+#screen-char .class-review-intro {
+  margin: 2px 0 6px !important;
+  line-height: 1.35 !important;
+}
+@media (max-width: 600px) {
+  #screen-char .character-creation-container {
+    width: calc(100% - 12px) !important;
+    padding: 3px 7px 8px !important;
+  }
+  #screen-char .character-creation-heading h1 {
+    font-size: 20px !important;
+  }
+  #screen-char .character-creation-heading .subtitle {
+    font-size: 9px !important;
+  }
+  #screen-char .character-stepper {
+    margin: 2px auto 4px !important;
+    gap: 4px !important;
+  }
+  #screen-char .character-step {
+    min-height: 22px !important;
+    padding: 3px 7px !important;
+    font-size: 10px !important;
+  }
+}
