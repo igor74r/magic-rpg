@@ -123,6 +123,8 @@ export function renderHeader() {
       </div>
     </div>
 
+    <div class="hud-overview-columns">
+      <section class="hud-overview-vitals" aria-label="Ресурсы героя">
     <div class="hud-resource hud-health" role="group" aria-label="Здоровье">
       <div class="hud-resource-top"><span>❤ Здоровье</span><b>${p.hp} <i>/ ${p.maxHp}</i></b></div>
       <div class="bar hud-track" role="progressbar" aria-label="Здоровье героя" aria-valuemin="0" aria-valuemax="${p.maxHp}" aria-valuenow="${p.hp}">
@@ -144,7 +146,8 @@ export function renderHeader() {
       </div>
       <div class="hud-exp-caption">До уровня осталось: ${Math.max(0, p.expNext - p.exp)} EXP</div>
     </div>
-
+      </section>
+      <section class="hud-overview-details" aria-label="Боевые характеристики">
     <button type="button" class="hud-details-toggle" data-hud-toggle aria-expanded="false">
       <span>Подробные характеристики</span><span aria-hidden="true">⌄</span>
     </button>
@@ -164,6 +167,8 @@ export function renderHeader() {
           ? `<b class="header-passive-points">✦ ${passivePoints} очк. древа</b>`
           : ''
       }
+    </div>
+      </section>
     </div>
 
     ${effectsHtml}
