@@ -164,6 +164,20 @@ function enemyDefenseForStyle(enemy, style, armorPen = 0) {
   return base + Math.floor(Math.max(1, base) * reduction);
 }
 
+// Keep the persistent player HP and the overworld combat HUD/model in sync.
+// All incoming attacks use one guarded path so malformed damage cannot heal
+// the hero or leave the visual HP stale.
+function applyPlayerDamage(player, overworld, amount) {
+  if (!player || !overworld?.player) return 0;
+  const safeHp = Number.isFinite(player.hp) ? Math.max(0, player.hp) : 0;
+  const safeDamage = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+  const actual = Math.min(safeHp, safeDamage);
+  player.hp = safeHp - actual;
+  overworld.player.hp = player.hp;
+  overworld.player.maxHp = Number.isFinite(player.maxHp) ? Math.max(1, player.maxHp) : 1;
+  return actual;
+}
+
 function mitigateIncomingDamage(attack, defense) {
   const safeAttack = Number.isFinite(attack) ? Math.max(0, attack) : 0;
   const safeDefense = Number.isFinite(defense) ? Math.max(0, defense) : 0;
@@ -1310,9 +1324,7 @@ function enemyCombatTurn() {
       Math.floor(baseDamage * 0.6)
     );
 
-    actualDamage = damage1 + damage2;
-    p.hp -= actualDamage;
-    ow.player.hp = Math.max(0, p.hp);
+    actualDamage = applyPlayerDamage(p, ow, damage1 + damage2);
 
     ow.floatingNumbers.push({
       x: ow.player.x,
@@ -1346,9 +1358,7 @@ function enemyCombatTurn() {
       Math.floor(baseDamage * mult)
     );
 
-    actualDamage = damage;
-    p.hp -= actualDamage;
-    ow.player.hp = Math.max(0, p.hp);
+    actualDamage = applyPlayerDamage(p, ow, damage);
 
     ow.floatingNumbers.push({
       x: ow.player.x,
@@ -1369,10 +1379,7 @@ function enemyCombatTurn() {
     }
   } else if (useSpecial && special.type === 'drain') {
     const damage = baseDamage;
-    actualDamage = damage;
-
-    p.hp -= damage;
-    ow.player.hp = Math.max(0, p.hp);
+    actualDamage = applyPlayerDamage(p, ow, damage);
 
     enemy.hp = Math.min(enemy.maxHp, enemy.hp + damage);
 
@@ -1402,9 +1409,7 @@ function enemyCombatTurn() {
       pushLog(`☠️ Наложен эффект: ${special.effect}`, 'damage');
     }
   } else {
-    actualDamage = baseDamage;
-    p.hp -= actualDamage;
-    ow.player.hp = Math.max(0, p.hp);
+    actualDamage = applyPlayerDamage(p, ow, baseDamage);
 
     ow.floatingNumbers.push({
       x: ow.player.x,
