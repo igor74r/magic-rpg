@@ -6,7 +6,7 @@ import { LOCATIONS } from '../../data/locations.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic } from './models.js';
 import { buildDepthItems } from './depth-order.js';
-import { drawAtlasTile, drawAtlasProp, drawAuroraGroundTile } from './tile-atlas.js';
+import { drawAtlasTile, drawAtlasProp, drawAuroraGroundTile, drawAuroraGroundTransitions } from './tile-atlas.js';
 import { getTileDanger } from '../../systems/overworld/hazards.js';
 import { getActiveCampaignMission } from '../../systems/campaign.js';
 import { renderCombatPanel } from './combat-panel.js';
@@ -237,8 +237,9 @@ function tick(ts) {
   }
 }
 
-function drawTile(ctx, type, x, y, size, themeName, colors, tileX = 0, tileY = 0) {
+function drawTile(ctx, type, x, y, size, themeName, colors, tileX = 0, tileY = 0, map = null) {
   if (themeName === 'village' && drawAuroraGroundTile(ctx, type, x, y, size, tileX, tileY)) {
+    drawAuroraGroundTransitions(ctx, type, x, y, size, tileX, tileY, map);
     return;
   }
   if (drawAtlasTile(ctx, type, x, y, size, themeName)) {
@@ -368,7 +369,7 @@ function render() {
       if (tile !== undefined) {
         const screenX = x * ow.tile - cam.x;
         const screenY = y * ow.tile - cam.y;
-        drawTile(ctx, tile, screenX, screenY, ow.tile, ow.locationId, theme.colors, x, y);
+        drawTile(ctx, tile, screenX, screenY, ow.tile, ow.locationId, theme.colors, x, y, ow.map);
       }
     }
   }

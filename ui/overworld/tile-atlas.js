@@ -51,6 +51,55 @@ export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0
   }
 }
 
+
+/**
+ * Softens the grass-to-cobblestone boundary with crisp, stepped pixel edges.
+ * This is a visual-only overlay: the logical map and collision grid stay intact.
+ */
+export function drawAuroraGroundTransitions(ctx, type, x, y, size, tileX, tileY, map) {
+  if (type !== 1 || !Array.isArray(map) || !auroraGroundReady || !auroraGroundImage) return false;
+  const edges = [
+    { dx: 0, dy: -1, points: (d, a, b) => [[0, 0], [size, 0], [size, d(3)], [size * 0.72, d(2)], [size * 0.48, d(4)], [size * 0.22, d(1)], [0, d(3)]] },
+    { dx: 0, dy: 1, points: (d, a, b) => [[0, size], [size, size], [size, size - d(3)], [size * 0.72, size - d(2)], [size * 0.48, size - d(4)], [size * 0.22, size - d(1)], [0, size - d(3)]] },
+    { dx: -1, dy: 0, points: (d, a, b) => [[0, 0], [d(3), 0], [d(2), size * 0.25], [d(4), size * 0.5], [d(1), size * 0.75], [d(3), size], [0, size]] },
+    { dx: 1, dy: 0, points: (d, a, b) => [[size, 0], [size - d(3), 0], [size - d(2), size * 0.25], [size - d(4), size * 0.5], [size - d(1), size * 0.75], [size - d(3), size], [size, size]] }
+  ];
+  const step = Math.max(2, Math.round(size / 12));
+  const previousSmoothing = ctx.imageSmoothingEnabled;
+  let drawn = false;
+  try {
+    ctx.imageSmoothingEnabled = false;
+    for (let edgeIndex = 0; edgeIndex < edges.length; edgeIndex++) {
+      const edge = edges[edgeIndex];
+      if (map[tileY + edge.dy]?.[tileX + edge.dx] !== 0) continue;
+      const depth = (segment) => {
+        let seed = Math.imul(tileX + 19 + edgeIndex * 7, 374761393) ^ Math.imul(tileY + 23 + segment * 11, 668265263);
+        seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b);
+        return (2 + ((seed >>> 0) % 3)) * step;
+      };
+      const points = edge.points(depth);
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x + points[0][0], y + points[0][1]);
+      for (let i = 1; i < points.length; i++) ctx.lineTo(x + points[i][0], y + points[i][1]);
+      ctx.closePath();
+      ctx.clip();
+      let seed = Math.imul(tileX + 17, 374761393) ^ Math.imul(tileY + 31, 668265263);
+      seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b);
+      seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b);
+      const variant = (seed ^ (seed >>> 16)) >>> 0 & 3;
+      ctx.drawImage(auroraGroundImage, variant * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, size, size);
+      ctx.restore();
+      drawn = true;
+    }
+    return drawn;
+  } catch (error) {
+    return false;
+  } finally {
+    ctx.imageSmoothingEnabled = previousSmoothing;
+  }
+}
+
 let atlasImage = null;
 let atlasRequested = false;
 let atlasReady = false;

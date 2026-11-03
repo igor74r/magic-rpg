@@ -46,6 +46,8 @@ const atlasRenderer = readFileSync(new URL('../ui/overworld/tile-atlas.js', impo
 assert.ok(atlasRenderer.includes('const TILE_SIZE = 96'));
 assert.ok(atlasRenderer.includes('ctx.imageSmoothingEnabled = false'));
 assert.ok(atlasRenderer.includes('drawAuroraGroundTile'));
+assert.ok(atlasRenderer.includes('drawAuroraGroundTransitions'), 'Aurora cobblestone edges must blend into adjacent grass with pixel-stepped overlays');
+assert.ok(renderer.includes('drawAuroraGroundTransitions(ctx, type'), 'village renderer must pass logical neighbours into the visual ground transition pass');
 assert.ok(atlasRenderer.includes('sourceColumn = type * 4 + variant'), 'Aurora ground must select deterministic authored terrain variants');
 assert.ok(renderer.includes('drawAuroraGroundTile(ctx, type'), 'Aurora village must use its dedicated authored ground atlas');
 const styles = readFileSync(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8');
