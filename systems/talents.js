@@ -110,6 +110,20 @@ export function canAllocatePassive(player, nodeId) {
   return node.conn.some(parentId => allocated.includes(parentId));
 }
 
+export function getPassiveNodeStatus(player, nodeId) {
+  if (!player || !nodeId) return 'Нет данных персонажа';
+  if (nodeId === 'start') return 'Стартовый узел';
+  const node = getPassiveTree(player.class).nodes[nodeId];
+  if (!node) return 'Узел не найден';
+  const allocated = Array.isArray(player.passives) ? player.passives : ['start'];
+  if (allocated.includes(nodeId)) return 'Уже изучено';
+  if ((player.passivePoints || 0) <= 0) return 'Нет свободных очков навыков';
+  const level = player.level || 1;
+  if (level < (node.levelReq || 1)) return `Требуется уровень ${node.levelReq || 1} (текущий: ${level})`;
+  if (!node.conn.some(parentId => allocated.includes(parentId))) return 'Сначала изучите соединённый узел';
+  return 'Доступно для изучения';
+}
+
 export function allocatePassive(player, nodeId) {
   if (!canAllocatePassive(player, nodeId)) return false;
 
