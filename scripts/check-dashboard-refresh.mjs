@@ -23,4 +23,10 @@ assert.match(css, /@media \(max-width: 720px\)[\s\S]*?dashboard-tablist[\s\S]*?o
 assert.match(css, /:focus-visible/, 'keyboard focus indicators must remain visible');
 assert.match(css, /prefers-reduced-motion/, 'reduced-motion preference must be respected');
 assert.match(css, /#dashboard-tab-modal\s*\{\s*z-index:\s*100000/, 'tab dialog must remain above the game shell');
+assert.match(css, /hud-overview-vitals[\\s\\S]*?grid-template-columns:\\s*repeat\\(3, minmax\\(0, 1fr\\)\\)/,
+  'hero HUD must render health, class resource and experience as three cards');
+assert.match(css, /hud-overview-details[\\s\\S]*?justify-content:\\s*flex-end/,
+  'combat details must remain in a separate collapsible area');
+assert.match(css, /hud-details-panel\\[hidden\\]\\s*\\{\\s*display:\\s*none !important/s,
+  'collapsed combat details must not occupy screen space');
 console.log('Dashboard refresh layout contract passed.');
