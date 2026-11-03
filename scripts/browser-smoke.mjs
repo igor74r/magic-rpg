@@ -68,6 +68,9 @@ try {
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
 
     assert.equal(await page.locator('#screen-main.active').count(), 1, `${viewport.name}: main menu did not open`);
+    assert.equal(await page.locator('.menu-story-panel').isVisible(), true, `${viewport.name}: main menu story panel must be visible`);
+    assert.equal(await page.locator('.menu-primary-action').isVisible(), true, `${viewport.name}: primary new-adventure action must be visible`);
+    assert.equal(await page.locator('#screen-main .slot-card').count(), 3, `${viewport.name}: all three save slots must remain visible`);
     await page.getByRole('button', { name: /Настройки/ }).click();
     assert.equal(await page.locator('#screen-settings.active').count(), 1, `${viewport.name}: settings screen did not open`);
 
@@ -102,7 +105,10 @@ try {
     assert.equal(stored.screenShake, false, `${viewport.name}: screen shake was not saved`);
 
     await page.locator('#screen-settings .settings-back-btn').click();
-    await page.locator('.slot-new').first().click();
+    await page.locator('.menu-primary-action').click();
+    assert.equal(await page.locator('#screen-char.active').count(), 1, `${viewport.name}: primary action must open character creation`);
+    assert.equal(await page.locator('[data-character-step="selection"]').getAttribute('aria-current'), 'step',
+      `${viewport.name}: selection step must be active`);
     const warriorCard = page.locator('.class-card[data-class-id="warrior"]');
     await warriorCard.focus();
     await warriorCard.press('Space');
@@ -113,6 +119,8 @@ try {
     await page.locator('#char-name').fill('UI audit');
     await page.getByRole('button', { name: /Проверить героя/ }).click();
     await page.locator('#class-review-stage').waitFor();
+    assert.equal(await page.locator('[data-character-step="review"]').getAttribute('aria-current'), 'step',
+      `${viewport.name}: review step must become active`);
     assert.match(await page.locator('#class-review-content').innerText(), /UI audit/,
       `${viewport.name}: review screen must show the entered hero name`);
     assert.equal(await page.evaluate(() => localStorage.getItem('magic-rpg-save-2')), null,
