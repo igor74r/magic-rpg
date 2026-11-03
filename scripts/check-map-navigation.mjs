@@ -9,6 +9,12 @@ assert.match(map, /Следующая точка/);
 assert.ok(map.includes('map-story-link ${routeState}'));
 assert.match(map, /lockDetail/);
 assert.match(map, /map-route-count/);
+assert.match(map, /role="button" tabindex="0" aria-pressed=/,
+  'world map destinations must be keyboard focusable controls');
+assert.match(map, /onkeydown="if\(event\.key==='Enter'\|\|event\.key===' '\)/,
+  'world map destinations must activate with Enter and Space');
+assert.match(map, /setAttribute\('aria-pressed', String\(active\)\)/,
+  'selected map destination state must be announced to assistive technology');
 assert.match(theme, /\.map-route-summary/);
 assert.match(theme, /\.map-links line\.map-story-link\.open/);
 assert.match(theme, /\.map-links line\.map-story-link\.locked/);
