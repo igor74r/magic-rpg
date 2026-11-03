@@ -261,6 +261,16 @@ function drawAuroraGroundDetails(ctx, type, tileX, tileY, x, y, size) {
         ctx.fillStyle = '#c4c77a';
         ctx.fillRect(Math.round(x + (px + 2) * size / 48), Math.round(y + (py - 1) * size / 48), 1, 1);
       }
+      // Sparse tiny flower heads add readable color accents without
+      // turning the village floor into a noisy repeating carpet.
+      if (i === 1 || i === 5) {
+        const flowerX = Math.round(x + (px + 3) * size / 48);
+        const flowerY = Math.round(y + (py + 2) * size / 48);
+        ctx.fillStyle = (value & 1) ? '#e7d58a' : '#d98f9b';
+        ctx.fillRect(flowerX, flowerY, 2, 1);
+        ctx.fillStyle = '#f2e7bd';
+        ctx.fillRect(flowerX, flowerY - 1, 1, 1);
+      }
     }
   } else {
     const stones = ['#9b896d', '#b6a184', '#776b59'];
