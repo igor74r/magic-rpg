@@ -1,6 +1,6 @@
 import { state } from '../systems/state.js';
 import {
-  tryMovePlayer, updateOverworld, exitOverworld,
+  tryMovePlayer, updateOverworld, exitOverworld, enterOverworld,
   combatFlee
 } from '../systems/overworld.js';
 import { saveGame } from '../systems/save.js';
@@ -414,7 +414,44 @@ on('achievements:unlocked', showAchievementNotification);
 
 
 export function owPauseResume() { closePauseMenu(); }
-export function owPauseSaveVillage() { saveGame(); closePauseMenu(); exitOverworld(); }
+export function owPauseSaveVillage() {
+  if (!state.overworld || !state.game) {
+    closePauseMenu();
+    return false;
+  }
+
+  // Persist the current run before leaving the location. If the write fails,
+  // keep the player in the current world instead of dropping their progress.
+  if (!saveGame()) {
+    emit('toast', '❌ Не удалось сохранить игру. Вы остались в текущей локации.');
+    return false;
+  }
+
+  const previousOverworld = state.overworld;
+  const previousLocation = state.game.location || previousOverworld.locationId || 'village';
+  exitOverworld();
+
+  // exitOverworld() can be cancelled by the combat escape confirmation.
+  if (state.overworld === previousOverworld) {
+    closePauseMenu();
+    return false;
+  }
+
+  state.game.location = 'village';
+  if (!saveGame()) {
+    // The first save above still protects the current progress. Keep the
+    // in-memory destination correct and let the next autosave persist it.
+    emit('toast', '⚠️ Вы вернулись в деревню, но переход не удалось записать в сохранение.');
+  }
+
+  closePauseMenu();
+  if (!enterOverworld('village')) {
+    state.game.location = previousLocation;
+    emit('toast', '❌ Не удалось открыть деревню. Попробуйте продолжить игру из меню.');
+    return false;
+  }
+  return true;
+}
 export function owPauseExit() { saveGame(); closePauseMenu(); state.overworld = null; emit('overworld:end'); saveAndMenu(); }
 
 export { 
