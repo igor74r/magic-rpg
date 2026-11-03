@@ -848,22 +848,35 @@ function drawVillageProp(ctx, x, y, style) {
   const t = performance.now() * 0.001;
   ctx.save();
   if (style === 'lantern') {
-    ctx.fillStyle = '#3a3028'; ctx.fillRect(x - 2, y - 5, 4, 29);
-    ctx.fillStyle = '#806244'; ctx.fillRect(x - 7, y - 12, 14, 3);
-    ctx.fillStyle = '#d99a42'; ctx.fillRect(x - 6, y - 10, 12, 12);
-    ctx.fillStyle = '#ffe1a0'; ctx.globalAlpha = 0.72 + Math.sin(t * 2 + x) * 0.12;
-    ctx.beginPath(); ctx.arc(x, y - 4, 15, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1; ctx.strokeStyle = '#49352a'; ctx.lineWidth = 2; ctx.strokeRect(x - 6, y - 10, 12, 12);
+    // Carved oak post, iron hooks and a warm glass lantern.
+    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x, y + 23, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#392a23'; ctx.fillRect(x - 3, y - 5, 6, 31);
+    ctx.fillStyle = '#765238'; ctx.fillRect(x - 2, y - 4, 2, 28);
+    ctx.fillStyle = '#9b744b'; ctx.fillRect(x - 9, y - 17, 18, 4);
+    ctx.fillRect(x - 6, y - 21, 12, 4);
+    ctx.fillStyle = '#29252a'; ctx.fillRect(x - 7, y - 15, 14, 15);
+    ctx.fillStyle = '#d99a42'; ctx.fillRect(x - 5, y - 13, 10, 11);
+    ctx.fillStyle = '#ffe7a5'; ctx.globalAlpha = 0.82 + Math.sin(t * 2 + x) * 0.12;
+    ctx.fillRect(x - 3, y - 11, 6, 7);
+    ctx.beginPath(); ctx.arc(x, y - 6, 20, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = '#49352a'; ctx.lineWidth = 2; ctx.strokeRect(x - 7, y - 15, 14, 15);
+    ctx.fillStyle = '#c6a36b'; ctx.fillRect(x - 8, y - 17, 16, 2); ctx.fillRect(x - 8, y, 16, 2);
   } else if (style === 'memorial') {
     ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(x, y + 10, 24, 8, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#55565b'; ctx.beginPath(); ctx.moveTo(x - 17, y + 10); ctx.lineTo(x - 14, y - 18); ctx.lineTo(x - 7, y - 25); ctx.lineTo(x + 8, y - 25); ctx.lineTo(x + 16, y - 15); ctx.lineTo(x + 18, y + 10); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#aaa08c'; ctx.lineWidth = 2; ctx.stroke();
     ctx.strokeStyle = '#c9a66b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y - 16); ctx.lineTo(x, y + 2); ctx.moveTo(x - 6, y - 9); ctx.lineTo(x + 6, y - 9); ctx.stroke();
   } else if (style === 'bench') {
-    ctx.fillStyle = '#392923'; ctx.fillRect(x - 20, y - 4, 40, 7);
-    ctx.fillStyle = '#9a6940'; ctx.fillRect(x - 21, y - 10, 42, 6);
-    ctx.fillRect(x - 18, y - 3, 4, 16); ctx.fillRect(x + 14, y - 3, 4, 16);
-    ctx.strokeStyle = '#d0a66b'; ctx.lineWidth = 1.5; ctx.strokeRect(x - 21, y - 10, 42, 6);
+    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x, y + 13, 25, 6, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#392923'; ctx.fillRect(x - 21, y - 4, 42, 8);
+    ctx.fillStyle = '#9a6940'; ctx.fillRect(x - 23, y - 12, 46, 7);
+    ctx.fillStyle = '#bd8b55'; ctx.fillRect(x - 20, y - 11, 40, 2);
+    ctx.fillStyle = '#63402e'; ctx.fillRect(x - 18, y - 3, 5, 17); ctx.fillRect(x + 13, y - 3, 5, 17);
+    ctx.fillStyle = '#d0a66b'; ctx.fillRect(x - 22, y - 13, 44, 2);
+    ctx.strokeStyle = '#49352a'; ctx.lineWidth = 1.5; ctx.strokeRect(x - 23, y - 12, 46, 7);
+    // Small carved end caps.
+    ctx.fillStyle = '#d8b878'; ctx.fillRect(x - 23, y - 12, 3, 7); ctx.fillRect(x + 20, y - 12, 3, 7);
   } else if (style === 'stall') {
     ctx.fillStyle = '#50352a'; ctx.fillRect(x - 23, y - 2, 46, 20);
     ctx.fillStyle = '#9a633b'; ctx.fillRect(x - 25, y - 7, 50, 6);
@@ -871,14 +884,22 @@ function drawVillageProp(ctx, x, y, style) {
     ctx.fillStyle = '#e6c68d'; ctx.fillRect(x - 13, y - 18, 8, 11); ctx.fillRect(x + 5, y - 18, 8, 11);
     ctx.fillStyle = '#d6a34d'; ctx.fillRect(x - 17, y + 2, 34, 5);
   } else if (style === 'fountain') {
-    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.beginPath(); ctx.ellipse(x, y + 13, 31, 12, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#494c53'; ctx.beginPath(); ctx.ellipse(x, y + 3, 31, 12, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#858b8d'; ctx.beginPath(); ctx.ellipse(x, y, 26, 9, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#4b91a0'; ctx.beginPath(); ctx.ellipse(x, y - 1, 21, 6, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#b9c4bd'; ctx.fillRect(x - 4, y - 21, 8, 21);
-    ctx.fillStyle = '#d9c9a4'; ctx.fillRect(x - 9, y - 23, 18, 4);
-    ctx.strokeStyle = '#a9e9f0'; ctx.lineWidth = 2; ctx.globalAlpha = 0.7 + Math.sin(t * 2) * 0.2;
-    ctx.beginPath(); ctx.moveTo(x, y - 22); ctx.quadraticCurveTo(x - 7, y - 32, x - 10, y - 26); ctx.moveTo(x, y - 22); ctx.quadraticCurveTo(x + 7, y - 32, x + 10, y - 26); ctx.stroke();
+    // Layered cut-stone basin with rippling water and a carved central jet.
+    ctx.fillStyle = 'rgba(0,0,0,.34)'; ctx.beginPath(); ctx.ellipse(x, y + 15, 36, 13, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#343940'; ctx.beginPath(); ctx.ellipse(x, y + 5, 36, 14, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#777b7b'; ctx.beginPath(); ctx.ellipse(x, y + 1, 33, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#c4b18d'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(x, y + 1, 29, 9, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#4b91a0'; ctx.beginPath(); ctx.ellipse(x, y - 1, 25, 8, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#a9e9f0'; ctx.lineWidth = 1.5; ctx.globalAlpha = .45 + Math.sin(t * 2) * .18;
+    ctx.beginPath(); ctx.ellipse(x - 5, y - 2, 12, 3 + Math.sin(t * 2) * 1.2, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(x + 7, y, 7, 2.5, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#a99b80'; ctx.fillRect(x - 5, y - 22, 10, 22);
+    ctx.fillStyle = '#d9c9a4'; ctx.fillRect(x - 11, y - 25, 22, 5);
+    ctx.fillStyle = '#8c806c'; ctx.fillRect(x - 8, y - 30, 16, 5);
+    ctx.strokeStyle = '#a9e9f0'; ctx.lineWidth = 2; ctx.globalAlpha = .72 + Math.sin(t * 2) * .18;
+    ctx.beginPath(); ctx.moveTo(x, y - 27); ctx.quadraticCurveTo(x - 8, y - 38, x - 11, y - 31); ctx.moveTo(x, y - 27); ctx.quadraticCurveTo(x + 8, y - 38, x + 11, y - 31); ctx.stroke();
+    ctx.globalAlpha = 1;
   } else if (style === 'world-portal' || style.startsWith('world-waystone')) {
     const portalTone = style.includes('forest') || style.includes('briar') ? '#79bd78' : style.includes('ice') || style.includes('frost') ? '#8edfff' : style.includes('volcano') || style.includes('obsidian') || style.includes('dragon') ? '#ff9364' : style.includes('shadow') || style.includes('void') || style.includes('rift') ? '#bd91ff' : style.includes('swamp') ? '#b0bd6a' : style.includes('desert') || style.includes('wasteland') ? '#e7bd71' : style.includes('graveyard') || style.includes('ruins') || style.includes('sunken') ? '#b6a2c9' : style.includes('library') ? '#e5ca83' : '#6fd7d2';
     const pulse = 0.72 + Math.sin(t * 2.2 + x * 0.01) * 0.16;
@@ -909,10 +930,14 @@ function drawVillageProp(ctx, x, y, style) {
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#d6b77e'; ctx.fillRect(x - 2, y - 35, 4, 7);
   } else if (style === 'planter') {
-    ctx.fillStyle = '#58443a'; ctx.fillRect(x - 13, y - 3, 26, 15);
-    ctx.fillStyle = '#98704d'; ctx.fillRect(x - 15, y - 7, 30, 5);
-    ctx.fillStyle = '#354a35'; ctx.beginPath(); ctx.arc(x, y - 10, 12, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#a85b64'; ctx.beginPath(); ctx.arc(x - 5, y - 12, 3, 0, Math.PI * 2); ctx.arc(x + 5, y - 8, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,.24)'; ctx.beginPath(); ctx.ellipse(x, y + 13, 19, 5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#58443a'; ctx.fillRect(x - 14, y - 2, 28, 16);
+    ctx.fillStyle = '#98704d'; ctx.fillRect(x - 16, y - 7, 32, 6);
+    ctx.fillStyle = '#c09161'; ctx.fillRect(x - 13, y - 5, 26, 2);
+    ctx.fillStyle = '#354a35'; ctx.beginPath(); ctx.arc(x, y - 10, 13, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#52764a'; ctx.beginPath(); ctx.arc(x - 7, y - 12, 7, 0, Math.PI * 2); ctx.arc(x + 7, y - 10, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#a85b64'; ctx.beginPath(); ctx.arc(x - 6, y - 14, 3, 0, Math.PI * 2); ctx.arc(x + 6, y - 8, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#e7c879'; ctx.beginPath(); ctx.arc(x, y - 17, 2, 0, Math.PI * 2); ctx.fill();
   } else if (style === 'banner') {
     ctx.fillStyle = '#46372d'; ctx.fillRect(x - 2, y - 31, 4, 58);
     ctx.fillStyle = '#8f3037'; ctx.beginPath(); ctx.moveTo(x + 2, y - 29); ctx.lineTo(x + 22, y - 24); ctx.lineTo(x + 2, y - 12); ctx.closePath(); ctx.fill();
