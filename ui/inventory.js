@@ -110,9 +110,13 @@ function filterAndSort(entries) {
   const query = invSearch.trim().toLocaleLowerCase('ru');
   if (query) list = list.filter(({ inst }) => {
     const item = ITEMS[inst.id];
-    return [item?.name, item?.type, RARITIES[inst.rarity || 'common']?.name, inst.id]
+    return [item?.name, item?.desc, item?.type, TYPE_LABELS[item?.type], RARITIES[inst.rarity || 'common']?.name, inst.id,
+      ...(Array.isArray(inst.affixes) ? inst.affixes.map(affix => affix?.name) : [])]
       .filter(Boolean).some(value => String(value).toLocaleLowerCase('ru').includes(query));
   });
+  if (invRarityFilter !== 'all') {
+    list = list.filter(({ inst }) => (inst.rarity || 'common') === invRarityFilter;
+  }
   if (invFilter === 'bag') {
     list = list.filter(({ inst }) => !['quest', 'material'].includes(ITEMS[inst.id]?.type));
   } else if (invFilter === 'quest') {
