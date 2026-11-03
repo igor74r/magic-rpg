@@ -39,4 +39,12 @@ assert.ok(css.includes('#dashboard-tab-modal .hero-overview .hero-stat-grid') &&
   'hero profile must separate attributes from campaign progression');
 assert.ok(css.includes('#dashboard-tab-modal .hero-overview-actions button'),
   'hero profile must expose clear shortcuts to related sections');
+assert.ok(css.includes('#dashboard-tab-modal .rpg-inventory-layout') &&
+  css.includes('grid-template-columns: minmax(250px, .78fr) minmax(0, 1.42fr)'),
+  'inventory must balance the paperdoll and backpack as separate desktop columns');
+assert.ok(css.includes('#dashboard-tab-modal .inv-controls') &&
+  css.includes('#dashboard-tab-modal .inv-search-wrap'),
+  'inventory filters, sorting and search must share a clear control group');
+assert.ok(css.includes('#dashboard-tab-modal .paperdoll-combat-summary'),
+  'equipment bonus summary must remain visible below the paperdoll');
 console.log('Dashboard refresh layout contract passed.');
