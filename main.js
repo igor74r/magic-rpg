@@ -6,7 +6,7 @@ import { addItemOrStore } from './systems/inventory.js';
 import { ITEMS } from './data/items.js?v=20261102-fix4';
 import { addExp } from './systems/progression.js';
 import {
-  updateMainMenu, openSettings, backFromSettings, saveAndMenu,
+  updateMainMenu, startNewGame, openSettings, backFromSettings, saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
   switchSettingsTab, applySettings, applyFontScale, resetAllSettings, deleteAllSaves,
   openAchievementsMenu, openHelp,
@@ -884,6 +884,7 @@ window.GameAPI = {
   getRuntimeDiagnostics: () => runtimeDiagnostics.map(entry => ({ ...entry })),
   clearRuntimeDiagnostics: () => { runtimeDiagnostics.length = 0; },
   updateMainMenu,
+  startNewGame,
   openSettings, switchSettingsTab, applySettings, backFromSettings,
   resetAllSettings, deleteAllSaves,
   openAchievementsMenu, openHelp,
