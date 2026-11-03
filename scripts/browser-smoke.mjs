@@ -115,6 +115,12 @@ try {
       `${viewport.name}: reviewing must not create the save before final confirmation`);
     await page.getByRole('button', { name: /Создать героя и начать/ }).click();
     await page.locator('#screen-game.active').waitFor();
+    await page.locator('#screen-game.overworld-active').waitFor();
+    await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#screen-game .dashboard-sidebar').isVisible(), true,
+      `${viewport.name}: village scene must keep the left navigation visible`);
+    assert.equal(await page.locator('#screen-game .dashboard-log').isVisible(), true,
+      `${viewport.name}: village scene must keep the right journal visible`);
     const hudPanels = await page.locator('#game-header .hud-overview-columns').evaluate(node => {
       const resources = node.querySelector('.hud-overview-vitals')?.getBoundingClientRect();
       const details = node.querySelector('.hud-overview-details')?.getBoundingClientRect();
@@ -142,7 +148,12 @@ try {
     await hudToggle.click();
 
 
-    for (const tab of ['locations', 'hero', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
+    await page.locator('#game-tab-locations').click();
+    await page.locator('#aurora-world-portal').waitFor();
+    assert.equal(await page.locator('#aurora-world-portal [data-world-location]').count() > 0, true,
+      `${viewport.name}: world portal must show destination choices`);
+    await page.locator('#aurora-world-portal [data-world-close]').click();
+    for (const tab of ['hero', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
       const tabButton = page.locator(`#game-tab-${tab}`);
       await tabButton.click();
       assert.equal(await tabButton.getAttribute('aria-selected'), 'true', `${viewport.name}: ${tab} tab must become selected`);
