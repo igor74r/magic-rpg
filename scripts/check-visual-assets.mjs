@@ -26,6 +26,9 @@ assert.equal(groundPng.readUInt32BE(16), 768, 'Aurora ground atlas must contain 
 assert.equal(groundPng.readUInt32BE(20), 96, 'Aurora ground atlas must be 96px high');
 assert.equal(manifest.auroraGround?.columns, 8, 'Aurora ground atlas must define eight variants');
 assert.deepEqual(manifest.auroraGround?.types, ['grass', 'path']);
+const propsPng = readFileSync(new URL('../assets/aurora/village-props-atlas.png', import.meta.url));
+assert.equal(propsPng.readUInt32BE(16), 1024, 'Aurora village prop atlas must contain sixteen 64px frames');
+assert.equal(propsPng.readUInt32BE(20), 64, 'Aurora village prop atlas must be 64px high');
 const portalPng = readFileSync(new URL('../assets/aurora/world-portal.png', import.meta.url));
 assert.equal(portalPng.readUInt32BE(16), 64, 'Aurora world portal sprite must be 64px wide');
 assert.equal(portalPng.readUInt32BE(20), 64, 'Aurora world portal sprite must be 64px high');
@@ -36,6 +39,8 @@ assert.ok(villageArt.includes('drawAuroraBuilding(ctx,x,y,style'), 'Aurora build
 assert.ok(villageArt.includes('imageSmoothingEnabled=false'), 'Aurora pixel art must use nearest-neighbour scaling');
 assert.ok(!/create(?:Linear|Radial)Gradient|\.svg/i.test(villageArt), 'Aurora pixel art must not use gradients or vector assets');
 assert.ok(villageArt.includes('drawHall') && villageArt.includes('drawForge') && villageArt.includes('drawHealer') && villageArt.includes('drawAlchemy') && villageArt.includes('drawMarket') && villageArt.includes('drawTavern'), 'each village service building must have a distinct authored design');
+const locationsSource = readFileSync(new URL('../data/locations.js', import.meta.url), 'utf8');
+const locationPropStyles = [...locationsSource.matchAll(/propStyle:\s*['"]([^'"]+)['"]/g)].map(match => match[1]);
 const villageSprites = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
 assert.ok(villageSprites.includes('const VILLAGE_PROP_FRAMES = new Map(['), 'village props must use the authored PNG atlas');
 assert.ok(villageSprites.includes('frame * 64, 0, 64, 64'), 'village props must sample the 64px atlas frames');
@@ -44,6 +49,8 @@ assert.ok(!villageSprites.includes('function drawVillagePropRaw'), 'legacy proce
 assert.ok(villageSprites.includes("['planter', 5]"), 'Aurora planters must resolve to their authored pixel atlas frame');
 assert.ok(villageSprites.includes('getAuroraWorldPortalAtlas'), 'Aurora world portal must load its dedicated authored sprite');
 assert.ok(villageSprites.includes("style === 'world-portal'"), 'world portal must not reuse the rift ward frame');
+const mappedPropStyles = [...villageSprites.matchAll(/\['([^']+)',\s*\d+\]/g)].map(match => match[1]);
+for (const style of new Set(locationPropStyles)) assert.ok(mappedPropStyles.includes(style), 'Aurora propStyle ' + style + ' must resolve to an authored sprite');
 assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8').includes('SVG architecture'), 'Aurora sprite renderer must not depend on vector architecture');
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
 
@@ -66,6 +73,9 @@ assert.ok(atlasRenderer.includes('const paintPatch = (points)'), 'each pixel tra
 assert.ok(renderer.includes('drawAuroraGroundTransitions(ctx, type'), 'village renderer must pass logical neighbours into the visual ground transition pass');
 assert.ok(atlasRenderer.includes('sourceColumn = type * 4 + variant'), 'Aurora ground must select deterministic authored terrain variants');
 assert.ok(renderer.includes('drawAuroraGroundTile(ctx, type'), 'Aurora village must use its dedicated authored ground atlas');
+assert.ok(renderer.indexOf('const questEnemyId') < renderer.indexOf('const depthItems'), 'quest target must be resolved before the depth loop reads it');
+assert.ok(depth.includes("kind: 'chest'"), 'treasure chests must participate in common depth sorting');
+assert.ok(renderer.includes("entry.kind === 'chest'"), 'treasure chests must render in the common depth pass');
 const styles = readFileSync(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8');
 assert.ok(styles.includes('#mobile-dpad .dpad-btn'));
 assert.ok(styles.includes('prefers-reduced-motion'));
