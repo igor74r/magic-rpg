@@ -97,7 +97,8 @@ for (const room of ['forge', 'healer', 'alchemy', 'market', 'hall', 'tavern']) {
 }
 assert.ok(mainSource.includes('exitVillageInterior'), 'interiors must provide an exit to the village');
 assert.ok(mainSource.includes('openWorldPortalMenu'), 'world portal must open a navigation window');
-assert.ok(mainSource.includes('data-world-tower'), 'world navigation must expose the tower action');
+assert.ok(mainSource.includes('openWorldPortalMenu'), 'world portal must open a navigation window');
+assert.ok(!mainSource.includes('data-world-tower'), 'world portal menu must not duplicate the village tower entrance');
 assert.ok(mainSource.includes('aria-modal="true"'), 'world portal window must expose dialog semantics');
 assert.ok(mainSource.includes("event.key === 'Escape'"), 'world portal window must close with Escape');
 const overworldInputSource = readFileSync(new URL('../ui/overworld.js', import.meta.url), 'utf8');
@@ -123,7 +124,7 @@ for (const dragonFlag of ["dragons['ash-herald']", "dragons['ice-grasp']", "drag
 }
 assert.ok(spawnSource.includes('aurora-rift-ward'), 'final dragon victory must add the Rift memorial');
 assert.ok(spawnSource.includes('world-waystone-'), 'other regions must receive themed world waystones');
-assert.ok(spawnSource.includes("id: 'tower-gate'"), 'other regions must receive a dedicated tower gate');
+assert.ok(!spawnSource.includes("id: 'tower-gate'"), 'other regions must not receive a tower gate; only Aurora has the dedicated entrance');
 
 const boardSource = readFileSync(new URL('../ui/quests.js', import.meta.url), 'utf8');
 assert.ok(boardSource.includes('Новости Авроры'), 'notice board must show village news');
