@@ -15,7 +15,7 @@ export const LOCATIONS = {
       { id: 'villager-1', emoji: '🧑', name: 'Житель Авроры', x: 22, y: 6, ambient: true, wanderRadius: 44 },
       { id: 'villager-2', emoji: '🧑‍🌾', name: 'Садовник', x: 4, y: 9, ambient: true, wanderRadius: 44 },
       { id: 'villager-3', emoji: '🧕', name: 'Торговка', x: 33, y: 10, ambient: true, wanderRadius: 42 },
-      { id: 'villager-4', emoji: '🧑‍🌾', name: 'Помощник кузнеца', x: 5, y: 20, ambient: true, wanderRadius: 36 },
+      { id: 'villager-4', emoji: '🧑‍🌾', name: 'Помощник кузнеца', x: 5, y: 20, ambient: true, wanderRadius: 44 },
       { id: 'villager-5', emoji: '🧔', name: 'Плотник', x: 33, y: 21, ambient: true, wanderRadius: 40 }
     ],
     statics: [
