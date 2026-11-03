@@ -272,6 +272,13 @@ try {
       `${viewport.name}: all ten dashboard sections must be present`);
     assert.equal(await page.locator('#dashboard-context').isVisible(), true,
       `${viewport.name}: live quest context must remain visible`);
+    const missionAnnouncements = page.locator('#dashboard-context .dashboard-context-mission');
+    assert.equal(await missionAnnouncements.getAttribute('role'), 'status',
+      `${viewport.name}: changing mission context must expose a status region`);
+    assert.equal(await missionAnnouncements.getAttribute('aria-live'), 'polite',
+      `${viewport.name}: mission updates must be announced without interrupting screen readers`);
+    assert.equal(await missionAnnouncements.getAttribute('aria-atomic'), 'true',
+      `${viewport.name}: mission context should be announced as a complete update`);
     await page.locator('#game-tab-hero').click();
     await page.locator('.hero-overview').waitFor({ state: 'visible' });
     await page.locator('#game-tab-locations').click();
