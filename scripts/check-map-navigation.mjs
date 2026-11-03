@@ -34,7 +34,8 @@ const spawn = readFileSync(new URL('../systems/overworld/spawn.js', import.meta.
 assert.match(main, /enterOverworld\('village'\)/, 'new heroes must start inside Aurora');
 assert.match(main, /openWorldPortalMenu,/, 'the sidebar world portal action must be exposed');
 assert.match(html, /id="screen-overworld" class="dashboard-overworld"/, 'the location scene must live inside the dashboard');
-assert.match(html, /onclick="GameAPI\.openWorldPortalMenu\(\)"/, 'the sidebar world portal item must open the world portal');
+assert.doesNotMatch(html, /id="game-tab-locations"/, 'the world map must not be a sidebar tab');
+assert.match(html, /onclick="GameAPI\.interactNpc\('world-portal'\)"/, 'the world map must be accessed through the village portal system');
 assert.doesNotMatch(main, /data-world-tower/, 'the world portal menu must not contain a tower shortcut');
 assert.doesNotMatch(header, /data-header-action="tower"/, 'the HUD must not duplicate the village tower gate');
 assert.doesNotMatch(map, /GameAPI\.enterTower\(\)/, 'the map panel must not duplicate the village tower gate');
