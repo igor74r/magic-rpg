@@ -1448,3 +1448,14 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   .inv-title-row { flex-wrap:wrap; gap:6px; }
 }
 @media (prefers-reduced-motion: reduce) { .inv-search-wrap { scroll-behavior:auto; } }
+
+
+/* Equipment stat summary */
+.paperdoll-combat-summary{margin-top:12px;padding:12px;border:1px solid rgba(201,162,39,.28);border-radius:12px;background:rgba(12,16,24,.55);display:grid;gap:8px}
+.paperdoll-combat-summary> b{font-size:.82rem;letter-spacing:.04em;color:var(--gold,#c9a227)}
+.paperdoll-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.paperdoll-stat-grid>span{display:flex;justify-content:space-between;gap:8px;padding:6px 8px;border-radius:7px;background:rgba(255,255,255,.035);font-size:.78rem;color:var(--text-muted,#b7b7b7)}
+.paperdoll-stat-grid strong{color:var(--text,#f2ead8);font-variant-numeric:tabular-nums}
+.paperdoll-combat-summary small{font-size:.68rem;opacity:.72}
+@media(max-width:760px){.paperdoll-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.paperdoll-combat-summary{padding:9px}}
+@media(prefers-reduced-motion:reduce){.paperdoll-combat-summary *{transition:none!important;animation:none!important}}
