@@ -379,7 +379,8 @@ try {
       window.GameAPI.loadSlot(1);
       window.GameAPI.enterOverworld();
     });
-    await page.locator('#screen-overworld.active').waitFor();
+    await page.locator('#screen-game.overworld-active').waitFor();
+    await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
 
     await clickCanvasPoint(page, 0.5, 0.404);
     worldDialog = page.locator('#aurora-world-portal [role="dialog"][aria-labelledby="aurora-world-portal-title"]');
