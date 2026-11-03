@@ -131,11 +131,10 @@ try {
       `${viewport.name}: the in-world screen must not show the exit action that returns to the old portal map`);
     const toolbar = await page.locator('.overworld-toolbar').evaluate(node => {
       const title = node.querySelector('#overworld-title').getBoundingClientRect();
-      const exit = node.querySelector('.overworld-exit').getBoundingClientRect();
-      return { titleX: title.x, exitX: exit.x, exitRight: exit.right, toolbarRight: node.getBoundingClientRect().right };
+      return { titleRight: title.right, toolbarRight: node.getBoundingClientRect().right };
     });
-    assert.ok(toolbar.titleX > 0 && toolbar.exitX > toolbar.titleX && toolbar.exitRight <= toolbar.toolbarRight + 1,
-      `${viewport.name}: location title and exit must form one right-aligned header: ${JSON.stringify(toolbar)}`);
+    assert.ok(toolbar.titleRight <= toolbar.toolbarRight + 1,
+      `${viewport.name}: location title must remain inside its toolbar: ${JSON.stringify(toolbar)}`);
     assert.equal(await page.locator('#overworld-canvas').isVisible(), true,
       `${viewport.name}: the overworld scene must remain visible below its title`);
 
