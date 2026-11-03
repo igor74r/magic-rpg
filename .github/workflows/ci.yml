@@ -196,6 +196,9 @@ jobs:
       - name: Check Aurora village layout, portals and building collision
         run: node scripts/check-village-layout.mjs
 
+      - name: Check save-to-menu and slot-load overworld lifecycle
+        run: node scripts/check-save-menu-lifecycle.mjs
+
       - name: Check render and autosave lifecycle
         run: node scripts/check-render-lifecycle.mjs
 
