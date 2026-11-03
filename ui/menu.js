@@ -181,6 +181,11 @@ function renderSettingsTab(tab) {
     `;
   } else if (tab === 'accessibility') {
     content.innerHTML = `
+      <div class="settings-row settings-font-scale-row">
+        <label for="set-font-scale">🔎 Размер текста и интерфейса</label>
+        <input type="range" id="set-font-scale" min="85" max="130" step="5" value="${Math.round((s.fontScale ?? 1) * 100)}" aria-describedby="set-font-scale-val" oninput="GameAPI.applySettings()">
+        <span id="set-font-scale-val">${Math.round((s.fontScale ?? 1) * 100)}%</span>
+      </div>
       <div class="settings-row">
         <label for="set-damage-numbers">🔢 Числа урона и лечения</label>
         <select id="set-damage-numbers" onchange="GameAPI.applySettings()">
@@ -235,6 +240,12 @@ function renderSettingsTab(tab) {
   }
 }
 
+export function applyFontScale() {
+  if (typeof document === 'undefined') return;
+  const scale = Math.max(0.85, Math.min(1.3, Number(state.settings.fontScale) || 1));
+  document.documentElement.style.setProperty('--ui-font-scale', String(scale));
+}
+
 export function applySettings() {
   const s = state.settings;
   const value = id => document.getElementById(id)?.value;
@@ -250,6 +261,13 @@ export function applySettings() {
     const label = document.getElementById('set-sfx-volume-val');
     if (label) label.textContent = s.sfxVolume + '%';
   }
+  const fontScale = value('set-font-scale');
+  if (fontScale !== undefined) {
+    s.fontScale = Math.max(0.85, Math.min(1.3, Number(fontScale) / 100));
+    const label = document.getElementById('set-font-scale-val');
+    if (label) label.textContent = Math.round(s.fontScale * 100) + '%';
+  }
+  applyFontScale();
   const setBool = (id, key) => { const v = value(id); if (v !== undefined) s[key] = v === 'on'; };
   const difficulty = value('set-difficulty');
   if (difficulty && ['easy', 'normal', 'hard'].includes(difficulty)) s.difficulty = difficulty;
@@ -287,7 +305,7 @@ export function resetAllSettings() {
     musicVolume: 60, sfxVolume: 80, difficulty: 'normal',
     soundEnabled: true, autoSave: true, autoSaveInterval: 30,
     showHotkeys: true, showFps: false, screenShake: true,
-    damageNumbers: true, lowHealthEffects: true, reducedMotion: false,
+    damageNumbers: true, lowHealthEffects: true, reducedMotion: false, fontScale: 1,
     graphicsQuality: 'high', weatherEffects: true, ambientFog: true, bloomEffects: true,
     settingsVersion: 5
   };
