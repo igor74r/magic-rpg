@@ -23,6 +23,7 @@ let rafId = null, lastTs = 0, lastNpcKey = '', autosaveTimer = null, autosaveAt 
 let autosaveSavedAt = 0, autosaveErrorAt = 0;
 let fpsNow = 0, fpsFrames = 0, fpsSampleAt = 0;
 let paused = false, nearNpc = null;
+let lastTickErrorMessage = '', lastTickErrorAt = 0;
 let footprints = [], lastFootprintPos = { x: 0, y: 0 }, hurtFlash = 0, worldTime = 0;
 let deathParticles = [], bloodSplats = [], lowHpPulse = 0, corpses = [];
 let lastTileKey = null, tileDamageTimer = 0, _weatherEffectApplied = null;
@@ -84,6 +85,7 @@ export function startAutosave() {
 }
 
 function tick(ts) {
+  try {
   if (!state.overworld?.active) {
     rafId = null;
     return;
@@ -216,7 +218,23 @@ function tick(ts) {
     }
     render(); renderCombatPanel(); renderNpcPanel();
   }
-  rafId = requestAnimationFrame(tick);
+  } catch (error) {
+    // A single rendering/update exception must not permanently kill the
+    // animation loop. Keep the scene recoverable and avoid flooding console.
+    const message = error?.stack || error?.message || String(error);
+    const now = Number.isFinite(ts) ? ts : performance.now();
+    if (message !== lastTickErrorMessage || now - lastTickErrorAt > 5000) {
+      console.error('[overworld] Ошибка игрового кадра; цикл будет продолжен:', error);
+      lastTickErrorMessage = message;
+      lastTickErrorAt = now;
+    }
+  } finally {
+    if (state.overworld?.active) {
+      rafId = requestAnimationFrame(tick);
+    } else {
+      rafId = null;
+    }
+  }
 }
 
 function drawTile(ctx, type, x, y, size, themeName, colors) {
