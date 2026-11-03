@@ -1022,3 +1022,25 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
 /* Locked passive nodes remain keyboard-focusable for discovery and navigation. */
 .passive-node[aria-disabled="true"] { cursor:help; filter:saturate(.72); }
 .passive-node[aria-disabled="true"]:focus-visible { filter:none; }
+
+/* ---------- Счётчики фильтров и пустая категория инвентаря ---------- */
+.inv-filter-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; }
+.inv-filter-count {
+  display:inline-grid; place-items:center; min-width:18px; height:18px; padding:0 4px;
+  border-radius:10px; background:rgba(0,0,0,.28); color:#b8a77c; font-size:10px; font-weight:700;
+}
+.inv-filter-btn.active .inv-filter-count { background:rgba(220,190,100,.18); color:#f1d98c; }
+.inv-empty-state {
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+  min-height:150px; padding:22px; margin:10px 0;
+  border:1px dashed rgba(201,162,39,.28); border-radius:8px;
+  background:radial-gradient(ellipse at center,rgba(201,162,39,.06),transparent 70%);
+  color:#d7c49a; text-align:center;
+}
+.inv-empty-state > span { font-size:26px; }
+.inv-empty-state b { color:#e6cf8e; font-size:13px; }
+.inv-empty-state small { max-width:340px; color:#a89060; font-size:11px; line-height:1.6; }
+@media (max-width:600px) {
+  .inv-filter-count { min-width:16px; height:16px; font-size:9px; }
+  .inv-empty-state { min-height:120px; padding:16px; }
+}
