@@ -48,9 +48,11 @@ export function renderGame() {
   syncMapFocusedLayout(state.currentTab);
   renderLocation();
   renderDashboardContext();
-  // Keep the location/gameplay render in the central panel. Navigation
-  // sections are presented as overlays without removing the live scene.
-  renderTab(state.currentTab);
+  // The old tab panel sits before the live overworld in the central column.
+  // Never render a navigation page there during gameplay: it pushes the scene
+  // below the fold and makes movement appear lost. Tabs render in modal only.
+  const legacyTabPanel = document.getElementById('tab-content');
+  if (legacyTabPanel) legacyTabPanel.innerHTML = '';
 }
 
 function totalKills() {
