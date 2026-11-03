@@ -35,6 +35,9 @@ export function renderHeroOverview() {
   const campaign = getCampaignSummary(p);
   const location = LOCATIONS[state.game.location] || { name: state.game.location || 'Неизвестно', emoji: '📍' };
   const resourceName = p.class === 'warrior' ? 'Ярость' : p.class === 'archer' ? 'Концентрация' : 'Мана';
+  const hpPercent = p.maxHp > 0 ? Math.max(0, Math.min(100, p.hp / p.maxHp * 100)) : 0;
+  const mpPercent = p.maxMp > 0 ? Math.max(0, Math.min(100, p.mp / p.maxMp * 100)) : 0;
+  const expPercent = p.expNext > 0 ? Math.max(0, Math.min(100, p.exp / p.expNext * 100)) : 0;
   const cards = [
     ['Сила', p.str], ['Интеллект', p.int], ['Мудрость', p.wis], ['Телосложение', p.con], ['Ловкость', p.dex || 0],
     ['Критический удар', Math.round((stats.critChance || 0) * 100) + '%'], ['Уклонение', Math.round((stats.dodgeChance || 0) * 100) + '%'],
@@ -49,9 +52,9 @@ export function renderHeroOverview() {
       </div>
       <div class="hero-overview-columns" style="display:grid;grid-template-columns:minmax(250px,0.8fr) minmax(0,1.2fr);gap:12px;align-items:stretch;width:100%">
         <section class="hero-overview-left" aria-label="Ресурсы героя" style="display:flex;flex-direction:column;gap:10px;min-width:0;padding:12px;border:1px solid rgba(201,162,39,.28);border-radius:8px;background:rgba(15,12,9,.65);box-sizing:border-box">
-          <div class="hero-vital"><span>❤ Здоровье</span><b>${p.hp} / ${p.maxHp}</b><i><em class="vital-hp" style="width:${p.maxHp > 0 ? Math.max(0, Math.min(100, p.hp / p.maxHp * 100)) : 0}%"></em></i></div>
-          <div class="hero-vital"><span>🔹 ${resourceName}</span><b>${p.mp} / ${p.maxMp}</b><i><em class="vital-mp" style="width:${p.maxMp > 0 ? Math.max(0, Math.min(100, p.mp / p.maxMp * 100)) : 0}%"></em></i></div>
-          <div class="hero-vital hero-level-vital"><span>✦ Уровень ${p.level} · Опыт</span><b>${p.exp} / ${p.expNext}</b><i><em class="vital-exp" style="width:${p.expNext > 0 ? Math.max(0, Math.min(100, p.exp / p.expNext * 100)) : 0}%"></em></i><small>До следующего уровня: ${Math.max(0, (p.expNext || 0) - (p.exp || 0))} XP</small></div>
+          <div class="hero-vital"><span>❤ Здоровье</span><b>${p.hp} / ${p.maxHp}</b><i role="progressbar" aria-label="Здоровье" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(hpPercent)}"><em class="vital-hp" style="width:${hpPercent}%"></em></i></div>
+          <div class="hero-vital"><span>🔹 ${resourceName}</span><b>${p.mp} / ${p.maxMp}</b><i role="progressbar" aria-label="${resourceName}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(mpPercent)}"><em class="vital-mp" style="width:${mpPercent}%"></em></i></div>
+          <div class="hero-vital hero-level-vital"><span>✦ Уровень ${p.level} · Опыт</span><b>${p.exp} / ${p.expNext}</b><i role="progressbar" aria-label="Опыт до следующего уровня" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(expPercent)}"><em class="vital-exp" style="width:${expPercent}%"></em></i><small>До следующего уровня: ${Math.max(0, (p.expNext || 0) - (p.exp || 0))} XP</small></div>
         </section>
         <section class="hero-overview-right" aria-label="Подробные характеристики" style="min-width:0;width:100%;box-sizing:border-box">
           <details class="hero-details" open>
