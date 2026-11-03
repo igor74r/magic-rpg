@@ -714,8 +714,13 @@ function drawVillageBuilding(ctx, x, y, style = 'home') {
   // Detailed Canvas architecture; gameplay anchors and collision footprints stay unchanged.
   drawAuroraBuilding(ctx, x, y, style);
 }
-const VILLAGE_PROP_ATLAS = new Image();
-VILLAGE_PROP_ATLAS.src = new URL('../../assets/aurora/village-props-atlas.png', import.meta.url).href;
+let villagePropAtlas = null;
+function getVillagePropAtlas() {
+  if (villagePropAtlas || typeof Image === 'undefined') return villagePropAtlas;
+  villagePropAtlas = new Image();
+  villagePropAtlas.src = new URL('../../assets/aurora/village-props-atlas.png', import.meta.url).href;
+  return villagePropAtlas;
+}
 const VILLAGE_PROP_FRAMES = new Map([
   ['lantern', 0], ['memorial', 1], ['bench', 2], ['stall', 3],
   ['fountain', 4], ['planter', 5], ['banner', 6], ['brazier', 7],
@@ -725,10 +730,11 @@ const VILLAGE_PROP_FRAMES = new Map([
 ]);
 function drawVillageProp(ctx, x, y, style) {
   const frame = VILLAGE_PROP_FRAMES.get(style);
-  if (frame === undefined || !VILLAGE_PROP_ATLAS.complete || !VILLAGE_PROP_ATLAS.naturalWidth) return;
+  const atlas = getVillagePropAtlas();
+  if (frame === undefined || !atlas || !atlas.complete || !atlas.naturalWidth) return;
   ctx.save();
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(VILLAGE_PROP_ATLAS, frame * 64, 0, 64, 64,
+  ctx.drawImage(atlas, frame * 64, 0, 64, 64,
     Math.round(x - 48), Math.round(y - 48), 96, 96);
   if (style === 'lantern' || style === 'frost-lantern' || style === 'brazier') {
     ctx.globalAlpha = 0.72 + Math.sin(performance.now() * 0.002 + x * 0.03) * 0.16;
