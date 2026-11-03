@@ -1751,3 +1751,15 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
     min-height: 440px;
   }
 }
+
+
+/* The overworld is the primary game header now.
+   Permanently remove the duplicate centered hero panel; hero details stay in the in-world HUD. */
+#screen-game .dashboard-main > .dashboard-header,
+#screen-game #game-header {
+  display: none !important;
+}
+#screen-game.overworld-active .dashboard-main > .dashboard-overworld {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
