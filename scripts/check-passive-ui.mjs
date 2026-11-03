@@ -22,6 +22,7 @@ for (const contract of [
 
 assert.match(ui, /treeZoom = Math\.max\(0\.65, Math\.min\(1\.6/);
 assert.match(ui, /best\?\.focus\(\)/);
+assert.match(ui, /aria-disabled="\$\{!available\}"/);\nassert.doesNotMatch(ui, /\? 'disabled'/, 'locked nodes must remain keyboard-focusable');
 assert.match(css, /\.passive-tree-viewport:focus-visible/);
 assert.match(css, /\.passive-tree-viewport \.passive-node:focus-visible/);
 assert.match(css, /@media \(max-width:600px\)/);
