@@ -31,4 +31,4 @@ assert.match(css, /@media \(prefers-reduced-motion:reduce\)/);
 console.log('Passive tree UI accessibility checks passed');
 
 assert.ok(ui.includes('aria-disabled="${!available}"'), 'locked nodes must expose aria-disabled without removing keyboard focus');
-assert.ok(!ui.includes('disabled="${!available}"'), 'locked nodes must not use native disabled');
+assert.doesNotMatch(ui, /(?<!aria-)disabled="\$\{!available\}"/, 'locked nodes must not use native disabled');
