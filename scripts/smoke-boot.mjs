@@ -203,7 +203,7 @@ try {
 
 // Вкладки дашборда
 try {
-  for (const tab of ['locations', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
+  for (const tab of ['inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
     api.switchTab(tab);
   }
   check('вкладки дашборда рендерятся', true);
@@ -234,18 +234,13 @@ try {
   check('GameAPI.invSlotClick вызывается', false, String(e && e.message));
 }
 
-// Карта локаций: все доступные узлы должны отображаться, выбор работает
+// Единый атлас портала заменил старую карту вкладки и её API.
 try {
-  api.switchTab('locations');
-  const html = byId('tab-content').innerHTML;
-  const nodes = (html.match(/class="wnode(?=[\s"])/g) || []).length;
-  const expectedNodes = Object.keys(LOCATIONS).length - 1;
-  check('карта: все доступные локации отображаются', nodes === expectedNodes, `${nodes}/${expectedNodes} узлов`);
-  check('Rift marker is hidden before the final dragon', !html.includes('data-loc="rift"'));
-  api.mapSelect('forest');
-  check('карта: выбор узла', true);
+  check('единый атлас портала доступен', typeof api.openWorldPortalMenu === 'function');
+  check('старый API радиальной карты удалён',
+    typeof api.mapSelect === 'undefined' && typeof api.mapTravel === 'undefined' && typeof api.mapEnter === 'undefined');
 } catch (e) {
-  check('карта локаций', false, String(e && e.message));
+  check('единый атлас мира', false, String(e && e.message));
 }
 
 // NPC-диалоги
