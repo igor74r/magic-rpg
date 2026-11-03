@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
+import { inflateSync } from 'node:zlib';
 
 const manifest = JSON.parse(readFileSync(new URL('../assets/tiles/manifest.json', import.meta.url), 'utf8'));
 assert.equal(manifest.tileSize, 96);
@@ -24,6 +25,24 @@ for (const asset of [
 const groundPng = readFileSync(new URL('../assets/aurora/ground-atlas.png', import.meta.url));
 assert.equal(groundPng.readUInt32BE(16), 768, 'Aurora ground atlas must contain four variants for each of two terrain types');
 assert.equal(groundPng.readUInt32BE(20), 96, 'Aurora ground atlas must be 96px high');
+// Validate the complete PNG stream, not only its header. A truncated atlas can
+// pass dimension checks, silently fail Image.onload, and expose the fallback
+// terrain's tile-row seams in every Aurora screenshot.
+const groundChunks = [];
+let groundCursor = 8;
+let groundHasEnd = false;
+while (groundCursor + 12 <= groundPng.length) {
+  const chunkLength = groundPng.readUInt32BE(groundCursor);
+  const chunkType = groundPng.toString('ascii', groundCursor + 4, groundCursor + 8);
+  const chunkEnd = groundCursor + 12 + chunkLength;
+  assert.ok(chunkEnd <= groundPng.length, `Aurora ground PNG has truncated ${chunkType} chunk`);
+  if (chunkType === 'IDAT') groundChunks.push(groundPng.subarray(groundCursor + 8, groundCursor + 8 + chunkLength));
+  groundCursor = chunkEnd;
+  if (chunkType === 'IEND') { groundHasEnd = true; break; }
+}
+assert.ok(groundHasEnd && groundCursor === groundPng.length, 'Aurora ground PNG must end with a valid IEND chunk');
+const groundPixels = inflateSync(Buffer.concat(groundChunks));
+assert.equal(groundPixels.length, (768 * 3 + 1) * 96, 'Aurora ground PNG must contain complete decompressed pixel rows');
 assert.equal(manifest.auroraGround?.columns, 8, 'Aurora ground atlas must define eight variants');
 assert.deepEqual(manifest.auroraGround?.types, ['grass', 'path']);
 const propsPng = readFileSync(new URL('../assets/aurora/village-props-atlas.png', import.meta.url));
