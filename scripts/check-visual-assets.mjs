@@ -84,6 +84,7 @@ assert.ok(atlasRenderer.includes('const paintPatch = (points)'), 'each pixel tra
 assert.ok(renderer.includes('drawAuroraGroundTransitions(ctx, type'), 'village renderer must pass logical neighbours into the visual ground transition pass');
 assert.ok(atlasRenderer.includes('sourceColumn = type * 4 + variant'), 'Aurora ground must select deterministic authored terrain variants');
 assert.ok(renderer.includes('drawAuroraGroundTile(ctx, type'), 'Aurora village must use its dedicated authored ground atlas');
+assert.ok(renderer.includes("(type === 0 || type === 1) && themeName !== 'village'"), 'Aurora fallback terrain must not draw repeated dark tile-edge scanlines');
 assert.ok(renderer.indexOf('const questEnemyId') < renderer.indexOf('const depthItems'), 'quest target must be resolved before the depth loop reads it');
 assert.ok(depth.includes("kind: 'chest'"), 'treasure chests must participate in common depth sorting');
 assert.ok(renderer.includes("entry.kind === 'chest'"), 'treasure chests must render in the common depth pass');

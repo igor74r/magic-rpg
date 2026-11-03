@@ -270,7 +270,10 @@ function drawTile(ctx, type, x, y, size, themeName, colors, tileX = 0, tileY = 0
   ctx.fillStyle = colors[type] || '#1a4a3e';
   ctx.fillRect(x, y, size, size);
 
-  if (type === 0 || type === 1) {
+  // The generic terrain edge strip is useful in other biomes, but it reads
+  // as repeated dark scanlines across Aurora's grass when its authored atlas
+  // is still loading or unavailable. Keep Aurora's fallback ground seamless.
+  if ((type === 0 || type === 1) && themeName !== 'village') {
     ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(x, y + size - 4, size, 4);
   }
 
