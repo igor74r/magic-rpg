@@ -125,6 +125,7 @@ export function renderHeader() {
 
     <div class="hud-overview-columns">
       <section class="hud-overview-vitals" aria-label="Ресурсы героя">
+    <div class="hud-panel-kicker"><span aria-hidden="true">✦</span> РЕСУРСЫ И ПРОГРЕСС</div>
     <div class="hud-resource hud-health" role="group" aria-label="Здоровье">
       <div class="hud-resource-top"><span>❤ Здоровье</span><b>${p.hp} <i>/ ${p.maxHp}</i></b></div>
       <div class="bar hud-track" role="progressbar" aria-label="Здоровье героя" aria-valuemin="0" aria-valuemax="${p.maxHp}" aria-valuenow="${p.hp}">
@@ -148,19 +149,21 @@ export function renderHeader() {
     </div>
       </section>
       <section class="hud-overview-details" aria-label="Боевые характеристики">
-    <button type="button" class="hud-details-toggle" data-hud-toggle aria-expanded="false">
-      <span>Подробные характеристики</span><span aria-hidden="true">⌄</span>
+    <button type="button" class="hud-details-toggle" data-hud-toggle aria-expanded="false" aria-controls="game-header-combat-details">
+      <span><span aria-hidden="true">⚔️</span> ХАРАКТЕРИСТИКИ И БОЙ</span><span class="hud-toggle-chevron" aria-hidden="true">⌄</span>
     </button>
-    <div class="header-combat-stats hud-details-panel" data-hud-details hidden>
-      <span>СИЛ ${p.str}</span>
-      <span>ИНТ ${p.int}</span>
-      <span>МДР ${p.wis}</span>
-      <span>ТЕЛ ${p.con}</span>
-      <span>ЛОВ ${p.dex || 0}</span>
-      <span>💨 Уклон ${dodge}%</span>
-      <span>🛡️ Блок ${block}%</span>
-      <span>🎯 Крит ${crit}%</span>
-      <span>⚔️ ${totalKills()} убийств</span>
+    <div id="game-header-combat-details" class="header-combat-stats hud-details-panel" data-hud-details hidden>
+      <div class="hud-stat-group-label">ОСНОВНЫЕ</div>
+      <span><i aria-hidden="true">💪</i> СИЛ <b>${p.str}</b></span>
+      <span><i aria-hidden="true">🧠</i> ИНТ <b>${p.int}</b></span>
+      <span><i aria-hidden="true">✨</i> МДР <b>${p.wis}</b></span>
+      <span><i aria-hidden="true">❤️</i> ТЕЛ <b>${p.con}</b></span>
+      <span><i aria-hidden="true">🏹</i> ЛОВ <b>${p.dex || 0}</b></span>
+      <div class="hud-stat-group-label">БОЕВЫЕ</div>
+      <span><i aria-hidden="true">💨</i> Уклон <b>${dodge}%</b></span>
+      <span><i aria-hidden="true">🛡️</i> Блок <b>${block}%</b></span>
+      <span><i aria-hidden="true">🎯</i> Крит <b>${crit}%</b></span>
+      <span><i aria-hidden="true">⚔️</i> Убийств <b>${totalKills()}</b></span>
 
       ${
         passivePoints > 0
