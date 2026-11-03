@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const inventory = fs.readFileSync('ui/inventory.js', 'utf8');
+const styles = fs.readFileSync('css/rpg-overhaul.css', 'utf8');
+assert.match(inventory, /let invSearch = ''/);
+assert.match(inventory, /data-inv-search value="\$\{escapeHtml\(invSearch\)\}"/);
+assert.match(inventory, /toLocaleLowerCase\('ru'\)/);
+assert.match(inventory, /data-inv-search-clear/);
+assert.match(inventory, /rarity-frame-\$\{rarity\}/);
+assert.match(inventory, /invSort === 'power'/);
+assert.match(inventory, /invSort === 'name'/);
+assert.match(styles, /\.inv-search-wrap:focus-within/);
+assert.match(styles, /@media \(max-width:760px\)/);
+assert.match(styles, /@media \(max-width:380px\)/);
+console.log('Inventory UI enhancements: search, clear, sort, rarity and responsive styles verified.');
