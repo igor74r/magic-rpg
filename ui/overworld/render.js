@@ -237,6 +237,44 @@ function tick(ts) {
   }
 }
 
+// Aurora ground dressing: deterministic 16-bit pixel clusters layered over
+// the shared atlas. Coordinate hashing keeps the village coherent while
+// avoiding per-frame randomness, blur, gradients or extra image assets.
+function drawAuroraGroundDetails(ctx, type, tileX, tileY, x, y, size) {
+  if (type !== 0 && type !== 1) return;
+  const hash = (n) => {
+    let v = Math.imul(n ^ 0x45d9f3b, 0x45d9f3b);
+    v = Math.imul(v ^ (v >>> 16), 0x45d9f3b);
+    return (v ^ (v >>> 16)) >>> 0;
+  };
+  const seed = hash(Math.imul(tileX + 17, 374761393) ^ Math.imul(tileY + 31, 668265263));
+  ctx.save();
+  if (type === 0) {
+    const grass = ['#8aa45c', '#718d4e', '#a5b96b', '#647f46'];
+    for (let i = 0; i < 7; i++) {
+      const value = hash(seed + i * 1013);
+      const px = 4 + (value % 40);
+      const py = 4 + ((value >>> 8) % 40);
+      ctx.fillStyle = grass[(value >>> 16) % grass.length];
+      ctx.fillRect(Math.round(x + px * size / 48), Math.round(y + py * size / 48), Math.max(1, Math.round(size / 24)), Math.max(1, Math.round(size / 24)));
+      if (i % 3 === 0) {
+        ctx.fillStyle = '#c4c77a';
+        ctx.fillRect(Math.round(x + (px + 2) * size / 48), Math.round(y + (py - 1) * size / 48), 1, 1);
+      }
+    }
+  } else {
+    const stones = ['#9b896d', '#b6a184', '#776b59'];
+    for (let i = 0; i < 4; i++) {
+      const value = hash(seed + i * 1877);
+      const px = 5 + (value % 38);
+      const py = 5 + ((value >>> 8) % 38);
+      ctx.fillStyle = stones[(value >>> 16) % stones.length];
+      ctx.fillRect(Math.round(x + px * size / 48), Math.round(y + py * size / 48), Math.max(1, Math.round(size / 24)), Math.max(1, Math.round(size / 48)));
+    }
+  }
+  ctx.restore();
+}
+
 function drawTile(ctx, type, x, y, size, themeName, colors) {
   if (drawAtlasTile(ctx, type, x, y, size, themeName)) {
     const hazard = getTileDanger(type, themeName);
@@ -362,7 +400,12 @@ function render() {
     if (!ow.map[y]) continue;
     for (let x = startCol; x < endCol; x++) {
       const tile = ow.map[y][x];
-      if (tile !== undefined) drawTile(ctx, tile, x * ow.tile - cam.x, y * ow.tile - cam.y, ow.tile, ow.locationId, theme.colors);
+      if (tile !== undefined) {
+        const screenX = x * ow.tile - cam.x;
+        const screenY = y * ow.tile - cam.y;
+        drawTile(ctx, tile, screenX, screenY, ow.tile, ow.locationId, theme.colors);
+        if (ow.locationId === 'village') drawAuroraGroundDetails(ctx, tile, x, y, screenX, screenY, ow.tile);
+      }
     }
   }
   ctx.imageSmoothingEnabled = false;
