@@ -1086,3 +1086,38 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
 @media (max-width: 600px) {
   .tooltip-compare .compare-rarity-row { flex-wrap: wrap; }
 }
+
+
+/* Компактная сводка героя: важное видно сразу, детали раскрываются по запросу. */
+.hero-overview { gap:10px; }
+.hero-overview-identity { gap:10px; padding:10px 12px; }
+.hero-overview-emblem { width:44px; height:44px; flex-basis:44px; font-size:24px; }
+.hero-overview-identity h2 { font-size:19px; }
+.hero-overview-identity p { font-size:11px; }
+.hero-overview-gold { font-size:13px; }
+.hero-vitals-grid { gap:7px; }
+.hero-vital { padding:8px 10px; }
+.hero-vital b { margin:4px 0; font-size:12px; }
+.hero-vital i { height:4px; }
+.hero-details { border:1px solid rgba(201,162,39,.16); border-radius:6px; background:rgba(0,0,0,.12); }
+.hero-details > summary {
+  padding:9px 11px; color:#d8bd76; font-size:11px; font-weight:800;
+  letter-spacing:.035em; cursor:pointer; list-style:none;
+}
+.hero-details > summary::-webkit-details-marker { display:none; }
+.hero-details > summary::after { content:"＋"; float:right; color:#a89060; }
+.hero-details[open] > summary::after { content:"−"; }
+.hero-details[open] > summary { border-bottom:1px solid rgba(201,162,39,.13); }
+.hero-details .hero-stat-grid, .hero-details .hero-progression-grid { padding:9px; }
+.hero-details .hero-stat { padding:7px 9px; }
+.hero-details .hero-progression-grid > div { padding:8px 9px; }
+.hero-overview-actions { gap:6px; }
+.hero-overview-actions button { padding:7px 10px; }
+@media (max-width:700px) {
+  .hero-vitals-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .hero-vital { padding:7px; }
+  .hero-vital span { font-size:9px; }
+  .hero-vital b { font-size:11px; }
+  .hero-overview-identity { flex-wrap:nowrap; align-items:center; }
+  .hero-overview-gold { margin-left:auto; }
+}
