@@ -97,7 +97,7 @@ export function openQuestBoard() {
     document.getElementById('npc-dialog-content').innerHTML = content;
     document.getElementById('npc-dialog-modal').style.display = 'flex';
   } else {
-    document.getElementById('tab-content').innerHTML = content;
+    (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content')).innerHTML = content;
     showScreen('screen-game');
   }
 }
