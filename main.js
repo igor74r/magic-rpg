@@ -151,6 +151,8 @@ function showHeroArrivalTransition() {
 
 on('game:started', () => {
   stopVoice();
+  // A new hero always enters the village scene, never the legacy full-screen world map.
+  state.currentTab = 'quests';
   const log = document.getElementById('game-log');
   if (log) log.innerHTML = '';
   showScreen('screen-game');
