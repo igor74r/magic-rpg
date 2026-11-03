@@ -71,6 +71,14 @@ try {
         await page.locator('#dashboard-tab-modal').waitFor({state:'visible'});
         const title=await page.locator('#dashboard-tab-modal h2, #dashboard-tab-modal [role="heading"]').first().innerText().catch(()=>tab);
         assert.ok(title.length>0,`${vp.name}/${tab}: modal title must be rendered`);
+        const modalScroll=await page.locator('#dashboard-tab-modal .dashboard-tab-dialog-body').evaluate(node=>({
+          overflowY:getComputedStyle(node).overflowY,
+          clientWidth:node.clientWidth,
+          scrollWidth:node.scrollWidth
+        }));
+        assert.equal(modalScroll.overflowY,'auto',`${vp.name}/${tab}: dialog content must scroll independently`);
+        assert.ok(modalScroll.scrollWidth<=modalScroll.clientWidth+1,
+          `${vp.name}/${tab}: dialog content must not overflow horizontally: ${JSON.stringify(modalScroll)}`);
         if(tab==='hero') assert.ok(await page.locator('#dashboard-tab-modal .hero-overview').count()>0,`${vp.name}: hero view missing`);
         if(tab==='hero') {
           assert.equal(await page.locator('#dashboard-tab-modal .hero-overview-left .hero-vital').count(),3,
