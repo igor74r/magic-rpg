@@ -71,6 +71,19 @@ export function initWeather(themeName) {
     }
   }
 
+  // A few warm village motes add a calm evening atmosphere without affecting gameplay.
+  if (themeName === 'village') {
+    for (let i = 0; i < 5; i++) {
+      fireflies.push({
+        x: Math.random() * VIEW_W,
+        y: Math.random() * VIEW_H,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.12 + Math.random() * 0.18,
+        warmMote: true
+      });
+    }
+  }
+
   for (let i = 0; i < 3; i++) {
     fogLayers.push({
       x: Math.random() * VIEW_W,
@@ -202,10 +215,13 @@ export function drawFireflies(ctx, worldTime) {
   ctx.save();
   for (let f of fireflies) {
     const flicker = 0.4 + 0.6 * Math.abs(Math.sin(f.phase * 3));
-    ctx.globalAlpha = flicker * 0.9;
+    ctx.globalAlpha = flicker * (f.warmMote ? 0.28 : 0.9);
     ctx.fillStyle = getCurrentBiome() === 'village' ? '#f3c879' : '#a0ff60';
-    ctx.shadowBlur = 12; ctx.shadowColor = getCurrentBiome() === 'village' ? '#e6b75f' : '#80ff40';
-    ctx.beginPath(); ctx.arc(f.x, f.y, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = f.warmMote ? 7 : 12;
+    ctx.shadowColor = getCurrentBiome() === 'village' ? '#e6b75f' : '#80ff40';
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, f.warmMote ? 1.3 : 2.5, 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.restore();
 }
