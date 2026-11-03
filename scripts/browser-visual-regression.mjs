@@ -45,6 +45,16 @@ try {
     assert.equal(await page.locator('.dashboard-context-actions button').innerText(), '🌀 Портал миров',
       `${vp.name}: portal shortcut must remain`);
     await capture(page, `${vp.name}-01-gameplay`);
+    assert.equal(await page.locator('#dashboard-context .dashboard-context-actions button').count(),1,
+      `${vp.name}: mission guide must expose one primary portal action`);
+    if(vp.width>1050) {
+      assert.ok(await page.locator('#game-log-search').isVisible(),
+        `${vp.name}: desktop event journal search must be visible`);
+      assert.equal(await page.locator('[data-log-filter]').count(),4,
+        `${vp.name}: event journal must retain all four filters`);
+      assert.ok(await page.locator('#dashboard-context .context-progress').count()>0,
+        `${vp.name}: current mission progress must be visible`);
+    }
 
     for (const tab of ['hero','inventory','locations']) {
       const trigger=page.locator(`#game-tab-${tab}`);
