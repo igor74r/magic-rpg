@@ -239,70 +239,6 @@ function tick(ts) {
 }
 
 function drawTile(ctx, type, x, y, size, themeName, colors) {
-  // Aurora has no small house sprites: skip legacy building tile completely.
-  if (themeName === 'village' && type === 2) return;
-  // Aurora: use a unified ground surface instead of mismatched biome atlas patches.
-  if (themeName === 'village' && (type === 0 || type === 1)) {
-    const tx = Math.floor(x / size), ty = Math.floor(y / size);
-    const seed = Math.abs(tx * 374761393 + ty * 668265263) % 2147483647;
-    const noise = n => ((seed + n * 1274126177) >>> 0) % 100;
-    ctx.fillStyle = type === 1 ? '#766653' : '#34483b';
-    ctx.fillRect(x, y, size, size);
-
-    if (type === 1) {
-      // Irregular worn flagstones: quiet seams and scattered warm stone grain.
-      ctx.fillStyle = 'rgba(35,27,22,.16)';
-      ctx.fillRect(x, y + size - 2, size, 2);
-      if (noise(1) < 34) {
-        ctx.fillStyle = 'rgba(218,194,157,.10)';
-        ctx.fillRect(x + 4 + noise(2) % 15, y + 5 + noise(3) % 13, 9 + noise(4) % 8, 2);
-      }
-      if (noise(5) < 27) {
-        ctx.fillStyle = 'rgba(35,29,25,.16)';
-        ctx.fillRect(x + noise(6) % 22, y + 8 + noise(7) % 13, 2, 5);
-      }
-      ctx.fillStyle = 'rgba(235,211,170,.07)';
-      ctx.fillRect(x + 3 + noise(8) % 19, y + 3 + noise(9) % 19, 2, 2);
-      if (noise(10) < 18) {
-        ctx.fillStyle = 'rgba(112,133,91,.18)';
-        ctx.fillRect(x + 7 + noise(11) % 15, y + 20, 3, 2);
-      }
-      // Fine, offset joints give the village road a hand-laid flagstone rhythm.
-      if (noise(12) < 62) {
-        const seamX = x + 9 + noise(13) % 25;
-        ctx.fillStyle = 'rgba(31,25,21,.13)';
-        ctx.fillRect(seamX, y + 2, 1, size - 5);
-        ctx.fillStyle = 'rgba(220,199,165,.07)';
-        ctx.fillRect(seamX + 1, y + 3, 1, size - 7);
-      }
-      if (noise(14) < 38) {
-        const seamY = y + 10 + noise(15) % 22;
-        ctx.fillStyle = 'rgba(31,25,21,.11)';
-        ctx.fillRect(x + 2, seamY, size - 5, 1);
-      }
-      if (noise(16) < 16) {
-        ctx.fillStyle = 'rgba(45,37,29,.17)';
-        ctx.fillRect(x + 11 + noise(17) % 20, y + 9 + noise(18) % 24, 4, 1);
-      }
-    } else {
-      // Small deterministic grass blades and occasional wildflower pixels.
-      ctx.fillStyle = 'rgba(175,198,154,.11)';
-      ctx.fillRect(x + 4 + noise(1) % 21, y + 5 + noise(2) % 21, 3, 2);
-      if (noise(3) < 48) {
-        const gx = x + 5 + noise(4) % 23, gy = y + 7 + noise(5) % 22;
-        ctx.fillStyle = 'rgba(130,166,111,.28)';
-        ctx.fillRect(gx, gy, 2, 5);
-        ctx.fillRect(gx + 3, gy + 2, 2, 4);
-      }
-      if (noise(6) < 10) {
-        ctx.fillStyle = '#c5a76e';
-        ctx.fillRect(x + 8 + noise(7) % 18, y + 8 + noise(8) % 18, 2, 2);
-      }
-      ctx.fillStyle = 'rgba(0,0,0,.07)';
-      ctx.fillRect(x, y + size - 2, size, 2);
-    }
-    return;
-  }
   if (drawAtlasTile(ctx, type, x, y, size, themeName)) {
     const hazard = getTileDanger(type, themeName);
     if (hazard) {
@@ -346,19 +282,12 @@ function drawTile(ctx, type, x, y, size, themeName, colors) {
     ctx.fillRect(x + 10, y + 10, 4, 3); ctx.fillRect(x + 30, y + 25, 5, 4); ctx.fillRect(x + 15, y + 40, 3, 2);
     ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(x + 20, y + 15, 2, 2);
   } else if (type === 2) {
-    if (themeName === 'village') {
-      ctx.fillStyle = '#2a3440'; ctx.fillRect(x + 6, y + 16, size - 12, size - 12);
-      ctx.fillStyle = '#3a2a3a'; ctx.beginPath(); ctx.moveTo(x, y + 18); ctx.lineTo(x + half, y - 2); ctx.lineTo(x + size, y + 18); ctx.fill();
-      ctx.fillStyle = '#ffcc00'; ctx.fillRect(x + 18, y + 26, 8, 8);
-      ctx.fillStyle = '#2a1a0a'; ctx.fillRect(x + 22, y + 26, 1, 8); ctx.fillRect(x + 18, y + 30, 8, 1);
-    } else {
-      const wind = Math.sin(worldTime * 1.5 + x * 0.02) * 2;
-      ctx.fillStyle = '#241a12'; ctx.fillRect(x + half - 4, y + 32, 8, 16);
-      ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.arc(x + half, y + 28, 18, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#0b2a24'; ctx.beginPath(); ctx.arc(x + half + wind, y + 24, 16, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#123a30'; ctx.beginPath(); ctx.arc(x + half - 4 + wind, y + 20, 12, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#1a4a3e'; ctx.beginPath(); ctx.arc(x + half + 2 + wind, y + 18, 10, 0, Math.PI * 2); ctx.fill();
-    }
+    const wind = Math.sin(worldTime * 1.5 + x * 0.02) * 2;
+    ctx.fillStyle = '#241a12'; ctx.fillRect(x + half - 4, y + 32, 8, 16);
+    ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.arc(x + half, y + 28, 18, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#0b2a24'; ctx.beginPath(); ctx.arc(x + half + wind, y + 24, 16, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#123a30'; ctx.beginPath(); ctx.arc(x + half - 4 + wind, y + 20, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#1a4a3e'; ctx.beginPath(); ctx.arc(x + half + 2 + wind, y + 18, 10, 0, Math.PI * 2); ctx.fill();
   } else if (type === 3) {
     const isLava = ['volcano', 'dragon', 'obsidian-fields'].includes(themeName);
     const isPoison = ['swamp', 'briar-hollow'].includes(themeName);
