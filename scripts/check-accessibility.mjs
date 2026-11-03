@@ -16,8 +16,8 @@ const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworl
   readFile(new URL('../ui/quests.js', import.meta.url), 'utf8')
 ]);
 
-const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
-assert.equal(tabs.length, 14, 'remaining game and settings navigation items must expose tab semantics');
+const tabs = [...html.matchAll(/<(?:div|button) class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
+assert.equal(tabs.length, 14, 'all game and settings navigation items must expose tab semantics');
 for (const [tag] of tabs) {
   assert.match(tag, /aria-selected="(?:true|false)"/);
   assert.match(tag, /aria-controls="(?:tab-content|settings-content)"/);
