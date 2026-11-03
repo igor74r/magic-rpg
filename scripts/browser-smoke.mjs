@@ -239,7 +239,7 @@ try {
     // Exercise the portal interaction contract and destination navigation.
     await page.evaluate(() => window.GameAPI.enterOverworld());
     await page.locator('#screen-overworld.active').waitFor();
-    let worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
+    let worldDialog = page.locator('#npc-dialog-modal');
     await page.evaluate(() => window.GameAPI.interactNpc('world-portal'));
     await worldDialog.waitFor({ state: 'visible' });
     assert.equal(await worldDialog.getAttribute('aria-modal'), 'true',
