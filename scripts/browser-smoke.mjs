@@ -374,7 +374,7 @@ try {
       save.player.level = 3;
       localStorage.setItem('magic-rpg-save-1', JSON.stringify(save));
       window.GameAPI.loadSlot(1);
-      window.GameAPI.enterOverworld();
+      if (!document.getElementById('screen-game')?.classList.contains('overworld-active')) throw new Error('Continue did not start the saved world scene');
       window.GameAPI.interactNpc('world-portal');
     });
     await worldDialog.waitFor({ state: 'visible' });
@@ -393,7 +393,7 @@ try {
       save.player.campaignClaimed = { ...(save.player.campaignClaimed || {}), 'a1-m1': true };
       localStorage.setItem('magic-rpg-save-1', JSON.stringify(save));
       window.GameAPI.loadSlot(1);
-      window.GameAPI.enterOverworld();
+      if (!document.getElementById('screen-game')?.classList.contains('overworld-active')) throw new Error('Continue did not start the saved world scene');
     });
     await page.locator('#screen-game.overworld-active').waitFor();
     await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
@@ -417,6 +417,19 @@ try {
     await page.getByRole('heading', { name: /Башня · 40 этажей/ }).waitFor();
     await page.locator('[data-tower-close]').click();
     await page.locator('#tower-map-overlay').waitFor({ state: 'detached' });
+
+    // Reproduce the user's exact flow: save to the menu, then press Continue.
+    // No manual enterOverworld call is allowed after loadSlot.
+    await page.evaluate(() => {
+      if (!window.GameAPI.saveAndMenu()) throw new Error('Save-to-menu action failed');
+    });
+    await page.locator('#screen-main.active').waitFor();
+    await page.locator('.slot-play').first().click();
+    await page.locator('#screen-game.overworld-active').waitFor();
+    await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
+    assert.match(await page.locator('.hero-overview, #game-header, #overworld-title').first().innerText().catch(() => ''),
+      /UI audit|Аврора|Деревня/i,
+      `${viewport.name}: Continue must restore visible game content, not an empty screen`);
 
     assert.deepEqual(pageErrors, [], `${viewport.name}: uncaught browser errors: ${pageErrors.join('; ')}`);
     console.log(`PASS ${viewport.name} (${viewport.width}x${viewport.height}): settings labels, game creation, 10 dashboard tabs, responsive widths, no page errors`);
