@@ -124,7 +124,18 @@ try {
     assert.equal(await page.locator('#game-header').isVisible(), false,
       `${viewport.name}: duplicate centered hero header must stay removed`);
     assert.equal(await page.locator('#overworld-title').isVisible(), true,
-      `${viewport.name}: location title must be the first visible central game block`);
+      `${viewport.name}: location title must be visible above the world scene`);
+    assert.equal(await page.locator('.overworld-toolbar').count(), 1,
+      `${viewport.name}: opening screen must have exactly one location toolbar`);
+    assert.equal(await page.locator('.overworld-toolbar .overworld-exit').count(), 1,
+      `${viewport.name}: opening screen must have exactly one exit action`);
+    const toolbar = await page.locator('.overworld-toolbar').evaluate(node => {
+      const title = node.querySelector('#overworld-title').getBoundingClientRect();
+      const exit = node.querySelector('.overworld-exit').getBoundingClientRect();
+      return { titleX: title.x, exitX: exit.x, exitRight: exit.right, toolbarRight: node.getBoundingClientRect().right };
+    });
+    assert.ok(toolbar.titleX > 0 && toolbar.exitX > toolbar.titleX && toolbar.exitRight <= toolbar.toolbarRight + 1,
+      `${viewport.name}: location title and exit must form one right-aligned header: ${JSON.stringify(toolbar)}`);
     assert.equal(await page.locator('#overworld-canvas').isVisible(), true,
       `${viewport.name}: the overworld scene must remain visible below its title`);
 
