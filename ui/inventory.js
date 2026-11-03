@@ -115,7 +115,7 @@ function filterAndSort(entries) {
       .filter(Boolean).some(value => String(value).toLocaleLowerCase('ru').includes(query));
   });
   if (invRarityFilter !== 'all') {
-    list = list.filter(({ inst }) => (inst.rarity || 'common') === invRarityFilter;
+    list = list.filter(({ inst }) => (inst.rarity || 'common') === invRarityFilter);
   }
   if (invFilter === 'bag') {
     list = list.filter(({ inst }) => !['quest', 'material'].includes(ITEMS[inst.id]?.type));
