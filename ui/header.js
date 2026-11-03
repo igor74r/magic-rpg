@@ -48,10 +48,9 @@ export function renderGame() {
   syncMapFocusedLayout(state.currentTab);
   renderLocation();
   renderDashboardContext();
-  // Clear stale legacy tab markup on every gameplay render. All navigation
-  // sections now belong exclusively to the modal overlay.
-  const legacyTabContent = document.getElementById('tab-content');
-  if (legacyTabContent) legacyTabContent.innerHTML = '';
+  // Keep the location/gameplay render in the central panel. Navigation
+  // sections are presented as overlays without removing the live scene.
+  renderTab(state.currentTab);
 }
 
 function totalKills() {
