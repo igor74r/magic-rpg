@@ -15,6 +15,7 @@ import { renderGame } from './header.js';
 
 let invFilter = 'bag';
 let invSort = 'default';
+let invSearch = '';
 let saleSelection = [];
 let saleConfirmState = false;
 let saleReturnFocus = null;
@@ -105,6 +106,12 @@ function getJunkCount() {
 
 function filterAndSort(entries) {
   let list = entries;
+  const query = invSearch.trim().toLocaleLowerCase('ru');
+  if (query) list = list.filter(({ inst }) => {
+    const item = ITEMS[inst.id];
+    return [item?.name, item?.type, RARITIES[inst.rarity || 'common']?.name, inst.id]
+      .filter(Boolean).some(value => String(value).toLocaleLowerCase('ru').includes(query));
+  });
   if (invFilter === 'bag') {
     list = list.filter(({ inst }) => !['quest', 'material'].includes(ITEMS[inst.id]?.type));
   } else if (invFilter === 'quest') {
@@ -280,6 +287,7 @@ function filterBarHTML(counts) {
         ${s('power', 'Сила ↓')}
         ${s('name', 'Название ↑')}
       </div>
+      <label class="inv-search-wrap"><span aria-hidden="true">⌕</span><input type="search" data-inv-search value="${escapeHtml(invSearch)}" placeholder="Поиск предмета, типа или редкости…" aria-label="Поиск предметов в инвентаре"><button type="button" data-inv-search-clear aria-label="Очистить поиск" ${invSearch ? '' : 'hidden'}>×</button></label>
     </div>
   `;
 }
@@ -365,10 +373,24 @@ let inventoryEventsBound = false;
 function bindInventoryEvents() {
   if (inventoryEventsBound || typeof document === 'undefined' || typeof document.addEventListener !== 'function') return;
   inventoryEventsBound = true;
+  document.addEventListener('input', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target?.matches('[data-inv-search]')) return;
+    invSearch = target.value;
+    const el = document.getElementById('tab-content');
+    if (el) {
+      const pos = target.selectionStart;
+      el.innerHTML = renderInventory();
+      const next = el.querySelector('[data-inv-search]');
+      next?.focus();
+      next?.setSelectionRange(pos, pos);
+    }
+  });
   document.addEventListener('click', event => {
     const target = event.target instanceof Element ? event.target : null;
     const control = target?.closest('[data-inv-action], [data-inv-filter], [data-inv-sort]');
     if (!control) return;
+    if (control.hasAttribute('data-inv-search-clear')) { invSearch = ''; const el = document.getElementById('tab-content'); if (el) el.innerHTML = renderInventory(); return; }
     if (control.hasAttribute('data-inv-filter')) { setInvFilter(control.dataset.invFilter); return; }
     if (control.hasAttribute('data-inv-sort')) { setInvSort(control.dataset.invSort); return; }
     const index = Number(control.dataset.index);
