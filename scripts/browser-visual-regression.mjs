@@ -31,12 +31,37 @@ try {
     const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1 });
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
+    // Capture the first-visit prologue separately from returning-player menu flow.
+    const prologuePage = await browser.newPage({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1 });
+    const prologueErrors = [];
+    prologuePage.on('pageerror', e => prologueErrors.push(e.message));
+    await prologuePage.goto(baseUrl, { waitUntil:'networkidle' });
+    await prologuePage.locator('#screen-prologue.active').waitFor();
+    assert.ok(await prologuePage.locator('#screen-prologue .center-flex').isVisible(),
+      `${vp.name}: cinematic prologue shell must be visible`);
+    await capture(prologuePage, `${vp.name}-00-prologue`);
+    assert.deepEqual(prologueErrors, [], `${vp.name}: prologue runtime errors: ${prologueErrors.join('; ')}`);
+    await prologuePage.close();
+
     await page.addInitScript(() => localStorage.setItem('magic-rpg-prologue-seen','1'));
     await page.goto(baseUrl, { waitUntil:'networkidle' });
+    await page.locator('#screen-main.active').waitFor();
+    assert.equal(await page.locator('#screen-main .slot-card').count(), 3,
+      `${vp.name}: all save slots must render in main menu`);
+    assert.ok(await page.locator('.menu-story-panel').isVisible(),
+      `${vp.name}: story panel must render in main menu`);
+    await capture(page, `${vp.name}-00-main-menu`);
     await page.locator('.slot-new').first().click();
+    await page.locator('#screen-char.active').waitFor();
+    assert.equal(await page.locator('[data-character-step="selection"]').getAttribute('aria-current'),'step',
+      `${vp.name}: character selection step must be active`);
+    await capture(page, `${vp.name}-00-character-selection`);
     await page.locator('.class-card[data-class-id="mage"]').click();
     await page.locator('#char-name').fill('Visual QA');
     await page.getByRole('button',{name:/Проверить героя/}).click();
+    assert.equal(await page.locator('[data-character-step="review"]').getAttribute('aria-current'),'step',
+      `${vp.name}: character review step must be active`);
+    await capture(page, `${vp.name}-00-character-review`);
     await page.getByRole('button',{name:/Создать героя и начать/}).click();
     await page.locator('#screen-game.active').waitFor();
     await page.locator('#overworld-canvas').waitFor({state:'visible'});
