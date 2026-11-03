@@ -663,6 +663,48 @@
 }
 
 
+/* How-to screen controls: skip/close stays visible while scrolling the guide. */
+#screen-help .game-container { padding-top: 18px; }
+#screen-help .help-top-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 8px;
+}
+#screen-help .help-skip-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 8px 13px;
+  border: 1px solid rgba(194, 160, 105, .34);
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(48, 37, 32, .92), rgba(14, 15, 20, .97));
+  color: #d8c8a9;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, color .18s ease;
+}
+#screen-help .help-skip-btn span {
+  color: #e7c77f;
+  font-size: 18px;
+  line-height: 1;
+}
+#screen-help .help-skip-btn:hover {
+  border-color: rgba(230, 194, 125, .72);
+  background: linear-gradient(180deg, rgba(76, 55, 39, .92), rgba(28, 22, 22, .98));
+  color: #f4e2bc;
+}
+@media (max-width: 700px) {
+  #screen-help .help-top-actions { margin-bottom: 5px; }
+  #screen-help .help-skip-btn { min-height: 42px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #screen-help .help-skip-btn { transition: none; }
+}
+
 /* Extend the main-menu parchment, bronze and midnight palette to secondary screens. */
 #screen-settings .game-container,
 #screen-help .game-container,
