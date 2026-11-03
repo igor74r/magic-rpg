@@ -1493,3 +1493,36 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
 #screen-char .character-secondary-action{background:rgba(20,20,23,.65);border-color:rgba(180,160,120,.24)}
 @media(max-width:700px){#screen-main .slots-grid{grid-template-columns:1fr;gap:9px}#screen-main .main-menu-buttons{grid-template-columns:1fr;gap:8px}#screen-char .classes-grid{grid-template-columns:1fr;gap:10px}#screen-char .character-creation-container{padding:14px}#screen-char .character-stage-actions{display:grid;grid-template-columns:1fr}#screen-char .character-primary-action{min-width:0}}
 @media(prefers-reduced-motion:reduce){#screen-main .mm-btn,#screen-char .classes-grid>*{transition:none;transform:none}}
+
+/* ---------- Исправление положения эмблемы главного меню ---------- */
+#screen-main .logo-block {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+#screen-main .logo-gem {
+  display:grid;
+  place-items:center;
+  width:96px;
+  height:96px;
+  margin:0;
+  flex:0 0 96px;
+}
+#screen-main .logo-gem img {
+  display:block;
+  width:88px;
+  height:88px;
+  max-width:100%;
+  object-fit:contain;
+  object-position:center;
+  transform-origin:50% 50%;
+  animation:mainMenuCrystalFloat 4s ease-in-out infinite;
+}
+@keyframes mainMenuCrystalFloat {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(-4px); }
+}
+@media(prefers-reduced-motion:reduce) {
+  #screen-main .logo-gem img { animation:none; }
+}
