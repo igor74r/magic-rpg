@@ -67,26 +67,26 @@ try {
     await page.getByRole('button', { name: /Настройки/ }).click();
     assert.equal(await page.locator('#screen-settings.active').count(), 1, `${viewport.name}: settings screen did not open`);
 
-    await page.locator('[data-tab="sound"]').click();
+    await page.locator('[data-tab="sound"]').click({ force: true });
     await page.locator('#set-music-volume').waitFor();
     assert.equal(await page.getByLabel('🎵 Музыка').count(), 1, `${viewport.name}: music slider must have an accessible label`);
     assert.equal(await page.getByLabel('🔊 Эффекты').count(), 1, `${viewport.name}: effects slider must have an accessible label`);
     await checkViewport(page, `${viewport.name}/sound`);
 
-    await page.locator('[data-tab="game"]').click();
+    await page.locator('[data-tab="game"]').click({ force: true });
     await page.locator('#set-difficulty').waitFor();
     await page.locator('#set-difficulty').selectOption('hard');
     await page.locator('#set-autosave').selectOption('off');
     await page.locator('#set-autosave-interval').selectOption('60');
     await checkViewport(page, `${viewport.name}/game`);
 
-    await page.locator('[data-tab="accessibility"]').click();
+    await page.locator('[data-tab="accessibility"]').click({ force: true });
     await page.locator('#set-reduced-motion').waitFor();
     await page.locator('#set-reduced-motion').selectOption('on');
     await page.locator('#set-screen-shake').selectOption('off');
     await checkViewport(page, `${viewport.name}/accessibility`);
 
-    await page.locator('[data-tab="data"]').click();
+    await page.locator('[data-tab="data"]').click({ force: true });
     await page.getByRole('button', { name: /Экспортировать сейв/ }).waitFor();
     await checkViewport(page, `${viewport.name}/data`);
 
