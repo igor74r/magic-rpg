@@ -65,4 +65,14 @@ assert.ok(css.includes('#screen-game .context-progress') &&
 assert.ok(css.includes('#screen-game .log-filter.active') &&
   css.includes('#screen-game .log-search:focus-visible'),
   'event filters and log search must retain clear active and keyboard-focus states');
+assert.ok(css.includes('#dashboard-tab-modal .dashboard-tab-dialog-body') &&
+  css.includes('overscroll-behavior: contain') &&
+  css.includes('scrollbar-gutter: stable'),
+  'dialog content must scroll independently without leaking scroll to the game');
+assert.ok(css.includes('#dashboard-tab-modal .dashboard-tab-dialog-body button:focus-visible') &&
+  css.includes('min-height: 36px'),
+  'dialog controls must have consistent touch targets and keyboard focus');
+assert.ok(css.includes('#screen-game .dashboard-content {') &&
+  css.includes('overflow-wrap: anywhere'),
+  'dashboard content must not create horizontal overflow');
 console.log('Dashboard refresh layout contract passed.');
