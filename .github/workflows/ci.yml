@@ -184,6 +184,9 @@ jobs:
       - name: Check boss phase HUD and special attack warnings
         run: node scripts/check-combat-boss-ui.mjs
 
+      - name: Check combat visual effects, boss signatures and block counters
+        run: node scripts/check-combat-visuals.mjs
+
       - name: Check overworld maps and region collision
         run: node scripts/check-overworld-map.mjs
 
