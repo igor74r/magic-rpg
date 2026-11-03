@@ -35,7 +35,8 @@ assert.match(main, /enterOverworld\('village'\)/, 'new heroes must start inside 
 assert.match(main, /openWorldPortalMenu,/, 'the sidebar world portal action must be exposed');
 assert.match(html, /id="screen-overworld" class="dashboard-overworld"/, 'the location scene must live inside the dashboard');
 assert.doesNotMatch(html, /id="game-tab-locations"/, 'the world map must not be a sidebar tab');
-assert.match(html, /onclick="GameAPI\.interactNpc\('world-portal'\)"/, 'the world map must be accessed through the village portal system');
+const dashboard = readFileSync(new URL('../ui/dashboard.js', import.meta.url), 'utf8');
+assert.match(dashboard, /GameAPI\.interactNpc\('world-portal'\)/, 'the world map shortcut must use the village portal system');
 assert.doesNotMatch(main, /data-world-tower/, 'the world portal menu must not contain a tower shortcut');
 assert.doesNotMatch(header, /data-header-action="tower"/, 'the HUD must not duplicate the village tower gate');
 assert.doesNotMatch(map, /GameAPI\.enterTower\(\)/, 'the map panel must not duplicate the village tower gate');
