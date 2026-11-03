@@ -732,12 +732,11 @@ const VILLAGE_PROP_FRAMES = new Map([
   ['lantern', 0], ['memorial', 1], ['bench', 2], ['stall', 3],
   ['fountain', 4], ['planter', 5], ['banner', 6], ['brazier', 7],
   ['anvil', 8], ['woodpile', 9], ['cart', 10], ['barrels', 11],
-  ['herb-rack', 12], ['frost-lantern', 13], ['rift-ward', 14],
-  ['world-portal', 14], ['tower-gate', 15]
+  ['herb-rack', 12], ['frost-lantern', 13], ['rift-ward', 14], ['tower-gate', 15]
 ]);
 function drawVillageProp(ctx, x, y, style) {
-  const frame = VILLAGE_PROP_FRAMES.get(style);
   const isWorldPortal = style === 'world-portal';
+  const frame = isWorldPortal ? 0 : VILLAGE_PROP_FRAMES.get(style);
   const atlas = isWorldPortal ? getAuroraWorldPortalAtlas() : getVillagePropAtlas();
   if (frame === undefined || !atlas || !atlas.complete || !atlas.naturalWidth) return;
   ctx.save();

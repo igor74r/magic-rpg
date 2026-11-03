@@ -50,7 +50,14 @@ assert.ok(villageSprites.includes("['planter', 5]"), 'Aurora planters must resol
 assert.ok(villageSprites.includes('getAuroraWorldPortalAtlas'), 'Aurora world portal must load its dedicated authored sprite');
 assert.ok(villageSprites.includes("style === 'world-portal'"), 'world portal must not reuse the rift ward frame');
 const mappedPropStyles = [...villageSprites.matchAll(/\['([^']+)',\s*\d+\]/g)].map(match => match[1]);
-for (const style of new Set(locationPropStyles)) assert.ok(mappedPropStyles.includes(style), 'Aurora propStyle ' + style + ' must resolve to an authored sprite');
+for (const style of new Set(locationPropStyles)) {
+  if (style === 'world-portal') {
+    assert.ok(villageSprites.includes("style === 'world-portal'"), 'Aurora world portal must resolve through its dedicated sprite');
+    assert.ok(!mappedPropStyles.includes(style), 'world portal must not alias a village prop atlas frame');
+  } else {
+    assert.ok(mappedPropStyles.includes(style), 'Aurora propStyle ' + style + ' must resolve to an authored sprite');
+  }
+}
 assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8').includes('SVG architecture'), 'Aurora sprite renderer must not depend on vector architecture');
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
 
