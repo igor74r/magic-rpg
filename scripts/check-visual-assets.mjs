@@ -37,8 +37,7 @@ assert.ok(villageSprites.includes('const VILLAGE_PROP_FRAMES = new Map(['), 'vil
 assert.ok(villageSprites.includes('frame * 64, 0, 64, 64'), 'village props must sample the 64px atlas frames');
 assert.ok(villageSprites.includes('ctx.imageSmoothingEnabled = false'), 'village prop atlas must render with crisp nearest-neighbour pixels');
 assert.ok(!villageSprites.includes('function drawVillagePropRaw'), 'legacy procedural village prop rasterizer must be removed');
-assert.ok(villageSprites.includes('const gardenVariant = (gardenSeed >>> 0) % 3'), 'Aurora planters must have deterministic visual garden variants');
-assert.ok(villageSprites.includes('Crisp raised timber bed'), 'Aurora garden beds must use crisp authored pixel details');
+assert.ok(villageSprites.includes("['planter', 5]"), 'Aurora planters must resolve to their authored pixel atlas frame');
 assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8').includes('SVG architecture'), 'Aurora sprite renderer must not depend on vector architecture');
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
 
