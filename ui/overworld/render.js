@@ -484,12 +484,22 @@ function render() {
       ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.strokeText(item.name, sx, sy - 24);
       ctx.fillStyle = '#ffd060'; ctx.fillText(item.name, sx, sy - 24);
     } else if (entry.kind === 'enemy') {
+      const enemyDef = ENEMIES[item.enemyId];
+      const distToPlayer = Math.hypot(item.x - p.x, item.y - p.y);
+      if (questEnemyId && item.enemyId === questEnemyId) {
+        const pulse = 0.5 + 0.5 * Math.sin(now / 300);
+        ctx.fillStyle = `rgba(180,60,255,${0.15 + pulse * 0.2})`;
+        ctx.beginPath(); ctx.arc(sx, sy, 34 + pulse * 5, 0, Math.PI * 2); ctx.fill();
+      }
+      if (item.state === 'chase') {
+        ctx.fillStyle = 'rgba(255,60,60,0.1)';
+        ctx.beginPath(); ctx.arc(sx, sy, 26, 0, Math.PI * 2); ctx.fill();
+      }
       let enemyLungeX = 0;
       if (ow.combat && ow.combat.enemy === item && ow.combat.turn === 'enemy') {
         enemyLungeX = Math.cos(now / 50) * 5;
       }
       drawEnemyByType(ctx, item, sx + enemyLungeX, sy, theme.shadow);
-      const enemyDef = ENEMIES[item.enemyId];
       if (enemyDef) {
         const hpPct = item.hp / item.maxHp;
         ctx.fillStyle = '#330000'; ctx.fillRect(sx - 20, sy - 40, 40, 5);
@@ -497,6 +507,15 @@ function render() {
         ctx.fillRect(sx - 20, sy - 40, 40 * hpPct, 5);
         ctx.font = '10px Georgia'; ctx.textAlign = 'center'; ctx.fillStyle = '#ddd';
         ctx.fillText(enemyDef.name, sx, sy - 43);
+        if (distToPlayer < 300) {
+          const label = item.boss ? '☠ ' + enemyDef.name : item.elite ? '★ ' + enemyDef.name : enemyDef.name;
+          const labelY = sy - (item.boss ? 55 : item.elite ? 45 : 32);
+          ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+          ctx.lineWidth = 3; ctx.strokeStyle = '#000';
+          ctx.strokeText(label, sx, labelY);
+          ctx.fillStyle = item.boss ? '#b060ff' : item.elite ? '#ffd060' : '#d4c8a8';
+          ctx.fillText(label, sx, labelY);
+        }
       }
     } else if (entry.kind === 'player') {
       drawPlayerByClass(ctx, sx + pLungeX, sy + pLungeY, state.game.player.class, theme.shadow, heroMoving);
@@ -533,20 +552,7 @@ function render() {
     
     const sx = e.x - cam.x, sy = e.y - cam.y;
     if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
-    if (questEnemyId && e.enemyId === questEnemyId) {
-      const pulse = 0.5 + 0.5 * Math.sin(now / 300);
-      ctx.fillStyle = `rgba(180,60,255,${0.15 + pulse * 0.2})`; ctx.beginPath(); ctx.arc(sx, sy, 34 + pulse * 5, 0, Math.PI * 2); ctx.fill();
-    }
-    if (e.state === 'chase') { ctx.fillStyle = 'rgba(255,60,60,0.1)'; ctx.beginPath(); ctx.arc(sx, sy, 26, 0, Math.PI * 2); ctx.fill(); }
-    
-    const distToPlayer = Math.hypot(e.x - ow.player.x, e.y - ow.player.y);
-    if (distToPlayer < 300) {
-      const def = ENEMIES[e.enemyId];
-      const label = e.boss ? '☠ ' + def.name : e.elite ? '★ ' + def.name : def.name;
-      const labelY = sy - (e.boss ? 55 : e.elite ? 45 : 32);
-      ctx.font = 'bold 11px Georgia'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = '#000';
-      ctx.strokeText(label, sx, labelY); ctx.fillStyle = e.boss ? '#b060ff' : e.elite ? '#ffd060' : '#d4c8a8'; ctx.fillText(label, sx, labelY);
-    }
+
   }
 
   for (let p of deathParticles) {
