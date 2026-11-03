@@ -116,6 +116,10 @@ try {
     await page.getByRole('button', { name: /Создать героя и начать/ }).click();
     await page.locator('#screen-game.active').waitFor();
     await page.locator('#screen-game.overworld-active').waitFor();
+    assert.equal(await page.locator('#screen-game').evaluate(el => el.classList.contains('map-focused')), false,
+      `${viewport.name}: a newly created hero must enter the village scene, not the full-screen world map`);
+    assert.equal(await page.locator('#game-tab-locations').isVisible(), false,
+      `${viewport.name}: the redundant world-map sidebar entry must remain hidden`);
     await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
     assert.equal(await page.locator('#screen-game .dashboard-sidebar').isVisible(), true,
       `${viewport.name}: village scene must keep the left navigation visible`);
