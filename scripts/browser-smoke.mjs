@@ -57,7 +57,11 @@ try {
     { name: 'mobile', width: 390, height: 844 },
     { name: 'small-mobile', width: 320, height: 740 }
   ]) {
-    const page = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height } });
+    const page = await browser.newPage({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.name !== 'desktop',
+      hasTouch: viewport.name !== 'desktop'
+    });
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
     await page.addInitScript(() => localStorage.setItem('magic-rpg-prologue-seen', '1'));
@@ -121,6 +125,9 @@ try {
     assert.equal(await page.locator('#game-tab-locations').isVisible(), false,
       `${viewport.name}: the redundant world-map sidebar entry must remain hidden`);
     await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
+    const dpadVisible = await page.locator('#mobile-dpad').isVisible();
+    assert.equal(dpadVisible, viewport.name !== 'desktop',
+      `${viewport.name}: on-screen movement pad must be hidden on desktop and available only on touch devices`);
     assert.equal(await page.locator('#dashboard-tab-modal').count(), 0,
       `${viewport.name}: dashboard section must not open automatically during gameplay`);
     assert.equal(await page.locator('#screen-game .dashboard-sidebar').isVisible(), true,
