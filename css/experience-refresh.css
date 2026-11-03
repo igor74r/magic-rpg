@@ -941,3 +941,42 @@
   #screen-help .game-container { max-height: calc(100dvh - 12px) !important; padding: 4px 0 !important; }
   #screen-help .help-panel { max-height: calc(100dvh - 48px) !important; }
 }
+
+
+/* Center settings, how-to and prologue panels consistently in the viewport. */
+#screen-settings.screen.active,
+#screen-help.screen.active,
+#screen-prologue.screen.active {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  margin-inline: auto !important;
+}
+#screen-settings.screen.active,
+#screen-prologue.screen.active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+#screen-settings .game-container,
+#screen-prologue .center-flex {
+  box-sizing: border-box !important;
+  width: min(760px, calc(100% - 32px)) !important;
+  max-width: 760px !important;
+  margin: 0 auto !important;
+  left: auto !important;
+  right: auto !important;
+}
+#screen-settings .game-container {
+  flex: 0 1 auto !important;
+}
+#screen-prologue .center-flex {
+  position: relative !important;
+  transform: none !important;
+}
+@media (max-height: 620px) {
+  #screen-settings.screen.active,
+  #screen-prologue.screen.active {
+    align-items: flex-start !important;
+    overflow-y: auto !important;
+  }
+}
