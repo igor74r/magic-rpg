@@ -1788,3 +1788,11 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
     margin: 0 6px 6px;
   }
 }
+
+
+/* The village portal is the only world-travel entry point.
+   Keep the legacy tab hook in the DOM for compatibility, but remove it from the sidebar UI. */
+.dashboard-tablist > .dashboard-nav-caption:first-child,
+.dashboard-tablist > #game-tab-locations {
+  display: none !important;
+}
