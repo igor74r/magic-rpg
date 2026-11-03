@@ -48,7 +48,8 @@ export function renderGame() {
   syncMapFocusedLayout(state.currentTab);
   renderLocation();
   renderDashboardContext();
-  renderTab(state.currentTab);
+  // The legacy inline #tab-content must never paint a section over the gameplay.
+  // Sections are rendered only inside #dashboard-tab-modal on explicit navigation.
 }
 
 function totalKills() {
