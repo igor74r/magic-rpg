@@ -549,3 +549,41 @@
   border-left-color: var(--experience-gold);
   background: linear-gradient(90deg, rgba(153,112,55,.27), rgba(153,112,55,.055));
 }
+
+/* Keep the save heading and slot count on one clean line at every width. */
+#screen-main .slots-area,
+#screen-main .slots-grid { min-width: 0; width: 100%; }
+#screen-main .slots-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  gap: 8px;
+}
+#screen-main .slots-heading h2 {
+  min-width: 0;
+  margin: 0;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+  line-height: 1.2;
+  font-size: clamp(16px, 2vw, 19px);
+}
+#screen-main .slots-heading span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  line-height: 1.2;
+  font-size: 10px;
+}
+#screen-main .slot-card,
+#screen-main .slot-body { min-width: 0; }
+@media (max-width: 700px) {
+  #screen-main .slots-heading { gap: 6px; }
+  #screen-main .slots-heading h2 { font-size: 17px; }
+  #screen-main .slots-heading span { font-size: 9px; letter-spacing: .12em; }
+}
+@media (max-width: 340px) {
+  #screen-main .slots-heading h2 { font-size: 16px; }
+  #screen-main .slots-heading span { font-size: 8px; letter-spacing: .08em; }
+}
