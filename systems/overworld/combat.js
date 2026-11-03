@@ -1321,7 +1321,7 @@ function enemyCombatTurn() {
     if (def.boss) triggerShake(7, 0.28);
   }
 
-  if (playerGuarding && p.hp > 0 && enemy.hp > 0) {
+  if (playerGuarding && (def.boss || enemy.elite) && p.hp > 0 && enemy.hp > 0) {
     const counterDamage = Math.max(1, Math.floor(
       stats.atk * (0.28 + Math.min(0.25, (stats.blockPower || 0.5) * 0.25))
     ));
