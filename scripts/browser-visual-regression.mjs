@@ -65,6 +65,11 @@ try {
         if(tab==='inventory') assert.ok(await page.locator('#dashboard-tab-modal [data-inv-filter]').count()>0,`${vp.name}: inventory controls missing`);
         await capture(page,`${vp.name}-0${tab==='hero'?2:3}-${tab}`);
         await page.locator('#dashboard-tab-modal [data-dashboard-modal-close]').click();
+        await page.locator('#overworld-canvas').waitFor({state:'visible'});
+        assert.equal(await page.locator('#dashboard-tab-modal').count(),0,
+          `${vp.name}/${tab}: closing tab must remove only the overlay`);
+        assert.equal(await page.locator('#screen-overworld').isVisible(),true,
+          `${vp.name}/${tab}: playable village scene must remain visible behind tabs`);
       }
     }
     assert.deepEqual(errors,[], `${vp.name}: browser runtime errors: ${errors.join('; ')}`);
