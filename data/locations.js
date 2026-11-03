@@ -58,8 +58,6 @@ export const LOCATIONS = {
       { id: 'tavern-building', name: 'Таверна «Тихий угол»', x: 13, y: 24, buildingStyle: 'tavern', decorative: true },
       { id: 'home-nw', name: 'Дом у северной дороги', x: 13, y: 3, buildingStyle: 'home', decorative: true },
       { id: 'home-se', name: 'Дом у южной дороги', x: 25, y: 24, buildingStyle: 'home', decorative: true },
-      { id: 'home-west', name: 'Дом садовника', x: 3, y: 6, buildingStyle: 'home', decorative: true },
-      { id: 'home-east', name: 'Дом торговки', x: 34, y: 6, buildingStyle: 'home', decorative: true }
     ]
   },
 
