@@ -692,7 +692,8 @@ function buildCompareHTML(inst, item) {
   const comparisonTitle = eqObj
     ? `Сравнение: ${escapeHtml(ITEMS[eqObj.id]?.name || 'предмет')}`
     : 'Сравнение: пустой слот';
-  return `<div class="tooltip-compare"><b>${comparisonTitle}</b>${scoreLine}${lines.length ? lines.join('') : '<div class="compare-neutral">Характеристики не изменятся</div>'}</div>`;
+  const statLines = lines.length ? lines.join('') : '<div class="compare-neutral">Характеристики не изменятся</div>';
+  return `<div class="tooltip-compare"><b>${comparisonTitle}</b>${scoreLine}${statLines}</div>`;
 }
 
 export function buildTooltipHTML(inst) {
