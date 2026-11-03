@@ -896,6 +896,7 @@ window.GameAPI = {
   sellJunk: sellJunkUI,
   openShop, buy: buyItemUI, setShopPreset, buybackItem: buybackItemUI,
   openWorldPortalMenu,
+  enterOverworld: () => enterOverworld(state.game?.location || 'village'),
   resumeOverworld,
   exitOverworld,
   owAttack, owCast, owUseItem, owBlock, owUseAbility, owFlee,
