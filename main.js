@@ -8,7 +8,7 @@ import { addExp } from './systems/progression.js';
 import {
   updateMainMenu, openSettings, backFromSettings, saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
-  switchSettingsTab, applySettings, resetAllSettings, deleteAllSaves,
+  switchSettingsTab, applySettings, applyFontScale, resetAllSettings, deleteAllSaves,
   openAchievementsMenu, openHelp,
   exportSave, importSave
 } from './ui/menu.js';
@@ -890,6 +890,7 @@ window.GameAPI = {
 
 migrateLegacySave();
 loadSettings();
+applyFontScale();
 
 const prologueSeen = localStorage.getItem('magic-rpg-prologue-seen');
 const hasAnySave = !!(localStorage.getItem('magic-rpg-save-1') || localStorage.getItem('magic-rpg-save-2') || localStorage.getItem('magic-rpg-save-3'));
