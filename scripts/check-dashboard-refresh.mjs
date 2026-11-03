@@ -31,4 +31,12 @@ assert.ok(css.includes('#screen-game .hud-overview-details') &&
   'combat details must remain in a separate collapsible area');
 assert.ok(css.includes('.hud-details-panel[hidden] { display: none !important;'),
   'collapsed combat details must not occupy screen space');
+assert.ok(css.includes('#dashboard-tab-modal .hero-overview .hero-overview-left') &&
+  css.includes('grid-template-columns: repeat(3,minmax(0,1fr))'),
+  'hero profile must group its three resources in a dedicated row');
+assert.ok(css.includes('#dashboard-tab-modal .hero-overview .hero-stat-grid') &&
+  css.includes('#dashboard-tab-modal .hero-overview .hero-progression-grid'),
+  'hero profile must separate attributes from campaign progression');
+assert.ok(css.includes('#dashboard-tab-modal .hero-overview-actions button'),
+  'hero profile must expose clear shortcuts to related sections');
 console.log('Dashboard refresh layout contract passed.');
