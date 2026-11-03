@@ -280,6 +280,14 @@ function drawAuroraGroundDetails(ctx, type, tileX, tileY, x, y, size) {
         ctx.fillRect(tuftX + 1, tuftY - 1, 1, 2);
         ctx.fillRect(tuftX + 2, tuftY, 1, 1);
       }
+      if (i === 0 || i === 4) {
+        const mossX = Math.round(x + (px + 1) * size / 48);
+        const mossY = Math.round(y + (py + 5) * size / 48);
+        ctx.fillStyle = '#536f46';
+        ctx.fillRect(mossX, mossY, 3, 1);
+        ctx.fillStyle = '#789454';
+        ctx.fillRect(mossX + 1, mossY - 1, 2, 1);
+      }
     }
   } else {
     const stones = ['#9b896d', '#b6a184', '#776b59'];
