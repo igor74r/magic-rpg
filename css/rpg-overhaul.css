@@ -1845,3 +1845,16 @@ body.dashboard-modal-open { overflow: hidden; }
   #dashboard-tab-modal .dashboard-tab-dialog-body { padding: 10px; }
 }
 
+
+/* Gameplay priority: the obsolete inline tab panel must not consume the
+   central column; the actual overworld below it remains visible and playable. */
+#screen-game.active .dashboard-main > #tab-content {
+  display: none !important;
+}
+#screen-game.active .dashboard-main > #screen-overworld,
+#screen-game.active .dashboard-main > .dashboard-overworld {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
