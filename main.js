@@ -146,7 +146,7 @@ function showHeroArrivalTransition() {
     overlay.style['--arrival-duration'] = `${duration}ms`;
   }
   body.appendChild(overlay);
-  window.setTimeout(() => overlay.remove(), duration + 100);
+  (window.setTimeout || globalThis.setTimeout)(() => overlay.remove(), duration + 100);
 }
 
 on('game:started', () => {
