@@ -34,7 +34,7 @@ try {
     await page.addInitScript(() => localStorage.setItem('magic-rpg-prologue-seen','1'));
     await page.goto(baseUrl, { waitUntil:'networkidle' });
     await page.locator('.slot-new').first().click();
-    await page.locator('.class-card[data-class-id="warrior"]').click();
+    await page.locator('.class-card[data-class-id="mage"]').click();
     await page.locator('#char-name').fill('Visual QA');
     await page.getByRole('button',{name:/Проверить героя/}).click();
     await page.getByRole('button',{name:/Создать героя и начать/}).click();
