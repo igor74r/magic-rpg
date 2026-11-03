@@ -1160,3 +1160,45 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   .hero-overview-left .hero-vital { flex:auto; }
   .hero-overview-right .hero-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
+
+
+/* FIX: enforce the two-column hero panel layout over legacy dashboard rules. */
+.hero-overview .hero-overview-columns {
+  display: grid !important;
+  grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1.22fr) !important;
+  width: 100% !important;
+  align-items: stretch !important;
+  gap: 12px !important;
+}
+.hero-overview .hero-overview-left,
+.hero-overview .hero-overview-right {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.hero-overview .hero-overview-left {
+  padding: 12px !important;
+  border: 1px solid rgba(201,162,39,.25) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(145deg,rgba(30,24,17,.76),rgba(8,7,6,.48)) !important;
+  gap: 10px !important;
+}
+.hero-overview .hero-overview-left .hero-vital {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+.hero-overview .hero-overview-right .hero-details {
+  height: 100% !important;
+  box-sizing: border-box !important;
+}
+.hero-overview .hero-overview-right .hero-stat-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+}
+@media (max-width: 760px) {
+  .hero-overview .hero-overview-columns {
+    grid-template-columns: minmax(0,1fr) !important;
+  }
+}
