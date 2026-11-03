@@ -10,7 +10,94 @@ import { toast } from './screens.js';
 import { renderHeader } from './header.js';
 
 let treePan = { x: -150, y: -170 };
+let treeZoom = 1;
 let treeDrag = null;
+
+function applyPassiveTreeTransform() {
+  const world = document.getElementById('passive-tree-world');
+  if (world) world.style.transform = `translate(${treePan.x}px, ${treePan.y}px) scale(${treeZoom})`;
+}
+
+export function passiveTreeZoom(delta) {
+  treeZoom = Math.max(0.65, Math.min(1.6, Number((treeZoom + delta).toFixed(2))));
+  applyPassiveTreeTransform();
+  const status = document.getElementById('passive-tree-zoom-status');
+  if (status) status.textContent = `Масштаб ${Math.round(treeZoom * 100)}%`;
+}
+
+export function passiveTreeResetView() {
+  treePan = { x: -150, y: -170 };
+  treeZoom = 1;
+  applyPassiveTreeTransform();
+  const status = document.getElementById('passive-tree-zoom-status');
+  if (status) status.textContent = 'Масштаб 100% · положение сброшено';
+}
+
+export function passiveTreeKeyDown(e) {
+  const viewport = e.currentTarget;
+  const nodes = [...viewport.querySelectorAll('.passive-node')];
+  const current = e.target.closest('.passive-node');
+
+  if (e.key === '+' || e.key === '=') {
+    e.preventDefault();
+    passiveTreeZoom(0.1);
+    return;
+  }
+  if (e.key === '-') {
+    e.preventDefault();
+    passiveTreeZoom(-0.1);
+    return;
+  }
+  if (e.key === '0') {
+    e.preventDefault();
+    passiveTreeResetView();
+    return;
+  }
+  if (e.key === 'Home') {
+    e.preventDefault();
+    (viewport.querySelector('.passive-node.start') || nodes[0])?.focus();
+    return;
+  }
+  if (e.key === 'End') {
+    e.preventDefault();
+    nodes.at(-1)?.focus();
+    return;
+  }
+  if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+
+  e.preventDefault();
+  if (!current) {
+    (viewport.querySelector('.passive-node.start') || nodes[0])?.focus();
+    return;
+  }
+
+  const currentX = Number(current.dataset.x) * 12;
+  const currentY = Number(current.dataset.y) * 9;
+  const directions = {
+    ArrowUp: [0, -1],
+    ArrowDown: [0, 1],
+    ArrowLeft: [-1, 0],
+    ArrowRight: [1, 0]
+  };
+  const [dx, dy] = directions[e.key];
+  let best = null;
+  let bestScore = Infinity;
+
+  for (const node of nodes) {
+    if (node === current) continue;
+    const vx = Number(node.dataset.x) * 12 - currentX;
+    const vy = Number(node.dataset.y) * 9 - currentY;
+    const forward = vx * dx + vy * dy;
+    if (forward <= 0) continue;
+    const lateral = Math.abs(vx * dy - vy * dx);
+    const score = forward + lateral * 1.8;
+    if (score < bestScore) {
+      best = node;
+      bestScore = score;
+    }
+  }
+  best?.focus();
+}
 
 export function passiveTreePointerDown(e) {
   if (e.button !== undefined && e.button !== 0) return;
@@ -35,8 +122,7 @@ export function passiveTreePointerMove(e) {
   const dy = e.clientY - treeDrag.startY;
   if (Math.abs(dx) + Math.abs(dy) > 3) treeDrag.moved = true;
   treePan = { x: treeDrag.panX + dx, y: treeDrag.panY + dy };
-  const world = document.getElementById('passive-tree-world');
-  if (world) world.style.transform = `translate(${treePan.x}px, ${treePan.y}px)`;
+  applyPassiveTreeTransform();
   e.preventDefault();
 }
 
@@ -152,6 +238,7 @@ export function renderPassives() {
         type="button"
         class="passive-node ${classes}"
         style="left:${node.x}%;top:${node.y}%"
+        data-x="${node.x}" data-y="${node.y}"
         ${
           available
             ? `onclick="GameAPI.allocatePassive('${node.id}')"`
