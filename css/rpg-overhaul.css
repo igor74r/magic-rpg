@@ -1272,3 +1272,44 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   .hero-overview-right .hero-stat span { font-size:9px; }
   .hero-overview-right .hero-stat b { font-size:10px; }
 }
+
+
+/* Central gameplay HUD: split resources/level from detailed combat stats. */
+#game-header .hud-overview-columns {
+  display:grid;
+  grid-template-columns:minmax(220px,.82fr) minmax(0,1.18fr);
+  gap:12px;
+  align-items:stretch;
+  width:100%;
+  margin:10px 0;
+}
+#game-header .hud-overview-vitals,
+#game-header .hud-overview-details {
+  min-width:0;
+  box-sizing:border-box;
+  padding:11px;
+  border:1px solid rgba(201,162,39,.24);
+  border-radius:8px;
+  background:linear-gradient(145deg,rgba(28,23,17,.68),rgba(8,7,6,.4));
+}
+#game-header .hud-overview-vitals {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:10px;
+}
+#game-header .hud-overview-vitals .hud-resource { margin:0; }
+#game-header .hud-overview-vitals .hud-experience { margin-top:2px; }
+#game-header .hud-overview-details {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+#game-header .hud-overview-details .hud-details-toggle { margin:0; }
+#game-header .hud-overview-details .hud-details-panel { margin:0; }
+@media (max-width:760px) {
+  #game-header .hud-overview-columns { grid-template-columns:minmax(0,1fr); gap:8px; }
+  #game-header .hud-overview-vitals { gap:8px; }
+  #game-header .hud-overview-vitals,
+  #game-header .hud-overview-details { padding:8px; }
+}
