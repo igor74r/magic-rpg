@@ -1094,3 +1094,78 @@
   justify-content: flex-start !important;
   gap: 0 !important;
 }
+
+/* Compact character creation: reclaim oversized empty space. */
+#screen-char.screen.active {
+  overflow-y: auto !important;
+  align-items: flex-start !important;
+  padding: 10px 0 !important;
+}
+#screen-char .character-creation-container {
+  width: min(940px, calc(100% - 24px)) !important;
+  max-width: 940px !important;
+  margin: 8px auto !important;
+  padding: clamp(12px, 1.8vw, 20px) !important;
+  border-radius: 16px !important;
+}
+#screen-char .character-creation-heading {
+  padding-bottom: 10px !important;
+}
+#screen-char .character-creation-heading h1 {
+  margin: 5px 0 3px !important;
+  font-size: clamp(23px, 3vw, 32px) !important;
+}
+#screen-char .character-creation-heading .subtitle {
+  margin: 3px 0 !important;
+  font-size: 11px !important;
+}
+#screen-char .character-creation-eyebrow {
+  padding: 4px 8px !important;
+  font-size: 9px !important;
+}
+#screen-char .character-stepper {
+  gap: 7px !important;
+  margin: 10px auto 12px !important;
+}
+#screen-char .character-step {
+  padding: 5px 9px !important;
+  font-size: 10px !important;
+}
+#screen-char .class-stage-title {
+  margin: 8px 0 !important;
+  font-size: 15px !important;
+}
+#screen-char .classes-grid {
+  gap: 12px !important;
+  margin-block: 8px !important;
+}
+#screen-char .character-name-panel {
+  margin-top: 10px !important;
+  padding: 10px 12px !important;
+}
+#screen-char .character-name-panel p {
+  margin: 4px 0 0 !important;
+  font-size: 10px !important;
+}
+#screen-char .character-stage-actions {
+  gap: 10px !important;
+  margin-top: 12px !important;
+}
+#screen-char .character-stage-actions button {
+  min-height: 40px !important;
+  padding: 9px 14px !important;
+}
+#screen-char .class-review-intro {
+  margin: 8px 0 !important;
+}
+@media (max-width: 700px) {
+  #screen-char .character-creation-container {
+    width: calc(100% - 12px) !important;
+    margin: 5px auto !important;
+    padding: 12px 9px !important;
+  }
+  #screen-char .character-stepper {
+    margin: 8px auto 10px !important;
+    flex-wrap: wrap !important;
+  }
+}
