@@ -39,7 +39,7 @@ const applyDamage = (hp, amount) => Math.min(Math.max(0, Number.isFinite(hp) ? h
 assert.equal(applyDamage(100, 25), 25, 'enemy attack removes expected HP');
 assert.equal(applyDamage(10, 50), 10, 'lethal enemy attack clamps to remaining HP');
 assert.equal(applyDamage(100, NaN), 0, 'invalid attack damage cannot alter HP');
-assert.match(source, /if (result.totalDamage > 0) {s*applyPlayerDamage(p, ow, result.totalDamage);/,
+assert.match(source, /if \(result\.totalDamage > 0\) \{\s*applyPlayerDamage\(p, ow, result\.totalDamage\);/,
   'damage-over-time effects must use the shared health path and synchronize the combat model');
 const applyDotDamage = (hp, damage) => Math.max(0, Math.max(0, Number.isFinite(hp) ? hp : 0) - Math.min(Math.max(0, Number.isFinite(hp) ? hp : 0), Math.max(0, Number.isFinite(damage) ? Math.floor(damage) : 0)));
 assert.equal(applyDotDamage(12, 5), 7, 'damage-over-time removes expected HP');
