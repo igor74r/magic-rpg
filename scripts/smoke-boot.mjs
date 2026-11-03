@@ -250,6 +250,7 @@ try {
 
 // NPC-диалоги
 try {
+  if (!state.overworld?.active) api.enterOverworld('village');
   const npcActions = [
     'openBlacksmith', 'openHealer', 'openAlchemist', 'openMerchant', 'openElder',
     'openWell', 'openBard', 'openGuard', 'openCat', 'openKids', 'openHerald', 'openDailyChest',
