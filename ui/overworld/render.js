@@ -422,19 +422,6 @@ function render() {
     ctx.restore();
   }
 
-  for (const c of ow.chests) {
-    if (c.opened) continue;
-    const sx = c.x - cam.x, sy = c.y - cam.y;
-    if (sx < -50 || sx > VIEW_W + 50 || sy < -50 || sy > VIEW_H + 50) continue;
-    ctx.fillStyle = theme.shadow; ctx.beginPath(); ctx.ellipse(sx, sy + 8, 17, 7, 0, 0, Math.PI * 2); ctx.fill();
-    if (!drawAtlasProp(ctx, 0, sx - 24, sy - 24, 48, 48)) {
-      ctx.fillStyle = '#3a2010'; ctx.fillRect(sx - 14, sy - 4, 28, 16); ctx.strokeRect(sx - 14, sy - 4, 28, 16);
-      ctx.fillStyle = '#5a3a20'; ctx.beginPath(); ctx.arc(sx, sy - 4, 14, Math.PI, 0); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#ffcc00'; ctx.fillRect(sx - 3, sy + 2, 6, 6);
-    }
-    ctx.shadowBlur = 10; ctx.shadowColor = '#ffcc00'; ctx.fillStyle = 'rgba(255, 204, 0, 0.4)'; ctx.beginPath(); ctx.arc(sx, sy, 16, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
-  }
-
   const p = ow.player; nearNpc = null;
   const now = performance.now();
   let pLungeX = 0, pLungeY = 0;
@@ -444,13 +431,28 @@ function render() {
   }
   const heroKeys = ow.keys || {};
   const heroMoving = !ow.combat && !ow.defeated && !!(heroKeys.w || heroKeys.a || heroKeys.s || heroKeys.d || heroKeys.arrowup || heroKeys.arrowdown || heroKeys.arrowleft || heroKeys.arrowright);
+
+  const activeMission = getActiveCampaignMission(state.game.player);
+  const missionLocationId = activeMission?.mission.locationId || activeMission?.act.locationId;
+  const questEnemyId = activeMission && missionLocationId === (ow.sourceLocationId || ow.locationId)
+    ? activeMission.mission.enemyId
+    : null;
   const depthItems = buildDepthItems(ow);
 
   for (const entry of depthItems) {
     const item = entry.item;
     const sx = item.x - cam.x, sy = item.y - cam.y;
     if (sx < -90 || sx > VIEW_W + 90 || sy < -90 || sy > VIEW_H + 90) continue;
-    if (entry.kind === 'static' || entry.kind === 'npc') {
+    if (entry.kind === 'chest') {
+      if (item.opened) continue;
+      ctx.fillStyle = theme.shadow; ctx.beginPath(); ctx.ellipse(sx, sy + 8, 17, 7, 0, 0, Math.PI * 2); ctx.fill();
+      if (!drawAtlasProp(ctx, 0, sx - 24, sy - 24, 48, 48)) {
+        ctx.fillStyle = '#3a2010'; ctx.fillRect(sx - 14, sy - 4, 28, 16); ctx.strokeRect(sx - 14, sy - 4, 28, 16);
+        ctx.fillStyle = '#5a3a20'; ctx.beginPath(); ctx.arc(sx, sy - 4, 14, Math.PI, 0); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ffcc00'; ctx.fillRect(sx - 3, sy + 2, 6, 6);
+      }
+      ctx.shadowBlur = 10; ctx.shadowColor = '#ffcc00'; ctx.fillStyle = 'rgba(255, 204, 0, 0.4)'; ctx.beginPath(); ctx.arc(sx, sy, 16, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    } else if (entry.kind === 'static' || entry.kind === 'npc') {
       const dist = Math.hypot(item.x - p.x, item.y - p.y);
       if (!item.decorative && dist < (item.interactionRadius || 60) && !ow.combat) {
         nearNpc = item;
@@ -522,11 +524,6 @@ function render() {
     }
   }
 
-  const activeMission = getActiveCampaignMission(state.game.player);
-  const missionLocationId = activeMission?.mission.locationId || activeMission?.act.locationId;
-  const questEnemyId = activeMission && missionLocationId === (ow.sourceLocationId || ow.locationId)
-    ? activeMission.mission.enemyId
-    : null;
   for (const e of ow.enemies) {
     if (e.dead) {
       if (!e._hasExploded) {
