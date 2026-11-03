@@ -1054,3 +1054,29 @@
 @media (max-width: 520px) {
   #screen-main .logo-emblem { font-size: 48px !important; }
 }
+
+/* Remove the standalone emblem; frame the actual game title symmetrically. */
+#screen-main .logo-block {
+  display: grid !important;
+  grid-template-columns: minmax(24px, 1fr) auto minmax(24px, 1fr) !important;
+  grid-template-areas: "left title right" "left subtitle right" !important;
+  align-items: center !important;
+  justify-items: center !important;
+  column-gap: clamp(8px, 2vw, 24px) !important;
+  width: 100% !important;
+}
+#screen-main .title-side-mark-left { grid-area: left !important; justify-self: end !important; }
+#screen-main .game-title { grid-area: title !important; text-align: center !important; }
+#screen-main .logo-block .subtitle { grid-area: subtitle !important; text-align: center !important; }
+#screen-main .title-side-mark-right { grid-area: right !important; justify-self: start !important; }
+#screen-main .title-side-mark {
+  color: #d9b978;
+  font-size: clamp(24px, 3vw, 40px);
+  line-height: 1;
+  text-shadow: 0 0 14px rgba(217,185,120,.4);
+}
+#screen-main .logo-emblem { display: none !important; }
+@media(max-width:520px) {
+ #screen-main .logo-block { column-gap: 5px !important; }
+ #screen-main .title-side-mark { font-size: 20px !important; }
+}
