@@ -28,7 +28,8 @@ import {
   payBardUI, petCatUI, claimQuestUI,
   upgradeEquipmentUI, healAtHealerUI, craftRecipeUI, reforgeItemUI, setShopPreset, buybackItemUI,
   showShopTooltip, equipBestUI, sellJunkUI, socketRuneUI,
-  allocatePassiveUI, resetPassivesUI, passiveTreePointerDown, passiveTreePointerMove, passiveTreePointerUp
+  allocatePassiveUI, resetPassivesUI, passiveTreePointerDown, passiveTreePointerMove, passiveTreePointerUp,
+  passiveTreeZoom, passiveTreeResetView, passiveTreeKeyDown
 } from './ui/game.js';
 import {
   initOverworld, owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
@@ -864,6 +865,7 @@ window.GameAPI = {
   allocatePassive: allocatePassiveUI,
   resetPassives: resetPassivesUI,
   passiveTreePointerDown, passiveTreePointerMove, passiveTreePointerUp,
+  passiveTreeZoom, passiveTreeResetView, passiveTreeKeyDown,
   startNGPlus,
   enterRift,
   openRiftMap,
