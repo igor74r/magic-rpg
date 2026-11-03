@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const inventoryUI = await readFile(new URL('../ui/inventory.js', import.meta.url), 'utf8');
 const inventoryCSS = await readFile(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8');
-assert.match(inventoryUI, /function filterBarHTML\(counts\)/, 'inventory filters should display category totals');
+assert.match(inventoryUI, /function filterBarHTML(counts, rarityCounts)/, 'inventory filters should display category totals');
 assert.match(inventoryUI, /class="inv-filter-count"/, 'filter totals need a dedicated visual counter');
 assert.match(inventoryUI, /class="inv-empty-state" role="status"/, 'empty inventory filters should explain the empty state accessibly');
 assert.match(inventoryCSS, /\.inv-filter-count/);
@@ -108,3 +108,7 @@ assert.equal(state.game.player.hp, 80);
 
 state.game = null;
 console.log('Inventory, affix and crafting checks passed');
+
+assert.match(inventoryUI, /data-inv-rarity/, 'inventory should expose rarity quick filters');
+assert.match(inventoryUI, /invRarityFilter !== 'all'/, 'rarity selection must affect filtered entries');
+assert.match(inventoryCSS, /\.inv-rarity-chip\.active/, 'active rarity filter should be visibly selected');
