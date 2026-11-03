@@ -134,6 +134,8 @@ assert.ok(atlasRenderer.includes('corner.sides.some'), 'diagonal overlays must n
 assert.ok(atlasRenderer.includes('const paintPatch = (points)'), 'each pixel transition patch must restore canvas state safely');
 assert.ok(renderer.includes('drawAuroraGroundTransitions(ctx, type'), 'village renderer must pass logical neighbours into the visual ground transition pass');
 assert.ok(atlasRenderer.includes('sourceColumn = type * 4 + variant'), 'Aurora ground must select deterministic authored terrain variants');
+assert.ok(atlasRenderer.includes('drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY)'), 'Aurora grass must render deterministic cached pixel accents');
+assert.ok(atlasRenderer.includes('auroraGrassDetailCache'), 'Aurora grass details must be cached to avoid per-frame asset allocation');
 assert.ok(renderer.includes('drawAuroraGroundTile(ctx, type'), 'Aurora village must use its dedicated authored ground atlas');
 assert.ok(renderer.includes("(type === 0 || type === 1) && themeName !== 'village'"), 'Aurora fallback terrain must not draw repeated dark tile-edge scanlines');
 assert.ok(renderer.indexOf('const questEnemyId') < renderer.indexOf('const depthItems'), 'quest target must be resolved before the depth loop reads it');

@@ -8,6 +8,50 @@ const BIOME_ROW = Object.freeze({
 });
 
 
+// Cached crisp grass accents make Aurora's lawn feel hand-authored without
+// per-frame random noise or thousands of Canvas fill calls.
+const auroraGrassDetailCache = new Map();
+function auroraGrassSeed(tileX, tileY) {
+  let value = Math.imul(tileX + 43, 374761393) ^ Math.imul(tileY + 71, 668265263);
+  value = Math.imul(value ^ (value >>> 16), 0x45d9f3b);
+  return (value ^ (value >>> 16)) >>> 0;
+}
+function drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY) {
+  const seed = auroraGrassSeed(tileX, tileY);
+  const key = seed & 63;
+  let detail = auroraGrassDetailCache.get(key);
+  if (!detail && typeof document !== 'undefined') {
+    detail = document.createElement('canvas');
+    detail.width = 48; detail.height = 48;
+    const g = detail.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    const colors = ['#71864a', '#849653', '#425c35', '#a2a55d', '#d5bd70'];
+    let n = (seed ^ 0x9e3779b9) >>> 0;
+    const count = 3 + (n % 3);
+    for (let i = 0; i < count; i++) {
+      n = Math.imul(n ^ (n >>> 15), 2246822519) >>> 0;
+      const px = 3 + n % 42;
+      n = Math.imul(n ^ (n >>> 13), 3266489917) >>> 0;
+      const py = 3 + n % 42;
+      g.fillStyle = colors[(n >>> 5) % colors.length];
+      g.fillRect(px, py, 2, 1);
+      if ((n & 7) === 0) g.fillRect(px + 1, py - 1, 1, 1);
+    }
+    auroraGrassDetailCache.set(key, detail);
+  }
+  if (!detail) return;
+  const previousSmoothing = ctx.imageSmoothingEnabled;
+  const previousAlpha = ctx.globalAlpha;
+  try {
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalAlpha = 0.72;
+    ctx.drawImage(detail, x, y, size, size);
+  } finally {
+    ctx.globalAlpha = previousAlpha;
+    ctx.imageSmoothingEnabled = previousSmoothing;
+  }
+}
+
 let auroraGroundImage = null;
 let auroraGroundRequested = false;
 let auroraGroundReady = false;
@@ -46,6 +90,7 @@ export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0
     ctx.fillRect(x, y, size, size);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(auroraGroundImage, sourceColumn * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, size, size);
+    if (type === 0) drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY);
     return true;
   } catch (error) {
     auroraGroundFailed = true;
