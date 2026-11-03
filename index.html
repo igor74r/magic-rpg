@@ -275,7 +275,7 @@
       <input id="dashboard-nav-search" class="dashboard-nav-search" type="search" placeholder="⌕ Найти раздел…" autocomplete="off">
       <div class="dashboard-tablist" role="tablist" aria-label="Разделы игры">
         <div class="dashboard-nav-caption">МИР</div>
-        <div class="tab active" id="game-tab-locations" role="tab" aria-selected="true" aria-controls="tab-content" tabindex="0" data-tab="locations" onclick="GameAPI.switchTab('locations')"><span class="tab-icon">🗺️</span> <span class="tab-text">Карта мира</span></div>
+        <div class="tab active" id="game-tab-locations" role="tab" aria-selected="true" aria-controls="tab-content" tabindex="0" data-tab="locations" onclick="GameAPI.openWorldPortalMenu()"><span class="tab-icon">🌀</span> <span class="tab-text">Портал миров</span></div>
         <div class="tab" id="game-tab-quests" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="quests" onclick="GameAPI.switchTab('quests')"><span class="tab-icon">📜</span> <span class="tab-text">Журнал заданий</span></div>
         <div class="dashboard-nav-caption">ГЕРОЙ</div>
         <div class="tab" id="game-tab-hero" role="tab" aria-selected="false" aria-controls="tab-content" tabindex="-1" data-tab="hero" onclick="GameAPI.switchTab('hero')"><span class="tab-icon">🧙</span> <span class="tab-text">Мой герой</span></div>
@@ -297,30 +297,8 @@
     <main class="dashboard-main">
       <header class="dashboard-header" id="game-header"></header>
       <div class="dashboard-content" id="tab-content" role="tabpanel" aria-labelledby="game-tab-locations" tabindex="0"></div>
-    </main>
-
-    <!-- ПРАВАЯ ПАНЕЛЬ (ЖУРНАЛ) -->
-    <aside class="dashboard-log" aria-label="Путеводитель и журнал событий">
-      <section class="dashboard-context-panel" id="dashboard-context" aria-label="Текущая цель"></section>
-      <div class="log-header"><span>📜 Журнал событий</span><span class="log-live-indicator">● LIVE</span></div>
-      <div class="dashboard-log-tools">
-        <div class="log-filter-row" role="group" aria-label="Фильтр журнала">
-          <button type="button" class="log-filter active" data-log-filter="all" aria-pressed="true">Все</button>
-          <button type="button" class="log-filter" data-log-filter="combat" aria-pressed="false">Бой</button>
-          <button type="button" class="log-filter" data-log-filter="loot" aria-pressed="false">Добыча</button>
-          <button type="button" class="log-filter" data-log-filter="story" aria-pressed="false">Сюжет</button>
-        </div>
-        <label class="visually-hidden" for="game-log-search">Поиск по журналу</label>
-        <input id="game-log-search" class="log-search" type="search" placeholder="Найти событие…" autocomplete="off">
-      </div>
-      <div class="log-body" id="game-log" role="log" aria-live="polite" aria-relevant="additions"></div>
-    </aside>
-
-  </div>
-</div>
-
-<!-- ================== OVERWORLD ================== -->
-<div id="screen-overworld" class="screen">
+    <!-- Игровая сцена внутри центральной колонки дашборда -->
+<div id="screen-overworld" class="dashboard-overworld">
   <div class="game-container" style="max-width:1000px; width: 100%;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;">
       <h2 id="overworld-title" style="margin:0;">Локация</h2>
@@ -363,6 +341,27 @@
     <p style="color:#a89060;font-size:13px;text-align:center;margin-top:8px;">
       WASD / стрелки — движение · Пробел / 1 — атака · 2 — магия · 3 — предмет · 4 — побег · 5 — блок · 6 — способность · Esc — выход
     </p>
+  </div>
+</div>
+    </main>
+
+    <!-- ПРАВАЯ ПАНЕЛЬ (ЖУРНАЛ) -->
+    <aside class="dashboard-log" aria-label="Путеводитель и журнал событий">
+      <section class="dashboard-context-panel" id="dashboard-context" aria-label="Текущая цель"></section>
+      <div class="log-header"><span>📜 Журнал событий</span><span class="log-live-indicator">● LIVE</span></div>
+      <div class="dashboard-log-tools">
+        <div class="log-filter-row" role="group" aria-label="Фильтр журнала">
+          <button type="button" class="log-filter active" data-log-filter="all" aria-pressed="true">Все</button>
+          <button type="button" class="log-filter" data-log-filter="combat" aria-pressed="false">Бой</button>
+          <button type="button" class="log-filter" data-log-filter="loot" aria-pressed="false">Добыча</button>
+          <button type="button" class="log-filter" data-log-filter="story" aria-pressed="false">Сюжет</button>
+        </div>
+        <label class="visually-hidden" for="game-log-search">Поиск по журналу</label>
+        <input id="game-log-search" class="log-search" type="search" placeholder="Найти событие…" autocomplete="off">
+      </div>
+      <div class="log-body" id="game-log" role="log" aria-live="polite" aria-relevant="additions"></div>
+    </aside>
+
   </div>
 </div>
 
