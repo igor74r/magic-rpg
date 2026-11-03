@@ -66,6 +66,12 @@ export function generateVillageMap(cols, rows) {
   const cx = Math.floor(cols / 2);
   const cy = Math.floor(rows / 2);
 
+  // Keep a guaranteed connected pedestrian spine beneath the curved lanes.
+  // The surrounding branches add character, while this narrow cross ensures
+  // every district remains reachable even where rasterized bends meet.
+  for (let x = 0; x < cols; x++) stampRoad(x, cy, 1);
+  for (let y = 0; y < rows; y++) stampRoad(cx, y, 1);
+
   // Southern arrival lane bends into the village square instead of forming
   // a rigid cross. The central tile remains the stable arrival/navigation hub.
   road([[cx, rows - 1], [cx, rows - 6], [cx - 1, rows - 9], [cx, cy + 4], [cx, cy]], 3);
