@@ -153,8 +153,10 @@ try {
       const tabButton = page.locator(`#game-tab-${tab}`);
       await tabButton.click();
       assert.equal(await tabButton.getAttribute('aria-selected'), 'true', `${viewport.name}: ${tab} tab must become selected`);
-      assert.equal(await page.locator('#tab-content').getAttribute('aria-labelledby'), `game-tab-${tab}`,
-        `${viewport.name}: tab panel must identify its active tab`);
+      const dashboardModal = page.locator('#dashboard-tab-modal');
+      await dashboardModal.waitFor({state:'visible'});
+      assert.equal(await dashboardModal.getAttribute('data-dashboard-tab'), tab,
+        `${viewport.name}: sidebar section must render in the modal overlay`);
       if (tab === 'quests') {
         const progress = page.locator('.campaign-progress[role="progressbar"]').first();
         await progress.waitFor();
@@ -205,9 +207,10 @@ try {
       assert.ok(dashboard.layoutScrollWidth <= dashboard.layoutWidth + 1, `${viewport.name}/${tab}: dashboard overflow: ${JSON.stringify(dashboard)}`);
       assert.ok(dashboard.mainScrollWidth <= dashboard.mainWidth + 1, `${viewport.name}/${tab}: main panel overflow: ${JSON.stringify(dashboard)}`);
       assert.ok(dashboard.contentScrollWidth <= dashboard.contentWidth + 1, `${viewport.name}/${tab}: content overflow: ${JSON.stringify(dashboard)}`);
-      const dashboardModal = page.locator('#dashboard-tab-modal');
       await dashboardModal.locator('[data-dashboard-modal-close]').click();
       await dashboardModal.waitFor({ state: 'detached' });
+      assert.equal(await page.locator('#screen-game').evaluate(el=>el.inert),false,
+        `${viewport.name}/${tab}: gameplay must be interactive after modal close`);
     }
 
     await page.locator('#game-tab-hero').click();
