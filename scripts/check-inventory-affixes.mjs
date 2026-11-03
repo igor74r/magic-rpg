@@ -10,7 +10,7 @@ assert.match(inventoryCSS, /\.inv-filter-count/);
 assert.match(inventoryCSS, /\.inv-empty-state/);
 assert.match(inventoryUI, /class="compare-heading"/, 'equipment comparison should identify the equipped item and slot');
 assert.match(inventoryUI, /class="compare-rarity-row"/, 'comparison should show current and candidate rarity');
-assert.match(inventoryUI, /class="compare-verdict \\${directionClass\\}"/, 'comparison should summarize upgrade/downgrade/equivalent');
+assert.ok(inventoryUI.includes('class="compare-verdict ${directionClass}"'), 'comparison should summarize upgrade/downgrade/equivalent');
 assert.match(inventoryCSS, /\.tooltip-compare \.compare-heading/);
 assert.match(inventoryCSS, /\.tooltip-compare \.compare-rarity-row/);
 assert.match(inventoryCSS, /\.tooltip-compare \.compare-verdict\.compare-up/);
