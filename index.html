@@ -193,11 +193,11 @@
   <div class="game-container" style="max-width:660px;">
     <h1>⚙️ Настройки</h1>
     <div class="settings-tabs" role="tablist" aria-label="Разделы настроек">
-      <div class="settings-tab active" id="settings-tab-sound" role="tab" aria-selected="true" aria-controls="settings-content" tabindex="0" data-tab="sound" onclick="GameAPI.switchSettingsTab('sound')">🔊 Звук</div>
-      <div class="settings-tab" id="settings-tab-game" role="tab" aria-selected="false" aria-controls="settings-content" tabindex="-1" data-tab="game" onclick="GameAPI.switchSettingsTab('game')">🎮 Игра</div>
-      <div class="settings-tab" id="settings-tab-graphics" role="tab" aria-selected="false" aria-controls="settings-content" tabindex="-1" data-tab="graphics" onclick="GameAPI.switchSettingsTab('graphics')">🎨 Графика</div>
-      <div class="settings-tab" id="settings-tab-accessibility" role="tab" aria-selected="false" aria-controls="settings-content" tabindex="-1" data-tab="accessibility" onclick="GameAPI.switchSettingsTab('accessibility')">♿ Доступность</div>
-      <div class="settings-tab" id="settings-tab-data" role="tab" aria-selected="false" aria-controls="settings-content" tabindex="-1" data-tab="data" onclick="GameAPI.switchSettingsTab('data')">💾 Данные</div>
+      <button type="button" class="settings-tab active" id="settings-tab-sound" role="tab" aria-selected="true" aria-controls="settings-content" tabindex="0" data-tab="sound" onclick="GameAPI.switchSettingsTab('sound')" onkeydown="GameAPI.handleSettingsTabKey(event)">🔊 Звук</button>
+      <button type="button" class="settings-tab" id="settings-tab-game" role="tab" aria-selected="false" aria-controls="settings-content" tabindex="-1" data-tab="game" onclick="GameAPI.switchSettingsTab('game')" onkeydown="GameAPI.handleSettingsTabKey(event)">🎮 Игра</button>
+      <button type="button" class="settings-tab" id="settings-tab-graphics" role="tab" aria-selected="false" aria-controls="settings-content" tabindex="-1" data-tab="graphics" onclick="GameAPI.switchSettingsTab('graphics')" onkeydown="GameAPI.handleSettingsTabKey(event)">🎨 Графика</button>
+      <button type="button" class="settings-tab" id="settings-tab-accessibility" role="tab" aria-selected="false" aria-controls="settings-content" tabindex="-1" data-tab="accessibility" onclick="GameAPI.switchSettingsTab('accessibility')" onkeydown="GameAPI.handleSettingsTabKey(event)">♿ Доступность</button>
+      <button type="button" class="settings-tab" id="settings-tab-data" role="tab" aria-selected="false" aria-controls="settings-content" tabindex="-1" data-tab="data" onclick="GameAPI.switchSettingsTab('data')" onkeydown="GameAPI.handleSettingsTabKey(event)">💾 Данные</button>
     </div>
     <div class="panel" id="settings-content" role="tabpanel" aria-labelledby="settings-tab-sound" tabindex="0"></div>
     <button onclick="GameAPI.backFromSettings()" class="settings-back-btn">← Назад</button>
@@ -234,9 +234,11 @@
           <div class="help-key-row"><kbd>2</kbd><span>Магия (если доступна)</span></div>
           <div class="help-key-row"><kbd>3</kbd><span>Использовать предмет</span></div>
           <div class="help-key-row"><kbd>4</kbd><span>Попытаться сбежать</span></div>
-          <div class="help-key-row"><kbd>5</kbd><span>Защита: получаемый урон уменьшается вдвое</span></div>
-          <div class="help-key-row"><kbd>6</kbd><span>Способность вашего класса</span></div>
-          <div class="help-key-row"><kbd>Esc</kbd><span>Пауза / выход из боя</span></div>
+          <div class="help-key-row"><kbd>5</kbd><span>Защита: следующий удар врага ослабляется (не менее чем на 50%)</span></div>
+          <div class="help-key-row"><kbd>6</kbd><span>Открыть умения класса; выберите нужное цифровой клавишей</span></div>
+          <div class="help-key-row"><kbd>E</kbd><span>Проверить ближайшую секретную стену вне боя</span></div>
+          <div class="help-key-row"><kbd>Esc</kbd><span>Пауза вне боя; в бою — запрос на побег, в меню — закрыть окно</span></div>
+          <p class="settings-note">В списке магии, предметов и умений нажмите клавишу с номером нужного действия. На телефоне используйте экранные кнопки движения и боевые кнопки.</p>
         </div>
       </section>
       <div class="divider"></div>
