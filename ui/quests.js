@@ -11,6 +11,10 @@ import { saveGame } from '../systems/save.js';
 import { showScreen, toast } from './screens.js';
 import { renderGame, renderHeader } from './header.js';
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
 export function openQuestBoard() {
   const quests = getDailyQuests();
   const dragons = state.game?.storyDragons || {};
