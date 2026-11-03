@@ -101,7 +101,7 @@ export function renderDashboardContext() {
   root.innerHTML = `
     <div class="dashboard-context-heading"><span>🎯 ПУТЕВОДИТЕЛЬ</span><span>${summary.completed}/${summary.total}</span></div>
     <div class="dashboard-context-location">📍 ${escapeHtml(location.name)}</div>
-    <div class="dashboard-context-mission">${missionHtml}</div>
+    <div class="dashboard-context-mission" role="status" aria-live="polite" aria-atomic="true">${missionHtml}</div>
     <div class="dashboard-context-shards"><span>Осколки</span><b>${shards}/3</b></div>
     <div class="dashboard-context-actions">
       <button type="button" onclick="GameAPI.switchTab('locations')">🗺️ Карта</button>
