@@ -47,21 +47,25 @@ export function renderHeroOverview() {
         <div><span class="dashboard-eyebrow">ЛИЧНОЕ ДЕЛО ПУТНИКА</span><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(cls.name)} · Уровень ${p.level}</p></div>
         <div class="hero-overview-gold">💰 ${Number(p.gold) || 0}</div>
       </div>
-      <div class="hero-vitals-grid">
-        <div class="hero-vital"><span>❤ Здоровье</span><b>${p.hp} / ${p.maxHp}</b><i><em class="vital-hp" style="width:${p.maxHp > 0 ? Math.max(0, Math.min(100, p.hp / p.maxHp * 100)) : 0}%"></em></i></div>
-        <div class="hero-vital"><span>✦ Опыт</span><b>${p.exp} / ${p.expNext}</b><i><em class="vital-exp" style="width:${p.expNext > 0 ? Math.max(0, Math.min(100, p.exp / p.expNext * 100)) : 0}%"></em></i></div>
-        <div class="hero-vital"><span>🔹 ${resourceName}</span><b>${p.mp} / ${p.maxMp}</b><i><em class="vital-mp" style="width:${p.maxMp > 0 ? Math.max(0, Math.min(100, p.mp / p.maxMp * 100)) : 0}%"></em></i></div>
+      <div class="hero-overview-columns">
+        <section class="hero-overview-left" aria-label="Ресурсы героя">
+          <div class="hero-vital"><span>❤ Здоровье</span><b>${p.hp} / ${p.maxHp}</b><i><em class="vital-hp" style="width:${p.maxHp > 0 ? Math.max(0, Math.min(100, p.hp / p.maxHp * 100)) : 0}%"></em></i></div>
+          <div class="hero-vital"><span>🔹 ${resourceName}</span><b>${p.mp} / ${p.maxMp}</b><i><em class="vital-mp" style="width:${p.maxMp > 0 ? Math.max(0, Math.min(100, p.mp / p.maxMp * 100)) : 0}%"></em></i></div>
+          <div class="hero-vital hero-level-vital"><span>✦ Уровень ${p.level} · Опыт</span><b>${p.exp} / ${p.expNext}</b><i><em class="vital-exp" style="width:${p.expNext > 0 ? Math.max(0, Math.min(100, p.exp / p.expNext * 100)) : 0}%"></em></i><small>До следующего уровня: ${Math.max(0, (p.expNext || 0) - (p.exp || 0))} XP</small></div>
+        </section>
+        <section class="hero-overview-right" aria-label="Подробные характеристики">
+          <details class="hero-details" open>
+            <summary>⚔️ Подробные характеристики</summary>
+            <div class="hero-stat-grid">${cards.map(([label, value]) => `<div class="hero-stat"><span>${label}</span><b>${value ?? 0}</b></div>`).join('')}</div>
+            <div class="hero-progression-grid">
+              <div><span>📍 Текущее место</span><b>${location.emoji || '📍'} ${escapeHtml(location.name)}</b></div>
+              <div><span>📖 Сюжетная кампания</span><b>Акт ${campaign.activeAct} · ${campaign.completed}/${campaign.total} миссий</b></div>
+              <div><span>🐉 Осколки Разлома</span><b>${shards}/3</b></div>
+              <div><span>🏰 Башня</span><b>${p.towerBest || 0}/40 этажей</b></div>
+            </div>
+          </details>
+        </section>
       </div>
-      <details class="hero-details">
-        <summary>⚔️ Характеристики и прогресс</summary>
-        <div class="hero-stat-grid">${cards.map(([label, value]) => `<div class="hero-stat"><span>${label}</span><b>${value ?? 0}</b></div>`).join('')}</div>
-        <div class="hero-progression-grid">
-        <div><span>📍 Текущее место</span><b>${location.emoji || '📍'} ${escapeHtml(location.name)}</b></div>
-        <div><span>📖 Сюжетная кампания</span><b>Акт ${campaign.activeAct} · ${campaign.completed}/${campaign.total} миссий</b></div>
-        <div><span>🐉 Осколки Разлома</span><b>${shards}/3</b></div>
-        <div><span>🏰 Башня</span><b>${p.towerBest || 0}/40 этажей</b></div>
-        </div>
-      </details>
       <div class="hero-overview-actions">
         <button type="button" onclick="GameAPI.switchTab('inventory')">🎒 Экипировка</button>
         <button type="button" onclick="GameAPI.switchTab('talents')">🌳 Таланты</button>
