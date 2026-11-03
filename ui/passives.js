@@ -322,7 +322,7 @@ export function allocatePassiveUI(nodeId) {
 
   renderHeader();
 
-  const content = document.getElementById('tab-content');
+  const content = (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content'));
 
   if (content) {
     content.innerHTML = renderPassives();
@@ -343,6 +343,6 @@ export function resetPassivesUI() {
   }
 
   renderHeader();
-  const content = document.getElementById('tab-content');
+  const content = (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content'));
   if (content) content.innerHTML = renderPassives();
 }
