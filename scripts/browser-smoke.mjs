@@ -239,7 +239,7 @@ try {
     // Exercise the portal interaction contract and destination navigation.
     await page.evaluate(() => window.GameAPI.enterOverworld());
     await page.locator('#screen-overworld.active').waitFor();
-    let worldDialog = page.locator('#npc-dialog-modal');
+    let worldDialog = page.locator('#aurora-world-portal [role="dialog"][aria-labelledby="aurora-world-portal-title"]');
     await page.evaluate(() => window.GameAPI.interactNpc('world-portal'));
     await worldDialog.waitFor({ state: 'visible' });
     assert.equal(await worldDialog.getAttribute('aria-modal'), 'true',
@@ -288,7 +288,7 @@ try {
     await page.locator('#screen-overworld.active').waitFor();
 
     await clickCanvasPoint(page, 0.5, 0.404);
-    worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
+    worldDialog = page.locator('#aurora-world-portal [role="dialog"][aria-labelledby="aurora-world-portal-title"]');
     await worldDialog.waitFor({ state: 'visible' });
     await worldDialog.getByRole('button', { name: /Тёмный лес/ }).click();
     await worldDialog.waitFor({ state: 'detached' });
