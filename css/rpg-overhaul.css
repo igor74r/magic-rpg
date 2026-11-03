@@ -1564,6 +1564,15 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
 #screen-game.map-focused .sidebar-bottom {
   display: none !important;
 }
+#screen-game.map-focused .dashboard-nav-search {
+  display: block !important;
+  flex: 0 0 clamp(125px,15vw,190px);
+  width: clamp(125px,15vw,190px);
+  min-width: 0;
+  margin: 0;
+  padding: 7px 9px;
+  font-size: 11px;
+}
 #screen-game.map-focused .dashboard-sidebar .dashboard-tablist {
   display: flex;
   flex: 1 1 auto;
@@ -1666,6 +1675,12 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   #screen-game.map-focused .dashboard-sidebar {
     max-height: 52px;
     padding: 5px 7px;
+  }
+  #screen-game.map-focused .dashboard-nav-search {
+    flex-basis: 118px;
+    width: 118px;
+    padding: 6px 7px;
+    font-size: 10px;
   }
   #screen-game.map-focused .dashboard-sidebar .tab {
     min-height: 34px;
