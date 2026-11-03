@@ -50,6 +50,30 @@ try {
       `${vp.name}: all save slots must render in main menu`);
     assert.ok(await page.locator('.menu-story-panel').isVisible(),
       `${vp.name}: story panel must render in main menu`);
+    const menuLayout = await page.locator('#screen-main .slots-area').evaluate(area => {
+      const heading = area.querySelector('.slots-heading');
+      const title = heading.querySelector('h2').getBoundingClientRect();
+      const count = heading.querySelector('span').getBoundingClientRect();
+      const grid = area.querySelector('.slots-grid').getBoundingClientRect();
+      const firstCard = area.querySelector('.slot-card').getBoundingClientRect();
+      return {
+        area: area.getBoundingClientRect().toJSON(),
+        title: title.toJSON(),
+        count: count.toJSON(),
+        grid: grid.toJSON(),
+        firstCard: firstCard.toJSON(),
+        scrollWidth: area.scrollWidth,
+        clientWidth: area.clientWidth
+      };
+    });
+    assert.ok(menuLayout.grid.width >= menuLayout.clientWidth * .9,
+      `${vp.name}: save cards must use the full panel width: ${JSON.stringify(menuLayout)}`);
+    assert.ok(menuLayout.firstCard.width >= menuLayout.grid.width - 1,
+      `${vp.name}: each save slot must fill its own row: ${JSON.stringify(menuLayout)}`);
+    assert.ok(menuLayout.title.right < menuLayout.count.left,
+      `${vp.name}: save heading and slot count must not overlap: ${JSON.stringify(menuLayout)}`);
+    assert.ok(menuLayout.scrollWidth <= menuLayout.clientWidth + 1,
+      `${vp.name}: save panel must not overflow horizontally: ${JSON.stringify(menuLayout)}`);
     await capture(page, `${vp.name}-00-main-menu`);
     await page.locator('.slot-new').first().click();
     await page.locator('#screen-char.active').waitFor();
