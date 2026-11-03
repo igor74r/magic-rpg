@@ -897,3 +897,47 @@
 @media (prefers-reduced-motion: reduce) {
   #screen-settings *, #screen-help *, #screen-achievements-menu * { transition: none !important; }
 }
+
+
+/* Help is a centered in-game modal; scroll its parchment panel with mouse wheel or touch. */
+#screen-help.screen.active {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  padding: 12px !important;
+}
+#screen-help .game-container {
+  display: flex !important;
+  width: min(760px, 100%) !important;
+  max-width: 760px !important;
+  max-height: calc(100vh - 24px) !important;
+  max-height: calc(100dvh - 24px) !important;
+  min-height: 0 !important;
+  height: auto !important;
+  flex: 0 1 auto !important;
+  overflow: hidden !important;
+  padding: 10px 0 !important;
+}
+#screen-help .help-panel {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  max-height: calc(100vh - 100px) !important;
+  max-height: calc(100dvh - 100px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  flex: 1 1 auto !important;
+  padding-bottom: 20px;
+}
+#screen-help .help-section { overflow: visible !important; }
+#screen-help .settings-back-btn { margin: 18px auto 12px !important; }
+#screen-help .help-top-actions,
+#screen-help .help-skip-btn { display: none !important; }
+@media (max-height: 520px) {
+  #screen-help .game-container { max-height: calc(100dvh - 12px) !important; padding: 4px 0 !important; }
+  #screen-help .help-panel { max-height: calc(100dvh - 48px) !important; }
+}
