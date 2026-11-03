@@ -491,7 +491,7 @@ function render() {
         ctx.fillText(enemyDef.name, sx, sy - 43);
       }
     } else if (entry.kind === 'player') {
-      drawPlayerByClass(ctx, item, sx + pLungeX, sy + pLungeY, state.game.player.class, theme.shadow, heroMoving);
+      drawPlayerByClass(ctx, sx + pLungeX, sy + pLungeY, state.game.player.class, theme.shadow, heroMoving);
     }
   }
 
