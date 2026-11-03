@@ -1,4 +1,13 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+const inventoryUI = await readFile(new URL('../ui/inventory.js', import.meta.url), 'utf8');
+const inventoryCSS = await readFile(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8');
+assert.match(inventoryUI, /function filterBarHTML\(counts\)/, 'inventory filters should display category totals');
+assert.match(inventoryUI, /class="inv-filter-count"/, 'filter totals need a dedicated visual counter');
+assert.match(inventoryUI, /class="inv-empty-state" role="status"/, 'empty inventory filters should explain the empty state accessibly');
+assert.match(inventoryCSS, /\.inv-filter-count/);
+assert.match(inventoryCSS, /\.inv-empty-state/);
 import { state } from '../systems/state.js';
 import { ITEMS, RARITIES, rollRarity, rollItemAffixes } from '../data/items.js';
 import { addItem, canAddItem, countItem, removeItem, useItem, getInventoryWeight } from '../systems/inventory.js';
