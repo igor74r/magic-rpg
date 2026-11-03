@@ -1,4 +1,4 @@
-﻿import assert from 'node:assert/strict';
+import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 
 const manifest = JSON.parse(readFileSync(new URL('../assets/tiles/manifest.json', import.meta.url), 'utf8'));
@@ -21,29 +21,26 @@ for (const asset of [
 
 const pngAssets = ['assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
 const villageArt = readFileSync(new URL('../ui/overworld/aurora-art.js', import.meta.url), 'utf8');
-assert.ok(villageArt.includes('drawBuilding(ctx,x,y,style)'), 'Aurora buildings must use the current building renderer pending raster asset replacement');
-assert.ok(!villageArt.includes('.svg'), 'Aurora renderer must not request vector asset files');
+assert.ok(villageArt.includes('drawAuroraBuilding(ctx,x,y,style'), 'Aurora buildings must use the rebuilt pixel-art renderer');
+assert.ok(villageArt.includes('imageSmoothingEnabled=false'), 'Aurora pixel art must use nearest-neighbour scaling');
+assert.ok(!/create(?:Linear|Radial)Gradient|\.svg/i.test(villageArt), 'Aurora pixel art must not use gradients or vector assets');
+assert.ok(villageArt.includes('drawHall') && villageArt.includes('drawForge') && villageArt.includes('drawHealer') && villageArt.includes('drawAlchemy') && villageArt.includes('drawMarket') && villageArt.includes('drawTavern'), 'each village service building must have a distinct authored design');
 assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8').includes('SVG architecture'), 'Aurora sprite renderer must not depend on vector architecture');
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-assert.ok(html.includes('Три дракона удерживают его закрытым.'));
+assert.ok(html.includes('Три дракона удерживают его закрытыми.'));
 assert.ok(html.includes('Первые кровавые маги создали Кристалл Разлома'));
 assert.ok(html.includes('css/2d-art-direction.css'));
 
 const renderer = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
-assert.ok(!renderer.includes('drawAuroraGround'), 'Aurora ground must use the authored terrain atlas');
-assert.ok(renderer.includes('ctx.imageSmoothingEnabled = false;'), 'world terrain must preserve pixel edges');
 assert.ok(renderer.includes('getEventPropIndex'));
 assert.ok(renderer.includes('drawAtlasProp(ctx, eventPropIndex'));
 const atlasRenderer = readFileSync(new URL('../ui/overworld/tile-atlas.js', import.meta.url), 'utf8');
 assert.ok(atlasRenderer.includes('const TILE_SIZE = 96'));
-assert.ok(atlasRenderer.includes("ctx.imageSmoothingEnabled = false"));
+assert.ok(atlasRenderer.includes('ctx.imageSmoothingEnabled = false'));
 const styles = readFileSync(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8');
 assert.ok(styles.includes('#mobile-dpad .dpad-btn'));
 assert.ok(styles.includes('prefers-reduced-motion'));
 
-console.log('2D art assets, high-resolution terrain atlas, tile manifest and responsive UI checks passed');
-
-
-
+console.log('16-bit Aurora pixel-art architecture, terrain atlas and responsive UI checks passed');
