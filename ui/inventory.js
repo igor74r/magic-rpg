@@ -126,6 +126,12 @@ function filterAndSort(entries) {
     list = list.slice().sort((a, b) =>
       (ITEMS[a.inst.id]?.type || '').localeCompare(ITEMS[b.inst.id]?.type || '')
     );
+  } else if (invSort === 'power') {
+    list = list.slice().sort((a, b) => itemScore(b.inst) - itemScore(a.inst));
+  } else if (invSort === 'name') {
+    list = list.slice().sort((a, b) =>
+      (ITEMS[a.inst.id]?.name || '').localeCompare(ITEMS[b.inst.id]?.name || '', 'ru')
+    );
   }
   return list;
 }
@@ -271,6 +277,8 @@ function filterBarHTML(counts) {
         ${s('rarity', 'Редкость ↓')}
         ${s('price', 'Цена ↓')}
         ${s('type', 'Тип')}
+        ${s('power', 'Сила ↓')}
+        ${s('name', 'Название ↑')}
       </div>
     </div>
   `;
@@ -432,7 +440,8 @@ export function renderInventory() {
       const socket = EQUIPMENT_TYPES.has(item.type) && (inst.sockets ?? item.sockets)
         ? '<span class="slot-socket">◈</span>' : '';
       grid += `
-        <button type="button" class="inv-slot has-item ${rarity}"
+        <button type="button" class="inv-slot has-item ${rarity} rarity-frame-${rarity}"
+          data-rarity="${rarity}" title="${escapeHtml(RARITIES[rarity]?.name || "Обычный")} · ${escapeHtml(item.name)}"
           data-inv-tooltip="${idx}" data-inv-action="slot" data-index="${idx}"
           aria-label="${escapeHtml(item.name)}">
           <span class="slot-icon">${item.icon}</span>${qty}${socket}
@@ -666,8 +675,19 @@ function buildCompareHTML(inst, item) {
   const slot = getSlotForItem(item, p);
   const eqInst = p.equipped?.[slot];
   const eqObj = typeof eqInst === 'string' ? { id: eqInst, qty: 1 } : eqInst;
-  const oldBonus = eqObj ? { ...(ITEMS[eqObj.id]?.bonus || {}), ...(eqObj.bonus || {}) } : {};
-  const newBonus = { ...(item.bonus || {}), ...(inst.bonus || {}) };
+  const mergeItemBonuses = obj => {
+    if (!obj) return {};
+    const base = ITEMS[obj.id] || {};
+    const bonus = { ...(base.bonus || {}), ...(obj.bonus || {}) };
+    for (const runeId of (obj.runes || [])) {
+      for (const [key, value] of Object.entries(ITEMS[runeId]?.runeBonus || {})) {
+        bonus[key] = (bonus[key] || 0) + value;
+      }
+    }
+    return bonus;
+  };
+  const oldBonus = mergeItemBonuses(eqObj);
+  const newBonus = mergeItemBonuses(inst);
   const lines = [];
   const stats = [
     ['attack', 'Атака'], ['magic', 'Магия'], ['defense', 'Защита'],
