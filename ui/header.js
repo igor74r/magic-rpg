@@ -378,7 +378,10 @@ function openDashboardModal(tab) {
 
 if (typeof document !== 'undefined') {
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && dashboardModal) {
+    const nestedModalOpen = !!document.querySelector(
+      '#inventory-sale-overlay [role="dialog"], #npc-dialog-modal[style*="display: flex"], #aurora-world-portal[role="dialog"], #tower-map-overlay[role="dialog"], #rift-map-overlay[role="dialog"]'
+    );
+    if (event.key === 'Escape' && dashboardModal && !nestedModalOpen) {
       event.preventDefault();
       event.stopImmediatePropagation();
       closeDashboardModal();
