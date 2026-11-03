@@ -50,6 +50,21 @@ try {
       `${vp.name}: all save slots must render in main menu`);
     assert.ok(await page.locator('.menu-story-panel').isVisible(),
       `${vp.name}: story panel must render in main menu`);
+    const saveHeading = await page.locator('#screen-main .slots-heading').evaluate(node => {
+      const title = node.querySelector('h2');
+      const count = node.querySelector('span');
+      const a = title.getBoundingClientRect();
+      const b = count.getBoundingClientRect();
+      return { titleRight: a.right, countLeft: b.left, titleHeight: a.height,
+        titleScroll: title.scrollWidth, titleClient: title.clientWidth,
+        lineHeight: parseFloat(getComputedStyle(title).lineHeight) };
+    });
+    assert.ok(saveHeading.titleRight <= saveHeading.countLeft + 1,
+      `${vp.name}: save title and slot count must not overlap: ${JSON.stringify(saveHeading)}`);
+    assert.ok(saveHeading.titleHeight <= saveHeading.lineHeight + 2,
+      `${vp.name}: save title must stay on one line: ${JSON.stringify(saveHeading)}`);
+    assert.ok(saveHeading.titleScroll <= saveHeading.titleClient + 1,
+      `${vp.name}: save title must not clip: ${JSON.stringify(saveHeading)}`);
     const menuLayout = await page.locator('#screen-main .slots-area').evaluate(area => {
       const heading = area.querySelector('.slots-heading');
       const title = heading.querySelector('h2').getBoundingClientRect();
