@@ -80,6 +80,9 @@ jobs:
       - name: Check passive trees and respec
         run: node scripts/check-passives.mjs
 
+      - name: Check passive tree UI accessibility and controls
+        run: node scripts/check-passive-ui.mjs
+
       - name: Check class talents and legacy compatibility
         run: node scripts/check-class-talents.mjs
 
