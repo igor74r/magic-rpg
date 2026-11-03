@@ -193,14 +193,17 @@ export function renderPassives() {
     const taken = allocated.includes(node.id);
 
     html += `
-      <div class="passive-detail ${taken ? 'taken' : ''}">
-        <b>${node.icon} ${node.name}</b>
-        <small>${node.branch || 'Центр'}</small>
+      <article class="passive-detail talent-card ${taken ? 'taken' : available ? 'ready' : 'locked'}" data-talent-card="${node.id}">
+        <div class="talent-card-heading">
+          <span class="talent-card-icon">${node.icon}</span>
+          <div>
+            <b>${node.name}</b>
+            <small>${node.branch || 'Центр'}</small>
+          </div>
+          <span class="talent-card-state">${taken ? 'Изучено' : available ? 'Доступно' : 'Закрыто'}</span>
+        </div>
         <p>${node.desc}</p>
-        <span>
-          ${taken ? 'Изучено' : 'Доступно для изучения'}
-        </span>
-      </div>
+      </article>
     `;
   }
 
