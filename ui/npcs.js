@@ -22,7 +22,7 @@ let npcDialogKeydownBound = false;
 function showNpcUI(html) {
   const root = state.overworld && state.overworld.active
     ? document.getElementById('npc-dialog-content')
-    : document.getElementById('tab-content');
+    : (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content'));
   if (!root) return;
   root.innerHTML = html;
   root.onclick = (event) => {
