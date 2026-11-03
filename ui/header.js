@@ -17,6 +17,7 @@ import {
 import { renderPassives } from './passives.js';
 import { renderChronicles } from './chronicles.js';
 import { renderHeroOverview, renderDashboardContext } from './dashboard.js';
+import { setPaused } from './overworld/render.js';
 
 let overhaulCssLoaded = false;
 
