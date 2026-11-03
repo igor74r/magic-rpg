@@ -71,6 +71,33 @@ try {
     assert.equal(await page.locator('.menu-story-panel').isVisible(), true, `${viewport.name}: main menu story panel must be visible`);
     assert.equal(await page.locator('.menu-primary-action').isVisible(), true, `${viewport.name}: primary new-adventure action must be visible`);
     assert.equal(await page.locator('#screen-main .slot-card').count(), 3, `${viewport.name}: all three save slots must remain visible`);
+    const menuLayout = await page.evaluate(() => {
+      const root = document.querySelector('#screen-main .main-menu');
+      const heading = document.querySelector('#screen-main .slots-heading h2');
+      const count = document.querySelector('#screen-main .slots-heading span');
+      const slots = document.querySelector('#screen-main .slots-grid');
+      const a = heading?.getBoundingClientRect();
+      const b = count?.getBoundingClientRect();
+      return {
+        viewport: innerWidth,
+        documentWidth: document.documentElement.scrollWidth,
+        rootWidth: root?.getBoundingClientRect().width ?? 0,
+        headingWidth: heading?.scrollWidth ?? 0,
+        headingClientWidth: heading?.clientWidth ?? 0,
+        headingRight: a?.right ?? 0,
+        countLeft: b?.left ?? 0,
+        slotsWidth: slots?.getBoundingClientRect().width ?? 0,
+        slotWidth: slots?.firstElementChild?.getBoundingClientRect().width ?? 0
+      };
+    });
+    assert.ok(menuLayout.documentWidth <= menuLayout.viewport + 1,
+      `${viewport.name}: main menu must not overflow horizontally: ${JSON.stringify(menuLayout)}`);
+    assert.ok(menuLayout.headingWidth <= menuLayout.headingClientWidth + 1,
+      `${viewport.name}: save heading must not wrap or clip: ${JSON.stringify(menuLayout)}`);
+    assert.ok(menuLayout.headingRight <= menuLayout.countLeft + 1,
+      `${viewport.name}: save heading and slot count must not overlap: ${JSON.stringify(menuLayout)}`);
+    assert.ok(menuLayout.slotWidth > 0 && menuLayout.slotsWidth > 0,
+      `${viewport.name}: save slots must have measurable layout`);
     await page.getByRole('button', { name: /Настройки/ }).click();
     assert.equal(await page.locator('#screen-settings.active').count(), 1, `${viewport.name}: settings screen did not open`);
 
