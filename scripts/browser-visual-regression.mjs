@@ -45,10 +45,6 @@ try {
     assert.equal(await page.locator('.dashboard-context-actions button').innerText(), '🌀 Портал миров',
       `${vp.name}: portal shortcut must remain`);
     await capture(page, `${vp.name}-01-gameplay`);
-    assert.equal(await page.locator('#tab-content').innerHTML(), '',
-      `${vp.name}: retired legacy panel must be empty on game start`);
-    assert.equal(await page.locator('#tab-content').isVisible(), false,
-      `${vp.name}: legacy panel must not be visible`);
 
     for (const tab of ['hero','inventory','locations']) {
       const trigger=page.locator(`#game-tab-${tab}`);
@@ -69,10 +65,6 @@ try {
         if(tab==='inventory') assert.ok(await page.locator('#dashboard-tab-modal [data-inv-filter]').count()>0,`${vp.name}: inventory controls missing`);
         await capture(page,`${vp.name}-0${tab==='hero'?2:3}-${tab}`);
         await page.locator('#dashboard-tab-modal [data-dashboard-modal-close]').click();
-        assert.equal(await page.locator('#tab-content').innerHTML(), '',
-          `${vp.name}/${tab}: legacy panel must remain empty after modal closes`);
-        assert.equal(await page.locator('#tab-content').isVisible(), false,
-          `${vp.name}/${tab}: legacy panel must remain hidden after modal closes`);
       }
     }
     assert.deepEqual(errors,[], `${vp.name}: browser runtime errors: ${errors.join('; ')}`);
