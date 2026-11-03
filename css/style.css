@@ -1333,3 +1333,9 @@ input[type="text"]:focus, select:focus { outline: none; border-color: var(--gold
 .game-title span { display:block; margin-top:2px; font-size:.72em; }
 .logo-block { width:100%; }
 
+
+
+/* Масштаб текста и интерфейса из настроек доступности */
+:root { --ui-font-scale: 1; }
+body { zoom: var(--ui-font-scale, 1); }
+#settings-content .settings-font-scale-row input[type="range"] { accent-color: var(--gold); }
