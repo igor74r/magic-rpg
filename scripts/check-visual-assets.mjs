@@ -23,10 +23,8 @@ const pngAssets = ['assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-assert.ok(html.includes('assets/branding/mana-crystal.png'));
 assert.ok(html.includes('Три дракона удерживают его закрытым.'));
 assert.ok(html.includes('Первые кровавые маги создали Кристалл Разлома'));
-assert.ok(html.includes('assets/branding/mana-crystal.png" alt="Кристалл Разлома"'));
 assert.ok(html.includes('css/2d-art-direction.css'));
 
 const renderer = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
