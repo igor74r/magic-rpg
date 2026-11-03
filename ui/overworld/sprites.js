@@ -809,14 +809,29 @@ function drawVillagePropRaw(ctx, x, y, style) {
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#d6b77e'; ctx.fillRect(x - 2, y - 35, 4, 7);
   } else if (style === 'planter') {
-    ctx.fillStyle = 'rgba(0,0,0,.24)'; ctx.beginPath(); ctx.ellipse(x, y + 13, 19, 5, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#58443a'; ctx.fillRect(x - 14, y - 2, 28, 16);
-    ctx.fillStyle = '#98704d'; ctx.fillRect(x - 16, y - 7, 32, 6);
-    ctx.fillStyle = '#c09161'; ctx.fillRect(x - 13, y - 5, 26, 2);
-    ctx.fillStyle = '#354a35'; ctx.beginPath(); ctx.arc(x, y - 10, 13, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#52764a'; ctx.beginPath(); ctx.arc(x - 7, y - 12, 7, 0, Math.PI * 2); ctx.arc(x + 7, y - 10, 7, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#a85b64'; ctx.beginPath(); ctx.arc(x - 6, y - 14, 3, 0, Math.PI * 2); ctx.arc(x + 6, y - 8, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#e7c879'; ctx.beginPath(); ctx.arc(x, y - 17, 2, 0, Math.PI * 2); ctx.fill();
+    // Crisp raised timber bed with visible soil, layered leaves and varied blooms.
+    let gardenSeed = Math.imul(Math.round(x) + 13, 374761393) ^ Math.imul(Math.round(y) + 29, 668265263);
+    gardenSeed = Math.imul(gardenSeed ^ (gardenSeed >>> 16), 0x45d9f3b);
+    const gardenVariant = (gardenSeed >>> 0) % 3;
+    ctx.fillStyle = '#283526'; ctx.fillRect(x - 19, y + 10, 38, 4);
+    ctx.fillStyle = '#58443a'; ctx.fillRect(x - 16, y - 3, 32, 17);
+    ctx.fillStyle = '#725039'; ctx.fillRect(x - 18, y - 8, 36, 6);
+    ctx.fillStyle = '#bd9360'; ctx.fillRect(x - 16, y - 7, 32, 2);
+    ctx.fillStyle = '#3b3028'; ctx.fillRect(x - 13, y - 2, 26, 7);
+    // Distinct pixel clumps keep the bed readable at the game's 48px scale.
+    ctx.fillStyle = gardenVariant === 1 ? '#456c3e' : '#35583a';
+    ctx.fillRect(x - 12, y - 12, 8, 8); ctx.fillRect(x - 3, y - 16, 9, 12);
+    ctx.fillRect(x + 6, y - 11, 7, 7); ctx.fillRect(x - 8, y - 18, 5, 5);
+    ctx.fillStyle = gardenVariant === 2 ? '#71934c' : '#63864a';
+    ctx.fillRect(x - 10, y - 14, 4, 4); ctx.fillRect(x - 1, y - 18, 5, 5);
+    ctx.fillRect(x + 7, y - 13, 4, 4); ctx.fillRect(x - 5, y - 8, 6, 4);
+    const bloom = gardenVariant === 0 ? '#d77a72' : gardenVariant === 1 ? '#e4c66e' : '#9b86c8';
+    ctx.fillStyle = bloom;
+    ctx.fillRect(x - 9, y - 17, 4, 4); ctx.fillRect(x + 7, y - 16, 4, 4);
+    ctx.fillStyle = '#f1d58a';
+    ctx.fillRect(x - 8, y - 16, 2, 2); ctx.fillRect(x + 8, y - 15, 2, 2);
+    ctx.fillStyle = '#e5c879'; ctx.fillRect(x - 1, y - 20, 3, 3);
+    ctx.fillStyle = '#8b6544'; ctx.fillRect(x - 18, y - 3, 3, 11); ctx.fillRect(x + 15, y - 3, 3, 11);
   } else if (style === 'banner') {
     ctx.fillStyle = 'rgba(0,0,0,.26)'; ctx.beginPath(); ctx.ellipse(x, y + 27, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#46372d'; ctx.fillRect(x - 3, y - 32, 6, 61);

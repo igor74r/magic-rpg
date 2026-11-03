@@ -31,6 +31,9 @@ assert.ok(villageArt.includes('drawAuroraBuilding(ctx,x,y,style'), 'Aurora build
 assert.ok(villageArt.includes('imageSmoothingEnabled=false'), 'Aurora pixel art must use nearest-neighbour scaling');
 assert.ok(!/create(?:Linear|Radial)Gradient|\.svg/i.test(villageArt), 'Aurora pixel art must not use gradients or vector assets');
 assert.ok(villageArt.includes('drawHall') && villageArt.includes('drawForge') && villageArt.includes('drawHealer') && villageArt.includes('drawAlchemy') && villageArt.includes('drawMarket') && villageArt.includes('drawTavern'), 'each village service building must have a distinct authored design');
+const villageSprites = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
+assert.ok(villageSprites.includes('const gardenVariant = (gardenSeed >>> 0) % 3'), 'Aurora planters must have deterministic visual garden variants');
+assert.ok(villageSprites.includes('Crisp raised timber bed'), 'Aurora garden beds must use crisp authored pixel details');
 assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8').includes('SVG architecture'), 'Aurora sprite renderer must not depend on vector architecture');
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
 
