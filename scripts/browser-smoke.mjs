@@ -427,9 +427,10 @@ try {
     await page.locator('.slot-play').first().click();
     await page.locator('#screen-game.overworld-active').waitFor();
     await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
-    assert.match(await page.locator('.hero-overview, #game-header, #overworld-title').first().innerText().catch(() => ''),
-      /UI audit|Аврора|Деревня/i,
-      `${viewport.name}: Continue must restore visible game content, not an empty screen`);
+    assert.equal(await page.locator('#screen-game .dashboard-layout').isVisible(), true,
+      `${viewport.name}: Continue must restore the dashboard, not an empty screen`);
+    assert.equal(await page.locator('#overworld-title').isVisible(), true,
+      `${viewport.name}: Continue must restore the saved world scene`);
 
     assert.deepEqual(pageErrors, [], `${viewport.name}: uncaught browser errors: ${pageErrors.join('; ')}`);
     console.log(`PASS ${viewport.name} (${viewport.width}x${viewport.height}): settings labels, game creation, 10 dashboard tabs, responsive widths, no page errors`);
