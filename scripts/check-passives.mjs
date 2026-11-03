@@ -4,6 +4,7 @@ import {
   allocatePassive,
   canAllocatePassive,
   getTalentBonus,
+  getPassiveNodeStatus,
   resetPassives
 } from '../systems/talents.js';
 
@@ -38,6 +39,13 @@ const player = {
   passives: ['start'],
   gold: 500
 };
+
+const lowLevelPlayer = { class: 'warrior', level: 1, passivePoints: 2, passives: ['start'] };
+assert.equal(getPassiveNodeStatus(lowLevelPlayer, 'warrior-might-1'), 'Требуется уровень 2 (текущий: 1)');
+assert.equal(getPassiveNodeStatus({ ...lowLevelPlayer, level: 20, passivePoints: 0 }, 'warrior-might-1'), 'Нет свободных очков навыков');
+assert.equal(getPassiveNodeStatus({ ...lowLevelPlayer, level: 20, passivePoints: 1, passives: ['start', 'warrior-might-1'] }, 'warrior-might-1'), 'Уже изучено');
+assert.equal(getPassiveNodeStatus({ ...lowLevelPlayer, level: 20, passivePoints: 1 }, 'warrior-might-2'), 'Сначала изучите соединённый узел');
+assert.equal(getPassiveNodeStatus({ ...lowLevelPlayer, level: 20, passivePoints: 1 }, 'warrior-might-1'), 'Доступно для изучения');
 
 assert.equal(canAllocatePassive(player, 'warrior-might-1'), true);
 assert.equal(allocatePassive(player, 'warrior-might-1'), true);
