@@ -105,7 +105,6 @@ export function renderDashboardContext() {
     <div class="dashboard-context-shards"><span>Осколки</span><b>${shards}/3</b></div>
     <div class="dashboard-context-actions">
       <button type="button" onclick="GameAPI.interactNpc('world-portal')">🌀 Портал миров</button>
-      <button type="button" onclick="GameAPI.switchTab('quests')">📜 Журнал заданий</button>
     </div>
   `;
 }
