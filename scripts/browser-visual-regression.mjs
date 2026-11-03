@@ -90,6 +90,25 @@ try {
           `${vp.name}/${tab}: gameplay must be interactive again after closing modal`);
       }
     }
+    for (const tab of ['quests','spells','talents']) {
+      await page.locator(`#game-tab-${tab}`).click();
+      await page.locator('#dashboard-tab-modal').waitFor({state:'visible'});
+      if(tab==='quests') assert.ok(await page.locator('#dashboard-tab-modal .campaign-act').count()>0,
+        `${vp.name}: quest journal must render campaign acts`);
+      if(tab==='spells') assert.ok(await page.locator('#dashboard-tab-modal .ability-item').count()>0,
+        `${vp.name}: magic section must render class abilities`);
+      if(tab==='talents') {
+        assert.ok(await page.locator('#dashboard-tab-modal .passive-tree-viewport').count()>0,
+          `${vp.name}: talent section must render the interactive tree`);
+        assert.ok(await page.locator('#dashboard-tab-modal .talent-card').count()>0,
+          `${vp.name}: talent section must render the talent catalogue`);
+      }
+      await capture(page,`${vp.name}-06-${tab}`);
+      await page.locator('#dashboard-tab-modal [data-dashboard-modal-close]').click();
+      await page.locator('#overworld-canvas').waitFor({state:'visible'});
+      assert.equal(await page.locator('#screen-game').evaluate(el=>el.inert),false,
+        `${vp.name}/${tab}: closing section must restore gameplay interactivity`);
+    }
     assert.deepEqual(errors,[], `${vp.name}: browser runtime errors: ${errors.join('; ')}`);
     await page.close();
   }
