@@ -61,7 +61,9 @@ export const LOCATIONS = {
       { id: 'home-west', name: 'Дом садовника', x: 3, y: 6, buildingStyle: 'home', decorative: true },
       { id: 'home-east', name: 'Дом торговки', x: 34, y: 6, buildingStyle: 'home', decorative: true }
     ]
-  }, {
+  },
+
+  forest: {
     name: 'Тёмный лес',
     emoji: '🌲',
     desc: 'Древний лес, кишащий гоблинами. Под корнями сохранились следы первой печати.',
