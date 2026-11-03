@@ -5,7 +5,6 @@ import { EFFECTS } from '../systems/status.js';
 import { getEffStats } from '../systems/stats.js';
 import { saveGame } from '../systems/save.js';
 import { toast, escapeHtml } from './screens.js';
-import { renderLocations } from './locations.js';
 import { renderInventory } from './inventory.js';
 import { renderSpells } from './spells.js';
 import {
@@ -521,9 +520,7 @@ function renderTab(tab) {
     return;
   }
 
-  if (tab === 'locations') {
-    element.innerHTML = renderLocations();
-  } else if (tab === 'inventory') {
+  if (tab === 'inventory') {
     element.innerHTML = renderInventory();
   } else if (tab === 'spells') {
     element.innerHTML = renderSpells();
