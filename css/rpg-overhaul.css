@@ -1844,3 +1844,16 @@ body.dashboard-modal-open { overflow: hidden; }
   #dashboard-tab-modal .dashboard-tab-dialog-close { width: 36px; height: 36px; flex-basis: 36px; }
   #dashboard-tab-modal .dashboard-tab-dialog-body { padding: 10px; }
 }
+
+/* Legacy inline tab panel is retired: gameplay stays mounted underneath
+   modal sections, and no old tab page may reappear on close/re-render. */
+#screen-game.active .dashboard-main > #tab-content,
+#screen-game.active #tab-content {
+  display: none !important;
+  visibility: hidden !important;
+  min-height: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
