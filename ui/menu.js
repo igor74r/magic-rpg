@@ -241,7 +241,7 @@ function renderSettingsTab(tab) {
 }
 
 export function applyFontScale() {
-  if (typeof document === 'undefined') return;
+  if (typeof document === 'undefined' || !document.documentElement?.style?.setProperty) return;
   const scale = Math.max(0.85, Math.min(1.3, Number(state.settings.fontScale) || 1));
   document.documentElement.style.setProperty('--ui-font-scale', String(scale));
 }
