@@ -368,11 +368,14 @@ try {
 
     // A new character must not bypass the first campaign mission by selecting
     // a later story region from the portal. The first lock is level-based.
-    let forestLocked = worldDialog.getByRole('button', { name: /Тёмный лес/ });
-    assert.equal(await forestLocked.isDisabled(), true,
-      `${viewport.name}: forest must remain locked for a level-one character`);
-    assert.match(await forestLocked.innerText(), /НУЖЕН УРОВЕНЬ 3/i,
-      `${viewport.name}: portal must explain the level requirement`);
+    let forestNode = worldDialog.locator('[data-portal-node="forest"]');
+    await forestNode.click();
+    assert.equal((await forestNode.getAttribute('class')).includes('is-locked'), true,
+      `${viewport.name}: forest must remain visibly locked for a level-one character`);
+    assert.match(await worldDialog.locator('.portal-destination-status').innerText(), /Требуется уровень 3/i,
+      `${viewport.name}: atlas must explain the level requirement`);
+    assert.equal(await worldDialog.locator('[data-portal-travel]').isDisabled(), true,
+      `${viewport.name}: locked destinations must not be travelable`);
     await page.keyboard.press('Escape');
     await worldDialog.waitFor({ state: 'detached' });
 
@@ -389,11 +392,14 @@ try {
       window.GameAPI.interactNpc('world-portal');
     });
     await worldDialog.waitFor({ state: 'visible' });
-    forestLocked = worldDialog.getByRole('button', { name: /Тёмный лес/ });
-    assert.equal(await forestLocked.isDisabled(), true,
+    forestNode = worldDialog.locator('[data-portal-node="forest"]');
+    await forestNode.click();
+    assert.equal((await forestNode.getAttribute('class')).includes('is-locked'), true,
       `${viewport.name}: forest must remain locked before the first campaign mission`);
-    assert.match(await forestLocked.innerText(), /ЗАДАНИЕ a1-m1/i,
-      `${viewport.name}: portal must explain the campaign prerequisite`);
+    assert.match(await worldDialog.locator('.portal-destination-status').innerText(), /задание a1-m1/i,
+      `${viewport.name}: atlas must explain the campaign prerequisite`);
+    assert.equal(await worldDialog.locator('[data-portal-travel]').isDisabled(), true,
+      `${viewport.name}: campaign-locked destinations must not be travelable`);
     await page.keyboard.press('Escape');
     await worldDialog.waitFor({ state: 'detached' });
 
@@ -412,14 +418,18 @@ try {
     await page.evaluate(() => window.GameAPI.interactNpc('world-portal'));
     worldDialog = page.locator('#aurora-world-portal [role="dialog"][aria-labelledby="aurora-world-portal-title"]');
     await worldDialog.waitFor({ state: 'visible' });
-    await worldDialog.getByRole('button', { name: /Тёмный лес/ }).click();
+    await worldDialog.locator('[data-portal-node="forest"]').click();
+    assert.equal(await worldDialog.locator('[data-portal-travel]').isDisabled(), false,
+      `${viewport.name}: forest travel must unlock after the campaign prerequisite`);
+    await worldDialog.locator('[data-portal-travel]').click();
     await worldDialog.waitFor({ state: 'detached' });
 
     // The forest has its own themed waystone two cells left of the spawn.
     await page.evaluate(() => window.GameAPI.interactNpc('world-waystone'));
-    worldDialog = page.getByRole('dialog', { name: 'Пути между мирами' });
+    worldDialog = page.locator('#aurora-world-portal [role="dialog"][aria-labelledby="aurora-world-portal-title"]');
     await worldDialog.waitFor({ state: 'visible' });
-    await worldDialog.getByRole('button', { name: /Деревня Аврора/ }).click();
+    await worldDialog.locator('[data-portal-node="village"]').click();
+    await worldDialog.locator('[data-portal-travel]').click();
     await worldDialog.waitFor({ state: 'detached' });
 
     // The separate amber gate must launch the existing 40-floor Tower menu.
