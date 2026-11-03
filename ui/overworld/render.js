@@ -660,7 +660,8 @@ function render() {
     ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
   }
 
-  const fogIntensity = !allowAmbientFog ? 0 : (ow.combat ? 0.2 : theme.fog * (graphicsQuality === 'balanced' ? 0.72 : 1));
+  const villageFogScale = ow.locationId === 'village' ? 0.38 : (graphicsQuality === 'balanced' ? 0.72 : 1);
+  const fogIntensity = !allowAmbientFog ? 0 : (ow.combat ? 0.2 : theme.fog * villageFogScale);
   if (fogIntensity > 0) {
     if (!darknessCanvas) {
       darknessCanvas = document.createElement('canvas');

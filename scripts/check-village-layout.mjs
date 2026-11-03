@@ -115,6 +115,7 @@ assert.ok(effectsSource.includes('vignette: 0.26') && effectsSource.includes('fo
 assert.ok(effectsSource.includes("getCurrentBiome() === 'village' ? '#f3c879'"), 'Aurora night fireflies must use warm light');
 const renderSource = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
 assert.ok(renderSource.includes('villageNightAlpha'), 'Aurora must have a softer day/night tint');
+assert.ok(renderSource.includes("ow.locationId === 'village' ? 0.38"), 'Aurora ambient fog must be lighter than other regions');
 
 const spawnSource = readFileSync(new URL('../systems/overworld/spawn.js', import.meta.url), 'utf8');
 for (const dragonFlag of ["dragons['ash-herald']", "dragons['ice-grasp']", "dragons['blood-crown']"]) {
