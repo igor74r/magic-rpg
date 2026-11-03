@@ -1249,3 +1249,13 @@
   letter-spacing: .04em !important;
   margin: 2px 0 5px !important;
 }
+
+
+/* Remove the excessive vertical gap around the class-selection / confirmation step labels. */
+#screen-char .character-creation-heading { margin-bottom: 0 !important; }
+#screen-char .character-stepper { margin-top: 3px !important; margin-bottom: 0 !important; }
+#screen-char #class-selection-stage,
+#screen-char #class-review-stage { margin-top: 0 !important; padding-top: 0 !important; }
+#screen-char #class-selection-stage > .class-stage-title,
+#screen-char #class-review-stage > .class-stage-title { margin-top: 0 !important; margin-bottom: 4px !important; }
+#screen-char .class-review-intro { margin-top: 3px !important; }
