@@ -1355,3 +1355,179 @@
     font-size: 10px !important;
   }
 }
+
+
+/* Main menu refresh: stronger hierarchy, calm spacing, and tactile actions. */
+#screen-main .main-menu {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(199, 164, 103, .42) !important;
+  background:
+    radial-gradient(ellipse at 50% -8%, rgba(94, 75, 126, .22), transparent 52%),
+    linear-gradient(155deg, rgba(18, 21, 33, .985), rgba(9, 11, 18, .99) 68%) !important;
+  box-shadow: 0 28px 90px rgba(0,0,0,.55), inset 0 1px rgba(244,220,173,.07) !important;
+}
+#screen-main .main-menu::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid rgba(196, 159, 99, .09);
+  border-radius: inherit;
+}
+#screen-main .menu-topline {
+  padding: 10px 8px 24px !important;
+  border-bottom: 1px solid rgba(202, 168, 108, .18);
+  margin-bottom: 22px;
+}
+#screen-main .game-title {
+  letter-spacing: .055em !important;
+  text-shadow: 0 3px 26px rgba(113, 91, 157, .28), 0 1px rgba(255,255,255,.12) !important;
+}
+#screen-main .subtitle {
+  margin-top: 10px !important;
+  color: #a7a0a0 !important;
+  letter-spacing: .17em !important;
+  text-transform: uppercase;
+}
+#screen-main .title-side-mark {
+  color: #c7a56c !important;
+  opacity: .78 !important;
+  text-shadow: 0 0 18px rgba(199,165,108,.22);
+}
+#screen-main .menu-content-grid {
+  gap: clamp(16px, 2.5vw, 26px) !important;
+  align-items: stretch;
+}
+#screen-main .menu-story-panel {
+  position: relative;
+  align-content: center;
+  gap: 13px !important;
+  padding: clamp(22px, 2.6vw, 34px) !important;
+  border: 1px solid rgba(186, 147, 91, .28) !important;
+  border-radius: 14px !important;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(110, 76, 121, .16), transparent 64%),
+    linear-gradient(145deg, rgba(28, 29, 42, .96), rgba(15, 17, 25, .96)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.045), 0 12px 32px rgba(0,0,0,.16);
+}
+#screen-main .menu-kicker {
+  color: #d2b274 !important;
+  letter-spacing: .2em !important;
+  font-size: 10px !important;
+  font-weight: 800;
+}
+#screen-main .menu-story-panel h2 {
+  max-width: 24ch;
+  text-wrap: balance;
+  color: #f0e3c7 !important;
+  font-size: clamp(22px, 2.2vw, 30px) !important;
+  line-height: 1.22 !important;
+}
+#screen-main .menu-story-panel p {
+  max-width: 54ch;
+  color: #b9b5b1 !important;
+  font-size: 14px !important;
+  line-height: 1.72 !important;
+}
+#screen-main .menu-primary-action {
+  min-height: 52px;
+  margin-top: 8px !important;
+  padding: 14px 20px !important;
+  border: 1px solid rgba(224, 185, 111, .72) !important;
+  border-radius: 9px !important;
+  background: linear-gradient(180deg, #785438, #4c3423) !important;
+  color: #fff0d1 !important;
+  font-weight: 800 !important;
+  letter-spacing: .035em;
+  box-shadow: inset 0 1px rgba(255,255,255,.12), 0 8px 20px rgba(0,0,0,.22);
+  transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+}
+#screen-main .menu-primary-action:hover {
+  filter: brightness(1.13);
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px rgba(255,255,255,.16), 0 11px 24px rgba(0,0,0,.3);
+}
+#screen-main .slots-area {
+  padding: 20px !important;
+  border: 1px solid rgba(139, 151, 176, .2) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(155deg, rgba(22, 25, 35, .94), rgba(13, 15, 22, .94)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+}
+#screen-main .slots-heading {
+  padding-bottom: 13px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(202, 168, 108, .16);
+}
+#screen-main .slots-heading h2 {
+  color: #e5d6b7 !important;
+  font-size: 18px !important;
+  letter-spacing: .015em;
+}
+#screen-main .slots-heading span {
+  color: #a99a7c !important;
+  letter-spacing: .14em;
+}
+#screen-main .slot-card {
+  border-color: rgba(162, 151, 132, .22) !important;
+  border-radius: 10px !important;
+  background: linear-gradient(145deg, rgba(31, 33, 43, .92), rgba(17, 19, 27, .94)) !important;
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+#screen-main .slot-card:hover {
+  border-color: rgba(205, 170, 111, .45) !important;
+  background: linear-gradient(145deg, rgba(39, 38, 47, .96), rgba(19, 20, 28, .96)) !important;
+}
+#screen-main .slot-actions button {
+  min-height: 38px;
+  border-radius: 7px !important;
+  font-weight: 700;
+}
+#screen-main .main-menu-buttons {
+  gap: 10px !important;
+  margin-top: 22px !important;
+}
+#screen-main .main-menu-buttons .mm-btn {
+  min-height: 44px;
+  border: 1px solid rgba(150, 151, 166, .24) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(180deg, rgba(35, 37, 48, .92), rgba(20, 22, 30, .92)) !important;
+  color: #c6c1b7 !important;
+  font-weight: 700;
+  transition: border-color .16s ease, color .16s ease, background .16s ease, transform .16s ease;
+}
+#screen-main .main-menu-buttons .mm-btn:hover {
+  border-color: rgba(203, 170, 112, .5) !important;
+  color: #f0dfbb !important;
+  background: linear-gradient(180deg, rgba(47, 43, 49, .96), rgba(24, 24, 31, .96)) !important;
+  transform: translateY(-1px);
+}
+#screen-main .menu-footer {
+  padding-top: 16px;
+  margin-top: 20px;
+  border-top: 1px solid rgba(202, 168, 108, .1);
+  color: #716e70 !important;
+}
+#screen-main button:focus-visible {
+  outline: 2px solid #e0bd79 !important;
+  outline-offset: 3px !important;
+}
+@media (max-width: 700px) {
+  #screen-main .menu-topline { margin-bottom: 16px; padding: 6px 4px 18px !important; }
+  #screen-main .menu-content-grid { gap: 14px !important; }
+  #screen-main .menu-story-panel { gap: 10px !important; padding: 20px 16px !important; }
+  #screen-main .menu-story-panel h2 { font-size: clamp(21px, 6vw, 27px) !important; }
+  #screen-main .menu-story-panel p { font-size: 13px !important; line-height: 1.62 !important; }
+  #screen-main .menu-primary-action { width: 100%; min-height: 48px; }
+  #screen-main .slots-area { padding: 15px 12px !important; }
+  #screen-main .main-menu-buttons { gap: 8px !important; margin-top: 16px !important; }
+  #screen-main .main-menu-buttons .mm-btn { min-height: 42px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #screen-main .menu-primary-action,
+  #screen-main .slot-card,
+  #screen-main .main-menu-buttons .mm-btn { transition: none !important; }
+}
