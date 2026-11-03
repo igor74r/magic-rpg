@@ -32,13 +32,13 @@ export function generateVillageMap(cols, rows) {
   };
   const road = (x1, y1, x2, y2, width = 2) => {
     let x = x1, y = y1;
+    const radius = Math.floor(width / 2);
     const stamp = () => {
-      const radius = Math.floor(width / 2);
       for (let oy = -radius; oy <= radius; oy++) {
         for (let ox = -radius; ox <= radius; ox++) {
           if (grid[y + oy]?.[x + ox] !== undefined) grid[y + oy][x + ox] = 1;
         }
-      }
+      };
     };
     for (let step = 0; step < cols + rows + 5; step++) {
       stamp();
@@ -50,28 +50,36 @@ export function generateVillageMap(cols, rows) {
 
   const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
 
-  // Aurora's roads form one precise, uninterrupted plus sign: a three-tile
-  // vertical lane crossed by a three-tile horizontal lane. No side streets.
-  for (let y = 0; y < rows; y++) {
-    for (let dx = -1; dx <= 1; dx++) {
-      if (grid[y]?.[cx + dx] !== undefined) grid[y][cx + dx] = 1;
-    }
-  }
-  for (let x = 0; x < cols; x++) {
-    for (let dy = -1; dy <= 1; dy++) {
-      if (grid[cy + dy]?.[x] !== undefined) grid[cy + dy][x] = 1;
-    }
-  }
+  // Aurora's new layout: a compact village square, a main north–south lane,
+  // and short connected branches to the craft quarter, market, tavern and gates.
+  // Every route remains continuous so the player can reach all quest services.
+  road(cx, rows - 1, cx, cy + 4, 2);
+  road(cx, cy + 4, cx - 2, cy + 2, 2);
+  road(cx - 2, cy + 2, cx, cy, 3);
+  road(cx, cy, cx, 4, 2);
 
-  // Small garden patches stay at the outer corners, clear of the roads.
+  road(cx, cy, 7, cy, 2);
+  road(7, cy, 7, 9, 2);
+  road(7, 9, 5, 11, 2);
+  road(cx, cy, cols - 7, cy, 2);
+  road(cols - 7, cy, cols - 7, 9, 2);
+  road(cols - 7, 9, cols - 7, 20, 2);
+
+  road(cx, cy + 2, 13, cy + 2, 2);
+  road(13, cy + 2, 13, rows - 4, 2);
+  road(cx, cy + 2, 25, cy + 2, 2);
+  road(25, cy + 2, 25, rows - 4, 2);
+
+  // A few soft grass gardens frame the houses without blocking any street,
+  // important interaction point or the southern spawn.
   putRect(1, 1, 3, 4, 4);
   putRect(cols - 4, 1, 3, 4, 4);
   putRect(1, rows - 5, 3, 4, 4);
   putRect(cols - 4, rows - 5, 3, 4, 4);
-  putRect(9, 1, 2, 2, 4);
-  putRect(cols - 11, 1, 2, 2, 4);
-  putRect(9, rows - 3, 2, 2, 4);
-  putRect(cols - 11, rows - 3, 2, 2, 4);
+  putRect(10, 1, 2, 2, 4);
+  putRect(cols - 12, 1, 2, 2, 4);
+  putRect(10, rows - 3, 2, 2, 4);
+  putRect(cols - 12, rows - 3, 2, 2, 4);
 
   return grid;
 }
