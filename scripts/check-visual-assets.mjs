@@ -23,6 +23,8 @@ for (const asset of [
 const groundPng = readFileSync(new URL('../assets/aurora/ground-atlas.png', import.meta.url));
 assert.equal(groundPng.readUInt32BE(16), 768, 'Aurora ground atlas must contain four variants for each of two terrain types');
 assert.equal(groundPng.readUInt32BE(20), 96, 'Aurora ground atlas must be 96px high');
+assert.equal(manifest.auroraGround?.columns, 8, 'Aurora ground atlas must define eight variants');
+assert.deepEqual(manifest.auroraGround?.types, ['grass', 'path']);
 const pngAssets = ['assets/aurora/ground-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
 const villageArt = readFileSync(new URL('../ui/overworld/aurora-art.js', import.meta.url), 'utf8');
 assert.ok(villageArt.includes('drawAuroraBuilding(ctx,x,y,style'), 'Aurora buildings must use the rebuilt pixel-art renderer');

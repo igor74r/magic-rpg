@@ -60,11 +60,14 @@
   "auroraGround": {
     "file": "../aurora/ground-atlas.png",
     "tileSize": 96,
-    "columns": [
-      "grass",
-      "cobblestone-path"
-    ],
+    "columns": 8,
     "rows": 1,
-    "style": "original 16-bit pixel art; flat palette; nearest-neighbour"
+    "variantsPerType": 4,
+    "types": [
+      "grass",
+      "path"
+    ],
+    "displaySize": 48,
+    "usage": "Original 16-bit village ground tiles; four seamless visual variants for grass and cobblestone"
   }
 }
