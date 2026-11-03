@@ -8,7 +8,7 @@ import { addExp } from './systems/progression.js';
 import {
   updateMainMenu, startNewGame, openSettings, backFromSettings, saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
-  switchSettingsTab, applySettings, applyFontScale, resetAllSettings, deleteAllSaves,
+  switchSettingsTab, handleSettingsTabKey, applySettings, applyFontScale, resetAllSettings, deleteAllSaves,
   openAchievementsMenu, openHelp,
   exportSave, importSave
 } from './ui/menu.js';
@@ -885,7 +885,7 @@ window.GameAPI = {
   clearRuntimeDiagnostics: () => { runtimeDiagnostics.length = 0; },
   updateMainMenu,
   startNewGame,
-  openSettings, switchSettingsTab, applySettings, backFromSettings,
+  openSettings, switchSettingsTab, handleSettingsTabKey, applySettings, backFromSettings,
   resetAllSettings, deleteAllSaves,
   openAchievementsMenu, openHelp,
   saveAndMenu,
