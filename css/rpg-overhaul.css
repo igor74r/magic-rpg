@@ -1858,3 +1858,9 @@ body.dashboard-modal-open { overflow: hidden; }
   min-height: 0;
   overflow: auto;
 }
+
+/* Sidebar pages are modal-only. Never show their stale legacy center panel
+   beside the same page in the overlay; keep overworld as the central view. */
+body.dashboard-modal-open #screen-game .dashboard-main > #tab-content {
+  display: none !important;
+}
