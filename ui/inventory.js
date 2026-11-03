@@ -689,11 +689,19 @@ function buildCompareHTML(inst, item) {
   const newScore = itemScore(inst);
   const scoreDiff = newScore - oldScore;
   const scoreLine = `<div class="compare-score ${scoreDiff > 0 ? 'compare-up' : scoreDiff < 0 ? 'compare-down' : ''}"><span>Сила предмета</span><b>${oldScore} → ${newScore} (${scoreDiff > 0 ? '+' : ''}${scoreDiff})</b></div>`;
+  const slotLabel = SLOT_INFO.find(([id]) => id === slot)?.[1] || 'Слот экипировки';
   const comparisonTitle = eqObj
     ? `Сравнение: ${escapeHtml(ITEMS[eqObj.id]?.name || 'предмет')}`
     : 'Сравнение: пустой слот';
+  const equippedRarity = eqObj ? RARITIES[eqObj.rarity]?.name || 'Обычный' : 'Пусто';
+  const candidateRarity = RARITIES[inst.rarity]?.name || 'Обычный';
   const statLines = lines.length ? lines.join('') : '<div class="compare-neutral">Характеристики не изменятся</div>';
-  return `<div class="tooltip-compare"><b>${comparisonTitle}</b>${scoreLine}${statLines}</div>`;
+  const direction = scoreDiff > 0 ? 'Улучшение' : scoreDiff < 0 ? 'Уступает' : 'Равноценно';
+  const directionClass = scoreDiff > 0 ? 'compare-up' : scoreDiff < 0 ? 'compare-down' : 'compare-neutral';
+  return `<div class="tooltip-compare" data-compare-slot="${slot || ''}">
+    <div class="compare-heading"><b>${comparisonTitle}</b><span class="compare-slot-label">${escapeHtml(slotLabel)}</span></div>
+    <div class="compare-rarity-row"><span>Сейчас: ${escapeHtml(equippedRarity)}</span><span>Новый: ${escapeHtml(candidateRarity)}</span></div>
+    <div class="compare-verdict ${directionClass}">${direction}</div>${scoreLine}${statLines}</div>`;
 }
 
 export function buildTooltipHTML(inst) {
