@@ -891,3 +891,82 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
   .dashboard-sidebar { flex-wrap:wrap; }
   .dashboard-sidebar .dashboard-tablist { flex:1 1 100%; }
 }
+
+
+/* ---------- Визуальные карточки экипировки, талантов и заданий ---------- */
+
+.rpg-paperdoll {
+  padding: 12px;
+  border: 1px solid rgba(201,162,39,.24);
+  border-radius: 8px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(201,162,39,.08), transparent 58%), linear-gradient(180deg, rgba(29,22,15,.96), rgba(12,9,7,.98));
+  box-shadow: inset 0 1px 0 rgba(255,230,170,.035), 0 8px 20px rgba(0,0,0,.18);
+}
+.equipment-slots { gap: 7px; }
+.gear-slot.filled {
+  position: relative; display: grid; grid-template-columns: 32px minmax(0,1fr); grid-template-rows: auto auto auto;
+  align-items: center; gap: 2px 8px; padding: 8px 9px;
+  border: 1px solid color-mix(in srgb, var(--gear-color) 42%, transparent); border-left: 3px solid var(--gear-color);
+  border-radius: 6px;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--gear-color) 10%, transparent), transparent 72%), rgba(0,0,0,.24);
+  transition: border-color .16s ease, background .16s ease, transform .16s ease;
+}
+.gear-slot.filled:hover { transform: translateX(2px); border-color: color-mix(in srgb, var(--gear-color) 72%, transparent); background: color-mix(in srgb, var(--gear-color) 9%, rgba(0,0,0,.28)); }
+.gear-slot.filled .gear-slot-icon {
+  grid-column: 1; grid-row: 1 / span 3; width: 32px; height: 32px; display: grid; place-items: center;
+  border: 1px solid color-mix(in srgb, var(--gear-color) 38%, transparent); border-radius: 6px; background: rgba(0,0,0,.3); font-size: 20px;
+}
+.gear-slot.filled .gear-slot-label { grid-column: 2; grid-row: 1; font-size: 9px; letter-spacing: .06em; text-transform: uppercase; color: #988765; }
+.gear-slot.filled .gear-slot-name { grid-column: 2; grid-row: 2; min-width: 0; color: var(--gear-color); font-weight: 700; font-size: 12px; overflow-wrap: anywhere; }
+.gear-slot-meta { grid-column: 2; grid-row: 3; display: flex; align-items: center; flex-wrap: wrap; gap: 5px 8px; min-height: 12px; }
+.gear-rarity-label { color: var(--gear-color); font-size: 9px; opacity: .9; }
+.gear-slot-sockets { font-size: 10px; color: #a9a08b; }
+.gear-slot-remove { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; padding: 0; opacity: .68; border-radius: 4px; }
+.gear-slot-remove:hover, .gear-slot-remove:focus-visible { opacity: 1; }
+
+.passive-detail-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+.talent-card {
+  position: relative; padding: 12px; border: 1px solid rgba(177,145,82,.24); border-radius: 8px;
+  background: linear-gradient(145deg, rgba(37,28,19,.88), rgba(13,10,8,.96));
+  box-shadow: inset 0 1px 0 rgba(255,230,170,.035), 0 5px 14px rgba(0,0,0,.16);
+  transition: border-color .16s ease, transform .16s ease, background .16s ease;
+}
+.talent-card:hover { transform: translateY(-1px); border-color: rgba(201,162,39,.48); }
+.talent-card.ready { border-color: rgba(126,181,103,.46); }
+.talent-card.taken { border-color: rgba(220,183,91,.54); background: linear-gradient(145deg, rgba(58,43,23,.92), rgba(16,11,7,.98)); }
+.talent-card.locked { opacity: .72; }
+.talent-card-heading { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.talent-card-icon { flex: 0 0 34px; width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid rgba(201,162,39,.28); border-radius: 7px; background: rgba(0,0,0,.28); font-size: 19px; }
+.talent-card-heading > div { flex: 1; min-width: 0; }
+.talent-card-heading b { display: block; color: #e6cf8e; font-size: 12px; line-height: 1.4; }
+.talent-card-heading small { display: block; margin-top: 2px; color: #a89060; font-size: 10px; }
+.talent-card-state { flex: 0 0 auto; padding: 3px 6px; border: 1px solid rgba(201,162,39,.2); border-radius: 999px; color: #c8b78b; background: rgba(0,0,0,.18); font-size: 9px; white-space: nowrap; }
+.talent-card.ready .talent-card-state { color: #a9d58b; border-color: rgba(126,181,103,.3); }
+.talent-card.taken .talent-card-state { color: #f0d98f; border-color: rgba(220,183,91,.35); }
+.talent-card p { margin: 8px 0 0; color: #c6b894; font-size: 12px; line-height: 1.55; }
+
+.quest-card {
+  position: relative; padding: 14px; border: 1px solid rgba(201,162,39,.2); border-radius: 8px;
+  background: linear-gradient(145deg, rgba(36,27,18,.9), rgba(12,9,7,.97));
+  box-shadow: inset 0 1px 0 rgba(255,230,170,.035), 0 6px 16px rgba(0,0,0,.16);
+  transition: border-color .16s ease, background .16s ease;
+}
+.quest-card.current { border-color: rgba(224,189,88,.62); box-shadow: 0 0 0 1px rgba(224,189,88,.08), 0 8px 18px rgba(0,0,0,.18); }
+.quest-card.done { border-color: rgba(126,181,103,.36); }
+.quest-card.locked { border-color: rgba(140,125,100,.16); background: linear-gradient(145deg, rgba(24,20,16,.75), rgba(10,8,7,.95)); }
+.quest-card-top { flex-wrap: wrap; gap: 7px; }
+.quest-card-location { color: #a89060; font-size: 10px; }
+.quest-card h4 { margin: 9px 0 6px; color: #e7ce8d; font-size: 15px; line-height: 1.4; }
+.quest-card > p { color: #c9bea7; font-size: 12px; line-height: 1.6; }
+.quest-card .campaign-objective { margin-top: 10px; padding: 8px 10px; border: 1px solid rgba(201,162,39,.14); border-radius: 5px; background: rgba(0,0,0,.2); }
+.quest-card .campaign-progress { margin: 8px 0; overflow: hidden; border-radius: 999px; }
+.quest-card .campaign-mission-number { display: inline-grid; place-items: center; min-width: 28px; height: 24px; padding: 0 6px; border: 1px solid rgba(201,162,39,.3); border-radius: 5px; color: #e8d08d; background: rgba(0,0,0,.24); font-size: 11px; }
+.quest-card.done .campaign-mission-number { border-color: rgba(126,181,103,.32); color: #a9d58b; }
+.quest-card.locked .campaign-mission-number { color: #8c8069; }
+@media (max-width: 700px) {
+  .quest-card { padding: 11px; }
+  .talent-card { padding: 10px; }
+  .talent-card-state { font-size: 8px; padding: 3px 5px; }
+  .gear-slot.filled { padding: 7px; grid-template-columns: 28px minmax(0,1fr); gap: 2px 6px; }
+  .gear-slot.filled .gear-slot-icon { width: 28px; height: 28px; font-size: 18px; }
+}
