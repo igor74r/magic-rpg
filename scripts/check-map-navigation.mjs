@@ -1,52 +1,35 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-const map = readFileSync(new URL('../ui/locations.js', import.meta.url), 'utf8');
-const theme = readFileSync(new URL('../css/theme.css', import.meta.url), 'utf8');
-const layout = readFileSync(new URL('../css/rpg-overhaul.css', import.meta.url), 'utf8');
-const header = readFileSync(new URL('../ui/header.js', import.meta.url), 'utf8');
-assert.match(map, /map-route-summary/);
-assert.match(map, /Следующая точка/);
-assert.ok(map.includes('map-story-link ${routeState}'));
-assert.match(map, /lockDetail/);
-assert.match(map, /map-route-count/);
-assert.match(map, /role="button" tabindex="0" aria-pressed=/,
-  'world map destinations must be keyboard focusable controls');
-assert.match(map, /onkeydown="if\(event\.key==='Enter'\|\|event\.key===' '\)/,
-  'world map destinations must activate with Enter and Space');
-assert.match(map, /setAttribute\('aria-pressed', String\(active\)\)/,
-  'selected map destination state must be announced to assistive technology');
-assert.match(theme, /\.map-route-summary/);
-assert.match(theme, /\.map-links line\.map-story-link\.open/);
-assert.match(theme, /\.map-links line\.map-story-link\.locked/);
-assert.match(theme, /prefers-reduced-motion:reduce/);
-console.log('World map route guidance checks passed.');
-
-assert.match(header, /syncMapFocusedLayout\(state\.currentTab\)/,
-  'initial game render must restore the map-focused layout');
-assert.match(header, /classList\.toggle\('map-focused', tab === 'locations'\)/,
-  'switching tabs must enable the wide layout only for the world map');
-assert.match(layout, /#screen-game\.map-focused \.dashboard-sidebar[\s\S]*?flex-direction: row/,
-  'map navigation must move into a horizontal top bar');
-assert.match(layout, /#screen-game\.map-focused \.dashboard-log\s*\{\s*display: none !important;/,
-  'the side journal must not steal map width');
-assert.match(layout, /#screen-game\.map-focused \.world-map\s*\{[\s\S]*?height: clamp\(500px/,
-  'the world map must use a wider, taller viewport');
-assert.match(layout, /@media \(max-width: 700px\)[\s\S]*?#screen-game\.map-focused \.world-map/,
-  'the enlarged map layout must remain responsive on mobile');
+import { existsSync, readFileSync } from 'node:fs';
 
 const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+const gameExports = readFileSync(new URL('../ui/game.js', import.meta.url), 'utf8');
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-const spawn = readFileSync(new URL('../systems/overworld/spawn.js', import.meta.url), 'utf8');
-assert.match(main, /enterOverworld\('village'\)/, 'new heroes must start inside Aurora');
-assert.match(main, /openWorldPortalMenu,/, 'the sidebar world portal action must be exposed');
-assert.match(html, /id="screen-overworld" class="dashboard-overworld"/, 'the location scene must live inside the dashboard');
-assert.doesNotMatch(html, /id="game-tab-locations"/, 'the world map must not be a sidebar tab');
 const dashboard = readFileSync(new URL('../ui/dashboard.js', import.meta.url), 'utf8');
-assert.match(dashboard, /GameAPI\.interactNpc\('world-portal'\)/, 'the world map shortcut must use the village portal system');
-assert.doesNotMatch(main, /data-world-tower/, 'the world portal menu must not contain a tower shortcut');
+const header = readFileSync(new URL('../ui/header.js', import.meta.url), 'utf8');
+const spawn = readFileSync(new URL('../systems/overworld/spawn.js', import.meta.url), 'utf8');
+
+assert.match(main, /class="portal-atlas"/, 'portal must expose one unified world atlas');
+assert.match(main, /portal-map-stage/, 'the portal must render a large map viewport');
+assert.match(main, /portal-map-node/, 'destinations must be represented by map points');
+assert.match(main, /portal-route/, 'the map must show the ordered campaign route');
+assert.match(main, /portal-destination/, 'the selected map point must show destination details');
+assert.match(main, /canEnterStoryLocation\(state\.game\?\.player, id\)/, 'portal selection must retain campaign and level restrictions');
+assert.match(main, /latestAccess\.allowed/, 'travel must revalidate access before transition');
+assert.match(main, /saveGame\(\)[\s\S]*?enterOverworld\(id\)/, 'travel must persist and enter the selected location');
+assert.doesNotMatch(main, /mapSelect|mapTravel|mapEnter|ui\/locations\.js/, 'legacy radial map API must be removed');
+assert.doesNotMatch(gameExports, /locations\.js|mapSelect|mapTravel|mapEnter/, 'game module must not export the legacy map');
+assert.equal(existsSync(new URL('../ui/locations.js', import.meta.url)), false, 'legacy radial map module must be deleted');
+
+assert.match(main, /enterOverworld\('village'\)/, 'new heroes must start inside Aurora');
+assert.match(main, /openWorldPortalMenu,/, 'the portal atlas action must remain exposed');
+assert.match(html, /id="screen-overworld" class="dashboard-overworld"/, 'the location scene must live inside the dashboard');
+assert.doesNotMatch(html, /id="game-tab-locations"/, 'the redundant world-map sidebar entry must remain absent');
+assert.match(dashboard, /GameAPI\.interactNpc\('world-portal'\)/, 'the portal shortcut must use the village portal interaction');
+assert.doesNotMatch(main, /data-world-tower/, 'the portal atlas must not contain a tower shortcut');
 assert.doesNotMatch(header, /data-header-action="tower"/, 'the HUD must not duplicate the village tower gate');
-assert.doesNotMatch(map, /GameAPI\.enterTower\(\)/, 'the map panel must not duplicate the village tower gate');
-assert.match(spawn, /id: 'world-waystone'/, 'other locations keep their world map portal');
-assert.doesNotMatch(spawn, /id: 'tower-gate'/, 'other locations must not spawn tower gates');
-assert.match(main, /classList\.add\('overworld-active'\)/, 'the village scene must retain the dashboard side panels');
+assert.match(spawn, /id: 'world-waystone'/, 'other locations must retain their world portal');
+assert.doesNotMatch(spawn, /id: 'tower-gate'/, 'other locations must not spawn duplicate tower gates');
+assert.match(main, /classList\.add\('overworld-active'\)/, 'the village scene must retain dashboard side panels');
 assert.match(main, /classList\.remove\('overworld-active'\)/, 'leaving a location must restore dashboard content');
+
+console.log('Unified portal world atlas navigation checks passed.');
