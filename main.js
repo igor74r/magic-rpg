@@ -508,64 +508,93 @@ function openWorldPortalMenu() {
     id !== 'rift' && (loc.safe || (Array.isArray(loc.enemies) && loc.enemies.length))
   );
   const storyOrder = new Map(getStoryLocationProgression().map(item => [item.id, item]));
-  destinations.sort(([a], [b]) => {
-    const aOrder = storyOrder.get(a)?.sequence ?? Number.MAX_SAFE_INTEGER;
-    const bOrder = storyOrder.get(b)?.sequence ?? Number.MAX_SAFE_INTEGER;
-    return aOrder - bOrder;
-  });
+  destinations.sort(([a], [b]) =>
+    (storyOrder.get(a)?.sequence ?? Number.MAX_SAFE_INTEGER) -
+    (storyOrder.get(b)?.sequence ?? Number.MAX_SAFE_INTEGER)
+  );
   if (isRiftReady() && LOCATIONS.rift) destinations.push(['rift', LOCATIONS.rift]);
   document.getElementById('aurora-world-portal')?.remove();
 
-  const overlay = document.createElement('div');
-  overlay.id = 'aurora-world-portal';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:10070;display:flex;align-items:center;justify-content:center;padding:clamp(10px,3vw,24px);background:radial-gradient(ellipse at 50% 25%,rgba(38,91,94,.42),rgba(5,9,16,.97) 72%);color:#f2eadb;overflow:auto;font-family:inherit;';
-  const cards = destinations.map(([id, loc]) => {
-    const here = id === currentId;
+  const points = destinations.map(([id, loc], index) => {
     const story = storyOrder.get(id);
-    const access = canEnterStoryLocation(state.game?.player, id);
-    const locked = !access.allowed;
-    const disabled = here || locked;
-    const description = escapeHtml(loc.desc || 'Неизведанная область');
-    const progressLabel = story
-      ? `ГЛАВА ${story.actNumber} · МАРШРУТ ${String(story.sequence).padStart(2, '0')} · УРОВЕНЬ ${story.recommendedLevel}`
-      : 'СВОБОДНОЕ ИССЛЕДОВАНИЕ';
-    const statusLabel = here ? '● ВЫ ЗДЕСЬ' : locked
-      ? access.reason === 'campaign'
-        ? `🔒 ЗАКРЫТО · СНАЧАЛА ЗАДАНИЕ ${access.requiredMissionId}`
-        : `🔒 ЗАКРЫТО · НУЖЕН УРОВЕНЬ ${story.requiredLevel}`
-      : 'ПЕРЕЙТИ В ОБЛАСТЬ →';
-    return `<button type="button" data-world-location="${escapeHtml(id)}" data-search="${escapeHtml(`${loc.name} ${loc.desc || ''} ${progressLabel}`.toLocaleLowerCase())}" ${disabled ? 'disabled' : ''} ${here ? 'aria-current="location"' : ''} style="display:flex;align-items:flex-start;gap:12px;min-height:104px;width:100%;text-align:left;padding:14px;border:1px solid ${here ? '#b89a62' : locked ? '#60434a' : '#426a70'};border-radius:13px;background:${here ? 'linear-gradient(135deg,#3a3023,#211c19)' : locked ? 'linear-gradient(145deg,#241c25,#15151e)' : 'linear-gradient(145deg,#1a3039,#111923)'};color:#f2eadb;opacity:${locked ? 0.62 : here ? 0.92 : 1};cursor:${disabled ? 'not-allowed' : 'pointer'};font:inherit;transition:border-color .15s,transform .15s,background .15s">
-      <span aria-hidden="true" style="display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:11px;background:rgba(116,185,178,.12);font-size:25px">${loc.emoji || '✦'}</span>
-      <span style="display:block;min-width:0;flex:1"><strong style="display:block;font-size:15px;line-height:1.35">${story ? `#${story.sequence} · ` : ''}${escapeHtml(loc.name)}</strong><small style="display:block;margin-top:5px;color:${locked ? '#d59aa2' : '#80c9bd'};font-size:10px;font-weight:700;letter-spacing:.04em">${progressLabel}</small><span style="display:-webkit-box;margin-top:5px;color:#a9c0bf;font-size:12px;line-height:1.45;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2">${description}</span><small style="display:block;margin-top:8px;color:${here ? '#e0c58f' : locked ? '#d59aa2' : '#80c9bd'};font-size:11px;font-weight:700;letter-spacing:.04em">${statusLabel}</small></span>
-    </button>`;
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+    const angle = story
+      ? -Math.PI * 0.72 + (story.sequence - 1) * 2.399963229728653
+      : (hash % 6283) / 1000;
+    const ring = story ? 0.72 + (story.sequence % 3) * 0.075 : 0.42 + (hash % 25) / 100;
+    const x = Math.max(105, Math.min(895, 500 + Math.cos(angle) * 390 * ring));
+    const y = Math.max(80, Math.min(540, 310 + Math.sin(angle) * 245 * ring));
+    return { id, loc, story, x, y, index };
+  });
+  const storyPoints = points.filter(point => point.story)
+    .sort((a, b) => a.story.sequence - b.story.sequence);
+  const routePoints = [{ x: 500, y: 310 }, ...storyPoints];
+  const route = routePoints.map(point => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ');
+  const nodeMarkup = points.map(point => {
+    const label = point.story ? '#' + point.story.sequence + ' · ' + point.loc.name : point.loc.name;
+    return '<button type="button" class="portal-map-node" data-portal-node="' + escapeHtml(point.id) +
+      '" data-x="' + point.x.toFixed(1) + '" data-y="' + point.y.toFixed(1) +
+      '" style="left:' + (point.x / 10) + '%;top:' + (point.y / 6.2) + '%" aria-pressed="false" aria-label="' +
+      escapeHtml(label) + '"><span class="portal-map-node-icon">' + (point.loc.emoji || '✦') +
+      '</span><span class="portal-map-node-label">' + escapeHtml(label) + '</span></button>';
   }).join('');
 
-  overlay.innerHTML = `
-    <section role="dialog" aria-modal="true" aria-labelledby="aurora-world-portal-title" aria-describedby="aurora-world-portal-description" style="width:min(960px,100%);max-height:92vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid #72b9b2;border-radius:18px;background:linear-gradient(145deg,rgba(24,37,44,.99),rgba(10,15,25,.99));box-shadow:0 0 55px rgba(69,190,182,.22),inset 0 0 35px rgba(99,188,175,.06)">
-      <header style="padding:clamp(17px,3vw,28px);padding-bottom:16px;border-bottom:1px solid rgba(114,185,178,.2)">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-          <div><small style="letter-spacing:.2em;color:#8bd7ce;font-size:10px">ДРЕВНЯЯ СЕТЬ ПЕРЕХОДОВ</small><h1 id="aurora-world-portal-title" style="margin:7px 0 5px;font-size:clamp(24px,4vw,36px);line-height:1.15">Пути между мирами</h1><p id="aurora-world-portal-description" style="margin:0;color:#b5c6c5;font-size:14px;line-height:1.5">Сюжетные земли идут по маршруту кампании. Новая область открывается после предыдущего задания и достижения нужного уровня; закрытые области нельзя выбрать.</p></div>
-          <button type="button" data-world-close aria-label="Закрыть окно портала" style="flex:0 0 auto;padding:9px 13px;border:1px solid #719b9b;border-radius:9px;background:#182a32;color:#e9ffff;font:inherit;cursor:pointer">✕</button>
-        </div>
-        <label for="aurora-world-search" style="display:block;margin-top:17px;color:#a9c5c3;font-size:12px;font-weight:700">НАЙТИ ЛОКАЦИЮ</label>
-        <input id="aurora-world-search" type="search" placeholder="Например: Тёмный лес, Ледяные пики…" autocomplete="off" style="box-sizing:border-box;width:100%;margin-top:7px;padding:12px 14px;border:1px solid #456b70;border-radius:10px;outline:none;background:#0d1a22;color:#f2eadb;font:inherit;font-size:14px">
-        <div style="display:flex;justify-content:space-between;gap:10px;margin-top:9px;color:#91aaa9;font-size:12px"><span>Сюжетный маршрут · от ранних земель к финальным</span><span data-world-count aria-live="polite">${destinations.length} локаций</span></div>
-      </header>
-      <div data-world-list style="padding:16px clamp(14px,3vw,26px);overflow:auto;overscroll-behavior:contain">
-        <div data-world-grid style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px">${cards}</div>
-        <p data-world-empty hidden style="padding:26px 10px;text-align:center;color:#b5c6c5">Ничего не найдено. Попробуйте другое название.</p>
-      </div>
-      <footer style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px clamp(14px,3vw,26px);border-top:1px solid rgba(114,185,178,.22);background:rgba(5,12,18,.35)">
-        <span style="color:#9db5b6;font-size:12px">Номер маршрута показывает порядок сюжета; расположение земель на карте остаётся разбросанным.</span>
-        
-      </footer>
-    </section>`;
+  const overlay = document.createElement('div');
+  overlay.id = 'aurora-world-portal';
+  overlay.className = 'portal-atlas-overlay';
+  overlay.innerHTML =
+    '<style>' +
+    '#aurora-world-portal{position:fixed;inset:0;z-index:10070;display:flex;align-items:center;justify-content:center;padding:clamp(8px,2vw,24px);background:radial-gradient(ellipse at 50% 18%,rgba(38,91,94,.48),rgba(3,7,14,.97) 76%);color:#f2eadb;font-family:inherit;}' +
+    '#aurora-world-portal *{box-sizing:border-box}#aurora-world-portal .portal-atlas{width:min(1500px,100%);height:min(920px,96vh);min-height:540px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #72b9b2;border-radius:18px;background:linear-gradient(145deg,#172a31,#0a111b 75%);box-shadow:0 0 65px rgba(69,190,182,.2)}' +
+    '#aurora-world-portal .portal-atlas-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 22px;border-bottom:1px solid rgba(114,185,178,.22)}' +
+    '#aurora-world-portal .portal-atlas-head small{color:#8bd7ce;letter-spacing:.2em;font-size:10px;font-weight:800}#aurora-world-portal h1{margin:5px 0 0;font-size:clamp(22px,3vw,34px)}' +
+    '#aurora-world-portal .portal-close{border:1px solid #719b9b;border-radius:9px;background:#182a32;color:#e9ffff;padding:9px 13px;font:inherit;cursor:pointer}' +
+    '#aurora-world-portal .portal-atlas-body{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px;min-height:0;flex:1;padding:14px}' +
+    '#aurora-world-portal .portal-map-stage{position:relative;min-width:0;min-height:0;overflow:hidden;border:1px solid rgba(119,177,159,.35);border-radius:15px;background:radial-gradient(ellipse at 48% 48%,rgba(51,104,91,.5),transparent 52%),radial-gradient(ellipse at 18% 75%,rgba(31,76,85,.7),transparent 45%),linear-gradient(145deg,#142d36,#0b1722 68%,#182b30)}' +
+    '#aurora-world-portal .portal-map-stage:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(176,207,181,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(176,207,181,.045) 1px,transparent 1px);background-size:42px 42px;pointer-events:none}' +
+    '#aurora-world-portal .portal-map-art{position:absolute;inset:0;width:100%;height:100%;opacity:.9}#aurora-world-portal .portal-route{fill:none;stroke:#8ec9ae;stroke-width:3;stroke-dasharray:8 8;stroke-linecap:round;opacity:.52;vector-effect:non-scaling-stroke}' +
+    '#aurora-world-portal .portal-map-island{fill:rgba(83,128,104,.17);stroke:rgba(147,190,151,.24);stroke-width:2;vector-effect:non-scaling-stroke}' +
+    '#aurora-world-portal .portal-map-node{position:absolute;z-index:2;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;min-width:58px;max-width:130px;padding:5px 7px;border:1px solid rgba(125,191,177,.5);border-radius:12px;background:rgba(10,22,30,.9);color:#edf4e8;cursor:pointer;font:inherit;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:transform .16s,border-color .16s,background .16s}' +
+    '#aurora-world-portal .portal-map-node:hover,#aurora-world-portal .portal-map-node:focus-visible{z-index:4;transform:translate(-50%,-50%) scale(1.1);outline:2px solid #a8ded0;outline-offset:2px}' +
+    '#aurora-world-portal .portal-map-node[aria-pressed="true"]{border:2px solid #e6c783;background:rgba(66,53,31,.96);box-shadow:0 0 0 4px rgba(230,199,131,.15),0 0 24px rgba(230,199,131,.28)}' +
+    '#aurora-world-portal .portal-map-node.is-locked{filter:grayscale(.75);border-color:#815c66;background:rgba(36,24,34,.92)}#aurora-world-portal .portal-map-node.is-current{border-color:#e6c783}' +
+    '#aurora-world-portal .portal-map-node-icon{font-size:clamp(17px,2vw,25px);line-height:1.2}#aurora-world-portal .portal-map-node-label{max-width:118px;font-size:9px;line-height:1.2;text-align:center;color:#d6e4dc;text-shadow:0 1px 3px #000}' +
+    '#aurora-world-portal .portal-map-village{position:absolute;left:50%;top:50%;z-index:3;transform:translate(-50%,-50%);display:grid;place-items:center;width:78px;height:78px;border:2px solid #e6c783;border-radius:50%;background:radial-gradient(circle,#66512c,#201d1b 72%);box-shadow:0 0 0 8px rgba(230,199,131,.1),0 0 35px rgba(230,199,131,.35);font-size:31px}' +
+    '#aurora-world-portal .portal-map-village span{position:absolute;top:80px;white-space:nowrap;color:#f3dba5;font-size:11px;font-weight:800;text-shadow:0 2px 5px #000}' +
+    '#aurora-world-portal .portal-map-legend{position:absolute;left:12px;bottom:10px;display:flex;gap:12px;flex-wrap:wrap;color:#b7c9c1;font-size:10px;background:rgba(5,12,18,.72);padding:7px 10px;border-radius:8px}' +
+    '#aurora-world-portal .portal-map-legend span{display:flex;align-items:center;gap:5px}#aurora-world-portal .portal-map-legend i{width:8px;height:8px;border-radius:50%;background:#8ec9ae}#aurora-world-portal .portal-map-legend .locked{background:#a87580}#aurora-world-portal .portal-map-legend .here{background:#e6c783}' +
+    '#aurora-world-portal .portal-destination{min-width:0;overflow:auto;border:1px solid rgba(114,185,178,.25);border-radius:14px;background:rgba(5,13,20,.55);padding:18px;display:flex;flex-direction:column;gap:12px}' +
+    '#aurora-world-portal .portal-destination-kicker{color:#8bd7ce;font-size:10px;font-weight:800;letter-spacing:.15em}#aurora-world-portal .portal-destination h2{font-size:22px;line-height:1.2;margin:0}#aurora-world-portal .portal-destination p{color:#b5c6c5;font-size:13px;line-height:1.6;margin:0}' +
+    '#aurora-world-portal .portal-destination-meta{display:grid;gap:8px;padding:11px;border-radius:10px;background:rgba(111,164,149,.09);color:#c7d9cf;font-size:12px}#aurora-world-portal .portal-destination-status{font-size:12px;font-weight:800;line-height:1.5;color:#8bd7ce}#aurora-world-portal .portal-destination-status.locked{color:#e0a0a9}' +
+    '#aurora-world-portal .portal-travel{margin-top:auto;padding:13px 16px;border:1px solid #b99b61;border-radius:10px;background:linear-gradient(135deg,#8d6b36,#584322);color:#fff5dd;font:inherit;font-weight:800;cursor:pointer}#aurora-world-portal .portal-travel:disabled{border-color:#596269;background:#29333a;color:#89969a;cursor:not-allowed}' +
+    '#aurora-world-portal .portal-atlas-foot{padding:10px 18px;border-top:1px solid rgba(114,185,178,.18);color:#91aaa9;font-size:11px;text-align:center}' +
+    '@media(max-width:850px){#aurora-world-portal .portal-atlas{height:96vh}#aurora-world-portal .portal-atlas-body{grid-template-columns:minmax(0,1fr) 260px}}' +
+    '@media(max-width:650px){#aurora-world-portal .portal-atlas{height:96vh;min-height:0}#aurora-world-portal .portal-atlas-head{padding:12px 14px}#aurora-world-portal .portal-atlas-body{grid-template-columns:1fr;grid-template-rows:minmax(260px,1fr) auto;gap:9px;padding:9px}#aurora-world-portal .portal-map-stage{min-height:260px}#aurora-world-portal .portal-destination{max-height:205px;padding:12px;gap:7px}#aurora-world-portal .portal-destination h2{font-size:18px}#aurora-world-portal .portal-destination p{font-size:11px}#aurora-world-portal .portal-travel{padding:10px}#aurora-world-portal .portal-map-node{min-width:42px;padding:4px}#aurora-world-portal .portal-map-node-label{font-size:8px;max-width:82px}#aurora-world-portal .portal-map-village{width:56px;height:56px;font-size:24px}#aurora-world-portal .portal-map-village span{top:58px;font-size:9px}}' +
+    '</style>' +
+    '<section class="portal-atlas" role="dialog" aria-modal="true" aria-labelledby="aurora-world-portal-title">' +
+      '<header class="portal-atlas-head"><div><small>АТЛАС МИРА · СЕТЬ ПЕРЕХОДОВ</small><h1 id="aurora-world-portal-title">Карта земель Авроры</h1></div><button type="button" class="portal-close" data-world-close aria-label="Закрыть карту">✕</button></header>' +
+      '<div class="portal-atlas-body">' +
+        '<div class="portal-map-stage" role="group" aria-label="Интерактивная карта мира">' +
+          '<svg class="portal-map-art" viewBox="0 0 1000 620" preserveAspectRatio="none" aria-hidden="true">' +
+            '<path class="portal-map-island" d="M95 170 Q170 55 340 105 T610 90 Q810 55 915 210 T850 480 Q680 585 480 520 T150 505 Q45 390 95 170Z"/>' +
+            '<path class="portal-map-island" d="M245 195 Q350 130 455 185 T650 190 Q760 250 680 390 T405 450 Q240 400 245 195Z" style="fill:rgba(25,55,65,.45)"/>' +
+            '<polyline class="portal-route" points="' + route + '"/>' +
+            '<circle cx="500" cy="310" r="104" fill="none" stroke="rgba(230,199,131,.16)" stroke-width="2" stroke-dasharray="5 12"/>' +
+          '</svg>' +
+          '<div class="portal-map-village" aria-label="Деревня Аврора">🏘️<span>Деревня Аврора</span></div>' +
+          nodeMarkup +
+          '<div class="portal-map-legend"><span><i></i>Доступно</span><span><i class="locked"></i>Закрыто</span><span><i class="here"></i>Вы здесь</span></div>' +
+        '</div>' +
+        '<aside class="portal-destination" id="portal-destination" aria-live="polite"></aside>' +
+      '</div>' +
+      '<footer class="portal-atlas-foot">Выберите точку на карте, чтобы изучить область и условия путешествия. Сюжетный маршрут отмечен пунктиром.</footer>' +
+    '</section>';
   document.body.appendChild(overlay);
 
-  const search = overlay.querySelector('#aurora-world-search');
-  const count = overlay.querySelector('[data-world-count]');
-  const empty = overlay.querySelector('[data-world-empty]');
-  const locationButtons = [...overlay.querySelectorAll('[data-world-location]')];
+  const nodeButtons = [...overlay.querySelectorAll('[data-portal-node]')];
+  const detail = overlay.querySelector('#portal-destination');
+  let selectedId = currentId;
   const resume = () => {
     overlay.remove();
     if (state.overworld) {
@@ -573,37 +602,76 @@ function openWorldPortalMenu() {
       document.getElementById('screen-game')?.classList.add('overworld-active');
     }
   };
-  const filterLocations = () => {
-    const query = (search.value || '').trim().toLocaleLowerCase();
-    let visible = 0;
-    for (const button of locationButtons) {
-      const matches = !query || button.dataset.search.includes(query);
-      button.hidden = !matches;
-      if (matches) visible++;
-    }
-    count.textContent = `${visible} из ${destinations.length} локаций`;
-    empty.hidden = visible !== 0;
+  const selectDestination = id => {
+    const point = points.find(item => item.id === id);
+    if (!point) return;
+    selectedId = id;
+    const access = canEnterStoryLocation(state.game?.player, id);
+    const locked = !access.allowed;
+    const here = id === currentId;
+    nodeButtons.forEach(button => {
+      const active = button.dataset.portalNode === id;
+      const item = points.find(pointItem => pointItem.id === button.dataset.portalNode);
+      const itemAccess = canEnterStoryLocation(state.game?.player, button.dataset.portalNode);
+      button.setAttribute('aria-pressed', String(active));
+      button.classList.toggle('is-locked', !itemAccess.allowed);
+      button.classList.toggle('is-current', button.dataset.portalNode === currentId);
+      if (active) button.focus({ preventScroll: true });
+    });
+    const story = point.story;
+    const status = here ? '● ВЫ ЗДЕСЬ' : locked
+      ? access.reason === 'campaign'
+        ? '🔒 Сначала завершите сюжетное задание ' + access.requiredMissionId
+        : '🔒 Требуется уровень ' + (access.requirement?.requiredLevel || access.requirement?.recommendedLevel || 'выше')
+      : '● МАРШРУТ ОТКРЫТ · МОЖНО ПУТЕШЕСТВОВАТЬ';
+    const level = story
+      ? '<div><b>Уровень доступа:</b> ' + story.requiredLevel + ' · <b>Рекомендуемый:</b> ' + story.recommendedLevel + '</div>'
+      : '<div><b>Тип области:</b> свободное исследование</div>';
+    const chapter = story
+      ? '<div><b>Акт:</b> ' + story.actNumber + ' · <b>Позиция маршрута:</b> ' + story.sequence + '</div>'
+      : '';
+    detail.innerHTML =
+      '<div class="portal-destination-kicker">' + (story ? 'ГЛАВА ' + story.actNumber + ' · ТОЧКА ' + story.sequence : 'ОБЛАСТЬ МИРА') + '</div>' +
+      '<h2>' + escapeHtml(point.loc.emoji || '✦') + ' ' + escapeHtml(point.loc.name) + '</h2>' +
+      '<p>' + escapeHtml(point.loc.desc || 'Неизведанная область') + '</p>' +
+      '<div class="portal-destination-meta">' + level + chapter + '<div><b>Опасность:</b> ' +
+        (point.loc.safe ? 'безопасная зона' : 'враждебная территория') + '</div></div>' +
+      '<div class="portal-destination-status' + (locked ? ' locked' : '') + '" role="status">' + status + '</div>' +
+      '<button type="button" class="portal-travel" data-portal-travel ' + (here || locked ? 'disabled' : '') + '>' +
+        (here ? 'Вы уже здесь' : locked ? 'Путешествие закрыто' : 'Путешествовать →') + '</button>';
+    const travelButton = detail.querySelector('[data-portal-travel]');
+    travelButton?.addEventListener('click', () => {
+      const latestAccess = canEnterStoryLocation(state.game?.player, id);
+      if (!latestAccess.allowed) {
+        selectDestination(id);
+        toast(latestAccess.reason === 'campaign'
+          ? '🔒 Сначала завершите сюжетное задание ' + latestAccess.requiredMissionId + '.'
+          : '🔒 Для перехода требуется ' + latestAccess.requirement.requiredLevel + ' уровень.');
+        return;
+      }
+      overlay.remove();
+      exitOverworld();
+      if (id === 'rift') { enterRift(); return; }
+      state.game.location = id;
+      saveGame();
+      enterOverworld(id);
+    });
   };
-
-  search.addEventListener('input', filterLocations);
+  nodeButtons.forEach(button => {
+    const id = button.dataset.portalNode;
+    const access = canEnterStoryLocation(state.game?.player, id);
+    button.classList.toggle('is-locked', !access.allowed);
+    button.classList.toggle('is-current', id === currentId);
+    button.addEventListener('click', () => selectDestination(id));
+  });
   overlay.querySelector('[data-world-close]')?.addEventListener('click', resume);
   overlay.addEventListener('keydown', event => {
     if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); resume(); }
   });
   overlay.addEventListener('click', event => { if (event.target === overlay) resume(); });
-  search.focus();
-
-  locationButtons.filter(button => !button.disabled).forEach(button => button.addEventListener('click', () => {
-    const id = button.getAttribute('data-world-location');
-    overlay.remove();
-    exitOverworld();
-    if (id === 'rift') { enterRift(); return; }
-    state.game.location = id;
-    saveGame();
-    enterOverworld(id);
-  }));
+  const initial = points.some(point => point.id === currentId) ? currentId : (points[0]?.id || 'village');
+  selectDestination(initial);
 }
-
 function interactNpc(npcId) {
   if (!state.overworld) return;
   state.overworld.paused = true;
