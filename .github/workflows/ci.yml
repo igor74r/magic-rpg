@@ -198,6 +198,8 @@ jobs:
 
       - name: Check save-to-menu and slot-load overworld lifecycle
         run: node scripts/check-save-menu-lifecycle.mjs
+      - name: Check save-and-return-to-village pause flow
+        run: node scripts/check-pause-village-flow.mjs
 
       - name: Check dashboard modal recovery from orphaned overlays
         run: node scripts/check-dashboard-modal-recovery.mjs
