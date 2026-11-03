@@ -21,7 +21,7 @@ for (const asset of [
 
 const pngAssets = ['assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
 const villageArt = readFileSync(new URL('../ui/overworld/aurora-art.js', import.meta.url), 'utf8');
-assert.ok(villageArt.includes('drawBuilding(ctx,x,y,style)'), 'Aurora buildings must use the detailed Canvas renderer');
+assert.ok(villageArt.includes('drawBuilding(ctx,x,y,style)'), 'Aurora buildings must use the current building renderer pending raster asset replacement');
 assert.ok(!villageArt.includes('.svg'), 'Aurora renderer must not request vector asset files');
 assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8').includes('SVG architecture'), 'Aurora sprite renderer must not depend on vector architecture');
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
@@ -31,7 +31,7 @@ assert.ok(html.includes('Три дракона удерживают его за�
 assert.ok(html.includes('Первые кровавые маги создали Кристалл Разлома'));
 assert.ok(html.includes('css/2d-art-direction.css'));
 
-const renderer = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
+const renderer = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');\nassert.ok(!renderer.includes('drawAuroraGround'), 'Aurora ground must use the authored terrain atlas');\nassert.ok(renderer.includes('ctx.imageSmoothingEnabled = false;'), 'world terrain must preserve pixel edges');
 assert.ok(renderer.includes('getEventPropIndex'));
 assert.ok(renderer.includes('drawAtlasProp(ctx, eventPropIndex'));
 const atlasRenderer = readFileSync(new URL('../ui/overworld/tile-atlas.js', import.meta.url), 'utf8');

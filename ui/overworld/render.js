@@ -7,7 +7,6 @@ import { ENEMIES } from '../../data/enemies.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic } from './models.js';
 import { buildDepthItems } from './depth-order.js';
 import { drawAtlasTile, drawAtlasProp } from './tile-atlas.js';
-import { drawAuroraGround } from './aurora-art.js';
 import { getTileDanger } from '../../systems/overworld/hazards.js';
 import { getActiveCampaignMission } from '../../systems/campaign.js';
 import { renderCombatPanel } from './combat-panel.js';
@@ -354,22 +353,16 @@ function render() {
   const time = performance.now() * 0.001; ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
   for (let i = 0; i < 30; i++) { ctx.beginPath(); ctx.arc((i * 137 + Math.sin(time + i) * 20) % VIEW_W, (i * 73 + Math.cos(time * 0.5 + i) * 15) % VIEW_H, 1.5, 0, Math.PI * 2); ctx.fill(); }
 
-  if (ow.locationId === 'village') {
-    // The village is a single continuous illustrated landscape. Logical map
-    // cells remain active for movement and hazards, but legacy tile artwork
-    // is deliberately not rendered in Aurora.
-    drawAuroraGround(ctx, cam.x, cam.y, ow.cols * ow.tile, ow.rows * ow.tile);
-  } else {
-    const startCol = Math.max(0, Math.floor(cam.x / ow.tile)), startRow = Math.max(0, Math.floor(cam.y / ow.tile));
-    const endCol = Math.min(ow.cols, startCol + Math.ceil(VIEW_W / ow.tile) + 2), endRow = Math.min(ow.rows, startRow + Math.ceil(VIEW_H / ow.tile) + 2);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    for (let y = startRow; y < endRow; y++) {
-      if (!ow.map[y]) continue;
-      for (let x = startCol; x < endCol; x++) {
-        const tile = ow.map[y][x];
-        if (tile !== undefined) drawTile(ctx, tile, x * ow.tile - cam.x, y * ow.tile - cam.y, ow.tile, ow.locationId, theme.colors);
-      }
+  // Aurora and every other region share the authored 2x terrain atlas.
+  // Nearest-neighbour sampling preserves crisp 16-bit pixel edges.
+  const startCol = Math.max(0, Math.floor(cam.x / ow.tile)), startRow = Math.max(0, Math.floor(cam.y / ow.tile));
+  const endCol = Math.min(ow.cols, startCol + Math.ceil(VIEW_W / ow.tile) + 2), endRow = Math.min(ow.rows, startRow + Math.ceil(VIEW_H / ow.tile) + 2);
+  ctx.imageSmoothingEnabled = false;
+  for (let y = startRow; y < endRow; y++) {
+    if (!ow.map[y]) continue;
+    for (let x = startCol; x < endCol; x++) {
+      const tile = ow.map[y][x];
+      if (tile !== undefined) drawTile(ctx, tile, x * ow.tile - cam.x, y * ow.tile - cam.y, ow.tile, ow.locationId, theme.colors);
     }
   }
   ctx.imageSmoothingEnabled = false;

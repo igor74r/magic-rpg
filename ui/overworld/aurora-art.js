@@ -10,50 +10,6 @@ const BUILDINGS = Object.freeze({
   home:    { wall:'#c9b18a', shade:'#88745b', roof:'#59604a', roofHi:'#89916a', trim:'#e5d1aa', sign:'#8a7452', window:'#f5d28a', chimney:false, crest:'' }
 });
 
-const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-function polygon(ctx, points, fill, stroke, lineWidth=1) {
-  ctx.beginPath(); ctx.moveTo(points[0][0], points[0][1]);
-  for (let i=1;i<points.length;i++) ctx.lineTo(points[i][0], points[i][1]);
-  ctx.closePath(); if (fill) { ctx.fillStyle=fill; ctx.fill(); }
-  if (stroke) { ctx.strokeStyle=stroke; ctx.lineWidth=lineWidth; ctx.stroke(); }
-}
-function rounded(ctx,x,y,w,h,r,fill,stroke) {
-  ctx.beginPath(); ctx.roundRect(x,y,w,h,r); ctx.fillStyle=fill; ctx.fill();
-  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
-}
-function line(ctx,x1,y1,x2,y2,color,width=2) {
-  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();
-}
-function makeGroundPattern(ctx) {
-  const tile=document.createElement('canvas'); tile.width=256; tile.height=256;
-  const g=tile.getContext('2d');
-  g.fillStyle='#657d50';g.fillRect(0,0,256,256);
-  let seed=0xA170A;
-  const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-  for(let i=0;i<260;i++){
-    const x=rand()*256,y=rand()*256,r=1+rand()*5;
-    g.fillStyle=rand()>.5?'rgba(191,177,112,.12)':'rgba(28,57,38,.13)';
-    g.beginPath();g.ellipse(x,y,r*1.7,r,rand()*Math.PI,0,Math.PI*2);g.fill();
-  }
-  for(let i=0;i<95;i++){
-    const x=rand()*256,y=rand()*256;
-    g.strokeStyle=rand()>.5?'rgba(205,204,132,.32)':'rgba(34,68,38,.35)';
-    g.lineWidth=1;g.beginPath();g.moveTo(x,y);g.lineTo(x-2+rand()*5,y-2-rand()*5);g.stroke();
-  }
-  return ctx.createPattern(tile,'repeat');
-}
-let groundPattern=null;
-export function drawAuroraGround(ctx,cameraX,cameraY,worldWidth,worldHeight){
-  if(!groundPattern) groundPattern=makeGroundPattern(ctx);
-  ctx.save();ctx.fillStyle=groundPattern;
-  ctx.fillRect(-cameraX,-cameraY,worldWidth,worldHeight);
-  // Soft sunlit variation prevents a flat, uniform floor.
-  const glow=ctx.createRadialGradient(520-cameraX,340-cameraY,20,520-cameraX,340-cameraY,680);
-  glow.addColorStop(0,'rgba(230,205,133,.13)');glow.addColorStop(1,'rgba(230,205,133,0)');
-  ctx.fillStyle=glow;ctx.fillRect(-cameraX,-cameraY,worldWidth,worldHeight);
-  ctx.restore();
-}
-
 function drawRoof(ctx,p) {
   polygon(ctx,[[-132,-111],[-91,-190],[4,-218],[133,-151],[133,-112],[4,-174],[-91,-151]],p.roof,'#302a2b',5);
   polygon(ctx,[[-132,-111],[-91,-190],[4,-218],[4,-174],[-91,-151]],p.roofHi,'rgba(255,225,174,.28)',2);
