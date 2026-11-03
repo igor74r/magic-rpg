@@ -895,6 +895,23 @@ function drawVillageProp(ctx, x, y, style) {
   pixelCtx.scale(0.5, 0.5);
   drawVillagePropRaw(pixelCtx, 0, 0, style);
   pixelCtx.restore();
+
+  // Convert the legacy silhouettes into a strict 16-bit-like pixel surface:
+  // snap RGB to a compact fixed-step palette and remove translucent edge pixels.
+  // This prevents antialiased curves and glow halos from surviving the downsample.
+  const image = pixelCtx.getImageData(0, 0, 32, 32);
+  for (let i = 0; i < image.data.length; i += 4) {
+    if (image.data[i + 3] < 112) {
+      image.data[i + 3] = 0;
+      continue;
+    }
+    image.data[i] = Math.round(image.data[i] / 32) * 32;
+    image.data[i + 1] = Math.round(image.data[i + 1] / 32) * 32;
+    image.data[i + 2] = Math.round(image.data[i + 2] / 32) * 32;
+    image.data[i + 3] = 255;
+  }
+  pixelCtx.putImageData(image, 0, 0);
+
   ctx.save();
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(surface, Math.round(x - 48), Math.round(y - 48), 96, 96);
