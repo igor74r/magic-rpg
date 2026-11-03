@@ -307,6 +307,7 @@ let dashboardModal = null;
 let dashboardModalResumeWorld = false;
 let dashboardModalTrigger = null;
 let dashboardPreviousGameInert = false;
+let dashboardPreviousPaused = false;
 
 function getDashboardTabTitle(tab) {
   const element = document.querySelector(`.dashboard-tablist .tab[data-tab="${tab}"] .tab-text`);
@@ -335,12 +336,12 @@ function closeDashboardModal({ resumeWorld = true, restoreFocus = true } = {}) {
 
   // The modal owns section rendering. Do not repaint the legacy #tab-content
   // on close; the persistent game shell remains mounted beneath the overlay.
+  // Resume exactly the scene that was running before the overlay opened.
+  // Do not rely on a second render or sidebar click to unfreeze the game.
   if (resumeWorld && dashboardModalResumeWorld && state.overworld) {
-    dashboardModalResumeWorld = false;
     window.GameAPI?.resumeOverworld?.();
-  } else {
-    dashboardModalResumeWorld = false;
   }
+  dashboardModalResumeWorld = false;
 
   const trigger = dashboardModalTrigger;
   dashboardModalTrigger = null;
@@ -368,18 +369,19 @@ function openDashboardModal(tab) {
   const preserveWorldResume = dashboardModal
     ? dashboardModalResumeWorld
     : !!(state.overworld?.active && !state.overworld?.paused);
-  // Retire the old central tab renderer. In the real game, sidebar sections
-  // belong only to the modal; the center must remain the persistent village.
-  const legacyCenterPanel = document.getElementById('tab-content');
-  if (legacyCenterPanel) legacyCenterPanel.innerHTML = '';
+  // The legacy central panel is never used in the live game. Do not erase
+  // its DOM here; only mount the overlay and leave the persistent scene intact.
   if (dashboardModal) closeDashboardModal({ resumeWorld: false, restoreFocus: false });
 
   dashboardModalTrigger = document.getElementById(`game-tab-${tab}`);
   dashboardModalResumeWorld = preserveWorldResume;
+  dashboardPreviousPaused = !!state.overworld?.paused;
   if (state.overworld) {
-    state.overworld.active = false;
+    // Pause the update loop without deactivating the overworld. Setting
+    // active=false can strand the loop in a state that sidebar actions cannot resume.
+    state.overworld.active = true;
     state.overworld.paused = true;
-    // Keep the scene mounted and visible behind the modal overlay.
+    setPaused(true);
     document.getElementById('screen-game')?.classList.add('overworld-active');
   }
 
