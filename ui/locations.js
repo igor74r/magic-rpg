@@ -153,7 +153,12 @@ function renderPanel(id) {
 }
 
 function highlight() {
-  document.querySelectorAll('.wnode').forEach((n) => n.classList.toggle('selected', n.dataset.loc === selected));
+  document.querySelectorAll('.wnode').forEach((n) => {
+    const active = n.dataset.loc === selected;
+    n.classList.toggle('selected', active);
+    n.setAttribute('aria-pressed', String(active));
+    n.setAttribute('aria-current', n.classList.contains('current') ? 'location' : 'false');
+  });
 }
 
 function updateAvatar() {
@@ -331,7 +336,7 @@ export function renderLocations() {
     const questMarker = isQuestTarget
       ? `<span class="wnode-quest-marker" aria-label="Цель активного задания: ${activeMissionProgress.current} из ${activeMissionProgress.required}">📜 ЗАДАНИЕ · ${activeMissionProgress.current}/${activeMissionProgress.required}</span>`
       : '';
-    return `<div class="wnode${n.id === state.game.location ? ' current' : ''}${locked ? ' locked' : ''}${isQuestTarget ? ' quest-target' : ''}" data-loc="${n.id}" data-x="${n.x}" data-y="${n.y}"
+    return `<div class="wnode${n.id === state.game.location ? ' current' : ''}${locked ? ' locked' : ''}${isQuestTarget ? ' quest-target' : ''}" role="button" tabindex="0" aria-pressed="${n.id === selected}" aria-current="${n.id === state.game.location ? 'location' : 'false'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();GameAPI.mapSelect('${n.id}')}" data-loc="${n.id}" data-x="${n.x}" data-y="${n.y}"
       style="left:${n.x.toFixed(2)}%;top:${n.y.toFixed(2)}%;${locked ? 'opacity:.48;filter:grayscale(.75)' : ''}" onclick="GameAPI.mapSelect('${n.id}')" title="${loc.name}${isQuestTarget ? ` · цель задания: ${activeMission.mission.title} · ${activeMissionProgress.current}/${activeMissionProgress.required}` : ''}${n.story ? ` · маршрут #${n.story.sequence} · уровень ${n.story.recommendedLevel}` : ''}${locked ? ` · закрыто: ${lockDetail}` : ''}" aria-label="${loc.name}${isQuestTarget ? `, цель задания, ${activeMissionProgress.current} из ${activeMissionProgress.required}` : ''}${locked ? `, закрыто: ${lockDetail}` : ''}">
       ${order}${questMarker}<span class="wnode-icon">${locked ? '🔒' : loc.emoji}</span>
       <span class="wnode-name" aria-hidden="true">${n.story ? `#${n.story.sequence} · ` : ''}${loc.name}</span>
@@ -361,7 +366,7 @@ export function renderLocations() {
       <svg class="map-links" viewBox="0 0 100 100" preserveAspectRatio="none">${links}</svg>
       <div class="map-orbit"></div>
       <div class="map-orbit map-orbit-inner"></div>
-      <div class="wnode village${state.game.location === 'village' ? ' current' : ''}" data-loc="village" data-x="50" data-y="50" style="left:50%;top:50%"
+      <div class="wnode village${state.game.location === 'village' ? ' current' : ''}" role="button" tabindex="0" aria-pressed="${selected === 'village'}" aria-current="${state.game.location === 'village' ? 'location' : 'false'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();GameAPI.mapSelect('village')}" data-loc="village" data-x="50" data-y="50" style="left:50%;top:50%"
         onclick="GameAPI.mapSelect('village')" title="Деревня Аврора">
         <span class="wnode-icon">🏘️</span>
         <span class="wnode-name">Деревня Аврора</span>
