@@ -447,6 +447,10 @@ export function saveAndMenu() {
     toast('❌ Не удалось сохранить игру. Проверьте свободное место в хранилище браузера.');
     return false;
   }
+  // The dashboard can be opened while the 2D overworld is active. Leaving
+  // its RAF/autosave loop alive behind the menu can consume CPU and freeze
+  // the page; clear runtime state only after the save succeeded.
+  clearOverworldRuntime();
   toast('Игра сохранена');
   stopBGM();
   showScreen('screen-main');
