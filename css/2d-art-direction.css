@@ -450,26 +450,3 @@
     animation-iteration-count: 1 !important;
   }
 }
-
-/* The hero HUD is the only full header above the world scene.
-   Keep the location canvas visually uninterrupted and retain a compact exit action. */
-#screen-overworld .overworld-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  min-height: 0;
-  margin: 0 0 8px;
-}
-#screen-overworld .overworld-exit-button {
-  margin: 0;
-  padding: 6px 12px;
-  border-color: rgba(201,166,107,.48);
-  border-radius: 7px;
-  background: rgba(8,12,18,.72);
-  color: #d9c69f;
-  font-size: 12px;
-}
-#screen-overworld .overworld-exit-button:hover {
-  border-color: #e4c27f;
-  color: #ffe8b4;
-}
