@@ -62,6 +62,14 @@ try {
         const title=await page.locator('#dashboard-tab-modal h2, #dashboard-tab-modal [role="heading"]').first().innerText().catch(()=>tab);
         assert.ok(title.length>0,`${vp.name}/${tab}: modal title must be rendered`);
         if(tab==='hero') assert.ok(await page.locator('#dashboard-tab-modal .hero-overview').count()>0,`${vp.name}: hero view missing`);
+        if(tab==='hero') {
+          assert.equal(await page.locator('#dashboard-tab-modal .hero-overview-left .hero-vital').count(),3,
+            `${vp.name}: hero profile must show three resource cards`);
+          assert.equal(await page.locator('#dashboard-tab-modal .hero-stat-grid .hero-stat').count(),10,
+            `${vp.name}: hero profile must retain all ten attributes`);
+          assert.equal(await page.locator('#dashboard-tab-modal .hero-progression-grid > div').count(),4,
+            `${vp.name}: hero profile must retain four progression indicators`);
+        }
         if(tab==='inventory') assert.ok(await page.locator('#dashboard-tab-modal [data-inv-filter]').count()>0,`${vp.name}: inventory controls missing`);
         await capture(page,`${vp.name}-0${tab==='hero'?2:3}-${tab}`);
         await page.locator('#dashboard-tab-modal [data-dashboard-modal-close]').click();
