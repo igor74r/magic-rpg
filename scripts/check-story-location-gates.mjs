@@ -59,7 +59,6 @@ assert.equal(canEnterStoryLocation({ level: 1 }, 'rift').allowed, true,
 const campaignSource = readFileSync(new URL('../systems/campaign.js', import.meta.url), 'utf8');
 const overworldSource = readFileSync(new URL('../systems/overworld.js', import.meta.url), 'utf8');
 const portalSource = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
-const mapSource = readFileSync(new URL('../ui/locations.js', import.meta.url), 'utf8');
 assert.ok(campaignSource.includes('getStoryLocationProgression'),
   'campaign must expose a single source of truth for story route order');
 assert.ok(overworldSource.includes('canEnterStoryLocation(state.game.player, locationId)'),
@@ -67,10 +66,10 @@ assert.ok(overworldSource.includes('canEnterStoryLocation(state.game.player, loc
 assert.ok(portalSource.includes('Требуется уровень') && portalSource.includes("classList.toggle('is-locked'"),
   'Aurora world atlas must visibly mark locked destinations and explain level requirements');
 assert.ok(portalSource.includes('destinations.sort(([a], [b]) =>') && portalSource.includes('storyOrder.get(a)') && portalSource.includes('storyOrder.get(b)'),
-  'Aurora portal must sort campaign destinations by story sequence');
-assert.ok(mapSource.includes('map-story-link'),
-  'world map must connect story locations in campaign sequence');
-assert.ok(mapSource.includes('canEnterStoryLocation(state.game?.player, id)'),
-  'world map must prevent selecting locked story destinations');
+  'Aurora atlas must sort campaign destinations by story sequence');
+assert.ok(portalSource.includes('portal-route') && portalSource.includes('storyPoints'),
+  'the unified portal atlas must connect story locations in campaign sequence');
+assert.ok(portalSource.includes('canEnterStoryLocation(state.game?.player, id)'),
+  'the unified portal atlas must prevent travel to locked story destinations');
 
 console.log('check-story-location-gates: OK — ordered regions, five level bands, direct-entry protection');
