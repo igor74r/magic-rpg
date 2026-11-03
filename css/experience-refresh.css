@@ -663,6 +663,47 @@
 }
 
 
+/* Robust help layout: use the screen itself as the scroll viewport (including iOS). */
+#screen-help.screen.active {
+  display: block !important;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow-x: clip;
+  overflow-y: scroll !important;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 12px 48px;
+}
+#screen-help .game-container {
+  display: flex;
+  position: relative;
+  margin: 0 auto;
+  flex: none !important;
+  min-height: min-content;
+  height: auto !important;
+  overflow: visible !important;
+}
+#screen-help .help-panel {
+  display: block;
+  flex: none;
+  min-height: min-content;
+  overflow: visible !important;
+}
+#screen-help .help-section {
+  display: block;
+  position: relative;
+  height: auto;
+  overflow: visible;
+}
+#screen-help .settings-back-btn {
+  display: block;
+  position: relative;
+  margin: 18px auto 12px;
+}
+
 /* The guide must grow naturally; the fixed screen scrolls instead of clipping its lower sections. */
 #screen-help.screen.active {
   height: 100%;
