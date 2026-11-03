@@ -1018,3 +1018,7 @@ button:focus-visible, a:focus-visible, .tab:focus-visible, .settings-tab:focus-v
 @media (prefers-reduced-motion:reduce) {
   .passive-tree-controls button { transition:none; }
 }
+
+/* Locked passive nodes remain keyboard-focusable for discovery and navigation. */
+.passive-node[aria-disabled="true"] { cursor:help; filter:saturate(.72); }
+.passive-node[aria-disabled="true"]:focus-visible { filter:none; }
