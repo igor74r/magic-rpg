@@ -315,6 +315,14 @@ document.addEventListener('click', (e) => {
 
 // Tab-like navigation remains fully usable without a pointer.
 document.addEventListener('keydown', (event) => {
+  // The How-to overlay can always be dismissed with Escape, even when focus is inside it.
+  if (event.key === 'Escape' && document.getElementById('screen-help')?.classList.contains('active')) {
+    event.preventDefault();
+    event.stopPropagation();
+    showScreen('screen-main');
+    updateMainMenu();
+    return;
+  }
   if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey
       && !/INPUT|TEXTAREA|SELECT/.test(event.target?.tagName || '')
       && document.getElementById('screen-game')?.classList.contains('active')) {
