@@ -23,63 +23,99 @@ export function hashString(str) {
 
 export function generateVillageMap(cols, rows) {
   const grid = Array.from({ length: rows }, () => Array(cols).fill(0));
-  const putRect = (x, y, width, height, tile) => {
-    for (let yy = y; yy < y + height; yy++) {
-      for (let xx = x; xx < x + width; xx++) {
-        if (grid[yy]?.[xx] !== undefined) grid[yy][xx] = tile;
+  const stampRoad = (x, y, width = 2) => {
+    const radius = Math.max(0, Math.floor((width - 1) / 2));
+    for (let oy = -radius; oy <= radius; oy++) {
+      for (let ox = -radius; ox <= radius; ox++) {
+        // A softened diamond keeps the path edge stepped, not square and rigid.
+        if (Math.abs(ox) + Math.abs(oy) > radius + (width % 2 ? 0 : 1)) continue;
+        if (grid[y + oy]?.[x + ox] !== undefined) grid[y + oy][x + ox] = 1;
+      }
+    }
+    if (grid[y]?.[x] !== undefined) grid[y][x] = 1;
+  };
+
+  // Walk a sequence of waypoints with a deterministic, 4-connected raster line.
+  // Alternating the axis on diagonal sections creates a natural stepped curve.
+  const road = (points, width = 2) => {
+    for (let segment = 0; segment < points.length - 1; segment++) {
+      let [x, y] = points[segment];
+      const [tx, ty] = points[segment + 1];
+      let ix = 0, iy = 0;
+      const dx = Math.abs(tx - x), dy = Math.abs(ty - y);
+      const sx = Math.sign(tx - x), sy = Math.sign(ty - y);
+      let error = dx - dy;
+      let toggle = segment % 2 === 0;
+      for (let step = 0; step < cols + rows + 8; step++) {
+        stampRoad(x, y, width);
+        if (x === tx && y === ty) break;
+        const twice = error * 2;
+        const canX = twice > -dy && x !== tx;
+        const canY = twice < dx && y !== ty;
+        if (canX && canY) {
+          if (toggle) { x += sx; error -= dy; }
+          else { y += sy; error += dx; }
+          toggle = !toggle;
+        } else if (canX) { x += sx; error -= dy; }
+        else if (canY) { y += sy; error += dx; }
+        else break;
       }
     }
   };
-  const road = (x1, y1, x2, y2, width = 2) => {
-    let x = x1, y = y1;
-    const radius = Math.floor(width / 2);
-    const stamp = () => {
-      for (let oy = -radius; oy <= radius; oy++) {
-        for (let ox = -radius; ox <= radius; ox++) {
-          if (grid[y + oy]?.[x + ox] !== undefined) grid[y + oy][x + ox] = 1;
-        }
-      };
-    };
-    for (let step = 0; step < cols + rows + 5; step++) {
-      stamp();
-      if (x === x2 && y === y2) break;
-      if (x !== x2) x += Math.sign(x2 - x);
-      else y += Math.sign(y2 - y);
-    }
-  };
 
-  const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
+  const cx = Math.floor(cols / 2);
+  const cy = Math.floor(rows / 2);
 
-  // Aurora's new layout: a compact village square, a main north–south lane,
-  // and short connected branches to the craft quarter, market, tavern and gates.
-  // Every route remains continuous so the player can reach all quest services.
-  road(cx, rows - 1, cx, cy + 4, 2);
-  road(cx, cy + 4, cx - 2, cy + 2, 2);
-  road(cx - 2, cy + 2, cx, cy, 3);
-  road(cx, cy, cx, 4, 2);
+  // Southern arrival lane bends into the village square instead of forming
+  // a rigid cross. The central tile remains the stable arrival/navigation hub.
+  road([[cx, rows - 1], [cx, rows - 6], [cx - 1, rows - 9], [cx, cy + 4], [cx, cy]], 3);
+  road([[cx, cy], [cx - 1, cy - 3], [cx, cy - 6], [cx, 4]], 2);
 
-  road(cx, cy, 7, cy, 2);
-  road(7, cy, 7, 9, 2);
-  road(7, 9, 5, 11, 2);
-  road(cx, cy, cols - 7, cy, 2);
-  road(cols - 7, cy, cols - 7, 9, 2);
-  road(cols - 7, 9, cols - 7, 20, 2);
+  // West craft quarter and east market quarter: each has a curved main walk
+  // plus a short yard spur leading to its service buildings.
+  road([[cx, cy], [cx - 4, cy - 1], [cx - 8, cy], [7, cy - 1], [7, 9]], 2);
+  road([[7, 9], [6, 11], [7, 14], [8, 17], [7, 21]], 2);
+  road([[cx, cy], [cx + 4, cy + 1], [cx + 8, cy], [cols - 7, cy + 1], [cols - 7, 9]], 2);
+  road([[cols - 7, 9], [cols - 6, 12], [cols - 7, 16], [cols - 7, 21]], 2);
 
-  road(cx, cy + 2, 13, cy + 2, 2);
-  road(13, cy + 2, 13, rows - 4, 2);
-  road(cx, cy + 2, 25, cy + 2, 2);
-  road(25, cy + 2, 25, rows - 4, 2);
+  // Residential and tavern paths form small courtyards, not long straight alleys.
+  road([[cx - 1, cy + 3], [cx - 4, cy + 5], [cx - 6, rows - 5], [13, rows - 4]], 2);
+  road([[cx + 1, cy + 3], [cx + 4, cy + 5], [cx + 6, rows - 5], [25, rows - 4]], 2);
+  road([[13, rows - 4], [15, rows - 5], [17, rows - 4], [cx, rows - 5]], 2);
 
-  // A few soft grass gardens frame the houses without blocking any street,
-  // important interaction point or the southern spawn.
-  putRect(1, 1, 3, 4, 4);
-  putRect(cols - 4, 1, 3, 4, 4);
-  putRect(1, rows - 5, 3, 4, 4);
-  putRect(cols - 4, rows - 5, 3, 4, 4);
-  putRect(10, 1, 2, 2, 4);
-  putRect(cols - 12, 1, 2, 2, 4);
-  putRect(10, rows - 3, 2, 2, 4);
-  putRect(cols - 12, rows - 3, 2, 2, 4);
+  // Small irregular garden beds. Road tiles and protected interaction cells
+  // are never overwritten, so every NPC, doorway, service and portal stays usable.
+  const protectedCells = [
+    [19, 15], ...Array.from({ length: 0 }, () => [0, 0])
+  ];
+  const protect = (x, y) => protectedCells.push([x, y]);
+  for (const [x, y] of [
+    [17,19],[20,19],[22,6],[4,9],[33,10],[5,20],[33,21],
+    [16,14],[19,13],[22,13],[15,10],[17,10],[20,10],[7,10],[31,10],
+    [7,21],[31,21],[24,6],[19,25],[12,16],[13,13],[27,13],[15,8],[15,18],
+    [12,9],[27,9],[12,20],[27,20],[10,14],[29,14],[10,18],[29,18],
+    [29,22],[9,9],[9,11],[10,11],[29,21],[9,21],
+    [25,4],[7,8],[31,8],[7,20],[31,20],[13,25],[25,25],[13,4]
+  ]) protect(x, y);
+  const isProtected = (x, y) => protectedCells.some(([px, py]) => Math.abs(px - x) <= 1 && Math.abs(py - y) <= 1);
+  const gardens = [
+    { x: 1, y: 1, rows: [[1,3],[0,4],[0,3],[1,2]] },
+    { x: cols - 5, y: 1, rows: [[1,3],[0,4],[0,3],[1,2]] },
+    { x: 1, y: rows - 5, rows: [[1,2],[0,3],[0,4],[1,3]] },
+    { x: cols - 5, y: rows - 5, rows: [[1,3],[0,4],[0,3],[1,2]] },
+    { x: 10, y: 2, rows: [[1,2],[0,3],[1,2]] },
+    { x: cols - 13, y: 2, rows: [[1,2],[0,3],[1,2]] },
+    { x: 2, y: 12, rows: [[1,2],[0,3],[1,2]] },
+    { x: cols - 5, y: 13, rows: [[1,2],[0,3],[1,2]] }
+  ];
+  for (const patch of gardens) {
+    patch.rows.forEach(([left, right], row) => {
+      for (let x = patch.x + left; x <= patch.x + right; x++) {
+        const y = patch.y + row;
+        if (grid[y]?.[x] === 0 && !isProtected(x, y)) grid[y][x] = 4;
+      }
+    });
+  }
 
   return grid;
 }
@@ -161,12 +197,10 @@ export function generateMap(locationId, cols, rows) {
   const cy = Math.floor(rows / 2);
 
   for (let x = 0; x < cols; x++) {
-    // The main horizontal road must never be cut by a random obstacle.
     grid[cy][x] = 1;
   }
 
   for (let y = 0; y < rows; y++) {
-    // The main vertical road connects the spawn area to both map edges.
     grid[y][cx] = 1;
   }
 
@@ -244,7 +278,6 @@ export function findFreeCell(
   }
 
   // A bounded full scan prevents random clustering from hiding valid cells.
-  // It also makes spawn placement reliable on small or obstacle-heavy maps.
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (isCandidate(x, y)) return { x, y };
