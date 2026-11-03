@@ -94,7 +94,7 @@ export function renderDashboardContext() {
       <div class="context-mission-meta"><span>Акт ${mission.act.number} · ${mission.missionIndex + 1}/5</span><b>${progress.current}/${progress.required}</b></div>
       <strong>${escapeHtml(mission.mission.title)}</strong>
       <p>${escapeHtml(mission.mission.objective)}</p>
-      <div class="context-progress"><i style="width:${percent}%"></i></div>
+      <div class="context-progress" role="progressbar" aria-label="Прогресс текущего задания" aria-valuemin="0" aria-valuemax="${progress.required}" aria-valuenow="${progress.current}" aria-valuetext="${progress.current} из ${progress.required}"><i style="width:${Math.max(0, Math.min(100, percent))}%"></i></div>
       <small>${progress.complete ? 'Цель выполнена — вернитесь и завершите задание.' : progress.active ? 'Задание активно' : 'Следующее сюжетное задание'}</small>
     `;
   }
