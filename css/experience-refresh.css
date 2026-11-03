@@ -1205,3 +1205,47 @@
   margin-top: 4px !important;
   margin-bottom: 6px !important;
 }
+
+/* Further compact and unify the upper header area of character creation. */
+#screen-char .character-creation-container {
+  padding-top: 6px !important;
+  padding-bottom: 12px !important;
+}
+#screen-char .character-creation-heading {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  justify-items: center !important;
+  text-align: center !important;
+  gap: 2px !important;
+  padding-bottom: 5px !important;
+}
+#screen-char .character-creation-eyebrow {
+  padding: 3px 7px !important;
+  letter-spacing: .12em !important;
+  line-height: 1.15 !important;
+}
+#screen-char .character-creation-heading h1 {
+  font-size: clamp(21px, 2.5vw, 29px) !important;
+  letter-spacing: .01em !important;
+}
+#screen-char .character-creation-heading .subtitle {
+  max-width: 56ch !important;
+  font-size: 10px !important;
+}
+#screen-char .character-stepper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 6px auto !important;
+}
+#screen-char .character-step {
+  min-height: 28px !important;
+  line-height: 1.1 !important;
+}
+#screen-char #class-selection-stage > .class-stage-title,
+#screen-char #class-review-stage > .class-stage-title {
+  text-align: center !important;
+  font-size: 13px !important;
+  letter-spacing: .04em !important;
+  margin: 2px 0 5px !important;
+}
