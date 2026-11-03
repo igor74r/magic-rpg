@@ -159,16 +159,19 @@ on('game:started', () => {
   initAudio();
   updateVolume();
   playBGM('village');
+  enterOverworld('village');
 });
 on('game:update', renderGame);
 
 on('overworld:start', () => {
-  showScreen('screen-overworld');
+  showScreen('screen-game');
+  document.getElementById('screen-game')?.classList.add('overworld-active');
   initOverworld();
   if (state.overworld.locationId === 'village') playBGM('village');
   else playBGM('explore');
 });
 on('overworld:end', () => {
+  document.getElementById('screen-game')?.classList.remove('overworld-active');
   showScreen('screen-game');
   renderGame();
   playBGM('village');
@@ -547,7 +550,7 @@ function openWorldPortalMenu() {
       </div>
       <footer style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px clamp(14px,3vw,26px);border-top:1px solid rgba(114,185,178,.22);background:rgba(5,12,18,.35)">
         <span style="color:#9db5b6;font-size:12px">Номер маршрута показывает порядок сюжета; расположение земель на карте остаётся разбросанным.</span>
-        <button type="button" data-world-tower style="padding:12px 17px;border:1px solid #d49a5b;border-radius:10px;background:linear-gradient(135deg,#69401f,#2b1b18);color:#fff0d7;font-weight:700;font:inherit;cursor:pointer">🏰 Башня · 40 этажей</button>
+        
       </footer>
     </section>`;
   document.body.appendChild(overlay);
@@ -580,11 +583,6 @@ function openWorldPortalMenu() {
   overlay.addEventListener('click', event => { if (event.target === overlay) resume(); });
   search.focus();
 
-  overlay.querySelector('[data-world-tower]')?.addEventListener('click', () => {
-    overlay.remove();
-    exitOverworld();
-    openTowerMenu();
-  });
   locationButtons.filter(button => !button.disabled).forEach(button => button.addEventListener('click', () => {
     const id = button.getAttribute('data-world-location');
     overlay.remove();
@@ -825,6 +823,7 @@ window.GameAPI = {
   openShop, buy: buyItemUI, setShopPreset, buybackItem: buybackItemUI,
   enterOverworld: enterOverworldFromUI,
   mapSelect, mapTravel, mapEnter,
+  openWorldPortalMenu,
   exitOverworld,
   owAttack, owCast, owUseItem, owBlock, owUseAbility, owFlee,
   owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
