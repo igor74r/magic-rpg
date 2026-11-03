@@ -32,7 +32,7 @@ import {
   passiveTreeZoom, passiveTreeResetView, passiveTreeKeyDown
 } from './ui/game.js';
 import {
-  initOverworld, owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
+  initOverworld, resumeOverworld, owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
   owAttack, owCast, owUseItem, owBlock, owUseAbility, owFlee,
   owPauseResume, owPauseSaveVillage, owPauseExit
 } from './ui/overworld.js';
@@ -566,7 +566,10 @@ function openWorldPortalMenu() {
   const locationButtons = [...overlay.querySelectorAll('[data-world-location]')];
   const resume = () => {
     overlay.remove();
-    if (state.overworld) { state.overworld.active = true; state.overworld.paused = false; }
+    if (state.overworld) {
+      resumeOverworld();
+      document.getElementById('screen-game')?.classList.add('overworld-active');
+    }
   };
   const filterLocations = () => {
     const query = (search.value || '').trim().toLocaleLowerCase();
@@ -829,6 +832,7 @@ window.GameAPI = {
   enterOverworld: enterOverworldFromUI,
   mapSelect, mapTravel, mapEnter,
   openWorldPortalMenu,
+  resumeOverworld,
   exitOverworld,
   owAttack, owCast, owUseItem, owBlock, owUseAbility, owFlee,
   owOpenSpells, owOpenItems, owOpenAbilities, owCloseSub,
