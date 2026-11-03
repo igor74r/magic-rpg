@@ -17,7 +17,7 @@ const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworl
 ]);
 
 const tabs = [...html.matchAll(/<div class="(?:tab|settings-tab)[^"]*"[^>]*role="tab"[^>]*>/g)];
-assert.equal(tabs.length, 15, 'all game and settings navigation items must expose tab semantics');
+assert.equal(tabs.length, 14, 'remaining game and settings navigation items must expose tab semantics');
 for (const [tag] of tabs) {
   assert.match(tag, /aria-selected="(?:true|false)"/);
   assert.match(tag, /aria-controls="(?:tab-content|settings-content)"/);
