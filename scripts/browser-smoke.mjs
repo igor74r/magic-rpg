@@ -203,6 +203,9 @@ try {
       assert.ok(dashboard.layoutScrollWidth <= dashboard.layoutWidth + 1, `${viewport.name}/${tab}: dashboard overflow: ${JSON.stringify(dashboard)}`);
       assert.ok(dashboard.mainScrollWidth <= dashboard.mainWidth + 1, `${viewport.name}/${tab}: main panel overflow: ${JSON.stringify(dashboard)}`);
       assert.ok(dashboard.contentScrollWidth <= dashboard.contentWidth + 1, `${viewport.name}/${tab}: content overflow: ${JSON.stringify(dashboard)}`);
+      const dashboardModal = page.locator('#dashboard-tab-modal');
+      await dashboardModal.locator('[data-dashboard-modal-close]').click();
+      await dashboardModal.waitFor({ state: 'detached' });
     }
 
     await page.locator('#game-tab-hero').click();
