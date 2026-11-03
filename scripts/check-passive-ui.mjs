@@ -14,7 +14,7 @@ for (const contract of [
   'data-x="${node.x}" data-y="${node.y}"',
   "e.key === 'Home'",
   "e.key === 'End'",
-  "e.key === 'ArrowRight'",
+  "'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'",
   "e.key === '0'"
 ]) {
   assert.ok(ui.includes(contract), `passive tree UI is missing: ${contract}`);
