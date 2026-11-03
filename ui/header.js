@@ -201,8 +201,6 @@ export function renderHeader() {
   header.querySelectorAll('[data-spend-stat]').forEach(button => {
     button.addEventListener('click', () => spendStat(button.dataset.spendStat));
   });
-  header.querySelector('[data-header-action="tower"]')
-    ?.addEventListener('click', () => window.GameAPI?.enterTower?.());
   header.querySelector('[data-header-action="rift"]')
     ?.addEventListener('click', () => window.GameAPI?.enterRift?.());
 }
