@@ -1114,3 +1114,187 @@
   #dashboard-tab-modal .campaign-act-heading { display: grid; }
   #dashboard-tab-modal .ability-item { align-items: flex-start; flex-direction: column; }
 }
+
+/* Stage 6 — right rail: mission first, live event stream second. */
+#screen-game .dashboard-log {
+  gap: 0;
+  border-color: rgba(202,169,112,.32);
+  background: linear-gradient(170deg, rgba(23,28,34,.98), rgba(8,12,18,.99));
+}
+#screen-game .dashboard-context-panel {
+  padding: 13px;
+  border: 0;
+  border-bottom: 1px solid rgba(202,169,112,.22);
+  border-radius: 0;
+  background:
+    radial-gradient(ellipse at 0 0, rgba(201,166,107,.12), transparent 65%),
+    linear-gradient(145deg, rgba(37,35,30,.84), rgba(9,14,20,.96));
+}
+#screen-game .dashboard-context-heading {
+  color: #a9c9b7;
+  font-size: 9px;
+  letter-spacing: .15em;
+}
+#screen-game .dashboard-context-heading span:last-child {
+  padding: 3px 7px;
+  border: 1px solid rgba(142,181,112,.25);
+  border-radius: 999px;
+  background: rgba(89,128,63,.12);
+  color: #b2d18e;
+  font-variant-numeric: tabular-nums;
+}
+#screen-game .dashboard-context-location {
+  margin: 9px 0;
+  color: #c7b58e;
+  font-size: 10px;
+}
+#screen-game .dashboard-context-mission {
+  padding: 11px;
+  border: 1px solid rgba(216,187,123,.28);
+  border-radius: 8px;
+  background: linear-gradient(145deg, rgba(53,44,30,.58), rgba(5,9,14,.72));
+}
+#screen-game .context-mission-meta {
+  color: #a99a7c;
+  font-size: 9px;
+}
+#screen-game .context-mission-meta b {
+  color: #f0d69c;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+#screen-game .dashboard-context-mission strong {
+  color: #f0dfbb;
+  font-size: 12px;
+  line-height: 1.45;
+}
+#screen-game .dashboard-context-mission p {
+  color: #b7b09f;
+  font-size: 10px;
+  line-height: 1.5;
+}
+#screen-game .context-progress {
+  height: 7px;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 999px;
+  background: rgba(0,0,0,.5);
+}
+#screen-game .context-progress i {
+  border-radius: inherit;
+  box-shadow: 0 0 8px rgba(188,166,93,.25);
+}
+#screen-game .dashboard-context-mission small {
+  color: #a8c58c;
+  font-size: 9px;
+}
+#screen-game .dashboard-context-shards {
+  margin: 9px 1px;
+  color: #a9a18f;
+  font-size: 10px;
+}
+#screen-game .dashboard-context-shards b {
+  color: #e6cb83;
+  font-variant-numeric: tabular-nums;
+}
+#screen-game .dashboard-context-actions {
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  gap: 0;
+}
+#screen-game .dashboard-context-actions button {
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid rgba(216,187,123,.34);
+  border-radius: 7px;
+  background: linear-gradient(145deg, rgba(100,75,39,.38), rgba(29,28,25,.8));
+  color: #f0d9a7;
+  font-size: 10px;
+  font-weight: 800;
+}
+#screen-game .dashboard-context-actions button:hover {
+  border-color: rgba(240,214,156,.7);
+  background: rgba(115,88,48,.35);
+}
+#screen-game .dashboard-log .log-header {
+  padding: 11px 13px;
+  border-bottom-color: rgba(202,169,112,.2);
+  color: #e8d5ad;
+  font-size: 11px;
+}
+#screen-game .log-live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  border: 1px solid rgba(126,181,103,.22);
+  border-radius: 999px;
+  background: rgba(72,117,63,.1);
+  color: #a7d28c;
+  font-size: 8px;
+}
+#screen-game .dashboard-log-tools {
+  display: grid;
+  gap: 8px;
+  padding: 9px 10px;
+  border-bottom-color: rgba(202,169,112,.16);
+  background: rgba(4,8,13,.28);
+}
+#screen-game .log-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0;
+}
+#screen-game .log-filter {
+  flex: 1 1 48px;
+  min-height: 28px;
+  padding: 5px 6px;
+  border: 1px solid rgba(202,169,112,.18);
+  border-radius: 6px;
+  background: rgba(255,255,255,.025);
+  color: #aaa18e;
+  font-size: 9px;
+}
+#screen-game .log-filter.active {
+  border-color: rgba(216,187,123,.5);
+  background: rgba(153,112,55,.2);
+  color: #f0d9a7;
+}
+#screen-game .log-search {
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid rgba(202,169,112,.22);
+  border-radius: 7px;
+  background: rgba(0,0,0,.34);
+  color: #eee0c1;
+  font-size: 10px;
+}
+#screen-game .log-search:focus-visible {
+  outline: 2px solid #e4c27f;
+  outline-offset: 2px;
+}
+#screen-game .dashboard-log .log-body {
+  padding: 8px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201,166,107,.35) transparent;
+}
+#screen-game .dashboard-log .log-body > div {
+  margin: 0 0 5px;
+  padding: 8px 8px 8px 10px;
+  border: 1px solid rgba(202,169,112,.1);
+  border-left: 2px solid rgba(202,169,112,.34);
+  border-radius: 0 6px 6px 0;
+  background: rgba(255,255,255,.022);
+  color: #c2b9a7;
+  font-size: 10px;
+  line-height: 1.55;
+  transition: background .14s ease, border-color .14s ease;
+}
+#screen-game .dashboard-log .log-body > div:hover {
+  border-left-color: rgba(216,187,123,.72);
+  background: rgba(201,166,107,.06);
+}
+#screen-game .dashboard-log .log-body > div[hidden] { display: none !important; }
+@media (max-width: 1050px) {
+  #screen-game .dashboard-context-panel { border-radius: 9px; }
+}
