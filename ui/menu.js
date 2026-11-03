@@ -10,6 +10,7 @@ import { CLASSES } from '../data/classes.js';
 import { LOCATIONS } from '../data/locations.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
 import { ENEMIES } from '../data/enemies.js';
+import { enterOverworld } from '../systems/overworld.js';
 
 let currentSettingsTab = 'sound';
 
@@ -409,6 +410,13 @@ export function loadSlot(slot) {
     showScreen('screen-game');
     emit('log', { channel: 'game', msg: `С возвращением, ${state.game.player.name}!`, cls: 'success' });
     emit('game:update');
+    // Loading data alone only rebuilds the dashboard. The saved world scene
+    // must also be started; otherwise Continue opens an empty game screen.
+    const savedLocation = state.game.location || 'village';
+    if (!enterOverworld(savedLocation)) {
+      state.game.location = 'village';
+      enterOverworld('village');
+    }
     playBGM('village');
   } else {
     toast('Не удалось загрузить слот');
