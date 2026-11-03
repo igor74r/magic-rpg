@@ -256,13 +256,18 @@ function createTree(classId, branches) {
   });
 
   // Поперечные связи между ветками создают несколько путей развития.
+  // Средние и поздние узлы соединены отдельно: игрок может менять специализацию,
+  // не возвращаясь к стартовому узлу и не теряя вложенные очки.
   branches.forEach((branch, index) => {
     const next = branches[(index + 1) % branches.length];
-    const fromId = `${classId}-${branch.id}-3`;
-    const toId = `${classId}-${next.id}-3`;
 
-    if (nodes[fromId] && nodes[toId] && !nodes[fromId].conn.includes(toId)) {
-      nodes[fromId].conn.push(toId);
+    for (const tierIndex of [3, 5]) {
+      const fromId = `${classId}-${branch.id}-${tierIndex}`;
+      const toId = `${classId}-${next.id}-${tierIndex}`;
+
+      if (nodes[fromId] && nodes[toId] && !nodes[fromId].conn.includes(toId)) {
+        nodes[fromId].conn.push(toId);
+      }
     }
   });
 
