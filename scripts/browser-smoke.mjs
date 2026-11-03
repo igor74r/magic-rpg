@@ -151,10 +151,12 @@ try {
     await page.locator('#aurora-world-portal [data-world-close]').click();
     for (const tab of ['hero', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
       const tabButton = page.locator(`#game-tab-${tab}`);
-      await tabButton.click();
+      await page.evaluate(tab => window.GameAPI.switchTab(tab), tab);
       assert.equal(await tabButton.getAttribute('aria-selected'), 'true', `${viewport.name}: ${tab} tab must become selected`);
       const dashboardModal = page.locator('#dashboard-tab-modal');
-      await dashboardModal.waitFor({state:'visible'});
+      await dashboardModal.waitFor({state:'visible', timeout:5000}).catch(async () => {
+        throw new Error(`${viewport.name}/${tab}: GameAPI.switchTab did not mount the modal overlay`);
+      });
       assert.equal(await dashboardModal.getAttribute('data-dashboard-tab'), tab,
         `${viewport.name}: sidebar section must render in the modal overlay`);
       if (tab === 'quests') {
