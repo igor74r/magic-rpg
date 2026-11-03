@@ -387,7 +387,22 @@ export function openHelp() {
 
 // ============ СЛОТЫ ============
 
+function clearOverworldRuntime() {
+  const overworld = state.overworld;
+  if (!overworld) return;
+
+  // Stop the RAF/autosave loops before hiding or replacing the game screen.
+  overworld.active = false;
+  overworld.paused = true;
+  state.overworld = null;
+  emit('overworld:end');
+}
+
+
 export function loadSlot(slot) {
+  // A previous session may have left a hidden overworld loop running behind
+  // the main menu. Tear it down before replacing the active character.
+  clearOverworldRuntime();
   if (loadGameData(slot)) {
     const log = document.getElementById('game-log');
     if (log) log.innerHTML = '';
