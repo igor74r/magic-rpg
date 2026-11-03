@@ -493,7 +493,11 @@ function showRiftOpeningCutscene() {
 }
 
 function openWorldPortalMenu() {
-  const ow = state.overworld;
+  let ow = state.overworld;
+  if (!ow && state.game) {
+    enterOverworld(state.game.location || 'village');
+    ow = state.overworld;
+  }
   if (!ow || ow.combat || ow.defeated) return;
   ow.active = false;
   const currentId = ow.sourceLocationId || ow.locationId;
