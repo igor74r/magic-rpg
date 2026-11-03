@@ -714,7 +714,7 @@ function drawVillageBuilding(ctx, x, y, style = 'home') {
   // Detailed Canvas architecture; gameplay anchors and collision footprints stay unchanged.
   drawAuroraBuilding(ctx, x, y, style);
 }
-function drawVillageProp(ctx, x, y, style) {
+function drawVillagePropRaw(ctx, x, y, style) {
   const t = performance.now() * 0.001;
   ctx.save();
   if (style === 'lantern') {
@@ -873,6 +873,31 @@ function drawVillageProp(ctx, x, y, style) {
     ctx.beginPath(); ctx.moveTo(x, y - 18); ctx.lineTo(x + 7, y - 4); ctx.lineTo(x, y + 5); ctx.lineTo(x - 6, y - 4); ctx.closePath(); ctx.fill();
     ctx.globalAlpha = 1; ctx.strokeStyle = '#d6b0ff'; ctx.beginPath(); ctx.moveTo(x, y - 18); ctx.lineTo(x, y + 5); ctx.stroke();
   }
+  ctx.restore();
+}
+
+const villagePropPixelCanvases = new Map();
+function drawVillageProp(ctx, x, y, style) {
+  // Render existing prop designs on a small logical pixel grid, then upscale
+  // with nearest-neighbour sampling to keep their silhouettes crisp.
+  if (typeof document === 'undefined') return drawVillagePropRaw(ctx, x, y, style);
+  let surface = villagePropPixelCanvases.get(style);
+  if (!surface) {
+    surface = document.createElement('canvas');
+    surface.width = 32; surface.height = 32;
+    villagePropPixelCanvases.set(style, surface);
+  }
+  const pixelCtx = surface.getContext('2d');
+  pixelCtx.imageSmoothingEnabled = false;
+  pixelCtx.clearRect(0, 0, 32, 32);
+  pixelCtx.save();
+  pixelCtx.translate(16, 15);
+  pixelCtx.scale(0.5, 0.5);
+  drawVillagePropRaw(pixelCtx, 0, 0, style);
+  pixelCtx.restore();
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(surface, Math.round(x - 48), Math.round(y - 48), 96, 96);
   ctx.restore();
 }
 
