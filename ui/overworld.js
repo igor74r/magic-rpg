@@ -211,9 +211,23 @@ export function initOverworld() {
 function initMobileDpad() {
   const dpad = document.getElementById('mobile-dpad');
   if (!dpad) return;
-  if (dpad.dataset.bound) return;
-  // Keep the on-screen pad available on every device as a reliable fallback,
-  // including desktop and hybrid touch/keyboard devices.
+
+  // Desktop/laptop users control the character with WASD or arrow keys.
+  // Do not mount pointer handlers or show a floating pad on a mouse/trackpad.
+  const isTouchDevice = window.matchMedia?.('(hover: none) and (pointer: coarse)').matches
+    || navigator.maxTouchPoints > 0;
+  if (!isTouchDevice) {
+    dpad.hidden = true;
+    dpad.style.display = 'none';
+    return;
+  }
+
+  if (dpad.dataset.bound) {
+    dpad.hidden = false;
+    dpad.style.display = 'block';
+    return;
+  }
+  dpad.hidden = false;
   dpad.style.display = 'block';
   dpad.dataset.bound = '1';
   dpad.querySelectorAll('.dpad-btn').forEach(btn => {
