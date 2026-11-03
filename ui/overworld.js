@@ -170,6 +170,16 @@ function onOverworldCanvasClick(event) {
   window.GameAPI?.interactNpc?.(nearest.id);
 }
 
+export function resumeOverworld() {
+  if (!state.overworld) return false;
+  state.overworld.active = true;
+  state.overworld.paused = false;
+  setPaused(false);
+  startAutosave();
+  start();
+  return true;
+}
+
 export function initOverworld() {
   if (!overworldInputBound) {
     window.addEventListener('keydown', onKeyDown);
