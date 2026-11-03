@@ -27,3 +27,18 @@ assert.match(layout, /#screen-game\.map-focused \.world-map\s*\{[\s\S]*?height: 
   'the world map must use a wider, taller viewport');
 assert.match(layout, /@media \(max-width: 700px\)[\s\S]*?#screen-game\.map-focused \.world-map/,
   'the enlarged map layout must remain responsive on mobile');
+
+const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const spawn = readFileSync(new URL('../systems/overworld/spawn.js', import.meta.url), 'utf8');
+assert.match(main, /enterOverworld\('village'\)/, 'new heroes must start inside Aurora');
+assert.match(main, /openWorldPortalMenu,/, 'the sidebar world portal action must be exposed');
+assert.match(html, /id="screen-overworld" class="dashboard-overworld"/, 'the location scene must live inside the dashboard');
+assert.match(html, /onclick="GameAPI\.openWorldPortalMenu\(\)"/, 'the sidebar world portal item must open the world portal');
+assert.doesNotMatch(main, /data-world-tower/, 'the world portal menu must not contain a tower shortcut');
+assert.doesNotMatch(header, /data-header-action="tower"/, 'the HUD must not duplicate the village tower gate');
+assert.doesNotMatch(map, /GameAPI\.enterTower\(\)/, 'the map panel must not duplicate the village tower gate');
+assert.match(spawn, /id: 'world-waystone'/, 'other locations keep their world map portal');
+assert.doesNotMatch(spawn, /id: 'tower-gate'/, 'other locations must not spawn tower gates');
+assert.match(main, /classList\.add\('overworld-active'\)/, 'the village scene must retain the dashboard side panels');
+assert.match(main, /classList\.remove\('overworld-active'\)/, 'leaving a location must restore dashboard content');
