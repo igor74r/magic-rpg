@@ -714,250 +714,36 @@ function drawVillageBuilding(ctx, x, y, style = 'home') {
   // Detailed Canvas architecture; gameplay anchors and collision footprints stay unchanged.
   drawAuroraBuilding(ctx, x, y, style);
 }
-function drawVillagePropRaw(ctx, x, y, style) {
-  const t = performance.now() * 0.001;
-  ctx.save();
-  if (style === 'lantern') {
-    // Carved oak post, iron hooks and a warm glass lantern.
-    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x, y + 23, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#392a23'; ctx.fillRect(x - 3, y - 5, 6, 31);
-    ctx.fillStyle = '#765238'; ctx.fillRect(x - 2, y - 4, 2, 28);
-    ctx.fillStyle = '#9b744b'; ctx.fillRect(x - 9, y - 17, 18, 4);
-    ctx.fillRect(x - 6, y - 21, 12, 4);
-    ctx.fillStyle = '#29252a'; ctx.fillRect(x - 7, y - 15, 14, 15);
-    ctx.fillStyle = '#d99a42'; ctx.fillRect(x - 5, y - 13, 10, 11);
-    ctx.fillStyle = '#ffe7a5'; ctx.globalAlpha = 0.82 + Math.sin(t * 2 + x) * 0.12;
-    ctx.fillRect(x - 3, y - 11, 6, 7);
-    ctx.beginPath(); ctx.arc(x, y - 6, 20, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.strokeStyle = '#49352a'; ctx.lineWidth = 2; ctx.strokeRect(x - 7, y - 15, 14, 15);
-    ctx.fillStyle = '#c6a36b'; ctx.fillRect(x - 8, y - 17, 16, 2); ctx.fillRect(x - 8, y, 16, 2);
-  } else if (style === 'memorial') {
-    ctx.fillStyle = 'rgba(0,0,0,.34)'; ctx.beginPath(); ctx.ellipse(x, y + 12, 27, 8, 0, 0, Math.PI * 2); ctx.fill();
-    // Moss-edged engraved stone with a small offering ledge.
-    ctx.fillStyle = '#4d5548'; ctx.fillRect(x - 21, y + 7, 42, 5);
-    ctx.fillStyle = '#66686a'; ctx.beginPath(); ctx.moveTo(x - 18, y + 8); ctx.lineTo(x - 15, y - 18); ctx.lineTo(x - 8, y - 28); ctx.lineTo(x + 8, y - 28); ctx.lineTo(x + 16, y - 17); ctx.lineTo(x + 19, y + 8); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#b9b19f'; ctx.lineWidth = 2; ctx.stroke();
-    ctx.fillStyle = '#858783'; ctx.fillRect(x - 11, y - 19, 22, 2);
-    ctx.strokeStyle = '#d8bd83'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(x, y - 18); ctx.lineTo(x, y + 1); ctx.moveTo(x - 7, y - 10); ctx.lineTo(x + 7, y - 10); ctx.stroke();
-    ctx.fillStyle = '#82916a'; ctx.fillRect(x - 17, y + 3, 4, 5); ctx.fillRect(x + 13, y + 4, 4, 4);
-    ctx.fillStyle = '#d9b77c'; ctx.fillRect(x - 3, y + 10, 6, 2);
-  } else if (style === 'bench') {
-    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x, y + 13, 25, 6, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#392923'; ctx.fillRect(x - 21, y - 4, 42, 8);
-    ctx.fillStyle = '#9a6940'; ctx.fillRect(x - 23, y - 12, 46, 7);
-    ctx.fillStyle = '#bd8b55'; ctx.fillRect(x - 20, y - 11, 40, 2);
-    ctx.fillStyle = '#63402e'; ctx.fillRect(x - 18, y - 3, 5, 17); ctx.fillRect(x + 13, y - 3, 5, 17);
-    ctx.fillStyle = '#d0a66b'; ctx.fillRect(x - 22, y - 13, 44, 2);
-    ctx.strokeStyle = '#49352a'; ctx.lineWidth = 1.5; ctx.strokeRect(x - 23, y - 12, 46, 7);
-    // Small carved end caps.
-    ctx.fillStyle = '#d8b878'; ctx.fillRect(x - 23, y - 12, 3, 7); ctx.fillRect(x + 20, y - 12, 3, 7);
-  } else if (style === 'stall') {
-    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x, y + 20, 31, 7, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#50352a'; ctx.fillRect(x - 24, y - 2, 48, 22);
-    ctx.fillStyle = '#9a633b'; ctx.fillRect(x - 27, y - 8, 54, 7);
-    ctx.fillStyle = '#b64a3c'; ctx.beginPath(); ctx.moveTo(x - 29, y - 8); ctx.lineTo(x - 23, y - 23); ctx.lineTo(x + 23, y - 23); ctx.lineTo(x + 29, y - 8); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#e6c68d'; ctx.fillRect(x - 21, y - 21, 7, 13); ctx.fillRect(x - 7, y - 21, 7, 13); ctx.fillRect(x + 7, y - 21, 7, 13);
-    ctx.fillStyle = '#d6a34d'; ctx.fillRect(x - 19, y + 2, 38, 5);
-    ctx.fillStyle = '#e2c58d'; ctx.fillRect(x - 17, y - 1, 8, 5); ctx.fillRect(x - 4, y - 1, 9, 5); ctx.fillRect(x + 10, y - 1, 7, 5);
-    ctx.strokeStyle = '#3e2a23'; ctx.lineWidth = 2; ctx.strokeRect(x - 24, y - 2, 48, 22);
-  } else if (style === 'fountain') {
-    // Layered cut-stone basin with rippling water and a carved central jet.
-    ctx.fillStyle = 'rgba(0,0,0,.34)'; ctx.beginPath(); ctx.ellipse(x, y + 15, 36, 13, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#343940'; ctx.beginPath(); ctx.ellipse(x, y + 5, 36, 14, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#777b7b'; ctx.beginPath(); ctx.ellipse(x, y + 1, 33, 12, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#c4b18d'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(x, y + 1, 29, 9, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = '#4b91a0'; ctx.beginPath(); ctx.ellipse(x, y - 1, 25, 8, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#a9e9f0'; ctx.lineWidth = 1.5; ctx.globalAlpha = .45 + Math.sin(t * 2) * .18;
-    ctx.beginPath(); ctx.ellipse(x - 5, y - 2, 12, 3 + Math.sin(t * 2) * 1.2, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.ellipse(x + 7, y, 7, 2.5, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#a99b80'; ctx.fillRect(x - 5, y - 22, 10, 22);
-    ctx.fillStyle = '#d9c9a4'; ctx.fillRect(x - 11, y - 25, 22, 5);
-    ctx.fillStyle = '#8c806c'; ctx.fillRect(x - 8, y - 30, 16, 5);
-    ctx.strokeStyle = '#a9e9f0'; ctx.lineWidth = 2; ctx.globalAlpha = .72 + Math.sin(t * 2) * .18;
-    ctx.beginPath(); ctx.moveTo(x, y - 27); ctx.quadraticCurveTo(x - 8, y - 38, x - 11, y - 31); ctx.moveTo(x, y - 27); ctx.quadraticCurveTo(x + 8, y - 38, x + 11, y - 31); ctx.stroke();
-    ctx.globalAlpha = 1;
-  } else if (style === 'world-portal' || style.startsWith('world-waystone')) {
-    const portalTone = style.includes('forest') || style.includes('briar') ? '#79bd78' : style.includes('ice') || style.includes('frost') ? '#8edfff' : style.includes('volcano') || style.includes('obsidian') || style.includes('dragon') ? '#ff9364' : style.includes('shadow') || style.includes('void') || style.includes('rift') ? '#bd91ff' : style.includes('swamp') ? '#b0bd6a' : style.includes('desert') || style.includes('wasteland') ? '#e7bd71' : style.includes('graveyard') || style.includes('ruins') || style.includes('sunken') ? '#b6a2c9' : style.includes('library') ? '#e5ca83' : '#6fd7d2';
-    const pulse = 0.72 + Math.sin(t * 2.2 + x * 0.01) * 0.16;
-    ctx.fillStyle = 'rgba(0,0,0,0.42)';
-    ctx.beginPath(); ctx.ellipse(x, y + 18, 35, 12, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#34313d'; ctx.beginPath(); ctx.ellipse(x, y + 7, 30, 12, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#b89b69'; ctx.lineWidth = 4; ctx.stroke();
-    ctx.fillStyle = '#151b2a'; ctx.beginPath(); ctx.ellipse(x, y - 8, 19, 27, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = portalTone; ctx.lineWidth = 3; ctx.globalAlpha = pulse;
-    ctx.beginPath(); ctx.ellipse(x, y - 8, 17, 25, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.strokeStyle = '#d7c18a'; ctx.lineWidth = 2; ctx.globalAlpha = 0.9;
-    ctx.beginPath(); ctx.arc(x, y - 8, 10, t * 0.7, t * 0.7 + Math.PI * 1.55); ctx.stroke();
-    ctx.fillStyle = portalTone; ctx.globalAlpha = pulse;
-    ctx.beginPath(); ctx.arc(x, y - 8, 5 + Math.sin(t * 3) * 1.5, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1;
-  } else if (style === 'tower-gate') {
-    const pulse = 0.68 + Math.sin(t * 1.8 + x * 0.02) * 0.14;
-    ctx.fillStyle = 'rgba(0,0,0,0.45)';
-    ctx.beginPath(); ctx.ellipse(x, y + 19, 38, 12, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#37313a'; ctx.fillRect(x - 28, y - 24, 9, 45); ctx.fillRect(x + 19, y - 24, 9, 45);
-    ctx.fillStyle = '#796047'; ctx.fillRect(x - 33, y - 30, 66, 8);
-    ctx.strokeStyle = '#c49a5e'; ctx.lineWidth = 3; ctx.strokeRect(x - 28, y - 24, 56, 45);
-    ctx.fillStyle = '#1d1220'; ctx.beginPath(); ctx.moveTo(x - 17, y + 19); ctx.lineTo(x - 17, y - 7); ctx.quadraticCurveTo(x, y - 34, x + 17, y - 7); ctx.lineTo(x + 17, y + 19); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#d28b58'; ctx.lineWidth = 3; ctx.globalAlpha = pulse;
-    ctx.beginPath(); ctx.moveTo(x - 17, y + 19); ctx.lineTo(x - 17, y - 7); ctx.quadraticCurveTo(x, y - 34, x + 17, y - 7); ctx.lineTo(x + 17, y + 19); ctx.stroke();
-    ctx.fillStyle = '#ffb36b'; ctx.globalAlpha = pulse;
-    ctx.beginPath(); ctx.arc(x, y - 7, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#d6b77e'; ctx.fillRect(x - 2, y - 35, 4, 7);
-  } else if (style === 'planter') {
-    // Crisp raised timber bed with visible soil, layered leaves and varied blooms.
-    let gardenSeed = Math.imul(Math.round(x) + 13, 374761393) ^ Math.imul(Math.round(y) + 29, 668265263);
-    gardenSeed = Math.imul(gardenSeed ^ (gardenSeed >>> 16), 0x45d9f3b);
-    const gardenVariant = (gardenSeed >>> 0) % 3;
-    ctx.fillStyle = '#283526'; ctx.fillRect(x - 19, y + 10, 38, 4);
-    ctx.fillStyle = '#58443a'; ctx.fillRect(x - 16, y - 3, 32, 17);
-    ctx.fillStyle = '#725039'; ctx.fillRect(x - 18, y - 8, 36, 6);
-    ctx.fillStyle = '#bd9360'; ctx.fillRect(x - 16, y - 7, 32, 2);
-    ctx.fillStyle = '#3b3028'; ctx.fillRect(x - 13, y - 2, 26, 7);
-    // Distinct pixel clumps keep the bed readable at the game's 48px scale.
-    ctx.fillStyle = gardenVariant === 1 ? '#456c3e' : '#35583a';
-    ctx.fillRect(x - 12, y - 12, 8, 8); ctx.fillRect(x - 3, y - 16, 9, 12);
-    ctx.fillRect(x + 6, y - 11, 7, 7); ctx.fillRect(x - 8, y - 18, 5, 5);
-    ctx.fillStyle = gardenVariant === 2 ? '#71934c' : '#63864a';
-    ctx.fillRect(x - 10, y - 14, 4, 4); ctx.fillRect(x - 1, y - 18, 5, 5);
-    ctx.fillRect(x + 7, y - 13, 4, 4); ctx.fillRect(x - 5, y - 8, 6, 4);
-    const bloom = gardenVariant === 0 ? '#d77a72' : gardenVariant === 1 ? '#e4c66e' : '#9b86c8';
-    ctx.fillStyle = bloom;
-    ctx.fillRect(x - 9, y - 17, 4, 4); ctx.fillRect(x + 7, y - 16, 4, 4);
-    ctx.fillStyle = '#f1d58a';
-    ctx.fillRect(x - 8, y - 16, 2, 2); ctx.fillRect(x + 8, y - 15, 2, 2);
-    ctx.fillStyle = '#e5c879'; ctx.fillRect(x - 1, y - 20, 3, 3);
-    ctx.fillStyle = '#8b6544'; ctx.fillRect(x - 18, y - 3, 3, 11); ctx.fillRect(x + 15, y - 3, 3, 11);
-  } else if (style === 'banner') {
-    ctx.fillStyle = 'rgba(0,0,0,.26)'; ctx.beginPath(); ctx.ellipse(x, y + 27, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#46372d'; ctx.fillRect(x - 3, y - 32, 6, 61);
-    ctx.fillStyle = '#a27b4c'; ctx.fillRect(x - 5, y - 34, 10, 4);
-    ctx.fillStyle = '#8f3037'; ctx.beginPath(); ctx.moveTo(x + 3, y - 29); ctx.lineTo(x + 26, y - 23); ctx.lineTo(x + 3, y - 10); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#d7b46f'; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.fillStyle = '#e4c982'; ctx.beginPath(); ctx.arc(x + 10, y - 22, 2.5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#60462f'; ctx.fillRect(x - 7, y + 26, 14, 3);
-  } else if (style === 'brazier') {
-    ctx.fillStyle = '#4a3930'; ctx.fillRect(x - 3, y - 3, 6, 25);
-    ctx.fillStyle = '#8b7862'; ctx.fillRect(x - 12, y - 5, 24, 5);
-    ctx.fillStyle = '#e98a43'; ctx.globalAlpha = 0.85 + Math.sin(t * 6 + x) * 0.1;
-    ctx.beginPath(); ctx.moveTo(x, y - 29); ctx.quadraticCurveTo(x + 14, y - 13, x, y - 7); ctx.quadraticCurveTo(x - 12, y - 17, x, y - 29); ctx.fill();
-    ctx.globalAlpha = 1;
-  } else if (style === 'anvil') {
-    ctx.fillStyle = '#343941'; ctx.fillRect(x - 7, y - 4, 14, 16);
-    ctx.fillStyle = '#8a9299'; ctx.beginPath(); ctx.moveTo(x - 18, y - 13); ctx.lineTo(x + 12, y - 13); ctx.lineTo(x + 18, y - 7); ctx.lineTo(x + 5, y - 4); ctx.lineTo(x - 10, y - 4); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#c0c8ca'; ctx.lineWidth = 2; ctx.stroke();
-  } else if (style === 'woodpile') {
-    for (let i = 0; i < 4; i++) {
-      ctx.fillStyle = i % 2 ? '#68442f' : '#8a5b3a';
-      ctx.fillRect(x - 19 + (i % 2) * 3, y - 12 + i * 5, 38 - (i % 2) * 6, 5);
-      ctx.fillStyle = '#c69a69'; ctx.fillRect(x - 18 + (i % 2) * 3, y - 12 + i * 5, 3, 5);
-    }
-  } else if (style === 'cart') {
-    ctx.fillStyle = '#765033'; ctx.fillRect(x - 18, y - 13, 34, 20);
-    ctx.fillStyle = '#a8794b'; ctx.fillRect(x - 21, y - 17, 40, 5);
-    ctx.strokeStyle = '#392c26'; ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.arc(x - 11, y + 10, 6, 0, Math.PI * 2); ctx.arc(x + 12, y + 10, 6, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = '#858c8a'; ctx.fillRect(x - 13, y - 10, 10, 10); ctx.fillRect(x + 1, y - 10, 10, 10);
-  } else if (style === 'barrels') {
-    for (let i = 0; i < 2; i++) {
-      ctx.fillStyle = '#805335'; ctx.fillRect(x - 17 + i * 20, y - 12, 14, 25);
-      ctx.fillStyle = '#b58a55'; ctx.fillRect(x - 17 + i * 20, y - 9, 14, 3); ctx.fillRect(x - 17 + i * 20, y + 5, 14, 3);
-      ctx.strokeStyle = '#3d3029'; ctx.lineWidth = 1.5; ctx.strokeRect(x - 17 + i * 20, y - 12, 14, 25);
-    }
-  } else if (style === 'herb-rack') {
-    ctx.fillStyle = '#5a4030'; ctx.fillRect(x - 18, y - 18, 36, 4); ctx.fillRect(x - 18, y + 5, 36, 4);
-    for (let i = 0; i < 5; i++) {
-      ctx.strokeStyle = ['#75945a','#a4a85e','#698c72'][i % 3]; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(x - 14 + i * 7, y - 14); ctx.lineTo(x - 11 + i * 7, y + 4); ctx.stroke();
-    }
-  } else if (style === 'frost-lantern') {
-    ctx.fillStyle = '#46545d'; ctx.fillRect(x - 3, y - 5, 6, 27);
-    ctx.fillStyle = '#b7e9f5'; ctx.fillRect(x - 8, y - 15, 16, 13);
-    ctx.fillStyle = '#e6fbff'; ctx.globalAlpha = 0.65 + Math.sin(t * 2) * 0.18;
-    ctx.beginPath(); ctx.arc(x, y - 9, 18, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1; ctx.strokeStyle = '#d7f6ff'; ctx.lineWidth = 2; ctx.strokeRect(x - 8, y - 15, 16, 13);
-  } else if (style === 'rift-ward') {
-    ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.ellipse(x, y + 13, 25, 9, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#46404b'; ctx.beginPath(); ctx.moveTo(x - 17, y + 12); ctx.lineTo(x - 12, y - 13); ctx.lineTo(x, y - 25); ctx.lineTo(x + 12, y - 13); ctx.lineTo(x + 17, y + 12); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = '#9b74b8'; ctx.lineWidth = 2; ctx.stroke();
-    ctx.fillStyle = '#c18cff'; ctx.globalAlpha = 0.55 + Math.sin(t * 2.4) * 0.2;
-    ctx.beginPath(); ctx.moveTo(x, y - 18); ctx.lineTo(x + 7, y - 4); ctx.lineTo(x, y + 5); ctx.lineTo(x - 6, y - 4); ctx.closePath(); ctx.fill();
-    ctx.globalAlpha = 1; ctx.strokeStyle = '#d6b0ff'; ctx.beginPath(); ctx.moveTo(x, y - 18); ctx.lineTo(x, y + 5); ctx.stroke();
-  }
-  ctx.restore();
-}
-
-const villagePropPixelCanvases = new Map();
+const VILLAGE_PROP_ATLAS = new Image();
+VILLAGE_PROP_ATLAS.src = new URL('../../assets/aurora/village-props-atlas.png', import.meta.url).href;
+const VILLAGE_PROP_FRAMES = new Map([
+  ['lantern', 0], ['memorial', 1], ['bench', 2], ['stall', 3],
+  ['fountain', 4], ['planter', 5], ['banner', 6], ['brazier', 7],
+  ['anvil', 8], ['woodpile', 9], ['cart', 10], ['barrels', 11],
+  ['herb-rack', 12], ['frost-lantern', 13], ['rift-ward', 14],
+  ['world-portal', 14], ['tower-gate', 15]
+]);
 function drawVillageProp(ctx, x, y, style) {
-  // Render existing prop designs on a small logical pixel grid, then upscale
-  // with nearest-neighbour sampling to keep their silhouettes crisp.
-  if (typeof document === 'undefined') return drawVillagePropRaw(ctx, x, y, style);
-  let surface = villagePropPixelCanvases.get(style);
-  if (!surface) {
-    surface = document.createElement('canvas');
-    surface.width = 32; surface.height = 32;
-    villagePropPixelCanvases.set(style, surface);
-  }
-  const pixelCtx = surface.getContext('2d');
-  pixelCtx.imageSmoothingEnabled = false;
-  pixelCtx.clearRect(0, 0, 32, 32);
-  pixelCtx.save();
-  pixelCtx.translate(16, 15);
-  pixelCtx.scale(0.5, 0.5);
-  drawVillagePropRaw(pixelCtx, 0, 0, style);
-  pixelCtx.restore();
-
-  // Convert the legacy silhouettes into a strict 16-bit-like pixel surface:
-  // snap RGB to a compact fixed-step palette and remove translucent edge pixels.
-  // This prevents antialiased curves and glow halos from surviving the downsample.
-  const image = pixelCtx.getImageData(0, 0, 32, 32);
-  const colors = new Map();
-  for (let i = 0; i < image.data.length; i += 4) {
-    if (image.data[i + 3] < 112) {
-      image.data[i + 3] = 0;
-      continue;
-    }
-    image.data[i] = Math.round(image.data[i] / 32) * 32;
-    image.data[i + 1] = Math.round(image.data[i + 1] / 32) * 32;
-    image.data[i + 2] = Math.round(image.data[i + 2] / 32) * 32;
-    image.data[i + 3] = 255;
-    const key = (image.data[i] << 16) | (image.data[i + 1] << 8) | image.data[i + 2];
-    colors.set(key, (colors.get(key) || 0) + 1);
-  }
-
-  // Limit each prop to a small authored-looking palette. Keeping the most
-  // represented tones preserves its silhouette while eliminating noisy
-  // one-off colors left by rasterized curves and translucent effects.
-  const palette = [...colors.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 12)
-    .map(([key]) => [(key >> 16) & 255, (key >> 8) & 255, key & 255]);
-  for (let i = 0; i < image.data.length; i += 4) {
-    if (!image.data[i + 3]) continue;
-    let nearest = palette[0], nearestDistance = Infinity;
-    for (const color of palette) {
-      const dr = image.data[i] - color[0];
-      const dg = image.data[i + 1] - color[1];
-      const db = image.data[i + 2] - color[2];
-      const distance = dr * dr + dg * dg + db * db;
-      if (distance < nearestDistance) {
-        nearest = color;
-        nearestDistance = distance;
-      }
-    }
-    image.data[i] = nearest[0];
-    image.data[i + 1] = nearest[1];
-    image.data[i + 2] = nearest[2];
-  }
-  pixelCtx.putImageData(image, 0, 0);
-
+  const frame = VILLAGE_PROP_FRAMES.get(style);
+  if (frame === undefined || !VILLAGE_PROP_ATLAS.complete || !VILLAGE_PROP_ATLAS.naturalWidth) return;
   ctx.save();
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(surface, Math.round(x - 48), Math.round(y - 48), 96, 96);
+  ctx.drawImage(VILLAGE_PROP_ATLAS, frame * 64, 0, 64, 64,
+    Math.round(x - 48), Math.round(y - 48), 96, 96);
+  if (style === 'lantern' || style === 'frost-lantern' || style === 'brazier') {
+    ctx.globalAlpha = 0.72 + Math.sin(performance.now() * 0.002 + x * 0.03) * 0.16;
+    ctx.fillStyle = style === 'frost-lantern' ? '#c9f5ff' : '#ffe39a';
+    ctx.fillRect(Math.round(x - 2), Math.round(y - 31), 4, 4);
+  } else if (style === 'fountain') {
+    ctx.globalAlpha = 0.55 + Math.sin(performance.now() * 0.002) * 0.2;
+    ctx.fillStyle = '#b9f2f2';
+    ctx.fillRect(Math.round(x - 7), Math.round(y - 27), 3, 2);
+    ctx.fillRect(Math.round(x + 4), Math.round(y - 24), 3, 2);
+  } else if (style === 'rift-ward' || style === 'world-portal') {
+    ctx.globalAlpha = 0.55 + Math.sin(performance.now() * 0.0018 + x * 0.02) * 0.2;
+    ctx.fillStyle = '#d7b4ff';
+    ctx.fillRect(Math.round(x - 1), Math.round(y - 31), 2, 5);
+  }
   ctx.restore();
 }
 

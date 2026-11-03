@@ -69,5 +69,31 @@
     ],
     "displaySize": 48,
     "usage": "Original 16-bit village ground tiles; four seamless visual variants for grass and cobblestone"
+  },
+  "villageProps": {
+    "file": "../aurora/village-props-atlas.png",
+    "tileSize": 64,
+    "columns": 16,
+    "rows": 1,
+    "displaySize": 96,
+    "styles": [
+      "lantern",
+      "memorial",
+      "bench",
+      "stall",
+      "fountain",
+      "planter",
+      "banner",
+      "brazier",
+      "anvil",
+      "woodpile",
+      "cart",
+      "barrels",
+      "herb-rack",
+      "frost-lantern",
+      "rift-ward",
+      "tower-gate"
+    ],
+    "usage": "Authored 16-bit pixel-art village prop sprites with transparent backgrounds; nearest-neighbour rendering"
   }
 }

@@ -13,6 +13,7 @@ for (const [biome, row] of Object.entries(manifest.biomeRows)) {
 for (const asset of [
   'assets/tiles/terrain/atlas.png',
   'assets/aurora/ground-atlas.png',
+  'assets/aurora/village-props-atlas.png',
   'assets/tiles/dungeons/atlas.png',
   'assets/tiles/props/atlas.png',
   'assets/branding/mana-crystal.png',
@@ -25,13 +26,17 @@ assert.equal(groundPng.readUInt32BE(16), 768, 'Aurora ground atlas must contain 
 assert.equal(groundPng.readUInt32BE(20), 96, 'Aurora ground atlas must be 96px high');
 assert.equal(manifest.auroraGround?.columns, 8, 'Aurora ground atlas must define eight variants');
 assert.deepEqual(manifest.auroraGround?.types, ['grass', 'path']);
-const pngAssets = ['assets/aurora/ground-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
+const pngAssets = ['assets/aurora/ground-atlas.png','assets/aurora/village-props-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
 const villageArt = readFileSync(new URL('../ui/overworld/aurora-art.js', import.meta.url), 'utf8');
 assert.ok(villageArt.includes('drawAuroraBuilding(ctx,x,y,style'), 'Aurora buildings must use the rebuilt pixel-art renderer');
 assert.ok(villageArt.includes('imageSmoothingEnabled=false'), 'Aurora pixel art must use nearest-neighbour scaling');
 assert.ok(!/create(?:Linear|Radial)Gradient|\.svg/i.test(villageArt), 'Aurora pixel art must not use gradients or vector assets');
 assert.ok(villageArt.includes('drawHall') && villageArt.includes('drawForge') && villageArt.includes('drawHealer') && villageArt.includes('drawAlchemy') && villageArt.includes('drawMarket') && villageArt.includes('drawTavern'), 'each village service building must have a distinct authored design');
 const villageSprites = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
+assert.ok(villageSprites.includes('const VILLAGE_PROP_FRAMES = new Map(['), 'village props must use the authored PNG atlas');
+assert.ok(villageSprites.includes('frame * 64, 0, 64, 64'), 'village props must sample the 64px atlas frames');
+assert.ok(villageSprites.includes('ctx.imageSmoothingEnabled = false'), 'village prop atlas must render with crisp nearest-neighbour pixels');
+assert.ok(!villageSprites.includes('function drawVillagePropRaw'), 'legacy procedural village prop rasterizer must be removed');
 assert.ok(villageSprites.includes('const gardenVariant = (gardenSeed >>> 0) % 3'), 'Aurora planters must have deterministic visual garden variants');
 assert.ok(villageSprites.includes('Crisp raised timber bed'), 'Aurora garden beds must use crisp authored pixel details');
 assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8').includes('SVG architecture'), 'Aurora sprite renderer must not depend on vector architecture');
