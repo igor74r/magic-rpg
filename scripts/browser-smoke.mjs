@@ -153,8 +153,15 @@ try {
 
     await page.evaluate(() => window.GameAPI.openWorldPortalMenu());
     await page.locator('#aurora-world-portal').waitFor();
-    assert.equal(await page.locator('#aurora-world-portal [data-world-location]').count() > 0, true,
-      `${viewport.name}: world portal must show destination choices`);
+    assert.equal(await page.locator('#aurora-world-portal .portal-map-stage').isVisible(), true,
+      `${viewport.name}: world portal must show the interactive atlas`);
+    assert.ok(await page.locator('#aurora-world-portal [data-portal-node]').count() > 0,
+      `${viewport.name}: atlas must expose clickable destination points`);
+    await page.locator('#aurora-world-portal [data-portal-node]').first().click();
+    assert.equal(await page.locator('#aurora-world-portal #portal-destination h2').isVisible(), true,
+      `${viewport.name}: selecting a map point must show destination details`);
+    assert.equal(await page.locator('#aurora-world-portal [data-portal-travel]').count(), 1,
+      `${viewport.name}: selected destination must expose exactly one travel action`);
     await page.locator('#aurora-world-portal [data-world-close]').click();
     for (const tab of ['hero', 'inventory', 'spells', 'quests', 'achievements', 'statistics', 'talents', 'bestiary', 'chronicles']) {
       const tabButton = page.locator(`#game-tab-${tab}`);
