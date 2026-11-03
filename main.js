@@ -503,7 +503,7 @@ function openWorldPortalMenu() {
   ow.active = false;
   const currentId = ow.sourceLocationId || ow.locationId;
   const destinations = Object.entries(LOCATIONS).filter(([id, loc]) =>
-    id !== 'rift' && (loc.safe || (Array.isArray(loc.enemies) && loc.enemies.length))
+    id !== 'village' && id !== 'rift' && (loc.safe || (Array.isArray(loc.enemies) && loc.enemies.length))
   );
   const storyOrder = new Map(getStoryLocationProgression().map(item => [item.id, item]));
   destinations.sort(([a], [b]) =>
@@ -513,7 +513,7 @@ function openWorldPortalMenu() {
   if (isRiftReady() && LOCATIONS.rift) destinations.push(['rift', LOCATIONS.rift]);
   document.getElementById('aurora-world-portal')?.remove();
 
-  const points = destinations.map(([id, loc], index) => {
+  const points = [['village', LOCATIONS.village], ...destinations].map(([id, loc], index) => {
     const story = storyOrder.get(id);
     let hash = 0;
     for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
@@ -521,8 +521,8 @@ function openWorldPortalMenu() {
       ? -Math.PI * 0.72 + (story.sequence - 1) * 2.399963229728653
       : (hash % 6283) / 1000;
     const ring = story ? 0.72 + (story.sequence % 3) * 0.075 : 0.42 + (hash % 25) / 100;
-    const x = Math.max(105, Math.min(895, 500 + Math.cos(angle) * 390 * ring));
-    const y = Math.max(80, Math.min(540, 310 + Math.sin(angle) * 245 * ring));
+    const x = id === 'village' ? 500 : Math.max(105, Math.min(895, 500 + Math.cos(angle) * 390 * ring));
+    const y = id === 'village' ? 310 : Math.max(80, Math.min(540, 310 + Math.sin(angle) * 245 * ring));
     return { id, loc, story, x, y, index };
   });
   const storyPoints = points.filter(point => point.story)
@@ -531,7 +531,7 @@ function openWorldPortalMenu() {
   const route = routePoints.map(point => point.x.toFixed(1) + ',' + point.y.toFixed(1)).join(' ');
   const nodeMarkup = points.map(point => {
     const label = point.story ? '#' + point.story.sequence + ' · ' + point.loc.name : point.loc.name;
-    return '<button type="button" class="portal-map-node" data-portal-node="' + escapeHtml(point.id) +
+    return '<button type="button" class="portal-map-node' + (point.id === 'village' ? ' portal-map-village-node' : '') + '" data-portal-node="' + escapeHtml(point.id) +
       '" data-x="' + point.x.toFixed(1) + '" data-y="' + point.y.toFixed(1) +
       '" style="left:' + (point.x / 10) + '%;top:' + (point.y / 6.2) + '%" aria-pressed="false" aria-label="' +
       escapeHtml(label) + '"><span class="portal-map-node-icon">' + (point.loc.emoji || '✦') +
@@ -558,8 +558,7 @@ function openWorldPortalMenu() {
     '#aurora-world-portal .portal-map-node[aria-pressed="true"]{border:2px solid #e6c783;background:rgba(66,53,31,.96);box-shadow:0 0 0 4px rgba(230,199,131,.15),0 0 24px rgba(230,199,131,.28)}' +
     '#aurora-world-portal .portal-map-node.is-locked{filter:grayscale(.75);border-color:#815c66;background:rgba(36,24,34,.92)}#aurora-world-portal .portal-map-node.is-current{border-color:#e6c783}' +
     '#aurora-world-portal .portal-map-node-icon{font-size:clamp(17px,2vw,25px);line-height:1.2}#aurora-world-portal .portal-map-node-label{max-width:118px;font-size:9px;line-height:1.2;text-align:center;color:#d6e4dc;text-shadow:0 1px 3px #000}' +
-    '#aurora-world-portal .portal-map-village{position:absolute;left:50%;top:50%;z-index:3;transform:translate(-50%,-50%);display:grid;place-items:center;width:78px;height:78px;border:2px solid #e6c783;border-radius:50%;background:radial-gradient(circle,#66512c,#201d1b 72%);box-shadow:0 0 0 8px rgba(230,199,131,.1),0 0 35px rgba(230,199,131,.35);font-size:31px}' +
-    '#aurora-world-portal .portal-map-village span{position:absolute;top:80px;white-space:nowrap;color:#f3dba5;font-size:11px;font-weight:800;text-shadow:0 2px 5px #000}' +
+    '#aurora-world-portal .portal-map-village-node{width:82px;min-width:82px;max-width:none;height:82px;border:2px solid #e6c783;border-radius:50%;background:radial-gradient(circle,#66512c,#201d1b 72%);box-shadow:0 0 0 8px rgba(230,199,131,.1),0 0 35px rgba(230,199,131,.35)}#aurora-world-portal .portal-map-village-node .portal-map-node-icon{font-size:31px}#aurora-world-portal .portal-map-village-node .portal-map-node-label{position:absolute;top:84px;max-width:150px;white-space:nowrap;color:#f3dba5;font-size:11px;font-weight:800}' +
     '#aurora-world-portal .portal-map-legend{position:absolute;left:12px;bottom:10px;display:flex;gap:12px;flex-wrap:wrap;color:#b7c9c1;font-size:10px;background:rgba(5,12,18,.72);padding:7px 10px;border-radius:8px}' +
     '#aurora-world-portal .portal-map-legend span{display:flex;align-items:center;gap:5px}#aurora-world-portal .portal-map-legend i{width:8px;height:8px;border-radius:50%;background:#8ec9ae}#aurora-world-portal .portal-map-legend .locked{background:#a87580}#aurora-world-portal .portal-map-legend .here{background:#e6c783}' +
     '#aurora-world-portal .portal-destination{min-width:0;overflow:auto;border:1px solid rgba(114,185,178,.25);border-radius:14px;background:rgba(5,13,20,.55);padding:18px;display:flex;flex-direction:column;gap:12px}' +
@@ -568,7 +567,7 @@ function openWorldPortalMenu() {
     '#aurora-world-portal .portal-travel{margin-top:auto;padding:13px 16px;border:1px solid #b99b61;border-radius:10px;background:linear-gradient(135deg,#8d6b36,#584322);color:#fff5dd;font:inherit;font-weight:800;cursor:pointer}#aurora-world-portal .portal-travel:disabled{border-color:#596269;background:#29333a;color:#89969a;cursor:not-allowed}' +
     '#aurora-world-portal .portal-atlas-foot{padding:10px 18px;border-top:1px solid rgba(114,185,178,.18);color:#91aaa9;font-size:11px;text-align:center}' +
     '@media(max-width:850px){#aurora-world-portal .portal-atlas{height:96vh}#aurora-world-portal .portal-atlas-body{grid-template-columns:minmax(0,1fr) 260px}}' +
-    '@media(max-width:650px){#aurora-world-portal .portal-atlas{height:96vh;min-height:0}#aurora-world-portal .portal-atlas-head{padding:12px 14px}#aurora-world-portal .portal-atlas-body{grid-template-columns:1fr;grid-template-rows:minmax(260px,1fr) auto;gap:9px;padding:9px}#aurora-world-portal .portal-map-stage{min-height:260px}#aurora-world-portal .portal-destination{max-height:205px;padding:12px;gap:7px}#aurora-world-portal .portal-destination h2{font-size:18px}#aurora-world-portal .portal-destination p{font-size:11px}#aurora-world-portal .portal-travel{padding:10px}#aurora-world-portal .portal-map-node{min-width:42px;padding:4px}#aurora-world-portal .portal-map-node-label{font-size:8px;max-width:82px}#aurora-world-portal .portal-map-village{width:56px;height:56px;font-size:24px}#aurora-world-portal .portal-map-village span{top:58px;font-size:9px}}' +
+    '@media(max-width:650px){#aurora-world-portal .portal-atlas{height:96vh;min-height:0}#aurora-world-portal .portal-atlas-head{padding:12px 14px}#aurora-world-portal .portal-atlas-body{grid-template-columns:1fr;grid-template-rows:minmax(260px,1fr) auto;gap:9px;padding:9px}#aurora-world-portal .portal-map-stage{min-height:260px}#aurora-world-portal .portal-destination{max-height:205px;padding:12px;gap:7px}#aurora-world-portal .portal-destination h2{font-size:18px}#aurora-world-portal .portal-destination p{font-size:11px}#aurora-world-portal .portal-travel{padding:10px}#aurora-world-portal .portal-map-node{min-width:42px;padding:4px}#aurora-world-portal .portal-map-node-label{font-size:8px;max-width:82px}#aurora-world-portal .portal-map-village-node{width:58px;min-width:58px;height:58px}#aurora-world-portal .portal-map-village-node .portal-map-node-icon{font-size:24px}#aurora-world-portal .portal-map-village-node .portal-map-node-label{top:59px;font-size:9px}}' +
     '</style>' +
     '<section class="portal-atlas" role="dialog" aria-modal="true" aria-labelledby="aurora-world-portal-title">' +
       '<header class="portal-atlas-head"><div><small>АТЛАС МИРА · СЕТЬ ПЕРЕХОДОВ</small><h1 id="aurora-world-portal-title">Карта земель Авроры</h1></div><button type="button" class="portal-close" data-world-close aria-label="Закрыть карту">✕</button></header>' +
@@ -580,7 +579,6 @@ function openWorldPortalMenu() {
             '<polyline class="portal-route" points="' + route + '"/>' +
             '<circle cx="500" cy="310" r="104" fill="none" stroke="rgba(230,199,131,.16)" stroke-width="2" stroke-dasharray="5 12"/>' +
           '</svg>' +
-          '<div class="portal-map-village" aria-label="Деревня Аврора">🏘️<span>Деревня Аврора</span></div>' +
           nodeMarkup +
           '<div class="portal-map-legend"><span><i></i>Доступно</span><span><i class="locked"></i>Закрыто</span><span><i class="here"></i>Вы здесь</span></div>' +
         '</div>' +
