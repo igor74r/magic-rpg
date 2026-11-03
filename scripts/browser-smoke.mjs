@@ -105,6 +105,15 @@ try {
     assert.equal(stored.screenShake, false, `${viewport.name}: screen shake was not saved`);
 
     await page.locator('#screen-settings .settings-back-btn').click();
+    await page.getByRole('button', { name: /Достижения/ }).click();
+    await page.locator('#screen-achievements-menu.active').waitFor();
+    await page.locator('#menu-achievements-content .achievement-list').waitFor();
+    await page.locator('#screen-achievements-menu .settings-back-btn').click();
+    await page.getByRole('button', { name: /Как играть/ }).click();
+    await page.locator('#screen-help.active').waitFor();
+    await page.getByRole('heading', { name: /Как играть/ }).waitFor();
+    await page.locator('#screen-help .settings-back-btn').click();
+    await page.locator('#screen-main.active').waitFor();
     await page.locator('.menu-primary-action').click();
     assert.equal(await page.locator('#screen-char.active').count(), 1, `${viewport.name}: primary action must open character creation`);
     assert.equal(await page.locator('[data-character-step="selection"]').getAttribute('aria-current'), 'step',
