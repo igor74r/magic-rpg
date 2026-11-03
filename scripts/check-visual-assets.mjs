@@ -53,6 +53,38 @@ assert.equal(portalPng.readUInt32BE(16), 64, 'Aurora world portal sprite must be
 assert.equal(portalPng.readUInt32BE(20), 64, 'Aurora world portal sprite must be 64px high');
 assert.equal(manifest.auroraWorldPortal?.columns, 1, 'Aurora world portal must use its dedicated authored sprite');
 const pngAssets = ['assets/aurora/ground-atlas.png','assets/aurora/village-props-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
+function crc32Png(buffer) {
+  let crc = 0xffffffff;
+  for (const byte of buffer) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+function assertPngIntegrity(asset) {
+  const png = readFileSync(new URL(`../${asset}`, import.meta.url));
+  assert.deepEqual(png.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), `${asset} must have a PNG signature`);
+  let cursor = 8;
+  const compressed = [];
+  let ended = false;
+  while (cursor + 12 <= png.length) {
+    const length = png.readUInt32BE(cursor);
+    const type = png.toString('ascii', cursor + 4, cursor + 8);
+    const dataStart = cursor + 8;
+    const dataEnd = dataStart + length;
+    const chunkEnd = dataEnd + 4;
+    assert.ok(chunkEnd <= png.length, `${asset} contains a truncated ${type} chunk`);
+    const checksum = png.readUInt32BE(dataEnd);
+    assert.equal(crc32Png(png.subarray(cursor + 4, dataEnd)), checksum, `${asset} has invalid ${type} checksum`);
+    if (type === 'IDAT') compressed.push(png.subarray(dataStart, dataEnd));
+    cursor = chunkEnd;
+    if (type === 'IEND') { ended = true; break; }
+  }
+  assert.ok(ended && cursor === png.length, `${asset} must end with a complete IEND chunk`);
+  assert.ok(inflateSync(Buffer.concat(compressed)).length > 0, `${asset} must contain decodable image data`);
+}
+for (const asset of pngAssets) assertPngIntegrity(asset);
+
 const villageArt = readFileSync(new URL('../ui/overworld/aurora-art.js', import.meta.url), 'utf8');
 assert.ok(villageArt.includes('drawAuroraBuilding(ctx,x,y,style'), 'Aurora buildings must use the rebuilt pixel-art renderer');
 assert.ok(villageArt.includes('imageSmoothingEnabled=false'), 'Aurora pixel art must use nearest-neighbour scaling');
