@@ -146,7 +146,7 @@ function filterAndSort(entries) {
 export function setInvFilter(filter) {
   invFilter = filter;
   if (state.currentTab === 'inventory') {
-    const el = document.getElementById('tab-content');
+    const el = (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content'));
     if (el) el.innerHTML = renderInventory();
   }
 }
@@ -154,7 +154,7 @@ export function setInvFilter(filter) {
 export function setInvSort(sort) {
   invSort = sort;
   if (state.currentTab === 'inventory') {
-    const el = document.getElementById('tab-content');
+    const el = (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content'));
     if (el) el.innerHTML = renderInventory();
   }
 }
@@ -390,7 +390,7 @@ function bindInventoryEvents() {
     const target = event.target instanceof Element ? event.target : null;
     if (!target?.matches('[data-inv-search]')) return;
     invSearch = target.value;
-    const el = document.getElementById('tab-content');
+    const el = (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content'));
     if (el) {
       const pos = target.selectionStart;
       el.innerHTML = renderInventory();
@@ -403,7 +403,7 @@ function bindInventoryEvents() {
     const target = event.target instanceof Element ? event.target : null;
     const control = target?.closest('[data-inv-action], [data-inv-filter], [data-inv-sort]');
     if (!control) return;
-    if (control.hasAttribute('data-inv-search-clear')) { invSearch = ''; const el = document.getElementById('tab-content'); if (el) el.innerHTML = renderInventory(); return; }
+    if (control.hasAttribute('data-inv-search-clear')) { invSearch = ''; const el = (document.getElementById('dashboard-tab-modal-body') || document.getElementById('tab-content')); if (el) el.innerHTML = renderInventory(); return; }
     if (control.hasAttribute('data-inv-filter')) { setInvFilter(control.dataset.invFilter); return; }
     if (control.hasAttribute('data-inv-sort')) { setInvSort(control.dataset.invSort); return; }
     const index = Number(control.dataset.index);
