@@ -158,7 +158,8 @@ assert.ok(atlasRenderer.includes('const paintPatch = (points)'), 'each pixel tra
 assert.ok(renderer.includes('drawAuroraGroundTransitions(ctx, type'), 'village renderer must pass logical neighbours into the visual ground transition pass');
 assert.ok(atlasRenderer.includes('sourceColumn = type * 4 + variant'), 'Aurora ground must select deterministic authored terrain variants');
 assert.ok(atlasRenderer.includes('drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY)'), 'Aurora grass must render deterministic cached pixel accents');
-assert.ok(atlasRenderer.includes('const count = 8 + (n % 5);') && atlasRenderer.includes('ctx.globalAlpha = 0.42;'), 'Aurora grass detail must stay sparse and subordinate to the flat base palette');
+assert.ok(atlasRenderer.includes('const count = 3 + (n % 3);') && atlasRenderer.includes('ctx.globalAlpha = 0.24;'), 'Aurora grass accents must remain very sparse and low-contrast');
+assert.ok(atlasRenderer.includes('ctx.globalAlpha = type === 0 ? 0.42 : 1;') && atlasRenderer.includes('ctx.globalAlpha = previousAlpha;'), 'Aurora grass atlas must blend into a flat base and restore Canvas alpha');
 assert.ok(atlasRenderer.includes('auroraGrassDetailCache'), 'Aurora grass details must be cached to avoid per-frame asset allocation');
 assert.ok(atlasRenderer.includes('const key = seed & 255'), 'Aurora ground must retain enough distinct cached grass detail patterns');
 assert.ok(atlasRenderer.includes('A few tiny flower pixels'), 'Aurora grass may include tiny flat-color flowers, without blur or gradients');
