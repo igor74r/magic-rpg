@@ -761,6 +761,35 @@ export function preloadAuroraNatureAtlas() {
 
 // Crisp, cached 16-bit pixel vegetation for Aurora's outer gardens.
 const AURORA_NATURE_CACHE = new Map();
+const AURORA_NATURE_BOUNDS = new Map();
+function getAuroraNatureFrameBounds(atlas, frame) {
+  if (AURORA_NATURE_BOUNDS.has(frame)) return AURORA_NATURE_BOUNDS.get(frame);
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 80;
+  const sample = canvas.getContext('2d', { willReadFrequently: true });
+  let bounds = { x: 0, y: 0, width: 64, height: 80 };
+  try {
+    sample.drawImage(atlas, frame * 64, 0, 64, 80, 0, 0, 64, 80);
+    const pixels = sample.getImageData(0, 0, 64, 80).data;
+    let left = 64, top = 80, right = -1, bottom = -1;
+    for (let py = 0; py < 80; py++) {
+      for (let px = 0; px < 64; px++) {
+        if (pixels[(py * 64 + px) * 4 + 3] === 0) continue;
+        if (px < left) left = px;
+        if (px > right) right = px;
+        if (py < top) top = py;
+        if (py > bottom) bottom = py;
+      }
+    }
+    if (right >= left && bottom >= top) {
+      bounds = { x: left, y: top, width: right - left + 1, height: bottom - top + 1 };
+    }
+  } catch {
+    // Keep the complete frame if pixel readback is unavailable in this browser.
+  }
+  AURORA_NATURE_BOUNDS.set(frame, bounds);
+  return bounds;
+}
 function getAuroraNatureSprite(style) {
   if (AURORA_NATURE_CACHE.has(style)) return AURORA_NATURE_CACHE.get(style);
   const canvas = document.createElement('canvas');
@@ -839,7 +868,8 @@ function drawAuroraNature(ctx,x,y,style){
   try{
     ctx.imageSmoothingEnabled=false;
     if (Number.isInteger(frame) && atlas && atlas.complete && atlas.naturalWidth) {
-      ctx.drawImage(atlas,frame*64,0,64,80,Math.round(x-width/2),Math.round(y-height+8),width,height);
+      const crop = getAuroraNatureFrameBounds(atlas, frame);
+      ctx.drawImage(atlas,frame*64+crop.x,crop.y,crop.width,crop.height,Math.round(x-width/2),Math.round(y-height+8),width,height);
     } else {
       const sprite=getAuroraNatureSprite(style);
       ctx.drawImage(sprite,Math.round(x-width/2),Math.round(y-height+8),width,height);
