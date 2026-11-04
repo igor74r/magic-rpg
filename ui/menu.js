@@ -541,7 +541,14 @@ function prepareImportedSave(raw) {
 export function exportSave() {
   if (!state.game) { toast('Нет активной игры для экспорта. Загрузите слот.'); return; }
   const slot = state.currentSlot || 1;
-  const data = localStorage.getItem(`magic-rpg-save-${slot}`);
+  let data;
+  try {
+    data = window.localStorage.getItem(`magic-rpg-save-${slot}`);
+  } catch (error) {
+    console.error('[save] Не удалось прочитать слот для экспорта:', error);
+    toast('❌ Не удалось прочитать слот: хранилище браузера недоступно');
+    return;
+  }
   if (!data) { toast('Слот пустой'); return; }
 
   const blob = new Blob([data], { type: 'application/json' });
