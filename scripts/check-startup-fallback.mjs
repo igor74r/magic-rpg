@@ -30,5 +30,7 @@ assert.match(guard, /tag === 'script'/,
   'failed script/module resources must trigger the fallback');
 assert.match(html, /main\.js\?v=20261104-aurora-interior-pixel-pass/,
   'entry module URL must be cache-busted after the latest visual asset update');
+assert.match(html, /css\/2d-art-direction\.css\?v=20261104-aurora-interior-pixel-pass/,
+  'Aurora art-direction stylesheet URL must be cache-busted after the latest visual asset update');
 
 console.log('Startup fallback contract and inline syntax: OK');
