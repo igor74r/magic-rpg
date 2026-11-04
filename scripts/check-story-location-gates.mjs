@@ -67,8 +67,11 @@ assert.ok(portalSource.includes('Требуется уровень') && portalSo
   'Aurora world atlas must visibly mark locked destinations and explain level requirements');
 assert.ok(portalSource.includes('destinations.sort(([a], [b]) =>') && portalSource.includes('storyOrder.get(a)') && portalSource.includes('storyOrder.get(b)'),
   'Aurora atlas must sort campaign destinations by story sequence');
-assert.ok(portalSource.includes('portal-route') && portalSource.includes('storyPoints'),
-  'the unified portal atlas must connect story locations in campaign sequence');
+assert.ok(portalSource.includes('storyPoints') && portalSource.includes('routePoints'),
+  'the unified portal atlas must pass ordered story locations into its pixel-map renderer');
+assert.ok(portalSource.includes('if (routePoints.length > 1)') &&
+  portalSource.includes('ctx.lineTo(point.x / 4, point.y / 4)'),
+  'the pixel-map renderer must draw the ordered campaign route on canvas');
 assert.ok(portalSource.includes('canEnterStoryLocation(state.game?.player, id)'),
   'the unified portal atlas must prevent travel to locked story destinations');
 
