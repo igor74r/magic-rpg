@@ -37,15 +37,44 @@ export function openDailyChest() {
     return;
   }
   const p = state.game.player;
-  if (!p.stats) p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 };
+  if (!Number.isSafeInteger(p.gold) || p.gold < 0 || !Number.isSafeInteger(p.gold + 8)) {
+    emit('toast', '❌ Не удалось выдать награду: проверьте баланс золота.');
+    return;
+  }
 
-  p.gold = (p.gold || 0) + 8;
+  let snapshot;
+  try {
+    snapshot = JSON.parse(JSON.stringify(p));
+  } catch {
+    emit('toast', '❌ Не удалось подготовить ежедневную награду. Попробуйте ещё раз.');
+    return;
+  }
+
+  if (!p.stats || typeof p.stats !== 'object' || Array.isArray(p.stats)) {
+    p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 };
+  }
+  const previousDailyCount = Number.isSafeInteger(p.stats.dailyChestsOpened) && p.stats.dailyChestsOpened >= 0
+    ? p.stats.dailyChestsOpened
+    : 0;
+  if (!Number.isSafeInteger(previousDailyCount + 1)) {
+    emit('toast', '❌ Не удалось выдать награду: счётчик сундуков переполнен.');
+    return;
+  }
+
+  p.gold += 8;
   p.stats.dailyChestAt = Date.now();
-  p.stats.dailyChestsOpened = (p.stats.dailyChestsOpened || 0) + 1;
+  p.stats.dailyChestsOpened = previousDailyCount + 1;
 
   const pool = ['health-potion', 'mana-potion', 'strong-health-potion', 'strong-mana-potion'];
   const id = pool[Math.floor(Math.random() * pool.length)];
   const reward = addItemOrStore(id, 1);
+
+  if (!saveGame()) {
+    for (const key of Object.keys(p)) delete p[key];
+    Object.assign(p, snapshot);
+    emit('toast', '❌ Не удалось сохранить ежедневный сундук. Награда не выдана; попробуйте ещё раз.');
+    return;
+  }
 
   playSound('chest');
   const rewardText = reward.stored
@@ -54,7 +83,6 @@ export function openDailyChest() {
   emit('log', { channel: 'game', msg: `🎁 Ежедневный сундук: +8💰, ${rewardText}`, cls: reward.stored ? 'warning' : 'success' });
   emit('toast', reward.stored ? `🎁 +8💰. ${ITEMS[id].name} сохранено в хранилище добычи.` : `🎁 +8💰 и ${ITEMS[id].name}`);
 
-  saveGame();
   checkAchievements();
   emit('game:update');
 }
