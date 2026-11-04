@@ -18,16 +18,16 @@ function auroraGrassSeed(tileX, tileY) {
 }
 function drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY) {
   const seed = auroraGrassSeed(tileX, tileY);
-  const key = seed & 63;
+  const key = seed & 255;
   let detail = auroraGrassDetailCache.get(key);
   if (!detail && typeof document !== 'undefined') {
     detail = document.createElement('canvas');
     detail.width = 48; detail.height = 48;
     const g = detail.getContext('2d');
     g.imageSmoothingEnabled = false;
-    const colors = ['#71864a', '#849653', '#425c35', '#a2a55d', '#d5bd70'];
+    const colors = ['#71864a', '#849653', '#425c35', '#a2a55d', '#d5bd70', '#c4d07b'];
     let n = (seed ^ 0x9e3779b9) >>> 0;
-    const count = 3 + (n % 3);
+    const count = 4 + (n % 4);
     for (let i = 0; i < count; i++) {
       n = Math.imul(n ^ (n >>> 15), 2246822519) >>> 0;
       const px = 3 + n % 42;
@@ -36,6 +36,13 @@ function drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY) {
       g.fillStyle = colors[(n >>> 5) % colors.length];
       g.fillRect(px, py, 2, 1);
       if ((n & 7) === 0) g.fillRect(px + 1, py - 1, 1, 1);
+      // A few tiny flower pixels create a lived-in meadow without emoji or blur.
+      if ((n & 15) === 3) {
+        g.fillStyle = (n & 32) ? '#e8d9a0' : '#d9a9b8';
+        g.fillRect(px, py + 1, 1, 1);
+        g.fillStyle = '#e8d9a0';
+        g.fillRect(px + 1, py, 1, 1);
+      }
     }
     auroraGrassDetailCache.set(key, detail);
   }
