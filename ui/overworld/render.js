@@ -777,7 +777,11 @@ function render() {
 
   if (!reduceMotion) {
     if (allowWeather) drawWeather(ctx);
-    if (allowAmbientFog) { drawFireflies(ctx, worldTime); drawFogLayers(ctx); }
+    if (allowAmbientFog) {
+      drawFireflies(ctx, worldTime);
+      // Aurora keeps a clean pixel-art silhouette; drifting soft fog belongs to other biomes.
+      if (ow.locationId !== 'village') drawFogLayers(ctx);
+    }
   }
 
   if (getLightningFlash() > 0) {
