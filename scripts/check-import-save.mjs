@@ -66,6 +66,7 @@ try {
       name: 'Legacy hero', class: 'mage', level: 5, exp: 0, expNext: 100,
       gold: 50, hp: 80, maxHp: 100, mp: 30, maxMp: 50,
       str: 5, int: 8, wis: 5, con: 5, dex: 5, luck: 5,
+      statPoints: 0, passivePoints: 0,
       inventory: [{ id: 'mana-crystal', qty: 1 }],
       spells: [], equipped: {}, stats: { kills: {} }, campaignKills: {}, campaignClaimed: {},
       activeCampaignMission: null, effects: [], buffs: []
