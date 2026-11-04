@@ -26,6 +26,14 @@ on('log', onLog);
 on('game:update', onUpdate);
 
 try {
+  game.player.gold = Number.MAX_SAFE_INTEGER;
+  checkAchievements();
+  assert.deepEqual(game.player.achievements, [],
+    'achievement reward must not unlock when its gold reward would overflow');
+  assert.equal(game.player.gold, Number.MAX_SAFE_INTEGER);
+  assert.equal(writes, 0, 'overflow rejection must not write a corrupted balance');
+  game.player.gold = 10;
+
   checkAchievements();
   assert.equal(writes, 1);
   assert.deepEqual(game.player.achievements, []);
