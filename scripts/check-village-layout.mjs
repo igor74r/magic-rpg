@@ -144,7 +144,10 @@ const interiorCssEnd = styleSource.indexOf('/* Active campaign objective', inter
 const interiorCss = styleSource.slice(interiorCssStart, interiorCssEnd < 0 ? undefined : interiorCssEnd);
 assert.ok(!/gradient|blur/i.test(interiorCss), 'Aurora interiors must use flat colors and crisp pixel edges');
 for (const room of ['forge','healer','alchemy','market','hall','tavern']) {
-  assert.ok(interiorCss.includes(`.icon-${room}-1:before`), `${room}: interior props must have pixel-art icon details`);
+  for (const item of [1,2,3]) {
+    assert.ok(interiorCss.includes(`.icon-${room}-${item}:before`), `${room}/${item}: interior prop must have a pixel-art body`);
+    assert.ok(interiorCss.includes(`.icon-${room}-${item}:after`), `${room}/${item}: interior prop must have a pixel-art highlight`);
+  }
 }
 assert.ok(mainSource.includes('village-room-pixel-icon icon-') && !mainSource.includes("['⚒️','🛏️','⚗️','📦']"),
   'Aurora interior props must not use emoji as their visual assets');
