@@ -15,7 +15,8 @@ for (const item of [...village.npcs, ...village.statics]) {
 const natureStyles = new Set(village.statics.filter(item => item.natureStyle).map(item => item.natureStyle));
 const natureRenderer = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
 for (const style of natureStyles) {
-  assert.ok(natureRenderer.includes(`style === '${style}'`), `${style}: every authored nature style must have a renderer branch`);
+  assert.ok(natureRenderer.includes(`style === '${style}'`) || natureRenderer.includes(`style==='${style}'`),
+    `${style}: every authored nature style must have a renderer branch`);
 }
 assert.equal(natureStyles.size, 8, 'Aurora must retain all eight authored nature sprite styles');
 assert.equal(village.mapCols, 38, 'Aurora width must be compact');
