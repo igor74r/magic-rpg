@@ -52,7 +52,7 @@ assert.equal(manifest.auroraKenneyTinyTown.columns, 12);
 assert.equal(manifest.auroraKenneyTinyTown.rows, 11);
 assert.equal(manifest.auroraKenneyTinyTown.spacing, 1);
 readAtlas(manifest.auroraKenneyTinyTown.file, 203, 186, 'Kenney Tiny Town atlas');
-const kenneyLicense = readFileSync(new URL('../aurora/kenney-tiny-town-LICENSE.txt', import.meta.url), 'utf8');
+const kenneyLicense = readFileSync(new URL('../assets/aurora/kenney-tiny-town-LICENSE.txt', import.meta.url), 'utf8');
 assert.ok(kenneyLicense.includes('Creative Commons Zero, CC0'), 'Kenney atlas must retain its CC0 license');
 
 for (const [biome, row] of Object.entries(manifest.biomeRows)) {
