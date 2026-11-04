@@ -26,6 +26,14 @@ try {
       }
     }
   };
+  // A failed repair must not leak a malformed non-array list to UI/event callers.
+  const originalSetItemForMalformed = globalThis.localStorage.setItem;
+  state.game.player.dailyQuests = { date: now, list: null };
+  globalThis.localStorage.setItem = () => { throw new Error('simulated quota failure'); };
+  assert.deepEqual(getDailyQuests(), [],
+    'malformed daily quest storage must return a safe array when repair cannot be saved');
+  globalThis.localStorage.setItem = originalSetItemForMalformed;
+
   const quests = getDailyQuests();
   assert.equal(quests.length, 3, 'malformed or duplicate daily quests should be replaced');
   assert.ok(quests.every(quest => !quest.text.includes('<')), 'quest display text must come from trusted definitions');
