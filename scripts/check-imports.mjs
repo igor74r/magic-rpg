@@ -33,7 +33,11 @@ function extractSpecs(src) {
   const specs = [];
   const re = /from\s+['"](\.[^'"]*)['"]|import\s*\(\s*['"](\.[^'"]*)['"]\s*\)/g;
   let m;
-  while ((m = re.exec(src)) !== null) specs.push(m[1] || m[2]);
+  while ((m = re.exec(src)) !== null) {
+    const spec = m[1] || m[2];
+    if (spec === '...') continue; // Пропускаем placeholder в комментариях/примерах.
+    specs.push(spec);
+  }
   return specs;
 }
 
