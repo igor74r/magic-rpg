@@ -1,7 +1,7 @@
 import { state } from '../systems/state.js';
 import { CLASSES } from '../data/classes.js';
 import { LOCATIONS } from '../data/locations.js';
-import { getEffStats } from '../systems/stats.js';
+import { getEffStats, getTotalKills } from '../systems/stats.js';
 import { getActiveCampaignMission, getNextCampaignMission, getMissionProgress } from '../systems/campaign.js';
 import { STORY } from '../data/story.js';
 import { escapeHtml } from './screens.js';
@@ -30,7 +30,7 @@ export function renderHeroOverview() {
   const p = state.game.player;
   const cls = CLASSES[p.class] || CLASSES.mage;
   const stats = getEffStats();
-  const kills = Object.values(p.stats?.kills || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const kills = getTotalKills(p.stats?.kills);
   const shards = ['flame', 'ice', 'blood'].filter(id => state.game.storyShards?.[id] === true).length;
   const campaign = getCampaignSummary(p);
   const location = LOCATIONS[state.game.location] || { name: state.game.location || 'Неизвестно', emoji: '📍' };
