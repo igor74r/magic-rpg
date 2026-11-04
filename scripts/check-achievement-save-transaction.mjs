@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
-import { checkAchievements } from '../systems/achievements.js';
+import { checkAchievements, unlockedCount } from '../systems/achievements.js';
 import { on, off } from '../systems/events.js';
 
 const originalStorage = globalThis.localStorage;
@@ -41,6 +41,7 @@ try {
   assert.deepEqual(emitted, [], 'failure must suppress achievement events and UI feedback');
 
   game.player.achievements = 'corrupt-achievement-list';
+  assert.equal(unlockedCount(), 0, 'malformed achievement data must not be counted as unlocked entries');
   checkAchievements();
   assert.equal(game.player.achievements, 'corrupt-achievement-list',
     'failed unlock must restore the original malformed achievement value');
