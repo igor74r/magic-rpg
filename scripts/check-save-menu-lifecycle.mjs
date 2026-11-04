@@ -35,12 +35,24 @@ const deleteSlotEnd = menu.indexOf('\n}\n', deleteSlotStart);
 const deleteSlot = menu.slice(deleteSlotStart, deleteSlotEnd);
 assert.match(deleteSlot, /if \(!deleteSave\(slot\)\)/,
   'a failed slot deletion must not be reported as successful');
+assert.ok(deleteSlot.indexOf('if (deletingActiveSlot) clearOverworldRuntime()') > deleteSlot.indexOf('if (!deleteSave(slot))'),
+  'deleting the active slot must stop its hidden overworld loop after storage confirms deletion');
 
 const deleteAllStart = menu.indexOf('export function deleteAllSaves()');
 const deleteAllEnd = menu.indexOf('\n}\n', deleteAllStart);
 const deleteAll = menu.slice(deleteAllStart, deleteAllEnd);
 assert.match(deleteAll, /failedSlots/,
   'bulk deletion must track slots that could not be removed');
+assert.match(deleteAll, /backups\.set\(i, globalThis\.localStorage\.getItem/,
+  'bulk deletion must snapshot all slots before removing any of them');
+assert.match(deleteAll, /deleteSave\(i, \{ preserveActiveState: true \}\)/,
+  'bulk deletion must preserve the active game until every slot is deleted');
+assert.ok(deleteAll.indexOf('if (failedSlots.length)') < deleteAll.indexOf('clearOverworldRuntime()'),
+  'bulk deletion must not stop gameplay before all storage removals succeed');
+assert.ok(deleteAll.indexOf('clearOverworldRuntime()') < deleteAll.indexOf('state.game = null'),
+  'successful bulk deletion must stop the overworld before clearing the active game');
+assert.match(deleteAll, /rollbackSucceeded/,
+  'bulk deletion must attempt to restore previous slots after a partial failure');
 assert.ok(deleteAll.indexOf('if (failedSlots.length)') < deleteAll.indexOf('state.game = null'),
   'bulk deletion must not clear the active game before confirming every slot was removed');
 assert.match(deleteAll, /Не удалось удалить слоты/,
