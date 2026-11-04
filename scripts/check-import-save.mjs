@@ -6,6 +6,8 @@ const originalStorage = globalThis.localStorage;
 const originalFileReader = globalThis.FileReader;
 const originalConfirm = globalThis.confirm;
 const originalSetTimeout = globalThis.setTimeout;
+const originalGame = state.game;
+const originalSlot = state.currentSlot;
 
 const nodes = new Map();
 const toastMessages = [];
@@ -35,8 +37,16 @@ globalThis.FileReader = class {
 };
 
 try {
-  const { importSave } = await import('../ui/menu.js');
+  const { importSave, exportSave } = await import('../ui/menu.js');
   state.currentSlot = 1;
+  state.game = { player: { name: 'Export test hero' } };
+  const originalGetItem = globalThis.localStorage.getItem;
+  globalThis.localStorage.getItem = () => { throw new Error('simulated blocked storage read'); };
+  assert.doesNotThrow(() => exportSave(), 'export must not throw when browser storage is blocked');
+  assert.match(toastMessages.at(-1), /хранилище браузера недоступно/,
+    'export must report a blocked storage read to the user');
+  globalThis.localStorage.getItem = originalGetItem;
+
   let readCalls = 0;
   globalThis.FileReader.prototype.readAsText = function () {
     readCalls++;
@@ -94,7 +104,8 @@ try {
   assert.equal(imported.player.name, 'Legacy hero');
   console.log('check-import-save: PASS (invalid files and failed writes preserve existing saves; legacy saves migrate before import)');
 } finally {
-  state.game = null;
+  state.game = originalGame;
+  state.currentSlot = originalSlot;
   if (originalDocument === undefined) delete globalThis.document;
   else globalThis.document = originalDocument;
   if (originalStorage === undefined) delete globalThis.localStorage;
