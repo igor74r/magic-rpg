@@ -53,6 +53,33 @@ try {
   assert.equal(petCatUI(), false, 'cat luck must not stack through repeated calls');
   assert.equal(p.buffs.filter(b => b.id === 'catLuck').length, 1);
 
+  const originalSetItem = globalThis.localStorage.setItem;
+  try {
+    globalThis.localStorage.setItem = () => { throw new Error('simulated NPC service storage failure'); };
+    p.gold = 30;
+    p.buffs = [];
+    let snapshot = JSON.stringify(p);
+    assert.equal(payBardUI(), false, 'bard payment must fail when persistence fails');
+    assert.equal(JSON.stringify(p), snapshot, 'failed bard payment must restore gold and buffs');
+
+    p.buffs = [];
+    snapshot = JSON.stringify(p);
+    assert.equal(petCatUI(), false, 'cat service must fail when persistence fails');
+    assert.equal(JSON.stringify(p), snapshot, 'failed cat service must restore buffs');
+
+    p.effects = [];
+    snapshot = JSON.stringify(p);
+    assert.equal(takeElderBlessingUI(), false, 'elder blessing must fail when persistence fails');
+    assert.equal(JSON.stringify(p), snapshot, 'failed elder blessing must restore effects');
+
+    p.hp = 10; p.mp = 5; p.stats.lastWellUse = 0;
+    snapshot = JSON.stringify(p);
+    assert.equal(useWellUI(), false, 'well healing must fail when persistence fails');
+    assert.equal(JSON.stringify(p), snapshot, 'failed well use must restore health, mana and cooldown');
+  } finally {
+    globalThis.localStorage.setItem = originalSetItem;
+  }
+
   assert.equal(takeElderBlessingUI(), true);
   assert.equal(p.effects.filter(e => e.id === 'elderBlessing').length, 1);
   assert.equal(takeElderBlessingUI(), false, 'elder blessing must not stack through repeated calls');
