@@ -749,6 +749,16 @@ function getAuroraNatureAtlas() {
   return auroraNatureAtlas;
 }
 
+export function preloadAuroraNatureAtlas() {
+  const atlas = getAuroraNatureAtlas();
+  if (!atlas) return Promise.resolve(false);
+  if (atlas.complete) return Promise.resolve(atlas.naturalWidth > 0);
+  return new Promise(resolve => {
+    atlas.addEventListener('load', () => resolve(true), { once: true });
+    atlas.addEventListener('error', () => resolve(false), { once: true });
+  });
+}
+
 // Crisp, cached 16-bit pixel vegetation for Aurora's outer gardens.
 const AURORA_NATURE_CACHE = new Map();
 function getAuroraNatureSprite(style) {
