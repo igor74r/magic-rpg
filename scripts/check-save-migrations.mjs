@@ -44,6 +44,9 @@ for (let version = 1; version <= 16; version++) {
         };
   const player = {
     name: 'Migration Fixture', class: 'warrior', level: 12, exp: 345, gold: 678,
+    hp: 100, maxHp: 120, mp: 40, maxMp: 80,
+    str: 12, int: 8, wis: 9, con: 10, dex: 10, luck: 5,
+    statPoints: 0, passivePoints: 0,
     inventory: [{ id: 'mana-crystal', qty: 2 }, { id: 'health-potion', qty: 3 }],
     spells: ['fireball'],
     stats: { kills: { wolf: 17 }, deaths: 4, goldEarned: 900, chestsOpened: 2 },
@@ -120,8 +123,15 @@ console.log('PASS menu defers slot switching until a new character is created an
 const storage = new Map([
   ['magic-rpg-save-1', JSON.stringify({
     version: 16,
-    player: { name: 'Storage Fixture', level: 8, luck: 8.5, inventory: [{ id: 'mana-crystal', qty: 4 }],
-      equipped: Object.fromEntries(expectedSlots.map(slot => [slot, null])) },
+    player: {
+      name: 'Storage Fixture', class: 'mage', level: 8, exp: 0, expNext: getExpNext(8), gold: 0,
+      hp: 80, maxHp: 100, mp: 30, maxMp: 60,
+      str: 5, int: 8, wis: 7, con: 6, dex: 8, luck: 8.5,
+      statPoints: 0, passivePoints: 0,
+      inventory: [{ id: 'mana-crystal', qty: 4 }],
+      spells: [], stats: { kills: {} }, campaignKills: {}, campaignClaimed: {}, activeCampaignMission: null,
+      equipped: Object.fromEntries(expectedSlots.map(slot => [slot, null]))
+    },
     storyShards: { flame: false, ice: false, blood: false },
     storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false }
   })],
