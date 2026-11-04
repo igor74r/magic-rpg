@@ -153,6 +153,21 @@ for (const target of targets) {
     `${target.id}: must be reachable from the village entrance`);
 }
 assert.ok(map.flat().includes(4), 'village must retain small garden/hedge areas');
+const gardenCells = [];
+for (let y = 0; y < map.length; y++) {
+  for (let x = 0; x < map[y].length; x++) {
+    if (map[y][x] === 4) gardenCells.push({ x, y });
+  }
+}
+assert.ok(gardenCells.length >= 35, 'courtyard planting must be substantial rather than a few isolated blocked tiles');
+assert.ok(gardenCells.every(({ x, y }) => map[y][x] !== 1),
+  'garden patches must never overwrite authored street tiles');
+for (const target of targets) {
+  assert.ok(gardenCells.every(cell => Math.abs(cell.x - target.x) > 1 || Math.abs(cell.y - target.y) > 1),
+    `${target.id}: garden planting must leave a one-tile interaction apron clear`);
+}
+const deterministicMap = generateMap('village', village.mapCols, village.mapRows);
+assert.deepEqual(deterministicMap, map, 'Aurora garden and street composition must remain deterministic');
 const roadTiles = map.flat().filter(tile => tile === 1).length;
 assert.ok(roadTiles > 140, 'village must retain enough road tiles for its connected street network');
 const centerRowRoad = map[roadCenterY].map((tile, x) => tile === 1 ? x : -1).filter(x => x >= 0);
