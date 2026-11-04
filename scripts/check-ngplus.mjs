@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { STORY } from '../data/story.js';
 import { startNGPlus } from '../systems/ngplus.js';
+import { getExpNext } from '../systems/progression.js';
 
 const originalStorage = globalThis.localStorage;
 const saved = new Map();
@@ -45,6 +46,7 @@ try {
   assert.equal(startNGPlus(), true, 'NG+ should start after the final victory gate');
   assert.equal(ready.player.ngPlus, 3);
   assert.equal(ready.player.level, 1);
+  assert.equal(ready.player.expNext, getExpNext(1), 'new cycle XP threshold must match the shared progression curve');
   assert.equal(ready.player.passivePoints, 0, 'unspent passive points must reset with the new cycle');
   assert.deepEqual(ready.player.passives, ['start'], 'old passive-tree bonuses must not leak into level 1');
   assert.equal(ready.player.gold, 777);
