@@ -152,6 +152,8 @@ assert.ok(boardSource.includes("dragons['ash-herald']"), 'village news must reac
 for (const target of targets) {
   assert.equal(isBlocked(map, target.x, target.y, 'village'), false,
     `${target.id}: interaction cell must be walkable`);
+  assert.equal(isVillagePositionBlocked(target.x * 48 + 24, target.y * 48 + 24, 8), false,
+    `${target.id}: interaction position must not intersect a building or solid prop collider`);
 }
 
 const queue = [start];
