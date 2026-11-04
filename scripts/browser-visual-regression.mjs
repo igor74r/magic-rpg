@@ -210,6 +210,12 @@ try {
         `${vp.name}/${room}: floor marker must be a CSS pixel motif, not a glyph`);
       assert.equal(await page.locator('.village-room-pixel-icon').count(),3,
         `${vp.name}/${room}: interior must render three pixel-art prop silhouettes`);
+      const propPixels = await page.locator('.village-room-pixel-icon').evaluateAll(nodes => nodes.map(node => ({
+        body: getComputedStyle(node, '::before').backgroundColor,
+        detail: getComputedStyle(node, '::after').backgroundColor
+      })));
+      assert.ok(propPixels.every(pixel => pixel.body !== 'rgba(0, 0, 0, 0)' && pixel.detail !== 'rgba(0, 0, 0, 0)'),
+        `${vp.name}/${room}: all three prop silhouettes must have visible pixel bodies and highlights`);
       const roomArt = await page.locator('.village-room-art').evaluate(node => ({
         backgroundImage: getComputedStyle(node).backgroundImage,
         filter: getComputedStyle(node).filter
