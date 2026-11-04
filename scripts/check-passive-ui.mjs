@@ -28,6 +28,12 @@ assert.doesNotMatch(ui, /<svg|<\\/svg>/, 'passive tree must not emit SVG markup'
 assert.match(ui, /treeZoom = Math\.max\(0\.65, Math\.min\(1\.6/);
 assert.match(ui, /best\?\.focus\(\)/);
 
+assert.equal(ui.includes('<svg'), false, 'passive tree must not render inline SVG');
+assert.equal(ui.includes('</svg>'), false, 'passive tree must not render inline SVG');
+assert.match(css, /\.passive-lines\s*\{[^}]*image-rendering:\s*pixelated/s);
+assert.equal(css.includes('.passive-lines line'), false, 'canvas connections must not retain SVG line styles');
+assert.equal(css.includes('filter:drop-shadow(0 0 2px'), false, 'passive connections must not use blur shadows');
+
 assert.match(css, /\.passive-tree-viewport:focus-visible/);
 assert.match(css, /\.passive-tree-viewport \.passive-node:focus-visible/);
 assert.match(css, /@media \(max-width:600px\)/);
