@@ -41,10 +41,10 @@ export function getDailyQuests() {
       date: now,
       list: shuffled.slice(0, 3).map(quest => ({ ...quest, current: 0, completed: false, claimed: false }))
     };
-    saveGame();
+    if (!saveGame()) p.dailyQuests = saved;
   } else if (p.dailyQuests !== saved || JSON.stringify(saved.list) !== JSON.stringify(normalized)) {
     p.dailyQuests = { date: lastDate, list: normalized };
-    saveGame();
+    if (!saveGame()) p.dailyQuests = saved;
   }
   return p.dailyQuests.list;
 }
@@ -55,7 +55,15 @@ export function updateQuestProgress(type, target, amount = 1) {
   if (!p || !Number.isSafeInteger(increment) || increment <= 0) return;
   const quests = getDailyQuests();
 
+  let previousQuests;
+  try {
+    previousQuests = JSON.parse(JSON.stringify(p.dailyQuests));
+  } catch {
+    return;
+  }
+
   let changed = false;
+  const completedTexts = [];
   for (const q of quests) {
     if (q.completed || q.claimed || q.type !== type) continue;
     if (q.target !== 'any' && q.target !== target) continue;
@@ -64,11 +72,17 @@ export function updateQuestProgress(type, target, amount = 1) {
     if (q.current >= q.max) {
       q.current = q.max;
       q.completed = true;
-      emit('toast', `📜 Квест выполнен: ${q.text}!`);
+      completedTexts.push(q.text);
     }
     changed = true;
   }
-  if (changed) saveGame();
+  if (changed && !saveGame()) {
+    p.dailyQuests = previousQuests;
+    return;
+  }
+  for (const questText of completedTexts) {
+    emit('toast', `📜 Квест выполнен: ${questText}!`);
+  }
 }
 
 export function claimQuestReward(questId) {
