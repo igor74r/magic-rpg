@@ -781,16 +781,34 @@ function getAuroraNatureSprite(style) {
     cluster(11,22,10,10,['#815b3b','#986a43','#68482f']);
     px(10,21,'#b68a58',12,2);px(13,23,'#c39a65',4,2);
     px(9,31,'#563a28',14,2);px(8,32,'#315d3b',4,2);px(21,32,'#315d3b',3,2);
+  } else if(style==='hedge'){
+    cluster(4,20,24,8,['#244832','#315d3b','#3d7146']);
+    cluster(2,25,28,8,['#285536','#356b3f','#244a30']);
+    cluster(6,30,21,4,['#244832','#315d3b','#244a30']);
+    px(7,21,'#6a9858',4,2);px(18,24,'#719c5d',4,2);px(25,27,'#57844e',3,2);
+  } else if(style==='fence'){
+    px(2,22,'#4b3528',3,15);px(13,22,'#4b3528',3,15);px(25,22,'#4b3528',3,15);
+    px(1,24,'#a77a4b',29,3);px(1,31,'#805638',29,3);
+    px(2,23,'#d0a16a',3,1);px(13,23,'#d0a16a',3,1);px(25,23,'#d0a16a',3,1);
+    px(5,27,'#68452d',2,2);px(18,27,'#68452d',2,2);
+  } else if(style==='flowerbed'){
+    px(4,29,'#68452d',24,5);px(6,27,'#986a43',20,3);
+    for(let i=0;i<6;i++){const x=6+i*4;px(x,22-(i%2)*2,'#315d3b',2,6);px(x,20-(i%2)*2,['#d7a5b8','#e6c77b','#b9a0dc'][i%3],2,2);}
+    px(8,31,'#a77a4b',3,1);px(20,31,'#a77a4b',3,1);
   }
   AURORA_NATURE_CACHE.set(style,canvas);
   return canvas;
 }
 function drawAuroraNature(ctx,x,y,style){
   const sprite=getAuroraNatureSprite(style);
+  const compact = style==='fence' || style==='flowerbed';
+  const hedge = style==='hedge';
+  const width = compact ? (style==='fence'?78:60) : hedge ? 78 : 72;
+  const height = compact ? (style==='fence'?42:34) : hedge ? 62 : 90;
   ctx.save();
   try{
     ctx.imageSmoothingEnabled=false;
-    ctx.drawImage(sprite,Math.round(x-36),Math.round(y-78),72,90);
+    ctx.drawImage(sprite,Math.round(x-width/2),Math.round(y-height+8),width,height);
   }finally{ctx.restore();}
 }
 
