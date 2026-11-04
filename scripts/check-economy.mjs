@@ -111,6 +111,16 @@ assert.equal(buyer.gold, Number.MAX_SAFE_INTEGER);
 assert.equal(buyer.inventory.length, 1, 'overflowing sale must not remove the item');
 buyer.gold = 1000;
 
+// Sale proceeds must also fit the persistent earned-gold counter.
+buyer.inventory = [{ id: 'iron-sword', qty: 1, rarity: 'common' }];
+buyer.stats.goldEarned = Number.MAX_SAFE_INTEGER;
+const overflowEarnedGold = sellItemsByIndices([0], { confirmed: true });
+assert.equal(overflowEarnedGold.ok, false, 'sale must reject earned-gold statistics overflow');
+assert.equal(buyer.stats.goldEarned, Number.MAX_SAFE_INTEGER);
+assert.equal(buyer.inventory.length, 1, 'overflowing earned-gold statistics must not remove the item');
+buyer.stats.goldEarned = 0;
+buyer.gold = 1000;
+
 // A failed storage write must roll back bulk sale and buyback as one transaction.
 buyer.inventory = [{ id: 'iron-sword', qty: 1, rarity: 'common' }];
 buyer.buyback = [{ id: 'prior-record', soldAt: new Date().toDateString(), price: 50, item: { id: 'health-potion', qty: 1 } }];
