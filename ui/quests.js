@@ -8,6 +8,7 @@ import { LOCATIONS } from '../data/locations.js';
 import { getDailyQuests, claimQuestReward } from '../systems/dailyQuests.js';
 import { takeTalent, resetTalents } from '../systems/talents.js';
 import { saveGame } from '../systems/save.js';
+import { getUnlockedAchievementIds } from '../systems/achievements.js';
 import { getSafeCount, getTotalKills } from '../systems/stats.js';
 import { showScreen, toast } from './screens.js';
 import { renderGame, renderHeader } from './header.js';
@@ -346,12 +347,12 @@ export function renderQuests() {
 }
 
 export function renderAchievements() {
-  const unlocked = state.game.player.achievements || [];
+  const unlocked = getUnlockedAchievementIds(state.game.player);
   const total = ACHIEVEMENTS.length;
-  const got = unlocked.length;
+  const got = unlocked.size;
 
   const items = ACHIEVEMENTS.map(achievement => {
-    const done = unlocked.includes(achievement.id);
+    const done = unlocked.has(achievement.id);
     let progressText = '';
 
     if (!done && achievement.progress && achievement.target !== undefined) {
@@ -422,7 +423,7 @@ export function renderStatistics() {
   const riftBest = getSafeCount(player.riftBest);
   const towerBest = getSafeCount(player.towerBest);
   const ngPlus = getSafeCount(player.ngPlus);
-  const achievementsCount = (player.achievements || []).length;
+  const achievementsCount = getUnlockedAchievementIds(player).size;
 
   const hours = Math.floor(playtimeSec / 3600);
   const minutes = Math.floor((playtimeSec % 3600) / 60);
