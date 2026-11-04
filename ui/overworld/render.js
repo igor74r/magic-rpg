@@ -237,6 +237,24 @@ function tick(ts) {
   }
 }
 
+// Pixel-stepped contact shadows anchor Aurora scenery to the ground.
+// Visual only: no collision, navigation, or interaction coordinates are changed.
+function drawAuroraContactShadow(ctx, item, x, y) {
+  const buildingWidths = { hall: 112, forge: 88, healer: 88, alchemy: 88, market: 92, tavern: 104, home: 78 };
+  const width = item.buildingStyle ? (buildingWidths[item.buildingStyle] || 84)
+    : item.natureStyle === 'oak' || item.natureStyle === 'pine' ? 54
+      : item.natureStyle === 'hedge' || item.natureStyle === 'fence' ? 42 : 30;
+  const depth = item.buildingStyle ? 22 : item.natureStyle ? 12 : 9;
+  const left = Math.round(x - width / 2);
+  const top = Math.round(y - depth / 2 + 5);
+  ctx.save();
+  ctx.fillStyle = 'rgba(18, 24, 19, 0.30)';
+  ctx.fillRect(left + 7, top, width - 14, depth);
+  ctx.fillRect(left + 3, top + 3, width - 6, depth - 6);
+  ctx.fillRect(left, top + 6, width, Math.max(2, depth - 12));
+  ctx.restore();
+}
+
 function drawTile(ctx, type, x, y, size, themeName, colors, tileX = 0, tileY = 0, map = null) {
   if (themeName === 'village' && drawAuroraGroundTile(ctx, type, x, y, size, tileX, tileY)) {
     drawAuroraGroundTransitions(ctx, type, x, y, size, tileX, tileY, map);
@@ -462,6 +480,9 @@ function render() {
         ctx.fillStyle = 'rgba(255, 215, 0, 0.15)';
         ctx.beginPath(); ctx.arc(sx, sy, 32, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = 'rgba(255, 215, 0, 0.7)'; ctx.lineWidth = 2; ctx.stroke();
+      }
+      if (ow.locationId === 'village' && (item.buildingStyle || item.natureStyle || item.propStyle)) {
+        drawAuroraContactShadow(ctx, item, sx, sy);
       }
       drawStatic(ctx, item, sx, sy, theme.shadow);
       if (entry.kind === 'npc' || !item.decorative) {
