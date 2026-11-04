@@ -76,6 +76,23 @@ try {
     'storage failure must not let corrupted progress claim a reward');
   assert.deepEqual(state.game.player.dailyQuests, corruptDailySave,
     'failed normalization must still roll back the original persisted state');
+
+  const validProgressNeedsRepair = {
+    date: now,
+    list: [
+      { id: 'q-kill-any', current: 10, completed: true, claimed: false, gold: 999999, exp: 999999 },
+      { id: 'q-kill-goblin', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-skeleton', current: 0, completed: false, claimed: false }
+    ]
+  };
+  state.game.player.dailyQuests = validProgressNeedsRepair;
+  const detachedFallback = getDailyQuests();
+  assert.equal(detachedFallback.find(q => q.id === 'q-kill-any').completed, true,
+    'valid progress remains visible in a normalized fallback');
+  assert.equal(claimQuestReward('q-kill-any'), false,
+    'a detached fallback list must not grant a reward before normalization is persisted');
+  assert.equal(state.game.player.gold, 10,
+    'failed normalization must not grant currency from a detached quest list');
   globalThis.localStorage.setItem = originalSetItemForCounterFailure;
   assert.ok(quests.every(quest => !quest.text.includes('<')), 'quest display text must come from trusted definitions');
 
