@@ -111,15 +111,21 @@ export function initWeather(themeName) {
     return sprite;
   });
 
-  if (!bloomCanvas) {
-    // Bloom is a soft light pass: render it at half resolution to cut fill cost
-    // by 75%, then scale it smoothly when compositing onto the main canvas.
+  if (!bloomCanvas && typeof document !== 'undefined') {
+    // Bloom is optional; keep the world renderable if an offscreen context is unavailable.
     const bloomScale = 0.5;
-    bloomCanvas = document.createElement('canvas');
-    bloomCanvas.width = Math.ceil(VIEW_W * bloomScale);
-    bloomCanvas.height = Math.ceil(VIEW_H * bloomScale);
-    bloomCtx = bloomCanvas.getContext('2d', { alpha: true });
-    bloomCtx.setTransform(bloomScale, 0, 0, bloomScale, 0, 0);
+    const candidate = document.createElement('canvas');
+    candidate.width = Math.ceil(VIEW_W * bloomScale);
+    candidate.height = Math.ceil(VIEW_H * bloomScale);
+    const candidateContext = candidate.getContext('2d', { alpha: true });
+    if (candidateContext) {
+      candidateContext.setTransform(bloomScale, 0, 0, bloomScale, 0, 0);
+      bloomCanvas = candidate;
+      bloomCtx = candidateContext;
+    } else {
+      bloomCanvas = null;
+      bloomCtx = null;
+    }
   }
 
   lightning = { timer: 5 + Math.random() * 5, flash: 0 };
@@ -269,11 +275,12 @@ export function drawFogLayers(ctx) {
 }
 
 export function drawBloom(ctx) {
+  const ow = state.overworld;
+  if (!bloomCtx || !bloomCanvas || !ctx || !ow?.camera || !ow?.player || !state.game?.player) return;
   bloomCtx.clearRect(0, 0, VIEW_W, VIEW_H);
   bloomCtx.save();
   bloomCtx.globalCompositeOperation = 'lighter';
   
-  const ow = state.overworld;
   const cam = ow.camera;
   const p = ow.player;
 
@@ -291,7 +298,7 @@ export function drawBloom(ctx) {
     bloomCtx.fillRect(p.x - cam.x - 40, p.y - cam.y - 60, 80, 80);
   }
 
-  for (const c of ow.chests) {
+  for (const c of ow.chests || []) {
     if (c.opened) continue;
     const cx = c.x - cam.x, cy = c.y - cam.y;
     if (cx < -100 || cx > VIEW_W + 100 || cy < -100 || cy > VIEW_H + 100) continue;
@@ -314,7 +321,7 @@ export function drawBloom(ctx) {
     bloomCtx.fillRect(ex - 120, ey - 120, 240, 240);
   }
 
-  for (const e of ow.enemies) {
+  for (const e of ow.enemies || []) {
     if (e.dead) continue;
     if (!e.boss && !e.elite) continue;
     const ex = e.x - cam.x, ey = e.y - cam.y;
