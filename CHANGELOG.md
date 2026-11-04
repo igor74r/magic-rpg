@@ -356,3 +356,12 @@
 - `scripts/check-visual-assets.mjs` проверяет PNG dimensions, RGBA color type, список стилей, путь загрузки и nearest-neighbour sampling. Скриншоты desktop/mobile visual regression просмотрены: новый atlas отображается в игровой сцене, без потери layout.
 - CI PASS и Pages deployment PASS на HEAD `89ad2c79188b79e5b25d267755c7bd7a4153f66a`. CI: https://github.com/igor74r/magic-rpg/actions/runs/41873200313 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41873200129 .
 - Остаётся завершить ручную проверку каждого природного кадра на полном масштабе и пройти оставшиеся архитектурные/NPC арт-этапы.
+
+
+## 2026-11-04 — Aurora vegetation scale and NPC pixel-detail pass
+
+- `ui/overworld/sprites.js`: enlarged the visible world footprint of oak/pine silhouettes and gave each Aurora nature style a proportionate size; flowerbeds, fences and other low garden pieces remain close to ground level.
+- `ui/overworld/render.js`: widened the pixel-stepped contact shadows to match the enlarged nature silhouettes.
+- `ui/overworld/sprites.js`: replaced antialiased line/arc embellishments on Aurora NPC role details with integer-aligned flat-color pixel clusters for blacksmith, healer, merchant, guard, elder, alchemist, herald, bard and children.
+- `scripts/check-visual-assets.mjs`: added regression checks for species-specific dimensions and the absence of vector strokes in NPC role details.
+- Browser visual regression and full CI are running for the new main-branch head; visual completion is not claimed until the updated screenshots are reviewed.
