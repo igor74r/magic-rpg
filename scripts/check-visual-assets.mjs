@@ -109,6 +109,14 @@ assert.ok(villageSprites.includes('getAuroraNatureFrameBounds(atlas, frame)') &&
 assert.ok(villageSprites.includes('ctx.drawImage(atlas,frame*64+crop.x,crop.y,crop.width,crop.height'), 'Aurora nature atlas must render the cropped visible sprite with nearest-neighbour sampling');
 const npcDetails = villageSprites.slice(villageSprites.indexOf('function drawNpcDetails('));
 assert.ok(npcDetails.includes('integer pixel clusters only') && npcDetails.includes("id === 'blacksmith'") && npcDetails.includes("id === 'bard'"), 'Aurora NPCs must use role-specific pixel-art details');
+const npcData = readFileSync(new URL('../data/npcs.js', import.meta.url), 'utf8');
+for (const id of ['blacksmith','healer','alchemist','merchant','elder','bard','guard','herald','kids']) {
+  assert.ok(npcDetails.includes(`id === '${id}'`), `Aurora NPC ${id} must have role-specific pixel-art details`);
+}
+for (const id of ['well','questBoard','cat']) {
+  assert.ok(villageSprites.includes(`if (id === '${id}')`), `Aurora NPC prop ${id} must have a dedicated pixel-art renderer`);
+  assert.ok(npcData.includes(`${id}: {`), `NPC data must keep the ${id} visual role registered`);
+}
 assert.ok(villageSprites.includes('Stepped rectangular footprint: crisp pixel-art shadow') && !villageSprites.includes('ctx.ellipse('), 'overworld character shadows must use crisp stepped pixel blocks, not antialiased ellipses');
 assert.ok(!/ctx\.(?:beginPath|arc|stroke|strokeRect)\s*\(/.test(npcDetails), 'Aurora NPC role details must avoid antialiased vector strokes');
 assert.ok(villageSprites.includes('frame * 64, 0, 64, 64'), 'village props must sample the 64px atlas frames');
