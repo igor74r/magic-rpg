@@ -109,16 +109,16 @@ export function claimQuestReward(questId) {
 
   const parts = [`+${definition.gold}💰`];
   if (definition.exp) parts.push(`+${definition.exp} EXP`);
+  if (!saveGame()) {
+    for (const key of Object.keys(p)) delete p[key];
+    Object.assign(p, previousPlayer);
+    return false;
+  }
   emit('toast', `📜 Награда: ${parts.join(', ')}`);
   emit('log', {
     channel: 'game',
     msg: `📜 Квест «${q.text}» — ${parts.join(', ')}`,
     cls: 'success'
   });
-  if (!saveGame()) {
-    for (const key of Object.keys(p)) delete p[key];
-    Object.assign(p, previousPlayer);
-    return false;
-  }
   return true;
 }
