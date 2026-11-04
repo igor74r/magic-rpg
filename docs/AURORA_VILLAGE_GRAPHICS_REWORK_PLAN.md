@@ -336,3 +336,12 @@ assets/tiles/
 - Visual contract checks guard grass density/opacity, Canvas alpha restoration and absence of ellipse shadows.
 - Browser visual regression and GitHub Pages deployment passed for the implementation commits. A later documentation-only commit is awaiting its own CI confirmation.
 - Remaining scope: continue the complete file-by-file main-branch audit and evaluate further Aurora art coverage (especially the remaining character and nature variants) before calling the rework complete.
+
+
+## Контрольная точка после CI 05.11.2026
+
+- Исторические SHA `4659bdcc` и `3e2fbba` выше относятся к предыдущим этапам и не являются текущим HEAD.
+- На HEAD `0299f7878b6a69e747c27435ae34b2976822cfb8` CI run [41903219376](https://github.com/igor74r/magic-rpg/actions/runs/41903219376) завершился `success`, включая desktop/mobile browser smoke и desktop/mobile gameplay visual regression.
+- GitHub Pages deployment [41903219260](https://github.com/igor74r/magic-rpg/actions/runs/41903219260) завершился `success` на том же SHA.
+- Это подтверждает автоматизированную совместимость текущих изменений, но не заменяет визуальную оценку каждого здания, NPC, природного объекта и игрового экрана.
+- Художественная переработка Авроры остаётся частичной: необходимо завершить ревизию оставшихся объектов и персонажей, сделать свежие скриншоты и вручную проверить цельность композиции/проходимость.
