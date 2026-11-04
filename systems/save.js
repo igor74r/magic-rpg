@@ -456,10 +456,9 @@ export function migrateGame(game) {
   // Version 15: Luck starts at 5 and grows by 0.5 per character level.
   if (game.version < 15) {
     const level = Math.max(1, Math.floor(Number(game.player.level) || 1));
-    if (!Number.isFinite(game.player.luck)) {
-      game.player.luck = 5 + (level - 1) * 0.5;
-    }
-    game.player.luck = Math.max(0, Math.min(100, game.player.luck));
+    // Luck did not scale on legacy saves. Backfill the progression bonus
+    // for every pre-v15 character, even when the old default value (5) exists.
+    game.player.luck = Math.min(100, 5 + (level - 1) * 0.5);
     game.version = 15;
   }
 
