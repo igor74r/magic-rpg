@@ -40,6 +40,14 @@ try {
   assert.equal(game.player.gold, 10);
   assert.deepEqual(emitted, [], 'failure must suppress achievement events and UI feedback');
 
+  game.player.achievements = 'corrupt-achievement-list';
+  checkAchievements();
+  assert.equal(game.player.achievements, 'corrupt-achievement-list',
+    'failed unlock must restore the original malformed achievement value');
+  assert.equal(game.player.gold, 10, 'failed unlock must also restore the currency balance');
+  assert.equal(writes, 2);
+
+  game.player.achievements = [];
   globalThis.localStorage.setItem = () => {};
   checkAchievements();
   assert.deepEqual(game.player.achievements, ['first-blood']);
