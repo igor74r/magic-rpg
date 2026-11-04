@@ -99,3 +99,12 @@
 - CI [41888073492](https://github.com/igor74r/magic-rpg/actions/runs/41888073492) на commit `80d71cc8954674343b79e0dce459e64384d65535` — **success, 81/81 шагов**; профильные шаги `Check chest reward rollback on save failure`, `Check player footprint and swept collision`, `Check Aurora village layout...` и browser desktop/mobile smoke + visual regression прошли.
 - GitHub Pages deployment [41888073631](https://github.com/igor74r/magic-rpg/actions/runs/41888073631) — **success**.
 - Полный построчный ручной аудит всех файлов и художественная переработка всех биомов/персонажей/драконов/предметов по-прежнему не завершены; текущие результаты не должны выдаваться за полный финал.
+
+
+## Проверка полноты CI-покрытия и экспорт/импорт сохранений
+
+- Сверены рекурсивное дерево и `.github/workflows/ci.yml`: в репозитории **69 файлов `scripts/check-*.mjs`**, и все 69 запускаются CI ровно по одному разу; не осталось check-скриптов вне workflow и несуществующих вызовов.
+- Сверены локальные ресурсы `index.html` и все шесть CSS: все относительные `src`/`href`/`url(...)` разрешаются в существующие файлы; отсутствующих путей не найдено.
+- `ui/menu.js`: `exportSave()` больше не отзывает Blob URL синхронно сразу после `a.click()`. URL освобождается через 1000 ms, чтобы браузер успел принять скачивание. `scripts/check-safe-rendering.mjs` закрепляет отсутствие синхронного revoke.
+- Последний CI [41889474023](https://github.com/igor74r/magic-rpg/actions/runs/41889474023) на commit `65c918f3d565704cd22982ed85e4edf28acca056` завершился **success, 81/81**; Pages [41889474159](https://github.com/igor74r/magic-rpg/actions/runs/41889474159) — **success**.
+- Независимый ручной аудит всех 202 файлов всё ещё продолжается; автоматическое покрытие тестами не выдаётся за построчную экспертизу каждого исходника.
