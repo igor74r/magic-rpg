@@ -120,7 +120,36 @@ try {
   updateQuestProgress('kill', 'any', Infinity);
   assert.equal(state.game.player.dailyQuests.list[0].current, before, 'non-finite progress must be ignored');
   assert.ok(saved.has('magic-rpg-save-1'), 'normalized quests and rewards should be saved');
-  console.log('check-daily-quests: PASS (save normalization, canonical rewards, forged completion, future dates, progress and balance guards)');
+
+  state.game.player.dailyQuests = {
+    date: Date.now(),
+    list: [
+      { id: 'q-kill-goblin', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-any', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-skeleton', current: 0, completed: false, claimed: false }
+    ]
+  };
+  getDailyQuests();
+  const beforeFailedProgress = JSON.parse(JSON.stringify(state.game.player.dailyQuests));
+  const originalSetItem = globalThis.localStorage.setItem;
+  let completionToasts = 0;
+  const onToast = message => {
+    if (String(message).includes('Квест выполнен')) completionToasts += 1;
+  };
+  on('toast', onToast);
+  globalThis.localStorage.setItem = () => { throw new Error('simulated quota failure'); };
+  try {
+    updateQuestProgress('kill', 'goblin', 5);
+    assert.deepEqual(state.game.player.dailyQuests, beforeFailedProgress,
+      'failed persistence must roll back daily quest progress and completion');
+    assert.equal(completionToasts, 0,
+      'completion feedback must not appear for an unpersisted quest');
+  } finally {
+    off('toast', onToast);
+    globalThis.localStorage.setItem = originalSetItem;
+  }
+
+  console.log('check-daily-quests: PASS (save normalization, canonical rewards, forged completion, future dates, progress and rollback guards)');
 } finally {
   state.game = null;
   if (previousStorage === undefined) delete globalThis.localStorage;
