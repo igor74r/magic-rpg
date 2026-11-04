@@ -87,7 +87,8 @@ for (let version = 1; version <= 16; version++) {
     assert.equal(migrated.player.equipped.gloves?.id, 'oath-bracers');
     assert.equal(migrated.player.equipped.amulet?.id, 'seal-five-orders');
     assert.deepEqual(Object.keys(migrated.player.equipped).sort(), [...expectedSlots].sort());
-    assert.equal(migrated.player.luck, 10.5);
+    assert.equal(migrated.player.luck, version >= 15 ? 10.5 : 5,
+      'Luck is preserved from v15 onward and defaults safely for older saves');
     assert.equal(migrated.player.campaignClaimed['a1-m1'], true);
     assert.equal(migrated.storyShards.flame, false);
     assert.equal(migrated.storyShards.ice, false);
@@ -183,7 +184,10 @@ console.log('PASS new character creation runs v16/v17 migrations before first sa
 storage.set('magic-rpg-save-1', JSON.stringify({
   version: 16,
   player: {
-    name: 'Storage Fixture', class: 'mage', level: 8, gold: 0, luck: 8.5,
+    name: 'Storage Fixture', class: 'mage', level: 8, exp: 0, expNext: getExpNext(8), gold: 0, luck: 8.5,
+    hp: 80, maxHp: 100, mp: 30, maxMp: 60,
+    str: 5, int: 8, wis: 7, con: 6, dex: 8,
+    statPoints: 0, passivePoints: 0,
     inventory: [{ id: 'mana-crystal', qty: 4 }], spells: [],
     stats: { kills: {} }, campaignKills: {}, campaignClaimed: {}, activeCampaignMission: null,
     equipped: Object.fromEntries(expectedSlots.map(slot => [slot, null]))
