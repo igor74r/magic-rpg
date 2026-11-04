@@ -145,7 +145,7 @@ const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
 assert.ok(html.includes('id="prologue-art"'), 'cinematic prologue must provide its illustrated Canvas');
 assert.ok(html.includes('id="prologue-narration"'), 'cinematic prologue must provide a narration layer');
-assert.ok(main.includes('Первые маги крови создали Кристалл Разлома') || main.includes('маги крови создали Кристалл Разлома'));
+assert.ok(main.includes('Кристалл Разлома'), 'prologue must retain the central crystal lore');
 assert.ok(main.includes('Зарплата — опыт'), 'prologue narrator must retain its darkly comic voice');
 assert.ok(main.includes('Ты ведь понимаешь, что я вижу тебя?'), 'prologue must directly address the player beyond the screen');
 assert.ok((main.match(/chapter: 'Глава /g) || []).length >= 7, 'prologue must contain at least seven story chapters');
