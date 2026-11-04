@@ -1,5 +1,5 @@
 {
-    "name":  "Shards of the Rift РІР‚вЂќ high-detail original 2D terrain atlas",
+    "name":  "Shards of the Rift Р Р†Р вЂљРІР‚Сњ high-detail original 2D terrain atlas",
     "license":  "Original project assets; created for this game",
     "tileSize":  96,
     "terrain":  {
@@ -68,7 +68,7 @@
                                        "path"
                                    ],
                          "displaySize":  48,
-                         "usage":  "Original 16-bit village ground tiles; four seamless visual variants for grass and cobblestone"
+                         "usage":  "Ash-dark 16-bit village grass and worn stone paths; four seamless visual variants per type; nearest-neighbour rendering"
                      },
     "villageProps":  {
                          "file":  "../aurora/village-props-atlas.png",
@@ -94,7 +94,7 @@
                                         "rift-ward",
                                         "tower-gate"
                                     ],
-                         "usage":  "Authored 16-bit pixel-art village prop sprites with transparent backgrounds; nearest-neighbour rendering"
+                         "usage":  "Muted 16-bit Aurora props with low-saturation colors; nearest-neighbour rendering"
                      },
     "auroraWorldPortal":  {
                               "file":  "../aurora/world-portal.png",

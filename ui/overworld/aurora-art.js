@@ -226,6 +226,11 @@ function makeBuilding(style,variant='default'){
 
   // Individual stone chips, moss and timber pegs; all aligned to the pixel grid.
   for(let i=0;i<16;i++){const x=9+(i*29)%86,y=73+(i*7)%9;pixel(g,x,y,i%3===0?p.accent:p.stone);}
+  g.save();
+  g.globalCompositeOperation = 'source-atop';
+  g.fillStyle = 'rgba(25, 28, 36, 0.18)';
+  g.fillRect(0, 0, W, H);
+  g.restore();
   return c;
 }
 export function drawAuroraBuilding(ctx,x,y,style='home',variant='default'){

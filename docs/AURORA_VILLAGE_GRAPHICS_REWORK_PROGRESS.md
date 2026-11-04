@@ -1,4 +1,4 @@
-﻿# Aurora village art integration — progress
+# Aurora village art integration — progress
 
 ## Imported source artwork
 - Basic Village Tileset by Forchild, CC0 1.0.
@@ -8,8 +8,8 @@
 
 ## Runtime integration
 - ui/overworld/aurora-village-pack.js loads the local nature and house sheets only.
-- Oak, pine, bush, hedge and fence visuals use real sprite-sheet frames.
-- Sampling is nearest-neighbour (imageSmoothingEnabled = false).
+- Oak, pine and bush visuals use real sprite-sheet frames; fence and hedge retain their authored fallback sprites.
+- The grass/path atlas and village prop atlas now use a muted ash-dark palette. Sampling is nearest-neighbour (imageSmoothingEnabled = false).
 - If an image cannot load, the existing Aurora renderer remains as a fallback.
 - Existing building geometry, map coordinates, interactions and collision rectangles are not changed.
 
@@ -19,7 +19,7 @@
 - check-imports.mjs: passed.
 - check-offline.mjs: passed.
 - Full check-*.mjs sweep: 66 passed, 2 failed because the local Desktop Commander package's expected dist/index.html and ui/inventory.js files are absent. These failures are unrelated to Aurora.
-- browser-smoke-cdp.mjs did not complete: its prologue voice-control assertion failed before entering gameplay. A gameplay screenshot has therefore not yet been verified.
+- browser-smoke-cdp.mjs did not complete: its prologue voice-control assertion failed before entering gameplay. A dedicated Chrome canvas preview verified the imported tree sprites and muted building palette. The complete in-game Aurora scene still needs visual verification.
 
 ## Remaining work before calling Aurora complete
 - Inspect the village in a running browser at desktop and mobile sizes.
