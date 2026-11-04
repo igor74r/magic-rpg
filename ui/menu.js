@@ -543,7 +543,7 @@ export function exportSave() {
   const slot = state.currentSlot || 1;
   let data;
   try {
-    data = window.localStorage.getItem(`magic-rpg-save-${slot}`);
+    data = globalThis.localStorage.getItem(`magic-rpg-save-${slot}`);
   } catch (error) {
     console.error('[save] Не удалось прочитать слот для экспорта:', error);
     toast('❌ Не удалось прочитать слот: хранилище браузера недоступно');
