@@ -396,3 +396,5 @@
 - Differentiated each interior hearth and window tint by room role: forge ember, healer green, alchemy violet, market gold, hall warm ivory and tavern amber. The room-specific pseudo-elements remain hard-edged flat-color pixel clusters; JS/CSS cache keys advanced to `20261104-aurora-interior-palettes-3` and are covered by the startup contract test.
 
 - Raised the interior floor pixel motif above the prop cards and moved it closer to the foreground so it no longer appears clipped behind the center item. Final interior JS/CSS cache keys are `20261104-aurora-interior-finish-4`.
+
+- Manual courtyard review showed the grass base still looked noisy even after reducing the decorative flecks. The authored grass atlas is now blended over the flat base at 0.42 opacity; extra tufts are limited to 3–5 per tile at 0.24 opacity. Path tiles remain fully opaque. Canvas alpha is restored in `finally`, and `check-visual-assets.mjs` guards density, blend and state restoration. Cache keys advanced to `20261104-aurora-flat-ground-5`.
