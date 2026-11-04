@@ -19,6 +19,9 @@ assert.equal(getSellPrice({ id: 'shard-flame', qty: 1 }, player), 0);
 assert.equal(getSellPrice({ id: 'iron-sword', rarity: 'mythic' }, player), 0);
 assert.equal(getSellPrice({ id: 'iron-sword', rarity: 'epic' }, player), Math.floor(150 * 0.35));
 assert.ok(getSellPrice({ id: 'health-potion', qty: 3 }, player) >= 3);
+assert.equal(getSellPrice({ id: 'scroll-lightning', qty: 3 }, player),
+  Math.floor(ITEMS['scroll-lightning'].price * 0.35) * 3,
+  'selling a stack of spell scrolls must pay for every scroll');
 
 for (let act = 0; act < STORY.acts.length; act++) {
   const missions = STORY.acts[act].missions;
@@ -33,6 +36,9 @@ for (let act = 0; act < STORY.acts.length; act++) {
 assert.equal(getCurrentActIndex(player), 4);
 assert.equal(getBuyPrice('health-potion', player), Math.round(ITEMS['health-potion'].price * 1.8));
 assert.equal(getSellPrice({ id: 'health-potion', qty: 1 }, player), Math.floor(ITEMS['health-potion'].price * 1.8 * 0.35));
+assert.equal(getSellPrice({ id: 'scroll-lightning', qty: 3 }, player),
+  Math.floor(ITEMS['scroll-lightning'].price * 1.8 * 0.35) * 3,
+  'scroll stack sale price must scale with the current campaign act');
 
 
 // Direct purchase calls must respect the merchant's actual stock, not just item prices.
