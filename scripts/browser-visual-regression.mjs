@@ -100,6 +100,40 @@ try {
     await naturePage.close();
   }
 
+  // Render every Aurora resident and special village NPC through the production dispatcher.
+  {
+    const npcPage = await browser.newPage({ viewport: { width: 1440, height: 720 }, deviceScaleFactor: 1 });
+    await npcPage.goto(baseUrl, { waitUntil:'domcontentloaded' });
+    const npcCheck = await npcPage.evaluate(async () => {
+      const { drawObject } = await import('/ui/overworld/sprites.js');
+      const roles = ['blacksmith','healer','alchemist','merchant','elder','well','bard','guard','cat','kids','herald','questBoard'];
+      const canvas = document.createElement('canvas');
+      canvas.width = 1360; canvas.height = 680;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = '#263b32'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      roles.forEach((id,index) => {
+        const col = index % 4, row = Math.floor(index / 4);
+        const x = col * 340 + 170, y = row * 220 + 145;
+        drawObject(ctx, { id }, x, y, 'rgba(0,0,0,0.35)');
+        ctx.fillStyle = '#f0dfb8'; ctx.font = 'bold 16px monospace';
+        ctx.textAlign = 'center'; ctx.fillText(id.toUpperCase(),x,y+58);
+      });
+      const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      let colored = 0;
+      for(let i=0;i<pixels.length;i+=4) if(pixels[i]!==38 || pixels[i+1]!==59 || pixels[i+2]!==50) colored++;
+      if(colored < 9000) throw new Error('Aurora NPC sheet appears incomplete: '+colored);
+      document.body.innerHTML = '';
+      document.body.style.cssText = 'margin:0;background:#17251f;display:grid;place-items:center;min-height:100vh';
+      document.body.appendChild(canvas);
+      return { roles, coloredPixels: colored, width: canvas.width, height: canvas.height };
+    });
+    assert.equal(npcCheck.roles.length,12,'all Aurora residents and special NPCs must render');
+    assert.ok(npcCheck.coloredPixels>9000,'NPC art sheet must contain substantial pixel detail');
+    await capture(npcPage,'aurora-02-npc-art-sheet');
+    await npcPage.close();
+  }
+
   for (const vp of [{name:'desktop',width:1440,height:900},{name:'mobile',width:390,height:844}]) {
     const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1 });
     const errors = [];
