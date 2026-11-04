@@ -13,7 +13,14 @@ assert.match(portal, /portal-map-node/, 'every destination must be represented b
 assert.match(portal, /<canvas class="portal-map-art"/, 'portal map art must use a crisp pixelated canvas');
 assert.match(portal, /drawPortalPixelMap\(overlay\.querySelector\('#portal-map-art'\), points, routePoints\)/,
   'pixel map canvas must be drawn from the current destination and story route points');
-assert.doesNotMatch(portal, /<svg|<\\/svg>/i, 'portal must not use inline SVG graphics');
+assert.equal(portal.includes('<svg'), false, 'portal must not use inline SVG graphics');
+assert.equal(portal.includes('</svg>'), false, 'portal must not use inline SVG graphics');
+assert.match(portal, /imageSmoothingEnabled = false/, 'portal canvas must preserve crisp pixel edges');
+const portalStyleStart = portal.indexOf('<style>');
+const portalStyleEnd = portal.indexOf('</style>', portalStyleStart);
+const portalCss = portal.slice(portalStyleStart, portalStyleEnd);
+assert.doesNotMatch(portalCss, /linear-gradient|radial-gradient|blur\\s*\\(|backdrop-filter|filter\\s*:/i,
+  'portal UI must use flat colors without blur or filter effects');
 assert.match(portal, /portal-destination/, 'selecting a point must show its detailed destination panel');
 assert.match(portal, /canEnterStoryLocation\(state\.game\?\.player, id\)/, 'destination selection and travel must preserve story and level gating');
 assert.match(portal, /latestAccess\.allowed/, 'travel must re-check access immediately before transition');
