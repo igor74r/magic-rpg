@@ -92,6 +92,7 @@ const originalStorage = globalThis.localStorage;
 const originalSetTimeout = globalThis.setTimeout;
 const toastMessages = [];
 globalThis.document = {
+  addEventListener() {},
   createElement: () => ({ setAttribute() {}, remove() {}, textContent: '' }),
   body: { appendChild(element) { toastMessages.push(element.textContent); } }
 };
