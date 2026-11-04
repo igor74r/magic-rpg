@@ -47,7 +47,7 @@ export function getDailyQuests() {
     p.dailyQuests = { date: lastDate, list: normalized };
     if (!saveGame()) p.dailyQuests = saved;
   }
-  return p.dailyQuests.list;
+  return Array.isArray(p.dailyQuests?.list) ? p.dailyQuests.list : [];
 }
 
 export function updateQuestProgress(type, target, amount = 1, options = {}) {
