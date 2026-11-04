@@ -517,13 +517,6 @@ function sprite(mask, colors, scale) {
   return canvas;
 }
 
-function blob(ctx, x, y, width, height, color) {
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.ellipse(x, y, width, height, 0, 0, Math.PI * 2);
-  ctx.fill();
-}
-
 function blit(ctx, canvas, x, y, bob = 0) {
   ctx.save();
   ctx.imageSmoothingEnabled = false;
@@ -583,7 +576,13 @@ function drawGait(ctx, x, y, phase, palette, scale = 1) {
   ctx.restore();
 }
 function shadow(ctx, x, y, color, width = 14) {
-  blob(ctx, x, y + 14, width, width * 0.42, color);
+  // Stepped rectangular footprint: crisp pixel-art shadow, no antialiased ellipse.
+  const w = Math.max(6, Math.round(width));
+  const h = Math.max(3, Math.round(width * 0.36));
+  ctx.fillStyle = color;
+  ctx.fillRect(Math.round(x - w * 0.62), Math.round(y + 14), Math.ceil(w * 1.24), Math.max(1, Math.round(h * 0.34)));
+  ctx.fillRect(Math.round(x - w * 0.86), Math.round(y + 14 + h * 0.34), Math.ceil(w * 1.72), Math.max(1, Math.round(h * 0.33)));
+  ctx.fillRect(Math.round(x - w), Math.round(y + 14 + h * 0.67), Math.ceil(w * 2), Math.max(1, Math.round(h * 0.33)));
 }
 
 // ---------- ОТРИСОВКА ГЕРОЯ ----------
