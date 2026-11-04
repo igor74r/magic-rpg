@@ -138,6 +138,8 @@ assert.ok(atlasRenderer.includes('drawAuroraGrassDetails(ctx, x, y, size, tileX,
 assert.ok(atlasRenderer.includes('auroraGrassDetailCache'), 'Aurora grass details must be cached to avoid per-frame asset allocation');
 assert.ok(atlasRenderer.includes('const key = seed & 255'), 'Aurora ground must retain enough distinct cached grass detail patterns');
 assert.ok(atlasRenderer.includes('A few tiny flower pixels'), 'Aurora grass may include tiny flat-color flowers, without blur or gradients');
+assert.ok(atlasRenderer.includes('auroraPathDetailCache'), 'Aurora cobblestone path must use cached crisp detail textures');
+assert.ok(atlasRenderer.includes('drawAuroraPathDetails(ctx, x, y, size, tileX, tileY)'), 'Aurora path tiles must receive visual stone variation');
 assert.ok(renderer.includes('drawAuroraGroundTile(ctx, type'), 'Aurora village must use its dedicated authored ground atlas');
 assert.ok(renderer.includes("(type === 0 || type === 1) && themeName !== 'village'"), 'Aurora fallback terrain must not draw repeated dark tile-edge scanlines');
 assert.ok(renderer.indexOf('const questEnemyId') < renderer.indexOf('const depthItems'), 'quest target must be resolved before the depth loop reads it');

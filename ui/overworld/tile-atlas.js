@@ -79,7 +79,48 @@ function requestAuroraGroundAtlas() {
 }
 
 /** Draws authored Aurora grass (0) or cobblestone path (1) pixel tiles. */
-export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0) {
+export const auroraPathDetailCache = new Map();
+
+function drawAuroraPathDetails(ctx, x, y, size, tileX, tileY) {
+  const seed = auroraGrassSeed(tileX + 97, tileY - 53);
+  const key = seed & 127;
+  let detail = auroraPathDetailCache.get(key);
+  if (!detail && typeof document !== 'undefined') {
+    detail = document.createElement('canvas');
+    detail.width = 48; detail.height = 48;
+    const g = detail.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    let n = (seed ^ 0x85ebca6b) >>> 0;
+    const colors = ['#6b6654', '#8a806a', '#a3977c', '#5b594a', '#77735f'];
+    const count = 3 + (n % 4);
+    for (let i = 0; i < count; i++) {
+      n = Math.imul(n ^ (n >>> 16), 2246822519) >>> 0;
+      const px = 2 + n % 44;
+      n = Math.imul(n ^ (n >>> 13), 3266489917) >>> 0;
+      const py = 2 + n % 44;
+      g.fillStyle = colors[(n >>> 4) % colors.length];
+      g.fillRect(px, py, 2 + (n & 1), 1);
+      if ((n & 31) === 7) {
+        g.fillStyle = '#9ba06a';
+        g.fillRect(px, py + 2, 1, 1);
+      }
+    }
+    auroraPathDetailCache.set(key, detail);
+  }
+  if (!detail) return;
+  const previousSmoothing = ctx.imageSmoothingEnabled;
+  const previousAlpha = ctx.globalAlpha;
+  try {
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalAlpha = 0.38;
+    ctx.drawImage(detail, x, y, size, size);
+  } finally {
+    ctx.globalAlpha = previousAlpha;
+    ctx.imageSmoothingEnabled = previousSmoothing;
+  }
+}
+
+function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0) {
   if ((type !== 0 && type !== 1) || auroraGroundFailed) return false;
   if (!auroraGroundRequested) requestAuroraGroundAtlas();
   if (!auroraGroundReady || !auroraGroundImage) return false;
@@ -98,6 +139,7 @@ export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(auroraGroundImage, sourceColumn * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, size, size);
     if (type === 0) drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY);
+    else drawAuroraPathDetails(ctx, x, y, size, tileX, tileY);
     return true;
   } catch (error) {
     auroraGroundFailed = true;
