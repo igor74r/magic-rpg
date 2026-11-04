@@ -70,11 +70,9 @@ try {
     const naturePage = await browser.newPage({ viewport: { width: 1440, height: 520 }, deviceScaleFactor: 1 });
     await naturePage.goto(baseUrl, { waitUntil:'domcontentloaded' });
     const natureCheck = await naturePage.evaluate(async () => {
-      const { drawObject } = await import('/ui/overworld/sprites.js');
+      const { drawObject, preloadAuroraNatureAtlas } = await import('/ui/overworld/sprites.js');
       const styles = ['oak','pine','bush','rock','stump','hedge','fence','flowerbed'];
-      const preload = new Image();
-      preload.src = '/assets/aurora/nature-atlas.png';
-      await preload.decode();
+      if (!await preloadAuroraNatureAtlas()) throw new Error('Aurora nature atlas failed to preload');
       const canvas = document.createElement('canvas');
       canvas.width = 1360; canvas.height = 480;
       const ctx = canvas.getContext('2d');
