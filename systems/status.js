@@ -17,8 +17,8 @@ export function applyEffect(target, effectId) {
   const def = EFFECTS[effectId];
   if (!def) return;
   if (effectId === 'stun' && target.stunImmunityTurns > 0) return;
-  const existing = target.effects.find(e => e.id === effectId);
-  if (existing) existing.duration = Math.max(existing.duration, def.duration);
+  const existing = target.effects.find(e => e?.id === effectId);
+  if (existing) existing.duration = Math.max(Number.isFinite(existing.duration) ? existing.duration : 0, def.duration);
   else target.effects.push({ id: effectId, duration: def.duration });
 }
 
@@ -27,8 +27,10 @@ export function tickEffects(target) {
   const messages = [];
   let totalDamage = 0;
   for (const e of target.effects) {
-    const def = EFFECTS[e.id];
+    if (!e || typeof e !== 'object' || Array.isArray(e)) continue;
+    const def = EFFECTS[e?.id];
     if (!def) continue;
+    if (!Number.isFinite(e.duration)) e.duration = def.duration;
     if (def.damage) {
       totalDamage += def.damage;
       messages.push({ icon: def.icon, name: def.name, damage: def.damage });
@@ -37,14 +39,14 @@ export function tickEffects(target) {
     // ordinary end-of-turn damage tick that runs on the same action.
     if (!def.skipTurn) e.duration -= 1;
   }
-  target.effects = target.effects.filter(e => e.duration > 0);
+  target.effects = target.effects.filter(e => e && typeof e === 'object' && !Array.isArray(e) && !!EFFECTS[e.id] && Number.isFinite(e.duration) && e.duration > 0);
   if (target.stunImmunityTurns > 0) target.stunImmunityTurns -= 1;
   return { totalDamage, messages };
 }
 
 export function hasEffect(target, effectId) {
   if (!target || !Array.isArray(target.effects)) return false;
-  return target.effects.some(e => e.id === effectId);
+  return target.effects.some(e => e?.id === effectId);
 }
 
 export function getAtkMult(target) {
@@ -83,7 +85,7 @@ export function isStunned(target) {
 
 export function consumeStun(target) {
   if (!target || !Array.isArray(target.effects)) return false;
-  const index = target.effects.findIndex(effect => effect.id === 'stun');
+  const index = target.effects.findIndex(effect => effect?.id === 'stun');
   if (index < 0) return false;
   target.effects.splice(index, 1);
   target.stunImmunityTurns = 2;
@@ -92,5 +94,5 @@ export function consumeStun(target) {
 
 export function clearDebuffs(target) {
   if (!target || !Array.isArray(target.effects)) return;
-  target.effects = target.effects.filter(e => EFFECTS[e.id]?.type !== 'debuff');
+  target.effects = target.effects.filter(e => e && typeof e === 'object' && !Array.isArray(e) && EFFECTS[e.id]?.type !== 'debuff');
 }
