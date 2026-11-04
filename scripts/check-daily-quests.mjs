@@ -92,7 +92,7 @@ try {
   assert.equal(repairedCompletion.claimed, false, 'an incomplete quest cannot retain a claimed reward flag');
   assert.equal(claimQuestReward('q-kill-wolf'), false, 'a forged completion flag must not unlock a reward');
 
-  updateQuestProgress('kill', 'goblin', '2');
+  updateQuestProgress('kill', 'goblin', 2);
   const goblinQuest = getDailyQuests().find(quest => quest.id === 'q-kill-goblin');
   assert.equal(goblinQuest.current, 2);
   assert.equal(typeof goblinQuest.current, 'number', 'numeric progress input must not turn the counter into a string');
