@@ -619,7 +619,7 @@ export function hasAnySave() {
   return false;
 }
 
-export function deleteSave(slot) {
+export function deleteSave(slot, { preserveActiveState = false } = {}) {
   const selectedSlot = slot === undefined ? (state.currentSlot ?? 1) : slot;
   if (!isValidSlot(selectedSlot)) return false;
 
@@ -631,7 +631,7 @@ export function deleteSave(slot) {
   }
 
   if (state.currentSlot === selectedSlot) {
-    state.game = null;
+    if (!preserveActiveState) state.game = null;
     lastSaveTime = null;
     lastSaveGame = null;
   }
