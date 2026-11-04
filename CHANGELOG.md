@@ -405,3 +405,5 @@
 - Replaced the remaining antialiased ellipse shadow under overworld characters with three stepped rectangular pixel bands. The shared helper covers hero, NPC and creature footprints; `check-visual-assets.mjs` now rejects a return to Canvas ellipses. JS/CSS cache keys advanced to `20261104-aurora-pixel-shadows-6`.
 
 - Aurora visual pass: grass atlas opacity reduced to 0.26 and decorative tufts to 2–3 per tile at 0.14; character shadows changed to stepped pixel bands. Desktop/mobile browser smoke and visual regression passed; Pages deployment passed.
+
+- Overworld audit: custom Aurora static collider sets now include nature ground footprints. Chest reward logs and effects are deferred until `saveGame()` succeeds, preventing false reward feedback after rollback. Both regressions have dedicated tests and passed CI/Pages.
