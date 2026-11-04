@@ -10,7 +10,23 @@ import { isRiftReady } from '../systems/rift.js';
 
 assert.equal(STORY.acts.length, 5, 'campaign must contain exactly five acts');
 assert.equal(STORY.acts.reduce((sum, act) => sum + act.missions.length, 0), 25, 'campaign must contain exactly 25 missions');
+
 assert.equal(Object.keys(STORY_DRAGONS).length, 3, 'exactly three story dragons are allowed');
+
+// Malformed truthy completion flags must not skip an unclaimed campaign mission.
+const firstMission = STORY.acts[0].missions[0];
+const malformedCampaignPlayer = {
+  campaignKills: {},
+  campaignClaimed: { [firstMission.id]: 'false' },
+  activeCampaignMission: firstMission.id
+};
+assert.equal(getNextCampaignMission(malformedCampaignPlayer)?.mission.id, firstMission.id,
+  'string "false" must not mark a mission as claimed');
+assert.equal(malformedCampaignPlayer.campaignClaimed[firstMission.id], false,
+  'malformed completion flags must be normalized to boolean false');
+assert.equal(getCampaignProgress(malformedCampaignPlayer).completed, 0,
+  'malformed completion flags must not inflate campaign progress');
+
 
 const game = {
   storyDragons: {},
