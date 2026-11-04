@@ -50,5 +50,6 @@ export function checkAchievements() {
 }
 
 export function unlockedCount() {
-  return state.game?.player?.achievements?.length || 0;
+  const achievements = state.game?.player?.achievements;
+  return Array.isArray(achievements) ? achievements.length : 0;
 }
