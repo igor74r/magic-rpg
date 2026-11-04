@@ -753,7 +753,7 @@ function render() {
     ctx.strokeStyle = 'rgba(201,162,39,0.6)'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]);
   }
 
-  if (!reduceMotion && settings.bloomEffects !== false && graphicsQuality === 'high') drawBloom(ctx);
+  if (!reduceMotion && settings.bloomEffects !== false && graphicsQuality === 'high' && ow.locationId !== 'village') drawBloom(ctx);
 
   const dayPhase = (worldTime % 120) / 120;
   let nightAlpha = 0;
@@ -779,7 +779,7 @@ function render() {
   }
 
   const villageFogScale = ow.locationId === 'village' ? 0.38 : (graphicsQuality === 'balanced' ? 0.72 : 1);
-  const fogIntensity = !allowAmbientFog ? 0 : (ow.combat ? 0.2 : theme.fog * villageFogScale);
+  const fogIntensity = !allowAmbientFog || ow.locationId === 'village' ? 0 : (ow.combat ? 0.2 : theme.fog * villageFogScale);
   if (fogIntensity > 0) {
     if (!darknessCanvas) {
       darknessCanvas = document.createElement('canvas');
@@ -872,6 +872,27 @@ function render() {
     ctx.fillRect(px - 150, py - 150, 300, 300);
   }
 
+  // Aurora uses flat, stepped light pools instead of radial fog/bloom so
+  // its 16-bit scenery stays crisp and readable at every display scale.
+  if (ow.locationId === 'village' && allowAmbientFog) {
+    for (const source of ow.statics || []) {
+      if (source.propStyle !== 'lantern' && source.propStyle !== 'brazier') continue;
+      const lx = Math.round(source.x - cam.x);
+      const ly = Math.round(source.y - cam.y);
+      if (lx < -100 || lx > VIEW_W + 100 || ly < -100 || ly > VIEW_H + 100) continue;
+      const radius = source.propStyle === 'brazier' ? 58 : 46;
+      ctx.save();
+      ctx.fillStyle = '#f4cf83';
+      ctx.globalAlpha = 0.055;
+      ctx.fillRect(lx - radius, ly - 8, radius * 2, 16);
+      ctx.globalAlpha = 0.075;
+      ctx.fillRect(lx - radius + 8, ly - 15, radius * 2 - 16, 30);
+      ctx.globalAlpha = 0.11;
+      ctx.fillRect(lx - 12, ly - 22, 24, 44);
+      ctx.restore();
+    }
+  }
+
   if (!reduceMotion) {
     if (allowWeather) drawWeather(ctx);
     if (allowAmbientFog) {
@@ -891,9 +912,11 @@ function render() {
     ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
   }
 
-  const gradient = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, 150, VIEW_W / 2, VIEW_H / 2, 500);
-  gradient.addColorStop(0, 'rgba(0,0,0,0)'); gradient.addColorStop(1, `rgba(0,0,0,${theme.vignette || 0.4})`);
-  ctx.fillStyle = gradient; ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
+  if (ow.locationId !== 'village') {
+    const gradient = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, 150, VIEW_W / 2, VIEW_H / 2, 500);
+    gradient.addColorStop(0, 'rgba(0,0,0,0)'); gradient.addColorStop(1, `rgba(0,0,0,${theme.vignette || 0.4})`);
+    ctx.fillStyle = gradient; ctx.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
+  }
 
   if (isLowHp && showLowHealth) {
     const pulse = 0.06 + 0.04 * Math.sin(lowHpPulse * 2);
