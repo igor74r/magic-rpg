@@ -14,6 +14,9 @@ export function createCharacter(name, className) {
   }
 
   const stats = cls.baseStats;
+  const previousGame = state.game;
+  const previousSlot = state.currentSlot;
+  const previousPendingSlot = state.pendingSlot;
 
   if (Number.isSafeInteger(state.pendingSlot) && state.pendingSlot >= 1 && state.pendingSlot <= 3) {
     state.currentSlot = state.pendingSlot;
@@ -138,7 +141,14 @@ export function createCharacter(name, className) {
   // Apply the current save schema before saveGame stamps the version.
   // Otherwise a fresh v15 character would skip the v16/v17 migrations.
   migrateGame(state.game);
-  saveGame();
+  if (!saveGame()) {
+    // Character creation is a transaction: preserve the prior in-memory game
+    // and slot selection when storage rejects the new save (e.g. quota).
+    state.game = previousGame;
+    state.currentSlot = previousSlot;
+    state.pendingSlot = previousPendingSlot;
+    return false;
+  }
 
   emit('game:started', {
     name,
