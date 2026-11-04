@@ -55,7 +55,7 @@ export function addExp(amount) {
       p.str += 2;
       p.con += 1;
       p.dex += 1;
-    } else if (p.class === 'mage') {
+    } else if (p.class === 'mage' || p.class === 'priest') {
       p.maxHp += 8;
       p.maxMp += 13;
       p.int += 2;
@@ -74,7 +74,7 @@ export function addExp(amount) {
 
     p.hp = p.maxHp;
 
-    if (p.class === 'mage') {
+    if (p.class === 'mage' || p.class === 'priest') {
       p.mp = p.maxMp;
     }
 
