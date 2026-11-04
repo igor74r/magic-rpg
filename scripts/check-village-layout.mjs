@@ -57,6 +57,10 @@ assert.ok(plazaProps.some(item => item.propStyle === 'lantern'), 'central square
 assert.ok(plazaProps.some(item => item.propStyle === 'planter'), 'central square must have flower planters');
 assert.ok(plazaProps.every(item => item.decorative || ['world-portal', 'tower-portal'].includes(item.id)),
   'only portals may intercept interactions among plaza props');
+const northCourtyard = village.statics.filter(item => item.id.startsWith('aurora-north-garden-'));
+assert.equal(northCourtyard.length, 4, 'northern courtyard must have a four-piece ornamental planting group');
+assert.deepEqual(northCourtyard.map(item => item.natureStyle), ['flowerbed', 'bush', 'flowerbed', 'hedge'],
+  'northern courtyard must combine flowerbeds, shrubs and a low hedge');
 
 const colliders = getVillageBuildingColliders();
 const propColliders = getVillagePropColliders();
