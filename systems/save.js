@@ -551,6 +551,9 @@ export function loadGameData(slot) {
 
     validateCurrentSaveShape(game);
     migrateGame(game);
+    // Legacy saves are checked again after migration so invalid balances or
+    // impossible levels cannot enter the current v17 runtime.
+    validateCurrentSaveShape(game);
 
     // A defeat is persisted immediately. If the browser was closed on the
     // death screen, restore the character in the village instead of loading
