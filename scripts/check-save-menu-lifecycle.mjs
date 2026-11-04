@@ -40,7 +40,9 @@ const deleteSlotEnd = menu.indexOf('\n}\n', deleteSlotStart);
 const deleteSlot = menu.slice(deleteSlotStart, deleteSlotEnd);
 assert.match(deleteSlot, /if \(!deleteSave\(slot\)\)/,
   'a failed slot deletion must not be reported as successful');
-assert.ok(deleteSlot.indexOf('if (deletingActiveSlot) clearOverworldRuntime()') > deleteSlot.indexOf('if (!deleteSave(slot))'),
+assert.match(deleteSlot, /deleteSave\(slot, \{ preserveActiveState: deletingActiveSlot \}\)/,
+  'active slot deletion must defer game clearing until the overworld has stopped');
+assert.ok(deleteSlot.indexOf('clearOverworldRuntime()') > deleteSlot.indexOf('if (!deleteSave(slot, { preserveActiveState: deletingActiveSlot }))'),
   'deleting the active slot must stop its hidden overworld loop after storage confirms deletion');
 
 const deleteAllStart = menu.indexOf('export function deleteAllSaves()');
