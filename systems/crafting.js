@@ -257,13 +257,15 @@ export function collectCraftingJobs(now = Date.now()) {
   if (!p || !Array.isArray(p.craftingJobs)) return [];
   const ready = p.craftingJobs.filter(job => Number(job.readyAt) <= now);
   if (!ready.length) return [];
+  // Snapshot before granting outputs: a failed save must leave both the
+  // completed order and its unclaimed reward available for a safe retry.
+  const previousInventory = cloneInventoryForRollback(p.inventory);
+  const previousJobs = [...p.craftingJobs];
   const claimed = [];
   for (const job of ready) {
     const created = addItem(job.result, job.qty, { rarity: job.rarity });
     if (created.length) claimed.push(job);
   }
-  const previousInventory = cloneInventoryForRollback(p.inventory);
-  const previousJobs = [...p.craftingJobs];
   p.craftingJobs = p.craftingJobs.filter(job => !claimed.includes(job));
   if (claimed.length) {
     if (!saveGame()) {
