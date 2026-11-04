@@ -1,7 +1,7 @@
 // Migration regression: exercise every supported save version v1-v16 without touching real browser storage.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { migrateGame, loadGameData, migrateLegacySave, hasSave, deleteSave, getSlotInfo, saveGame } from '../systems/save.js';
+import { migrateGame, loadGameData, migrateLegacySave, hasSave, deleteSave, getSlotInfo, saveGame, validateCurrentSaveShape } from '../systems/save.js';
 import { state } from '../systems/state.js';
 import { EQUIPMENT_SLOTS } from '../systems/inventory.js';
 import { createCharacter } from '../systems/character.js';
@@ -140,6 +140,18 @@ assert.deepEqual(Object.keys(freshSave.player.equipped).sort(), [...expectedSlot
   'new character must pass equipment-slot migrations before first save');
 assert.ok(!['back', 'wrists', 'hands', 'seal'].some(slot => slot in freshSave.player.equipped),
   'new character must not persist obsolete equipment slots');
+
+for (const [label, mutate] of [
+  ['unsafe gold balance', player => { player.gold = Number.MAX_SAFE_INTEGER + 1; }],
+  ['fractional level', player => { player.level = 1.5; }],
+  ['level above the cap', player => { player.level = 101; }]
+]) {
+  const invalid = JSON.parse(JSON.stringify(freshSave));
+  mutate(invalid.player);
+  assert.throws(() => validateCurrentSaveShape(invalid), /Invalid current save structure/,
+    `current save validator must reject ${label}`);
+}
+console.log('PASS current save validator rejects unsafe gold and invalid character levels');
 console.log('PASS new character creation runs v16/v17 migrations before first save');
 storage.set('magic-rpg-save-1', JSON.stringify({
   version: 16,
