@@ -923,7 +923,8 @@ function handleWorldEvent(eventId) {
 }
 
 function skipPrologue() {
-  stopVoice();
+  stopPrologueAnimation();
+  stopPrologueVoice();
   if (!writeLocalStorage('magic-rpg-prologue-seen', '1')) {
     toast('Не удалось сохранить отметку пролога. При следующем запуске он может показаться снова.');
   }
