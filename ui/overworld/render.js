@@ -299,7 +299,7 @@ function drawAuroraFallbackTile(ctx, type, x, y, size, tileX, tileY) {
   }
 }
 
-function drawAuroraGardenBedTile(ctx, x, y, size, tileX, tileY) {
+function drawAuroraGardenBedTile(ctx, x, y, size, tileX, tileY, map) {
   const previousSmoothing = ctx.imageSmoothingEnabled;
   let seed = Math.imul(tileX + 61, 374761393) ^ Math.imul(tileY + 29, 668265263);
   seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
@@ -307,26 +307,35 @@ function drawAuroraGardenBedTile(ctx, x, y, size, tileX, tileY) {
     seed = Math.imul(seed ^ (seed >>> 15), 2246822519) >>> 0;
     return seed % n;
   };
+  const inset = {
+    left: map?.[tileY]?.[tileX - 1] === 4 ? 0 : 4,
+    right: map?.[tileY]?.[tileX + 1] === 4 ? 0 : 4,
+    top: map?.[tileY - 1]?.[tileX] === 4 ? 0 : 4,
+    bottom: map?.[tileY + 1]?.[tileX] === 4 ? 0 : 4
+  };
+  const bedX = x + inset.left, bedY = y + inset.top;
+  const bedW = size - inset.left - inset.right, bedH = size - inset.top - inset.bottom;
   ctx.save();
   try {
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = '#526b3f';
     ctx.fillRect(x, y, size, size);
     ctx.fillStyle = '#684b32';
-    ctx.fillRect(x + 5, y + 8, 38, 31);
+    ctx.fillRect(bedX, bedY, bedW, bedH);
     ctx.fillStyle = '#a77a4b';
-    ctx.fillRect(x + 5, y + 8, 38, 3);
-    ctx.fillRect(x + 5, y + 36, 38, 3);
-    ctx.fillStyle = '#315d3b';
+    if (inset.top) ctx.fillRect(bedX, bedY, bedW, 2);
+    if (inset.bottom) ctx.fillRect(bedX, bedY + bedH - 2, bedW, 2);
+    if (inset.left) ctx.fillRect(bedX, bedY, 2, bedH);
+    if (inset.right) ctx.fillRect(bedX + bedW - 2, bedY, 2, bedH);
     for (let i = 0; i < 9; i++) {
-      const px = x + 8 + pick(32);
-      const py = y + 13 + pick(20);
+      const px = bedX + 5 + pick(Math.max(1, bedW - 12));
+      const py = bedY + 5 + pick(Math.max(1, bedH - 12));
+      ctx.fillStyle = '#315d3b';
       ctx.fillRect(px, py, 4, 3);
       ctx.fillRect(px + 1, py - 2, 2, 2);
       if (pick(3) === 0) {
         ctx.fillStyle = pick(2) ? '#e6c77b' : '#d7a5b8';
         ctx.fillRect(px + 1, py - 3, 2, 2);
-        ctx.fillStyle = '#315d3b';
       }
     }
   } finally {
@@ -338,7 +347,7 @@ function drawAuroraGardenBedTile(ctx, x, y, size, tileX, tileY) {
 function drawTile(ctx, type, x, y, size, themeName, colors, tileX = 0, tileY = 0, map = null) {
   if (themeName === 'village') {
     if (type === 4) {
-      drawAuroraGardenBedTile(ctx, x, y, size, tileX, tileY);
+      drawAuroraGardenBedTile(ctx, x, y, size, tileX, tileY, map);
       return;
     }
     if (drawAuroraGroundTile(ctx, type, x, y, size, tileX, tileY)) {
