@@ -164,6 +164,12 @@ try {
     await page.getByRole('button', { name: /Создать героя и начать/ }).click();
     await page.locator('#screen-game.active').waitFor();
     await page.locator('#screen-game.overworld-active').waitFor();
+    assert.equal(await page.locator('#game-tab-quests').getAttribute('aria-selected'), 'true',
+      `${viewport.name}: the default quests tab must be selected on first game render`);
+    assert.equal(await page.locator('#game-tab-quests').evaluate(el => el.tabIndex), 0,
+      `${viewport.name}: the default tab must be keyboard reachable on first game render`);
+    assert.equal(await page.locator('#tab-content').getAttribute('aria-labelledby'), 'game-tab-quests',
+      `${viewport.name}: the legacy tab panel must be labelled by the selected default tab`);
     assert.equal(await page.locator('#screen-game').evaluate(el => el.classList.contains('map-focused')), false,
       `${viewport.name}: a newly created hero must enter the village scene, not the full-screen world map`);
     assert.equal(await page.locator('#game-tab-locations').isVisible(), false,
