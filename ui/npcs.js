@@ -9,7 +9,7 @@ import { STORY } from '../data/story.js';
 import { LOCATIONS } from '../data/locations.js';
 import { addItemOrStore } from '../systems/inventory.js';
 import { canCraftRecipe, canReforgeItem, collectCraftingJobs, getCraftingJobs } from '../systems/crafting.js';
-import { getCurrentActIndex } from '../systems/economy.js';
+import { getCurrentActIndex, getGoldRewardTotals } from '../systems/economy.js';
 import { addExp } from '../systems/progression.js';
 import {
   getActiveCampaignMission, getNextCampaignMission, getMissionProgress,
@@ -276,9 +276,9 @@ export function turnInElderQuestUI() {
     return;
   }
   const reward = getMissionReward(active.mission);
-  if (!Number.isSafeInteger(p.gold) || p.gold < 0 ||
-      !Number.isSafeInteger(p.gold + reward.gold)) {
-    toast('Невозможно начислить награду: проверьте баланс золота.');
+  const goldTotals = getGoldRewardTotals(p, reward.gold);
+  if (!goldTotals) {
+    toast('Невозможно начислить награду: проверьте баланс золота и статистику.');
     return;
   }
   let previousPlayer;
@@ -288,16 +288,13 @@ export function turnInElderQuestUI() {
     toast('Не удалось подготовить награду. Попробуйте ещё раз.');
     return;
   }
-  const previousGoldEarned = Number.isSafeInteger(p.stats?.goldEarned) && p.stats.goldEarned >= 0
-    ? p.stats.goldEarned
-    : 0;
   const completed = claimCampaignMission(p);
   if (!completed) {
     toast('Поручение ещё не выполнено.');
     return;
   }
 
-  p.gold += reward.gold;
+  p.gold = goldTotals.gold;
   addExp(reward.exp);
   const itemReward = reward.itemId ? addItemOrStore(reward.itemId, 1) : null;
   const itemName = reward.itemId ? (ITEMS[reward.itemId]?.name || reward.itemId) : '';
@@ -305,7 +302,7 @@ export function turnInElderQuestUI() {
     ? ` Материал «${itemName}» отправлен в хранилище добычи.`
     : itemReward?.created?.length ? ` Материал: ${itemName}.` : '';
   if (!p.stats || typeof p.stats !== 'object') p.stats = {};
-  p.stats.goldEarned = previousGoldEarned + reward.gold;
+  p.stats.goldEarned = goldTotals.goldEarned;
   if (!saveGame()) {
     for (const key of Object.keys(p)) delete p[key];
     Object.assign(p, previousPlayer);
