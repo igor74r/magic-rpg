@@ -27,6 +27,41 @@ async function capture(page, name) {
 try {
   await waitForServer();
   browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+  // Render every Aurora building in isolation as a dedicated visual QA sheet.
+  // This covers facades that are outside the initial gameplay camera viewport.
+  {
+    const artPage = await browser.newPage({ viewport: { width: 1440, height: 680 }, deviceScaleFactor: 1 });
+    await artPage.goto(baseUrl, { waitUntil:'domcontentloaded' });
+    const artCheck = await artPage.evaluate(async () => {
+      const { drawAuroraBuilding } = await import('/ui/overworld/aurora-art.js');
+      const styles = ['hall','forge','healer','alchemy','market','tavern','home'];
+      const canvas = document.createElement('canvas');
+      canvas.width = 1360; canvas.height = 640;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = '#263b32'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      styles.forEach((style,index) => {
+        const col = index % 4, row = Math.floor(index / 4);
+        const x = col * 340 + 170, y = row * 300 + 280;
+        if (!drawAuroraBuilding(ctx,x,y,style)) throw new Error(style + ': renderer returned false');
+        ctx.fillStyle = '#f0dfb8'; ctx.font = 'bold 16px monospace';
+        ctx.textAlign = 'center'; ctx.fillText(style.toUpperCase(),x,y+35);
+      });
+      const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      let colored = 0;
+      for(let i=0;i<pixels.length;i+=4) if(pixels[i]!==38 || pixels[i+1]!==59 || pixels[i+2]!==50) colored++;
+      if(colored < 50000) throw new Error('Aurora building sheet appears incomplete: '+colored);
+      document.body.innerHTML = '';
+      document.body.style.cssText = 'margin:0;background:#17251f;display:grid;place-items:center;min-height:100vh';
+      document.body.appendChild(canvas);
+      return { styles, coloredPixels: colored, width: canvas.width, height: canvas.height };
+    });
+    assert.equal(artCheck.styles.length,7,'all seven distinct Aurora building designs must render');
+    assert.ok(artCheck.coloredPixels>50000,'building art sheet must contain substantial rendered detail');
+    await capture(artPage,'aurora-00-building-art-sheet');
+    await artPage.close();
+  }
+
   for (const vp of [{name:'desktop',width:1440,height:900},{name:'mobile',width:390,height:844}]) {
     const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1 });
     const errors = [];
