@@ -1,5 +1,5 @@
 import { state } from '../systems/state.js';
-import { getMissionProgress, isMissionComplete, getActiveCampaignMission, getNextCampaignMission, getMissionReward } from '../systems/campaign.js';
+import { getMissionProgress, isMissionComplete, getActiveCampaignMission, getNextCampaignMission, getMissionReward, countStoryShards } from '../systems/campaign.js';
 import { STORY } from '../data/story.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
 import { ENEMIES } from '../data/enemies.js';
@@ -20,16 +20,16 @@ export function openQuestBoard() {
   const dragons = state.game?.storyDragons || {};
   const shards = state.game?.storyShards || {};
   const villageNews = [];
-  if (dragons['blood-crown']) {
+  if (dragons['blood-crown'] === true) {
     villageNews.push('Разлом открыт. По ночам над площадью видны далёкие огни за трещиной, а стража просит жителей держаться ближе к фонарям.');
-  } else if (dragons['ice-grasp']) {
+  } else if (dragons['ice-grasp'] === true) {
     villageNews.push('Северные ветра стали мягче после падения Ледяной Хватки. Путники говорят, что снег перестал идти даже у старого тракта.');
-  } else if (dragons['ash-herald']) {
+  } else if (dragons['ash-herald'] === true) {
     villageNews.push('Пепельные бури ослабли. На кузнице Борина снова работают допоздна — деревня ждёт новых поставок металла.');
   } else {
     villageNews.push('Старейшина Эдвин ищет надёжного путника. Говорят, три дракона удерживают древнюю печать у границы мира.');
   }
-  const shardCount = ['flame', 'ice', 'blood'].filter(id => shards[id] === true).length;
+  const shardCount = countStoryShards(shards);
   if (shardCount > 0) villageNews.push(`В хронике деревни отмечено сюжетных осколков: ${shardCount}/3. Каждый получен после победы над своим драконом.`);
   const newsHtml = villageNews.map(line => `<div class="npc-slot"><div style="color:#d8c39a;line-height:1.55;">🕯️ ${line}</div></div>`).join('');
 
@@ -264,8 +264,7 @@ export function renderQuests() {
     `;
   }).join('');
 
-  const shards = Object.values(state.game.storyShards || {})
-    .filter(Boolean).length;
+  const shards = countStoryShards(state.game.storyShards);
 
   const shardItems = STORY.quests.map(quest => {
     const shardId = quest.id.replace('shard-', '');
