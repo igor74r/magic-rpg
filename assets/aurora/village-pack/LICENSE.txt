@@ -1,0 +1,7 @@
+﻿Basic Village Tileset — Forchild
+Source: https://forchild.itch.io/village-tileset
+License: CC0 1.0 Universal (public domain dedication; attribution is optional).
+Original PNG sheets are retained alongside Aurora-adjusted variants in this folder.
+Aurora variants are color-adjusted for the game's ash-dark fantasy palette. No individual source tiles are sold or redistributed as a standalone asset pack.
+Imported sheets: Outdoor_tileset.png, House_tileset.png, Trees_and_bushes.png, Furniture.png
+Aurora-adjusted runtime sheets: Outdoor_tileset-aurora.png, House_tileset-aurora.png, Trees_and_bushes-aurora.png, Furniture-aurora.png

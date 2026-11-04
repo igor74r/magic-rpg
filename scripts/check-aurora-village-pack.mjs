@@ -1,0 +1,13 @@
+﻿import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import { drawAuroraVillagePackNature } from '../ui/overworld/aurora-village-pack.js';
+const root = new URL('../assets/aurora/village-pack/', import.meta.url);
+const files = ['Outdoor_tileset-aurora.png','House_tileset-aurora.png','Trees_and_bushes-aurora.png','Furniture-aurora.png'];
+for (const file of files) assert.ok(existsSync(new URL(file, root)), file + ' must exist');
+const manifest = JSON.parse(readFileSync(new URL('../assets/tiles/manifest.json', import.meta.url), 'utf8'));
+assert.equal(manifest.auroraVillagePack.license, 'CC0-1.0');
+assert.equal(manifest.auroraVillagePack.author, 'Forchild');
+assert.equal(drawAuroraVillagePackNature(null, 0, 0, 'oak'), false, 'server-side rendering must safely fall back');
+const source = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
+assert.ok(source.includes('drawAuroraVillagePackNature'), 'Aurora sprite renderer must use the new village pack');
+console.log('Aurora village asset pack passed: CC0 manifest, 4 sheets, SSR fallback and renderer wiring');
