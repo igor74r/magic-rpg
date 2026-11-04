@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { escapeHtml } from '../ui/screens.js';
 import { state } from '../systems/state.js';
 import { renderInventory, buildTooltipHTML } from '../ui/inventory.js';
@@ -9,6 +10,9 @@ assert.equal(escapeHtml('<img src=x onerror="alert(1)">'), '&lt;img src=x onerro
 assert.equal(escapeHtml("O'Neil & Sons"), 'O&#39;Neil &amp; Sons');
 assert.equal(escapeHtml(null), '');
 assert.equal(escapeHtml(42), '42');
+const menuSource = readFileSync(new URL('../ui/menu.js', import.meta.url), 'utf8');
+assert.ok(menuSource.includes('setTimeout(() => URL.revokeObjectURL(url), 1000);'), 'save export must keep its object URL alive until the browser has accepted the download');
+assert.ok(!menuSource.includes('  URL.revokeObjectURL(url);'), 'save export must not revoke its object URL synchronously');
 const importedJobResult = '<svg onload=alert(1)>';
 assert.equal(escapeHtml(importedJobResult), '&lt;svg onload=alert(1)&gt;');
 const previousGame = state.game;
