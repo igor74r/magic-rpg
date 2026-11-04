@@ -5,6 +5,19 @@ import { generateMap, isBlocked } from '../systems/overworld/map.js';
 import { getVillageBuildingColliders, getVillagePropColliders, isVillagePositionBlocked } from '../systems/overworld/collisions.js';
 
 const village = LOCATIONS.village;
+const staticIds = village.statics.map(item => item.id);
+assert.equal(new Set(staticIds).size, staticIds.length, 'Aurora static object IDs must be unique');
+for (const item of [...village.npcs, ...village.statics]) {
+  assert.ok(Number.isInteger(item.x) && Number.isInteger(item.y), `${item.id}: village placement must use integer tile coordinates`);
+  assert.ok(item.x >= 0 && item.x < village.mapCols && item.y >= 0 && item.y < village.mapRows,
+    `${item.id}: village placement must remain inside the map`);
+}
+const natureStyles = new Set(village.statics.filter(item => item.natureStyle).map(item => item.natureStyle));
+const natureRenderer = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
+for (const style of natureStyles) {
+  assert.ok(natureRenderer.includes(`style === '${style}'`), `${style}: every authored nature style must have a renderer branch`);
+}
+assert.equal(natureStyles.size, 8, 'Aurora must retain all eight authored nature sprite styles');
 assert.equal(village.mapCols, 38, 'Aurora width must be compact');
 assert.equal(village.mapRows, 28, 'Aurora height must be compact');
 assert.equal(village.safe, true, 'Aurora remains a safe location');
