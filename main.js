@@ -37,7 +37,7 @@ import {
 } from './ui/overworld.js';
 import { openDailyChest } from './ui/village.js';
 import { exitOverworld, enterOverworld } from './systems/overworld.js';
-import { isRiftReady, getRiftLocations } from './systems/rift.js';
+import { isRiftReady, getRiftLocations, getRiftClearedCount } from './systems/rift.js';
 import { getStoryLocationProgression, canEnterStoryLocation, countStoryShards } from './systems/campaign.js';
 import { getTotalKills, getSafeCount } from './systems/stats.js';
 import { getTowerBest, getTowerStartFloor, TOWER_MAX_FLOOR } from './systems/tower.js';
