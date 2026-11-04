@@ -564,6 +564,17 @@ function renderPendingLoot(player) {
 }
 
 export function claimPendingLootUI(index) {
+  const player = state.game?.player;
+  if (!player) return;
+
+  let snapshot;
+  try {
+    snapshot = JSON.parse(JSON.stringify(player));
+  } catch {
+    toast('❌ Не удалось подготовить получение награды. Она осталась в списке добычи.');
+    return;
+  }
+
   const result = claimPendingLoot(index);
   if (!result.ok) {
     toast(result.reason === 'capacity'
@@ -571,9 +582,18 @@ export function claimPendingLootUI(index) {
       : 'Эта награда больше недоступна.');
     return;
   }
+
+  if (!saveGame()) {
+    // Keep the reward pending when persistence fails; do not show a false
+    // success or leave an uncommitted item in the live inventory.
+    for (const key of Object.keys(player)) delete player[key];
+    Object.assign(player, snapshot);
+    toast('❌ Не удалось сохранить награду. Она осталась в списке добычи.');
+    return;
+  }
+
   const item = ITEMS[result.entry.id];
   toast(`Получено: ${item?.name || result.entry.id}`);
-  saveGame();
   renderGame();
 }
 
