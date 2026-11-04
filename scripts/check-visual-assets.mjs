@@ -106,6 +106,9 @@ assert.ok(villageSprites.includes("oak: [120, 150], pine: [108, 144], bush: [90,
 assert.ok(villageSprites.includes("stump: [72, 66], hedge: [96, 72], fence: [108, 54], flowerbed: [84, 48]"), 'Aurora garden pieces must remain low and proportionate to their silhouettes');
 assert.ok(villageSprites.includes("new URL('../../assets/aurora/nature-atlas.png', import.meta.url)"), 'Aurora nature atlas must load from its manifest asset path');
 assert.ok(villageSprites.includes('ctx.drawImage(atlas,frame*64,0,64,80'), 'Aurora nature atlas must sample each 64×80 frame crisply');
+const npcDetails = villageSprites.slice(villageSprites.indexOf('function drawNpcDetails('));
+assert.ok(npcDetails.includes('integer pixel clusters only') && npcDetails.includes("id === 'blacksmith'") && npcDetails.includes("id === 'bard'"), 'Aurora NPCs must use role-specific pixel-art details');
+assert.ok(!/ctx\\.(?:beginPath|arc|stroke|strokeRect)\\s*\\(/.test(npcDetails), 'Aurora NPC role details must avoid antialiased vector strokes');
 assert.ok(villageSprites.includes('frame * 64, 0, 64, 64'), 'village props must sample the 64px atlas frames');
 assert.ok(villageSprites.includes('ctx.imageSmoothingEnabled = false'), 'village prop atlas must render with crisp nearest-neighbour pixels');
 assert.ok(villageSprites.includes('  } finally {\n    ctx.restore();'), 'village prop draws must restore Canvas state after failures');
