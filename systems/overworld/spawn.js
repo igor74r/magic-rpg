@@ -250,7 +250,7 @@ export function openChest(chest) {
     };
   }
 
-  updateQuestProgress('chest', 'chest', 1);
+  const questUpdate = updateQuestProgress('chest', 'chest', 1, { persist: false, notify: false });
 
   if (!p.stats) p.stats = { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 };
   p.stats.chestsOpened = (p.stats.chestsOpened || 0) + 1;
@@ -260,6 +260,10 @@ export function openChest(chest) {
     pushLog('⚠️ Не удалось сохранить сундук. Награда отменена; сундук можно открыть повторно.', 'warning');
     emit('game:update');
     return false;
+  }
+  // Daily quest progress is committed with the chest reward, never in a separate save.
+  for (const questText of questUpdate?.completedTexts || []) {
+    emit('toast', `📜 Квест выполнен: ${questText}!`);
   }
   // Publish reward feedback and audiovisual effects only after persistence succeeds.
   pushLog(rewardLog.msg, rewardLog.cls);
