@@ -726,7 +726,7 @@ function enterVillageInterior(interiorId) {
   const decor = room.details.map((item, index) => `<div class="village-room-prop prop-${index + 1}"><span class="village-room-pixel-icon icon-${interiorId}-${index + 1}" aria-hidden="true"></span><small>${item}</small></div>`).join('');
   content.innerHTML = `
     <div class="village-interior-view">
-      <div class="village-interior-heading"><div><h3>${room.title}</h3><p>${room.subtitle}</p></div><span>АВРОРА</span></div>
+      <div class="village-interior-heading"><div><h3>${room.title}</h3><p>${room.subtitle}</p></div></div>
       <div class="village-room-art room-${interiorId}">
         <div class="village-room-window"></div><div class="village-room-hearth"></div>
         <div class="village-room-furniture">${decor}</div>
