@@ -40,6 +40,7 @@ try {
     }
   };
   ready.location = 'dragon-lair';
+  ready.player.riftClearedLocations = ['rift-03', 'rift-17'];
   state.game = ready;
   const readyPlayerSnapshot = { ...ready.player };
   const readyGameSnapshot = {
@@ -48,7 +49,8 @@ try {
     storyDragons: ready.storyDragons,
     riftEnding: ready.riftEnding,
     shards: ready.shards,
-    quests: ready.quests
+    quests: ready.quests,
+    riftClearedLocations: ready.player.riftClearedLocations
   };
   const inventoryBefore = JSON.stringify(ready.player.inventory);
   const jobsBefore = JSON.stringify(ready.player.craftingJobs);
@@ -81,6 +83,7 @@ try {
   assert.equal(ready.player.ngPlus, 2, 'failed NG+ must not increment the cycle');
   assert.deepEqual(ready.player.campaignClaimed, claimed, 'failed NG+ must restore all campaign flags');
   assert.equal(ready.location, 'dragon-lair', 'failed NG+ must restore the previous world location');
+  assert.deepEqual(ready.player.riftClearedLocations, ['rift-03', 'rift-17'], 'failed NG+ must restore cleared Rift locations');
   globalThis.localStorage.setItem = originalSetItem;
   console.log('check-ngplus: PASS (completion gate, carry-over, XP threshold, and save-failure rollback)');
 } finally {
