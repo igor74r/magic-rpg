@@ -21,8 +21,8 @@ let failRollbackWrite = false;
 globalThis.localStorage = {
   getItem: key => storage.get(key) ?? null,
   setItem: (key, value) => {
-    storage.set(key, String(value));
     if (failImportWrite && key === 'magic-rpg-save-1') {
+      storage.set(key, String(value));
       failImportWrite = false;
       throw new Error('simulated storage quota failure after partial write');
     }
@@ -30,6 +30,7 @@ globalThis.localStorage = {
       failRollbackWrite = false;
       throw new Error('simulated rollback write failure');
     }
+    storage.set(key, String(value));
   },
   removeItem: key => storage.delete(key)
 };
