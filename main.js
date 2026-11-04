@@ -5,6 +5,7 @@ import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
 import { addItemOrStore } from './systems/inventory.js';
 import { ITEMS } from './data/items.js?v=20261102-fix4';
 import { addExp } from './systems/progression.js';
+import { getGoldRewardTotals } from './systems/economy.js';
 import {
   updateMainMenu, startNewGame, openSettings, backFromSettings, saveAndMenu,
   loadSlot, newGameSlot, deleteSlot, renderSlots,
@@ -775,7 +776,16 @@ function handleWorldEvent(eventId) {
     toastMsg = `⛩️ ${buffNames[buff]}!`;
   } else if (ev.eventType === 'mimic') {
     if (Math.random() < 0.5) {
-      p.gold = (p.gold || 0) + 12;
+      const totals = getGoldRewardTotals(p, 12);
+      if (!totals) {
+        state.game = previousGame;
+        ev.resolved = false;
+        toast('Невозможно начислить золото: проверьте баланс и статистику.');
+        return;
+      }
+      p.gold = totals.gold;
+      if (!p.stats || typeof p.stats !== 'object' || Array.isArray(p.stats)) p.stats = {};
+      p.stats.goldEarned = totals.goldEarned;
       logMsg = `🎁 Сундук: +12💰`;
       toastMsg = `🎁 +12💰!`;
     } else {
@@ -785,7 +795,16 @@ function handleWorldEvent(eventId) {
       toastMsg = `🎁 Мимик! −20 HP`;
     }
   } else if (ev.eventType === 'crystal') {
-    p.gold = (p.gold || 0) + 8;
+    const totals = getGoldRewardTotals(p, 8);
+    if (!totals) {
+      state.game = previousGame;
+      ev.resolved = false;
+      toast('Невозможно начислить золото: проверьте баланс и статистику.');
+      return;
+    }
+    p.gold = totals.gold;
+    if (!p.stats || typeof p.stats !== 'object' || Array.isArray(p.stats)) p.stats = {};
+    p.stats.goldEarned = totals.goldEarned;
     addExp(30);
     logMsg = `💎 Кристалл сырой магии: +8💰, +30 EXP`;
     toastMsg = `💎 +8💰, +30 EXP`;
