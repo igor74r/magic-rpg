@@ -1905,7 +1905,13 @@ function combatDefeat() {
   clearPlayerEffects();
   // Persist the death counter and zero-HP state immediately. loadGameData
   // safely restores this state at half HP in the village after a restart.
-  saveGame();
+  // Keep the defeat flow intact if storage is unavailable, but never fail
+  // silently: the player must know that this death may not survive a reload.
+  if (!saveGame()) {
+    const warning = 'Не удалось сохранить поражение. Проверьте свободное место в хранилище и сохраните игру повторно.';
+    pushLog(warning, 'warning');
+    emit('toast', warning);
+  }
 
   emit('rift:defeated');
   emit('overworld:defeat');
