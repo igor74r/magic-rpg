@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict';
+import { state } from '../systems/state.js';
+import { checkAchievements } from '../systems/achievements.js';
+import { on, off } from '../systems/events.js';
+
+const originalStorage = globalThis.localStorage;
+const originalGame = state.game;
+const originalSlot = state.currentSlot;
+let writes = 0;
+globalThis.localStorage = {
+  setItem() { writes += 1; throw new Error('simulated quota failure'); },
+  getItem() { return null; },
+  removeItem() {}
+};
+const game = { player: { achievements: [], gold: 10, stats: { kills: { goblin: 1 } } } };
+state.game = game;
+state.currentSlot = 1;
+const emitted = [];
+const onAchievement = payload => emitted.push(['achievement', payload]);
+const onToast = payload => emitted.push(['toast', payload]);
+const onLog = payload => emitted.push(['log', payload]);
+const onUpdate = () => emitted.push(['game:update']);
+on('achievement', onAchievement);
+on('toast', onToast);
+on('log', onLog);
+on('game:update', onUpdate);
+
+try {
+  checkAchievements();
+  assert.equal(writes, 1);
+  assert.deepEqual(game.player.achievements, []);
+  assert.equal(game.player.gold, 10);
+  assert.deepEqual(emitted, [], 'failure must suppress achievement events and UI feedback');
+
+  globalThis.localStorage.setItem = () => {};
+  checkAchievements();
+  assert.deepEqual(game.player.achievements, ['first-blood']);
+  assert.equal(game.player.gold, 13);
+  assert.equal(emitted.filter(([type]) => type === 'achievement').length, 1);
+  assert.equal(emitted.filter(([type]) => type === 'toast').length, 1);
+  assert.equal(emitted.filter(([type]) => type === 'game:update').length, 1);
+
+  checkAchievements();
+  assert.equal(game.player.gold, 13, 'reward must not be duplicated');
+  assert.equal(emitted.filter(([type]) => type === 'achievement').length, 1);
+  console.log('check-achievement-save-transaction: PASS (rollback, deferred events, exactly-once reward)');
+} finally {
+  off('achievement', onAchievement);
+  off('toast', onToast);
+  off('log', onLog);
+  off('game:update', onUpdate);
+  state.game = originalGame;
+  state.currentSlot = originalSlot;
+  if (originalStorage === undefined) delete globalThis.localStorage;
+  else globalThis.localStorage = originalStorage;
+}
