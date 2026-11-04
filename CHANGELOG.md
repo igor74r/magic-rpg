@@ -365,3 +365,11 @@
 - `ui/overworld/sprites.js`: replaced antialiased line/arc embellishments on Aurora NPC role details with integer-aligned flat-color pixel clusters for blacksmith, healer, merchant, guard, elder, alchemist, herald, bard and children.
 - `scripts/check-visual-assets.mjs`: added regression checks for species-specific dimensions and the absence of vector strokes in NPC role details.
 - Browser visual regression and full CI are running for the new main-branch head; visual completion is not claimed until the updated screenshots are reviewed.
+
+
+## 2026-11-04 — Aurora interiors rebuilt in flat pixel art
+
+- `css/2d-art-direction.css`: replaced gradient-based room backdrops, blurred hearth glows and rounded furniture cards with flat-color walls/floors, stepped pixel details, hard-edged window/hearth shapes and role-specific CSS pixel prop silhouettes.
+- `main.js`: replaced emoji room props and the house emoji label with dedicated pixel-icon slots and text; the interior entry button no longer uses an emoji glyph.
+- `scripts/check-village-layout.mjs`: verifies all six interiors have pixel-art prop classes and rejects gradients/blur in the Aurora interior art block.
+- CI and Pages are pending; updated browser captures must be inspected before marking the interior art pass complete.
