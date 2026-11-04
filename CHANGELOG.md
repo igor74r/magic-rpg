@@ -394,3 +394,5 @@
 - Manual inspection of the nature contact sheet showed that the PNG frames contained large transparent margins, making trees, bushes and garden props read much smaller than their world footprints. `drawAuroraNature()` now measures each 64×80 frame's non-transparent bounds once, caches the crop, and scales the visible sprite to its authored world dimensions with smoothing disabled. `check-visual-assets.mjs` guards the alpha-bound crop path.
 
 - Differentiated each interior hearth and window tint by room role: forge ember, healer green, alchemy violet, market gold, hall warm ivory and tavern amber. The room-specific pseudo-elements remain hard-edged flat-color pixel clusters; JS/CSS cache keys advanced to `20261104-aurora-interior-palettes-3` and are covered by the startup contract test.
+
+- Raised the interior floor pixel motif above the prop cards and moved it closer to the foreground so it no longer appears clipped behind the center item. Final interior JS/CSS cache keys are `20261104-aurora-interior-finish-4`.
