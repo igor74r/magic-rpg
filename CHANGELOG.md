@@ -382,3 +382,5 @@
 - `scripts/check-visual-assets.mjs`: guards the restrained detail density and opacity.
 
 - Removed the last text glyph used as an interior floor ornament; it is now an empty, aria-hidden CSS pixel motif. Static and browser regression checks assert the glyph-free floor marker, visible room modal, selected room palette and three rendered prop silhouettes.
+
+- Updated the `index.html` module query to `main.js?v=20261104-aurora-interior-pixel-pass` so browsers do not reuse the previous cached game module; `scripts/check-startup-fallback.mjs` now asserts the current cache-busted URL.
