@@ -17,6 +17,7 @@ globalThis.document = {
 };
 const storage = new Map([['magic-rpg-save-1', 'KEEP-EXISTING-SAVE']]);
 let failImportWrite = false;
+let failRollbackWrite = false;
 globalThis.localStorage = {
   getItem: key => storage.get(key) ?? null,
   setItem: (key, value) => {
@@ -24,6 +25,10 @@ globalThis.localStorage = {
     if (failImportWrite && key === 'magic-rpg-save-1') {
       failImportWrite = false;
       throw new Error('simulated storage quota failure after partial write');
+    }
+    if (failRollbackWrite && key === 'magic-rpg-save-1') {
+      failRollbackWrite = false;
+      throw new Error('simulated rollback write failure');
     }
   },
   removeItem: key => storage.delete(key)
@@ -93,6 +98,17 @@ try {
   failImportWrite = true;
   runImport(legacy);
   assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE', 'failed import write must restore the previous slot');
+  assert.match(toastMessages.at(-1), /прежнее сохранение восстановлено/,
+    'import must only claim rollback success after verifying the previous save');
+
+  failImportWrite = true;
+  failRollbackWrite = true;
+  runImport(legacy);
+  assert.notEqual(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE',
+    'test must simulate a rollback failure after a partial import write');
+  assert.match(toastMessages.at(-1), /не удалось записать импорт и подтвердить восстановление/,
+    'import must warn when rollback cannot be verified');
+  storage.set('magic-rpg-save-1', 'KEEP-EXISTING-SAVE');
 
   runImport(legacy);
   const importedText = storage.get('magic-rpg-save-1');
