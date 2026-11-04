@@ -147,6 +147,15 @@ try {
     assert.equal(await page.locator('.dashboard-context-actions button').innerText(), '🌀 Портал миров',
       `${vp.name}: portal shortcut must remain`);
     await capture(page, `${vp.name}-01-gameplay`);
+    // Move northwest from the plaza so the real in-world QA frame includes
+    // residential and craft courtyards, not only the initial portal viewport.
+    await page.keyboard.down('ArrowUp');
+    await page.keyboard.down('ArrowLeft');
+    await page.waitForTimeout(2800);
+    await page.keyboard.up('ArrowUp');
+    await page.keyboard.up('ArrowLeft');
+    await page.waitForTimeout(350);
+    await capture(page, `${vp.name}-01-aurora-courtyards`);
     assert.equal(await page.locator('#dashboard-context .dashboard-context-actions button').count(),1,
       `${vp.name}: mission guide must expose one primary portal action`);
     if(vp.width>1050) {
