@@ -32,7 +32,7 @@ export function canUpgrade(slot) {
   if (!upgrade || !Number.isSafeInteger(upgrade.cost) || upgrade.cost < 0) {
     return { ok: false, msg: 'Улучшение недоступно' };
   }
-  if (!Number.isFinite(p.gold) || p.gold < upgrade.cost) {
+  if (!Number.isSafeInteger(p.gold) || p.gold < 0 || p.gold < upgrade.cost) {
     return { ok: false, msg: `Не хватает золота (нужно ${upgrade.cost})` };
   }
 
@@ -78,6 +78,9 @@ export function healAtHealer() {
 
   if (p.hp >= p.maxHp && p.mp >= p.maxMp) {
     return { ok: false, msg: 'Вы полностью здоровы' };
+  }
+  if (!Number.isSafeInteger(p.gold) || p.gold < 0) {
+    return { ok: false, msg: 'Некорректный баланс золота' };
   }
   if (p.gold < cost) {
     return { ok: false, msg: `Не хватает золота (нужно ${cost})` };
