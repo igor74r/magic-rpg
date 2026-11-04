@@ -22,6 +22,16 @@ assert.equal(ordered.some(entry => entry.item === deadEnemy), false, 'dead enemi
 assert.equal(ordered.find(entry => entry.kind === 'player').item, player, 'player must participate in depth sorting');
 assert.equal(buildDepthItems(null).length, 0, 'missing world state must produce an empty draw list');
 
+const contactSorted = buildDepthItems({
+  statics: [
+    { id: 'large-prop', y: 100, depthY: 148 },
+    { id: 'building', y: 130, depthY: 138 }
+  ],
+  player: { id: 'hero', y: 120 }
+});
+assert.deepEqual(contactSorted.map(entry => entry.item.id), ['hero', 'building', 'large-prop'],
+  'large Aurora props and buildings must sort against their rendered ground-contact points');
+
 const renderSource = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
 assert.ok(renderSource.includes('const depthItems = buildDepthItems(ow);'), 'renderer must use the shared depth-order helper');
 assert.ok(renderSource.includes('drawPlayerByClass(ctx, sx + pLungeX, sy + pLungeY, state.game.player.class, theme.shadow, heroMoving)'), 'player sprite must receive screen coordinates, class, shadow and movement in the renderer signature order');
