@@ -315,6 +315,12 @@ document.addEventListener('click', (e) => {
   const btn = e.target.closest('button');
   if (btn && !btn.closest('#combat-panel') && !btn.closest('#npc-panel') && !btn.closest('.stat-buttons')) playSound('click');
 
+  if (e.target.closest('.mm-btn-prologue')) {
+    e.preventDefault();
+    openPrologue();
+    return;
+  }
+
   const logFilter = e.target.closest('[data-log-filter]');
   if (logFilter) {
     dashboardLogFilter = logFilter.dataset.logFilter || 'all';
@@ -343,6 +349,14 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && document.getElementById('screen-help')?.classList.contains('active')) {
     event.preventDefault();
     event.stopPropagation();
+    showScreen('screen-main');
+    updateMainMenu();
+    return;
+  }
+  if (event.key === 'Escape' && document.getElementById('screen-prologue')?.classList.contains('active')) {
+    event.preventDefault();
+    stopPrologueAnimation();
+    stopPrologueVoice();
     showScreen('screen-main');
     updateMainMenu();
     return;
@@ -1138,6 +1152,15 @@ function playPrologueVoice() {
   prologueVoiceCheck = window.setInterval(() => {
     if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) stopPrologueVoice();
   }, 350);
+}
+
+function openPrologue() {
+  stopPrologueVoice();
+  prologueSceneIndex = 0;
+  showScreen('screen-prologue');
+  setupPrologueVoice();
+  renderPrologueScene();
+  animatePrologue();
 }
 
 function setupPrologueVoice() {
