@@ -1,6 +1,6 @@
 // Regression coverage for skip-turn effects in both combat directions.
 import assert from 'node:assert/strict';
-import { applyEffect, tickEffects, isStunned, consumeStun } from '../systems/status.js';
+import { applyEffect, tickEffects, isStunned, consumeStun, hasEffect, getAtkMult, getDefMult, getLifesteal, clearDebuffs } from '../systems/status.js';
 
 for (const targetName of ['player', 'enemy']) {
   const target = { effects: [] };
@@ -33,4 +33,20 @@ const poisonTick = tickEffects(poisoned);
 assert.equal(poisonTick.totalDamage, 5, 'damage-over-time effects must still tick immediately');
 assert.equal(poisoned.effects[0].duration, 2, 'damage-over-time duration must still decrease');
 
-console.log('Combat status regression: 10/10 checks passed (player/enemy stun, anti-chain immunity, poison tick and duration).');
+const corruptedEffects = {
+  effects: [null, 'broken-entry', { id: 'unknown-effect', duration: 3 }, { id: 'poison', duration: NaN }]
+};
+assert.doesNotThrow(() => applyEffect(corruptedEffects, 'burn'),
+  'adding a status must tolerate malformed existing entries');
+assert.doesNotThrow(() => tickEffects(corruptedEffects),
+  'status ticks must tolerate malformed effect entries');
+assert.equal(hasEffect(corruptedEffects, 'poison'), true,
+  'valid known effects must survive alongside malformed entries');
+assert.equal(getAtkMult(corruptedEffects), 1);
+assert.equal(getDefMult(corruptedEffects), 1);
+assert.equal(getLifesteal(corruptedEffects), 0);
+assert.doesNotThrow(() => clearDebuffs(corruptedEffects));
+assert.ok(corruptedEffects.effects.every(effect => effect && typeof effect === 'object' && Number.isFinite(effect.duration)),
+  'malformed entries must be removed before they can crash later combat ticks');
+
+console.log('Combat status regression: 18/18 checks passed (player/enemy stun, anti-chain immunity, poison tick and duration).');
