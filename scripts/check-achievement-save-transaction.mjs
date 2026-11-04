@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
-import { checkAchievements, unlockedCount } from '../systems/achievements.js';
+import { checkAchievements, getUnlockedAchievementIds, unlockedCount } from '../systems/achievements.js';
 import { on, off } from '../systems/events.js';
+
+const knownAchievementId = 'first-blood';
+assert.equal(getUnlockedAchievementIds({ achievements: [knownAchievementId, knownAchievementId, 'unknown', 7] }).size, 1,
+  'achievement views must count unique known IDs only');
+assert.equal(getUnlockedAchievementIds({ achievements: {} }).size, 0,
+  'malformed achievement collections must not crash or inflate progress');
 
 const originalStorage = globalThis.localStorage;
 const originalGame = state.game;
