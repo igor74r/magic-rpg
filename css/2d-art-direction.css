@@ -148,29 +148,74 @@
 .village-interior-heading h3 { margin:0; color:#f0d6a1; }
 .village-interior-heading p { margin:5px 0 0; color:#b7a68a; font-size:12px; }
 .village-interior-heading > span { color:#c9a66b; font-size:10px; letter-spacing:2px; white-space:nowrap; }
-.village-room-art { position:relative; height:260px; overflow:hidden; border:3px solid #604638; border-radius:10px; background:linear-gradient(180deg,#4b3a34 0 38%,#795a42 38% 42%,#49372d 42% 100%); box-shadow:inset 0 0 45px #160f12,0 8px 24px #0008; }
-.village-room-art:before { content:""; position:absolute; inset:0 0 58% 0; background:repeating-linear-gradient(90deg,transparent 0 74px,#2b2020 75px 79px),linear-gradient(180deg,#5b4640,#80604b); opacity:.75; }
-.village-room-art:after { content:""; position:absolute; left:0; right:0; bottom:0; height:42%; background:repeating-linear-gradient(0deg,#6d4b35 0 13px,#382a25 14px 16px); border-top:5px solid #30231f; }
-.village-room-window { position:absolute; z-index:1; top:17px; left:calc(50% - 34px); width:68px; height:58px; border:7px solid #332722; border-radius:5px; background:linear-gradient(135deg,#e6bd76,#6c7881 55%,#34485b); box-shadow:0 0 22px #e7b96a88; }
-.village-room-hearth { position:absolute; z-index:2; right:7%; bottom:17%; width:78px; height:86px; border:8px solid #4a3028; border-radius:10px 10px 2px 2px; background:radial-gradient(ellipse at 50% 75%,#ffb45b 0 13%,#c74c28 30%,#241a1b 72%); box-shadow:0 0 22px #e8793c55; }
-.village-room-prop { position:absolute; z-index:3; bottom:14%; width:28%; min-height:58px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; padding:7px; border:2px solid #b18a54; border-radius:7px; color:#f0d9ad; background:linear-gradient(145deg,#76543b,#392a26); box-shadow:0 6px 12px #0008; text-align:center; }
-.village-room-prop span { font-size:25px; }
+.village-room-art { position:relative; height:260px; overflow:hidden; border:3px solid #604638; border-radius:0; background-color:#49372d; box-shadow:none; image-rendering:pixelated; }
+.village-room-art:before { content:""; position:absolute; inset:0 0 58% 0; background-color:#5b4640; border-bottom:8px solid #2b2020; box-shadow:inset 0 -4px 0 #80604b; }
+.village-room-art:after { content:""; position:absolute; left:0; right:0; bottom:0; height:42%; background-color:#6d4b35; border-top:5px solid #30231f; box-shadow:inset 0 4px 0 #382a25; }
+.village-room-window { position:absolute; z-index:1; top:17px; left:calc(50% - 34px); width:68px; height:58px; border:7px solid #332722; border-radius:0; background-color:#6c7881; box-shadow:inset 0 0 0 3px #34485b; }
+.village-room-window:before { content:""; position:absolute; left:25px; top:0; width:4px; height:100%; background:#332722; }
+.village-room-window:after { content:""; position:absolute; left:0; top:24px; width:100%; height:4px; background:#332722; }
+.village-room-hearth { position:absolute; z-index:2; right:7%; bottom:17%; width:78px; height:86px; border:8px solid #4a3028; border-radius:0; background-color:#241a1b; box-shadow:inset 0 -22px 0 #c74c28; }
+.village-room-hearth:before { content:""; position:absolute; left:21px; bottom:12px; width:20px; height:18px; background:#ffb45b; box-shadow:-8px 8px 0 #c74c28, 8px 8px 0 #c74c28, 0 -8px 0 #ffe08a; }
+.village-room-prop { position:absolute; z-index:3; bottom:14%; width:28%; min-height:58px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; padding:7px; border:2px solid #b18a54; border-radius:0; color:#f0d9ad; background-color:#76543b; box-shadow:4px 4px 0 #211916; text-align:center; }
+.village-room-prop span { display:block; width:34px; height:26px; position:relative; flex:none; }
 .village-room-prop small { font-size:10px; line-height:1.25; }
 .village-room-prop.prop-1 { left:7%; }
 .village-room-prop.prop-2 { left:36%; bottom:20%; }
 .village-room-prop.prop-3 { left:65%; bottom:13%; }
-.village-room-floor-mark { position:absolute; z-index:2; left:50%; bottom:8%; color:#e4bd7d; opacity:.5; font-size:26px; }
-.room-forge .village-room-art { background:linear-gradient(180deg,#322b2c 0 40%,#694331 40% 44%,#3a2924 44%); }
-.room-forge .village-room-hearth { background:radial-gradient(ellipse at 50% 75%,#ffe08a 0 9%,#ff7a32 25%,#2a1716 70%); box-shadow:0 0 35px #ff713c99; }
-.room-healer .village-room-art { background:linear-gradient(180deg,#5a6250 0 40%,#927d60 40% 44%,#554534 44%); }
-.room-healer .village-room-hearth { background:radial-gradient(ellipse at 50% 75%,#d8efaa 0 10%,#8ca96c 28%,#2b342b 70%); }
-.room-alchemy .village-room-art { background:linear-gradient(180deg,#493e59 0 40%,#81654f 40% 44%,#352b3d 44%); }
-.room-alchemy .village-room-hearth { background:radial-gradient(ellipse at 50% 75%,#c7a6ff 0 10%,#8b5ab7 28%,#251c35 70%); }
-.room-market .village-room-art { background:linear-gradient(180deg,#76513e 0 40%,#a17b50 40% 44%,#49342b 44%); }
-.room-hall .village-room-art { background:linear-gradient(180deg,#59463b 0 40%,#92734f 40% 44%,#403129 44%); }
-.room-tavern .village-room-art { background:linear-gradient(180deg,#6d4833 0 40%,#9c7044 40% 44%,#493027 44%); }
+.village-room-pixel-icon:before,.village-room-pixel-icon:after { content:""; position:absolute; display:block; }
+.village-room-pixel-icon:before { left:8px; top:8px; width:18px; height:8px; background:#9b7951; box-shadow:0 8px 0 #513b30, 4px 12px 0 #513b30; }
+.village-room-pixel-icon:after { left:14px; top:3px; width:6px; height:5px; background:#e7c58a; }
+.icon-forge-1:before { left:5px; top:10px; width:24px; height:7px; background:#89949a; box-shadow:4px -5px 0 #c5c9c5, 6px 7px 0 #49372d; }
+.icon-forge-1:after { left:13px; top:4px; width:8px; height:5px; background:#d7d9d0; }
+.icon-forge-2:before { left:15px; top:2px; width:4px; height:22px; background:#d8d6c8; box-shadow:-5px 3px 0 #805337,5px 3px 0 #805337; }
+.icon-forge-2:after { left:8px; top:2px; width:18px; height:4px; background:#9caab4; }
+.icon-forge-3:before { left:5px; top:4px; width:24px; height:4px; background:#68452d; box-shadow:0 7px 0 #68452d,0 14px 0 #68452d; }
+.icon-forge-3:after { left:9px; top:1px; width:3px; height:20px; background:#c9a66b; box-shadow:12px 0 0 #c9a66b; }
+.icon-healer-1:before { left:3px; top:9px; width:28px; height:8px; background:#d9c8a5; box-shadow:0 8px 0 #604638; }
+.icon-healer-1:after { left:7px; top:3px; width:20px; height:5px; background:#f0e2bd; }
+.icon-healer-2:before { left:12px; top:7px; width:10px; height:16px; background:#6b8b64; box-shadow:-4px 5px 0 #49372d,4px 5px 0 #49372d; }
+.icon-healer-2:after { left:14px; top:2px; width:6px; height:6px; background:#b9e0bf; }
+.icon-healer-3:before { left:5px; top:9px; width:24px; height:9px; background:#68452d; box-shadow:0 -5px 0 #986a43; }
+.icon-healer-3:after { left:8px; top:2px; width:4px; height:8px; background:#6e9b57; box-shadow:8px -3px 0 #7fae63,16px 0 0 #6e9b57; }
+.icon-alchemy-1:before { left:11px; top:8px; width:12px; height:15px; background:#7cc6a2; box-shadow:-4px 4px 0 #49372d,4px 4px 0 #49372d; }
+.icon-alchemy-1:after { left:14px; top:2px; width:6px; height:8px; background:#d9c99b; }
+.icon-alchemy-2:before { left:5px; top:7px; width:24px; height:16px; background:#49372d; box-shadow:4px -5px 0 #805337; }
+.icon-alchemy-2:after { left:12px; top:11px; width:10px; height:8px; background:#a8d9c0; }
+.icon-alchemy-3:before { left:4px; top:4px; width:26px; height:4px; background:#68452d; box-shadow:0 8px 0 #68452d,0 16px 0 #68452d; }
+.icon-alchemy-3:after { left:8px; top:1px; width:4px; height:21px; background:#b18a54; box-shadow:15px 0 0 #b18a54; }
+.icon-market-1:before { left:3px; top:10px; width:28px; height:9px; background:#9b7951; box-shadow:0 7px 0 #49372d; }
+.icon-market-1:after { left:3px; top:3px; width:28px; height:6px; background:#b95e43; box-shadow:7px 0 0 #d9b17c; }
+.icon-market-2:before { left:6px; top:7px; width:22px; height:4px; background:#d8bd91; box-shadow:8px -4px 0 #8b806c,0 12px 0 #513b30; }
+.icon-market-2:after { left:15px; top:2px; width:4px; height:17px; background:#49372d; }
+.icon-market-3:before { left:5px; top:5px; width:24px; height:5px; background:#68452d; box-shadow:0 8px 0 #68452d,0 16px 0 #68452d; }
+.icon-market-3:after { left:9px; top:1px; width:4px; height:20px; background:#d8bd91; box-shadow:12px 0 0 #d8bd91; }
+.icon-hall-1:before { left:3px; top:9px; width:28px; height:8px; background:#805337; box-shadow:4px 8px 0 #49372d,-4px 8px 0 #49372d; }
+.icon-hall-1:after { left:11px; top:4px; width:12px; height:5px; background:#d9c99b; }
+.icon-hall-2:before { left:5px; top:10px; width:24px; height:8px; background:#76543b; box-shadow:0 7px 0 #49372d; }
+.icon-hall-2:after { left:12px; top:3px; width:10px; height:5px; background:#d8bd91; }
+.icon-hall-3:before { left:5px; top:4px; width:24px; height:4px; background:#68452d; box-shadow:0 7px 0 #68452d,0 14px 0 #68452d; }
+.icon-hall-3:after { left:8px; top:2px; width:4px; height:17px; background:#d8bd91; box-shadow:14px 0 0 #d8bd91; }
+.icon-tavern-1:before { left:4px; top:11px; width:26px; height:6px; background:#9b7951; box-shadow:3px 7px 0 #49372d,19px 7px 0 #49372d; }
+.icon-tavern-1:after { left:8px; top:5px; width:18px; height:5px; background:#d8bd91; }
+.icon-tavern-2:before { left:3px; top:8px; width:28px; height:7px; background:#805337; box-shadow:0 8px 0 #49372d; }
+.icon-tavern-2:after { left:8px; top:2px; width:18px; height:5px; background:#d8bd91; }
+.icon-tavern-3:before { left:14px; top:4px; width:4px; height:20px; background:#68452d; box-shadow:-7px 8px 0 #b18a54,7px 8px 0 #b18a54; }
+.icon-tavern-3:after { left:8px; top:2px; width:16px; height:4px; background:#d8bd91; }
+.village-room-floor-mark { position:absolute; z-index:2; left:50%; bottom:8%; width:8px; height:8px; background:#e4bd7d; transform:translateX(-50%); box-shadow:8px 0 0 #e4bd7d,-8px 0 0 #e4bd7d,0 8px 0 #e4bd7d,0 -8px 0 #e4bd7d; }
+.room-forge .village-room-art { background-color:#3a2924; }
+.room-healer .village-room-art { background-color:#554534; }
+.room-alchemy .village-room-art { background-color:#352b3d; }
+.room-market .village-room-art { background-color:#49342b; }
+.room-hall .village-room-art { background-color:#403129; }
+.room-tavern .village-room-art { background-color:#493027; }
+.room-forge .village-room-hearth { background-color:#2a1716; }
+.room-healer .village-room-hearth { background-color:#2b342b; }
+.room-alchemy .village-room-hearth { background-color:#251c35; }
+.room-market .village-room-hearth { background-color:#352820; }
+.room-hall .village-room-hearth { background-color:#342820; }
+.room-tavern .village-room-hearth { background-color:#35251f; }
 .village-room-caption { margin:10px 0; color:#b7a68a; font-size:12px; text-align:center; }
-.village-interior-enter,.village-interior-exit { width:100%; margin-top:12px; padding:11px 14px; border:1px solid #b18a54; border-radius:7px; color:#f3dfb8; background:linear-gradient(180deg,#60452f,#342820); font-weight:700; cursor:pointer; }
+.village-interior-enter,.village-interior-exit { width:100%; margin-top:12px; padding:11px 14px; border:1px solid #b18a54; border-radius:0; color:#f3dfb8; background-color:#60452f; font-weight:700; cursor:pointer; }
 .village-interior-enter:hover,.village-interior-exit:hover { filter:brightness(1.18); }
 @media(max-width:480px) { .village-room-art { height:210px; } .village-room-prop { width:30%; min-height:50px; padding:4px; } .village-room-prop small { font-size:9px; } }
 
