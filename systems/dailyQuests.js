@@ -96,6 +96,11 @@ export function claimQuestReward(questId) {
   if (!Number.isSafeInteger(p.gold) || p.gold < 0) return false;
   const nextGold = p.gold + definition.gold;
   if (!Number.isSafeInteger(nextGold)) return false;
+  const previousGoldEarned = Number.isSafeInteger(p.stats?.goldEarned) && p.stats.goldEarned >= 0
+    ? p.stats.goldEarned
+    : 0;
+  const nextGoldEarned = previousGoldEarned + definition.gold;
+  if (!Number.isSafeInteger(nextGoldEarned)) return false;
 
   let previousPlayer;
   try {
@@ -105,6 +110,8 @@ export function claimQuestReward(questId) {
   }
   q.claimed = true;
   p.gold = nextGold;
+  if (!p.stats || typeof p.stats !== 'object' || Array.isArray(p.stats)) p.stats = {};
+  p.stats.goldEarned = nextGoldEarned;
   if (definition.exp) addExp(definition.exp);
 
   const parts = [`+${definition.gold}💰`];
