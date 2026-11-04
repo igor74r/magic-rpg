@@ -86,6 +86,45 @@ assert.equal(state.game.player.pendingLoot.length, 0);
 for (const entry of state.game.player.inventory) {
   assert.ok(ITEMS[entry.id], 'claimed item must exist in item catalog');
 }
+// A failed save while claiming must restore the exact player state and keep the reward pending.
+const originalDocument = globalThis.document;
+const originalStorage = globalThis.localStorage;
+const originalSetTimeout = globalThis.setTimeout;
+const toastMessages = [];
+globalThis.document = {
+  createElement: () => ({ setAttribute() {}, remove() {}, textContent: '' }),
+  body: { appendChild(element) { toastMessages.push(element.textContent); } }
+};
+globalThis.localStorage = {
+  setItem() { throw new Error('simulated storage quota failure'); }
+};
+globalThis.setTimeout = () => 0;
+try {
+  const { claimPendingLootUI } = await import('../ui/inventory.js');
+  const rollbackPlayer = {
+    name: 'Loot rollback hero', level: 5, gold: 0, str: 1000,
+    inventory: [],
+    pendingLoot: [{ id: 'leather-armor', qty: 1, allowMythic: true, seed: 0.25 }],
+    spells: [], equipped: {}, stats: { kills: {} },
+    campaignKills: {}, campaignClaimed: {}, activeCampaignMission: null
+  };
+  state.currentSlot = 1;
+  state.game = { player: rollbackPlayer };
+  const beforeFailedClaim = JSON.stringify(rollbackPlayer);
+  claimPendingLootUI(0);
+  assert.equal(JSON.stringify(rollbackPlayer), beforeFailedClaim,
+    'failed persistence must roll back both the granted item and pending-loot removal');
+  assert.match(toastMessages.at(-1), /не удалось сохранить награду/i,
+    'failed persistence must not display a success message');
+} finally {
+  if (originalDocument === undefined) delete globalThis.document;
+  else globalThis.document = originalDocument;
+  if (originalStorage === undefined) delete globalThis.localStorage;
+  else globalThis.localStorage = originalStorage;
+  if (originalSetTimeout === undefined) delete globalThis.setTimeout;
+  else globalThis.setTimeout = originalSetTimeout;
+}
+
 state.game = null;
 console.log('PASS overflow equipment rewards persist and can be claimed after freeing capacity');
 console.log('PASS overflow stackable rewards persist and preserve quantity');
