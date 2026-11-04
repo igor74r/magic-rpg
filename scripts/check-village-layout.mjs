@@ -139,6 +139,15 @@ assert.ok(overworldInputSource.includes('window.GameAPI?.interactNpc?.(nearest.i
 
 const styleSource = readFileSync(new URL('../css/2d-art-direction.css', import.meta.url), 'utf8');
 assert.ok(styleSource.includes('.village-room-art'), 'interior scenes must have their own visual styling');
+const interiorCssStart = styleSource.indexOf('.village-room-art');
+const interiorCssEnd = styleSource.indexOf('/* Active campaign objective', interiorCssStart);
+const interiorCss = styleSource.slice(interiorCssStart, interiorCssEnd < 0 ? undefined : interiorCssEnd);
+assert.ok(!/gradient|blur|filter:\\s*blur/i.test(interiorCss), 'Aurora interiors must use flat colors and crisp pixel edges');
+for (const room of ['forge','healer','alchemy','market','hall','tavern']) {
+  assert.ok(interiorCss.includes(`.icon-${room}-1:before`), `${room}: interior props must have pixel-art icon details`);
+}
+assert.ok(mainSource.includes('village-room-pixel-icon icon-') && !mainSource.includes("['⚒️','🛏️','⚗️','📦']"),
+  'Aurora interior props must not use emoji as their visual assets');
 const spriteSource = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
 assert.ok(spriteSource.includes("['tower-gate', 15]"), 'tower portal must use its dedicated authored atlas frame');
 assert.ok(spriteSource.includes("style === 'world-portal' ? getAuroraWorldPortalAtlas()") || (spriteSource.includes("const isWorldPortal = style === 'world-portal'") && spriteSource.includes("getAuroraWorldPortalAtlas()")), 'Aurora world portal must load its dedicated authored PNG atlas');
