@@ -65,6 +65,43 @@ try {
     await artPage.close();
   }
 
+  // Render all eight nature atlas frames through the production sprite dispatcher.
+  {
+    const naturePage = await browser.newPage({ viewport: { width: 1440, height: 520 }, deviceScaleFactor: 1 });
+    await naturePage.goto(baseUrl, { waitUntil:'domcontentloaded' });
+    const natureCheck = await naturePage.evaluate(async () => {
+      const { drawObject } = await import('/ui/overworld/sprites.js');
+      const styles = ['oak','pine','bush','rock','stump','hedge','fence','flowerbed'];
+      const preload = new Image();
+      preload.src = '/assets/aurora/nature-atlas.png';
+      await preload.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = 1360; canvas.height = 480;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.fillStyle = '#263b32'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      styles.forEach((style,index) => {
+        const col = index % 4, row = Math.floor(index / 4);
+        const x = col * 340 + 170, y = row * 220 + 155;
+        drawObject(ctx, { id: 'nature-' + style, natureStyle: style }, x, y, '#1e2928');
+        ctx.fillStyle = '#f0dfb8'; ctx.font = 'bold 16px monospace';
+        ctx.textAlign = 'center'; ctx.fillText(style.toUpperCase(),x, y + 54);
+      });
+      const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      let colored = 0;
+      for(let i=0;i<pixels.length;i+=4) if(pixels[i]!==38 || pixels[i+1]!==59 || pixels[i+2]!==50) colored++;
+      if(colored < 12000) throw new Error('Aurora nature sheet appears incomplete: '+colored);
+      document.body.innerHTML = '';
+      document.body.style.cssText = 'margin:0;background:#17251f;display:grid;place-items:center;min-height:100vh';
+      document.body.appendChild(canvas);
+      return { styles, coloredPixels: colored, width: canvas.width, height: canvas.height };
+    });
+    assert.equal(natureCheck.styles.length,8,'all eight Aurora nature styles must render');
+    assert.ok(natureCheck.coloredPixels>12000,'nature art sheet must contain substantial pixel detail');
+    await capture(naturePage,'aurora-01-nature-art-sheet');
+    await naturePage.close();
+  }
+
   for (const vp of [{name:'desktop',width:1440,height:900},{name:'mobile',width:390,height:844}]) {
     const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1 });
     const errors = [];
