@@ -10,7 +10,10 @@ const portal = main.slice(portalStart, portalEnd);
 assert.match(portal, /class="portal-atlas"/, 'portal must render one unified atlas window');
 assert.match(portal, /portal-map-stage/, 'atlas must contain a large map viewport');
 assert.match(portal, /portal-map-node/, 'every destination must be represented by an interactive map point');
-assert.match(portal, /portal-route/, 'story destinations must be connected by a route');
+assert.match(portal, /<canvas class="portal-map-art"/, 'portal map art must use a crisp pixelated canvas');
+assert.match(portal, /drawPortalPixelMap\(overlay\.querySelector\('#portal-map-art'\), points, routePoints\)/,
+  'pixel map canvas must be drawn from the current destination and story route points');
+assert.doesNotMatch(portal, /<svg\\b|<\\/svg>/i, 'portal must not use inline SVG graphics');
 assert.match(portal, /portal-destination/, 'selecting a point must show its detailed destination panel');
 assert.match(portal, /canEnterStoryLocation\(state\.game\?\.player, id\)/, 'destination selection and travel must preserve story and level gating');
 assert.match(portal, /latestAccess\.allowed/, 'travel must re-check access immediately before transition');
