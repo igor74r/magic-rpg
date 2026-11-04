@@ -54,8 +54,14 @@ try {
   globalThis.localStorage.getItem = originalGetItem;
 
   let readCalls = 0;
+  let failFileRead = false;
   globalThis.FileReader.prototype.readAsText = function () {
     readCalls++;
+    if (failFileRead) {
+      failFileRead = false;
+      this.onerror(new Error('simulated file read failure'));
+      return;
+    }
     this.onload({ target: { result: fileContent } });
   };
   const runImport = content => {
@@ -75,6 +81,12 @@ try {
 
   runImport({ version: 17, player: { name: 'Broken save', level: 10 } });
   assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE', 'incomplete current save must not overwrite the slot');
+
+  failFileRead = true;
+  const readFailureEvent = runImport({ version: 16, player: { name: 'Unreadable file' } });
+  assert.equal(readFailureEvent.target.value, '', 'failed file reads must clear the input');
+  assert.match(toastMessages.at(-1), /Не удалось прочитать файл сохранения/,
+    'failed FileReader operations must report a useful error');
 
   const legacy = {
     version: 16,
