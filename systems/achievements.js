@@ -8,14 +8,17 @@ export function checkAchievements() {
   const g = state.game;
   if (!g || !g.player) return;
   const p = g.player;
-  if (!Array.isArray(p.achievements)) p.achievements = [];
-  const previousAchievements = [...p.achievements];
+  const originalAchievements = p.achievements;
+  const previousAchievements = Array.isArray(originalAchievements)
+    ? [...originalAchievements]
+    : originalAchievements;
+  const knownAchievements = Array.isArray(originalAchievements) ? originalAchievements : [];
   const previousGold = p.gold;
 
   let any = false;
   const unlocked = [];
   for (const a of ACHIEVEMENTS) {
-    if (p.achievements.includes(a.id)) continue;
+    if (knownAchievements.includes(a.id)) continue;
     let ok = false;
     try { ok = !!a.check(g); } catch (e) { console.warn('[achievements]', a.id, e); }
     if (!ok) continue;
@@ -23,6 +26,7 @@ export function checkAchievements() {
       if (!Number.isSafeInteger(p.gold) || p.gold < 0 || !Number.isSafeInteger(p.gold + a.reward)) continue;
       p.gold += a.reward;
     }
+    if (!Array.isArray(p.achievements)) p.achievements = [];
     p.achievements.push(a.id);
     unlocked.push(a);
     any = true;
