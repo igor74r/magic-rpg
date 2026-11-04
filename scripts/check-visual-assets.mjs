@@ -121,6 +121,14 @@ assert.ok(html.includes('css/2d-art-direction.css'));
 
 const renderer = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
 const depth = readFileSync(new URL('../ui/overworld/depth-order.js', import.meta.url), 'utf8');
+assert.ok(renderer.includes("graphicsQuality === 'high' && ow.locationId !== 'village') drawBloom(ctx)"),
+  'Aurora must not apply soft bloom to crisp pixel art');
+assert.ok(renderer.includes("!allowAmbientFog || ow.locationId === 'village' ? 0"),
+  'Aurora must bypass radial fog lighting');
+assert.ok(renderer.includes("if (ow.locationId !== 'village') {\n    const gradient = ctx.createRadialGradient"),
+  'Aurora must bypass the radial vignette');
+assert.ok(renderer.includes("ctx.fillRect(lx - radius, ly - 8, radius * 2, 16)"),
+  'Aurora lanterns must use flat stepped light pools');
 assert.ok(renderer.includes('getEventPropIndex'));
 assert.ok(renderer.includes('drawAtlasProp(ctx, eventPropIndex'));
 const atlasRenderer = readFileSync(new URL('../ui/overworld/tile-atlas.js', import.meta.url), 'utf8');
