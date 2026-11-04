@@ -87,6 +87,27 @@ export function generateVillageMap(cols, rows) {
   road([[cx + 1, cy + 3], [cx + 4, cy + 5], [cx + 6, rows - 5], [25, rows - 4]], 2);
   road([[13, rows - 4], [15, rows - 5], [17, rows - 4], [cx, rows - 5]], 2);
 
+  // Короткие ответвления связывают дворы с главными улицами: они не проходят
+  // сквозь здания и заканчиваются у свободных подходов к ремесленным зонам.
+  road([[cx - 7, cy], [cx - 9, cy - 2], [cx - 10, cy - 4], [11, cy - 5]], 2);
+  road([[cx + 7, cy], [cx + 9, cy - 2], [cx + 10, cy - 4], [cols - 11, cy - 5]], 2);
+  road([[cx - 2, cy + 5], [cx - 4, cy + 7], [cx - 5, rows - 7], [10, rows - 7]], 2);
+  road([[cx + 2, cy + 5], [cx + 4, cy + 7], [cx + 5, rows - 7], [cols - 10, rows - 7]], 2);
+
+  // Небольшие расширения у площади и развилок создают ощущение мощёных
+  // карманов, а не одинаковых коридоров. Все они остаются проходимыми.
+  for (const [px, py, radius] of [
+    [cx, cy, 2], [cx - 7, cy, 1], [cx + 7, cy, 1],
+    [13, rows - 4, 1], [cols - 13, rows - 4, 1]
+  ]) {
+    for (let oy = -radius; oy <= radius; oy++) {
+      for (let ox = -radius; ox <= radius; ox++) {
+        if (Math.abs(ox) + Math.abs(oy) > radius + 1) continue;
+        if (grid[py + oy]?.[px + ox] !== undefined) grid[py + oy][px + ox] = 1;
+      }
+    }
+  }
+
   // Small irregular garden beds. Road tiles and protected interaction cells
   // are never overwritten, so every NPC, doorway, service and portal stays usable.
   const protectedCells = [
