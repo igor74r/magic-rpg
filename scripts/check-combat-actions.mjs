@@ -84,6 +84,15 @@ try {
   assert.ok(f.player.mp < mageMpBefore, 'Mage fireball must consume mana');
   console.log('PASS Mage fireball damages the target and consumes mana');
 
+  f = fixture('mage');
+  f.player.effects = [null, 'broken-effect'];
+  f.enemy.effects = [null, 'broken-effect'];
+  assert.doesNotThrow(() => combatCastSpell('fireball'),
+    'spell casting and elemental reactions must tolerate malformed player/enemy effects');
+  console.log('PASS Combat spell and elemental reaction ignore malformed effect entries');
+
+
+
   f = fixture('archer');
   const archerAbility = CLASSES.archer.abilities.find(item => item.id === 'aimed-shot');
   const archerMpBeforeInvalidAbility = f.player.mp;
@@ -156,6 +165,14 @@ try {
   const persistedVictory = JSON.parse(storage.get('magic-rpg-save-1'));
   assert.deepEqual(persistedVictory.player.effects, [{ id: 'elderBlessing', duration: 1 }]);
   assert.deepEqual(persistedVictory.player.cooldowns, {});
+  f = fixture('mage');
+  f.player.effects = [null, 'broken-effect', { id: 'elderBlessing', duration: 2 }];
+  f.enemy.hp = 1;
+  assert.doesNotThrow(() => combatAttack(),
+    'victory reward processing must tolerate malformed effects around a valid blessing');
+  assert.deepEqual(f.player.effects, [{ id: 'elderBlessing', duration: 1 }],
+    'valid elder blessing must survive malformed-effect cleanup and victory');
+
   console.log('PASS Victory save contains post-combat effects and cooldown state');
 
   assert.ok(scheduled.length >= 5, 'combat actions should schedule enemy responses');
