@@ -44,7 +44,10 @@ export function getTowerLocation(floor = 1) {
 }
 
 export function getTowerBest() {
-  return Math.max(0, Math.min(TOWER_MAX_FLOOR, state.game?.player?.towerBest || 0));
+  const value = state.game?.player?.towerBest;
+  return Number.isSafeInteger(value) && value >= 0
+    ? Math.min(TOWER_MAX_FLOOR, value)
+    : 0;
 }
 
 export function getTowerStartFloor() {
@@ -54,16 +57,20 @@ export function getTowerStartFloor() {
 
 export function recordTowerFloor(floor) {
   const player = state.game?.player;
-  if (!player) return false;
-  const value = Math.max(0, Math.min(TOWER_MAX_FLOOR, Math.floor(Number(floor) || 0)));
-  if (value <= (player.towerBest || 0)) return false;
-  const previous = player.towerBest || 0;
-  player.towerBest = value;
+  if (!player || !Number.isSafeInteger(floor) || floor < 1 || floor > TOWER_MAX_FLOOR) return false;
+
+  const original = player.towerBest;
+  const previous = Number.isSafeInteger(original) && original >= 0
+    ? Math.min(TOWER_MAX_FLOOR, original)
+    : 0;
+  if (floor <= previous && original === previous) return false;
+
+  player.towerBest = Math.max(previous, floor);
   if (!saveGame()) {
-    player.towerBest = previous;
+    player.towerBest = original;
     return false;
   }
-  return true;
+  return player.towerBest > previous;
 }
 
 export function endTower(floor) {
