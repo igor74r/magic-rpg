@@ -80,3 +80,13 @@
 - index.html и scripts/check-startup-fallback.mjs согласованы по cache key 20261104-aurora-flat-ground-5 для main.js и css/2d-art-direction.css.
 - .gitignore теперь исключает node_modules/, .npm/, coverage, Playwright reports/results и генерируемые test-artifacts/visual-regression/.
 - Статус не завышать: CI подтверждает автоматические контракты и проверенные browser captures, но не заменяет независимый построчный ручной анализ всех 202 файлов. Полная художественная переработка Aurora остаётся открытой по NPC/персонажам и оставшимся вариантам природных/архитектурных ассетов. GitHub Pages deployment run [41884222706](https://github.com/igor74r/magic-rpg/actions/runs/41884222706) завершился success на commit 390772c3d4603368cc5acffec68f9150efc21263.
+
+
+## Продолжение аудита — визуальные контракты и последний зелёный прогон
+
+- Текущий Git tree `main`: `truncated=false`, **202 tracked files**; 71 `.js`, 76 `.mjs`, 6 `.css`, 30 `.png`, 4 `.mp3`, 1 `.html`, 1 `.json`, 2 workflow `.yml`, 9 `.md` плюс служебные файлы. Из 30 PNG восемь — игровые/брендинговые ассеты, 22 — существующие скриншоты `test-artifacts/visual-review/`.
+- Скриптовая зона: 76 файлов; 69 `check-*.mjs`. Workflow CI проверяет синтаксис всех JS/MJS, относительные импорты/экспорты, игровые контракты, desktop/mobile browser smoke и gameplay visual regression.
+- После ручного просмотра desktop/mobile артефактов трава дополнительно уплощена: atlas alpha 0.26, 2–3 декоративных кластера на тайл alpha 0.14. Тени героя/NPC/существ — три ступенчатые прямоугольные полосы вместо антиалиасингового эллипса.
+- `check-visual-assets.mjs` расширен проверками всех 9 NPC с ролевыми пиксельными деталями и специальных pixel renderers для `well`, `questBoard`, `cat`; также проверяются отсутствие эллипсов, разреженность травы и восстановление Canvas alpha.
+- CI [41887283837](https://github.com/igor74r/magic-rpg/actions/runs/41887283837) на commit `7d9c0d5509b365512f7d5c9977215ccb8b6ec9b9` завершился **success: 81/81 шагов**. GitHub Pages deployment [41887283034](https://github.com/igor74r/magic-rpg/actions/runs/41887283034) — **success**.
+- Ограничение статуса: это не завершает независимый построчный ручной аудит всех 202 файлов и художественную переработку всех биомов/персонажей/драконов/предметов. Дальше аудит продолжается по оставшимся исходникам и игровым ассетам; полный проект пока не объявлять завершённым.
