@@ -236,20 +236,18 @@ export function openChest(chest) {
     ? `📦 Сундук: ${ITEMS[id].name} отправлено в хранилище добычи — в сумке нет места.`
     : `📦 Сундук: ${ITEMS[id].name}`;
   if (inst && inst.rarity && inst.rarity !== 'common') msg = `📦 Сундук: ${RARITIES[inst.rarity].name} ${ITEMS[id].name}`;
-  pushLog(msg, result.stored ? 'warning' : 'success');
-  ow.floatingNumbers.push({ x: chest.x, y: chest.y - 20, text: '📦', type: 'heal', life: 1.5 });
-  spawnParticles(chest.x, chest.y, 'spark', 8);
-  playSound('chest');
+  const rewardLog = { msg, cls: result.stored ? 'warning' : 'success' };
+  let herbLog = null;
 
   if (Math.random() < CHEST_HERB_CHANCE) {
     const herbId = Math.random() < 0.5 ? 'herb-life' : 'herb-moon';
     const herbResult = addItemOrStore(herbId, 1);
-    pushLog(
-      herbResult.stored
+    herbLog = {
+      msg: herbResult.stored
         ? `🌿 ${ITEMS[herbId].name} отправлено в хранилище добычи.`
         : `🌿 Сундук: ${ITEMS[herbId].name}`,
-      herbResult.stored ? 'warning' : 'success'
-    );
+      cls: herbResult.stored ? 'warning' : 'success'
+    };
   }
 
   updateQuestProgress('chest', 'chest', 1);
@@ -263,6 +261,12 @@ export function openChest(chest) {
     emit('game:update');
     return false;
   }
+  // Publish reward feedback and audiovisual effects only after persistence succeeds.
+  pushLog(rewardLog.msg, rewardLog.cls);
+  if (herbLog) pushLog(herbLog.msg, herbLog.cls);
+  ow.floatingNumbers.push({ x: chest.x, y: chest.y - 20, text: '📦', type: 'heal', life: 1.5 });
+  spawnParticles(chest.x, chest.y, 'spark', 8);
+  playSound('chest');
   checkAchievements();
   return true;
 }
