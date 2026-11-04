@@ -142,7 +142,7 @@ assert.ok(styleSource.includes('.village-room-art'), 'interior scenes must have 
 const interiorCssStart = styleSource.indexOf('.village-room-art');
 const interiorCssEnd = styleSource.indexOf('/* Active campaign objective', interiorCssStart);
 const interiorCss = styleSource.slice(interiorCssStart, interiorCssEnd < 0 ? undefined : interiorCssEnd);
-assert.ok(!/gradient|blur|filter:\\s*blur/i.test(interiorCss), 'Aurora interiors must use flat colors and crisp pixel edges');
+assert.ok(!/gradient|blur/i.test(interiorCss), 'Aurora interiors must use flat colors and crisp pixel edges');
 for (const room of ['forge','healer','alchemy','market','hall','tavern']) {
   assert.ok(interiorCss.includes(`.icon-${room}-1:before`), `${room}: interior props must have pixel-art icon details`);
 }
