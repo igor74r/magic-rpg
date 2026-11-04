@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { inflateSync } from 'node:zlib';
+const characterConnector = readFileSync(new URL('./connect-character-details.mjs', import.meta.url), 'utf8');
+assert.ok(characterConnector.includes('if (source.includes(call)) return;'),
+  'character detail connector must be idempotent and avoid duplicate render layers');
 
 const manifest = JSON.parse(readFileSync(new URL('../assets/tiles/manifest.json', import.meta.url), 'utf8'));
 assert.equal(manifest.tileSize, 96);
