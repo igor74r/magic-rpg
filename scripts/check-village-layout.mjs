@@ -126,7 +126,7 @@ const spriteSource = readFileSync(new URL('../ui/overworld/sprites.js', import.m
 assert.ok(spriteSource.includes("['tower-gate', 15]"), 'tower portal must use its dedicated authored atlas frame');
 assert.ok(spriteSource.includes('drawAuroraKenneyTile'), 'Aurora nature should use the imported local Kenney pixel-art atlas');
 const kenneyRenderer = readFileSync(new URL('../ui/overworld/aurora-kenney-atlas.js', import.meta.url), 'utf8');
-for (const style of ['flowerbed', 'pine', 'oak', 'bush']) {
+for (const style of ['flowerbed', 'pine', 'oak', 'bush', 'fence']) {
   assert.ok(kenneyRenderer.includes(`${style}:`), `Kenney atlas mapping must include ${style}`);
 }
 assert.ok(kenneyRenderer.includes('imageSmoothingEnabled = false'), 'Kenney sprites must stay pixel-crisp');
