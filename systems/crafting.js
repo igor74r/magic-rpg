@@ -10,7 +10,8 @@ export function getEquipmentForgeLevel(slot) {
   const inst = state.game?.player?.equipped?.[slot];
   if (!inst) return 0;
   if (typeof inst === 'string') return 0;
-  return inst.forgeLevel || 0;
+  const level = inst.forgeLevel;
+  return Number.isSafeInteger(level) && level >= 0 ? level : 0;
 }
 
 export function canUpgrade(slot) {
