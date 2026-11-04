@@ -1046,26 +1046,48 @@ function drawEnemyDetails(ctx, enemy, x, y, bob, scale) {
 }
 
 function drawNpcDetails(ctx, id, x, y, bob) {
-  ctx.save();
-  ctx.lineWidth = 2;
+  // Role silhouettes use integer pixel clusters only: no antialiased strokes,
+  // arcs or vector-like outlines on Aurora's 16-bit character sprites.
+  const px = (dx, dy, w, h, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.round(x + dx), Math.round(y + dy + bob), w, h);
+  };
   if (id === 'blacksmith') {
-    ctx.fillStyle = '#8b929e'; ctx.strokeStyle = '#171923';
-    ctx.fillRect(x-9,y-20+bob,18,5); ctx.strokeRect(x-9,y-20+bob,18,5);
-    ctx.fillStyle = '#c9a227'; ctx.fillRect(x+9,y-9+bob,4,8);
+    px(-8,-21,16,7,'#171923'); px(-6,-20,12,5,'#8b929e');
+    px(-5,-12,10,4,'#49372e'); px(-11,-8,22,3,'#6a4a3a');
+    px(9,-13,4,9,'#171923'); px(10,-12,2,6,'#c9a227');
+    px(8,-17,7,4,'#8b929e'); px(7,-18,9,2,'#d8e0e8');
   } else if (id === 'healer') {
-    ctx.strokeStyle = '#a9ef9b'; ctx.beginPath(); ctx.moveTo(x,y-21+bob); ctx.lineTo(x,y-11+bob); ctx.moveTo(x-5,y-16+bob); ctx.lineTo(x+5,y-16+bob); ctx.stroke();
+    px(-2,-22,4,13,'#315d3b'); px(-6,-17,12,4,'#315d3b');
+    px(-1,-21,2,11,'#d8f0c8'); px(-5,-16,10,2,'#d8f0c8');
+    px(-8,-5,16,3,'#e0d2aa');
   } else if (id === 'merchant') {
-    ctx.fillStyle = '#8a5a2a'; ctx.strokeStyle = '#d8bd71';
-    ctx.beginPath(); ctx.moveTo(x-13,y-28+bob); ctx.lineTo(x,y-37+bob); ctx.lineTo(x+13,y-28+bob); ctx.closePath(); ctx.fill(); ctx.stroke();
+    px(-14,-30,28,5,'#49372e'); px(-10,-35,20,6,'#8a5a2a');
+    px(-6,-38,12,4,'#b47b43'); px(-12,-29,24,2,'#d8bd71');
+    px(-8,-8,16,5,'#65412f'); px(-6,-7,12,2,'#e3b85f');
   } else if (id === 'guard') {
-    ctx.fillStyle = '#9aa8c0'; ctx.fillRect(x-13,y-21+bob,5,11); ctx.fillRect(x+8,y-21+bob,5,11);
+    px(-15,-23,7,14,'#202a40'); px(-14,-22,5,11,'#9aa8c0');
+    px(8,-23,7,14,'#202a40'); px(9,-22,5,11,'#9aa8c0');
+    px(-5,-18,10,7,'#26344c'); px(-3,-16,6,3,'#c9d6ea');
+    px(13,-12,3,19,'#49372e'); px(12,-15,5,4,'#d8bd71');
   } else if (id === 'elder') {
-    ctx.strokeStyle = '#d8d0bb'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(x+10,y-8+bob); ctx.lineTo(x+13,y+13+bob); ctx.stroke();
-    ctx.fillStyle = '#d8d0bb'; ctx.beginPath(); ctx.arc(x+13,y-9+bob,2,0,Math.PI*2); ctx.fill();
+    px(-5,-10,10,5,'#d8d0bb'); px(-4,-7,8,3,'#b6ad99');
+    px(10,-10,3,25,'#49372e'); px(9,-12,5,4,'#d8d0bb');
+    px(-7,-3,14,3,'#5a5a6a');
   } else if (id === 'alchemist') {
-    ctx.strokeStyle = '#9bdb77'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x+11,y-13+bob,4,0,Math.PI*2); ctx.stroke();
+    px(8,-19,8,11,'#344c3b'); px(10,-22,4,4,'#344c3b');
+    px(9,-17,6,7,'#9bdb77'); px(10,-15,4,3,'#d8f0a8');
+    px(7,-8,10,2,'#493e3c');
   } else if (id === 'herald') {
-    ctx.fillStyle = '#c9a227'; ctx.fillRect(x-2,y-38+bob,4,13);
+    px(-2,-39,4,27,'#49372e'); px(2,-37,10,8,'#7a2e2a');
+    px(3,-36,8,5,'#c9a227'); px(10,-34,3,4,'#f3d77c');
+    px(-3,-13,6,3,'#d8bd71');
+  } else if (id === 'bard') {
+    px(-12,-13,24,4,'#49372e'); px(-9,-17,18,3,'#b47b43');
+    px(7,-20,5,10,'#8a5a2a'); px(9,-21,2,4,'#d8bd71');
+    px(-4,-7,8,2,'#ffd060');
+  } else if (id === 'kids') {
+    px(-7,-10,14,3,'#b47b43'); px(-5,-8,10,3,'#ffd060');
+    px(-10,-24,5,3,'#e8b48a'); px(5,-24,5,3,'#e8b48a');
   }
-  ctx.restore();
 }
