@@ -242,6 +242,10 @@ try {
   assert.equal(JSON.parse(storage.get('magic-rpg-save-1')).player.dailyQuests.list.find(q => q.id === 'q-kill-goblin').current, 0,
     'failed victory transaction must leave daily kill progress unchanged');
   assert.equal(f.ow.combat.turn, 'player', 'failed save must return control to player');
+  assert.equal(f.ow.log.some(entry => entry.msg.includes('🏆 Победа!')), false,
+    'failed victory save must not leave success reward messages in the combat log');
+  assert.equal(f.ow.log.some(entry => entry.msg.startsWith('Добыча:')), false,
+    'failed victory save must not leave loot messages in the combat log');
   console.log('PASS failed victory save rolls back rewards and restores encounter');
 
   // Tower floor events are tied to the floor that emitted them.
