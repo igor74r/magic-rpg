@@ -29,7 +29,7 @@
   border: 3px solid #8c693d !important;
   border-radius: 10px !important;
   background: #101820 !important;
-  image-rendering: auto !important;
+  image-rendering: pixelated !important;
   box-shadow: 0 12px 34px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,238,190,.18);
 }
 #combat-panel, #npc-panel {
