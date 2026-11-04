@@ -93,4 +93,5 @@ https://reodesuxz.itch.io/free-pixel-top-down-forest-and-village-tileset-16x16
 - Найден внешний кандидат на тайловый набор.
 - Kenney Tiny Town atlas и CC0 license добавлены в рабочую ветку; загрузчик подключён к четырём природным типам Авроры.
 - Reodesuxz forest/village pack остаётся кандидатом; его ZIP пока не скачан и не проверен.
-- PNG manifest/размеры, layout, portal/collision и depth-sort проходят CI на момент последней проверки; браузерные Playwright проверки ещё выполняются.
+- Полный CI для commit `a42823a90d2af4ca4695ec0dc756360dd818c920` завершился успешно: PNG manifest/размеры, layout, порталы, коллизии, depth-sort, desktop/mobile smoke и visual regression.
+- Визуальные скриншоты desktop и mobile сохранены в GitHub Actions artifact `rpg-visual-regression-screenshots`.
