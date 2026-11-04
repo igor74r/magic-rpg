@@ -130,7 +130,7 @@ export function openBlacksmith() {
   const renderSlot = (slot, label) => {
     const inst = p.equipped[slot]; if (!inst) return `<div class="npc-slot"><div class="npc-slot-title">${label}</div><div class="npc-slot-empty">Слот пуст</div></div>`;
     const obj = typeof inst === 'string' ? { id: inst, qty: 1 } : inst; const item = ITEMS[obj.id]; if (!item) return '';
-    const rar = obj.rarity ? RARITIES[obj.rarity] : null; const color = rar ? rar.color : '#c9a227'; const lvl = obj.forgeLevel || 0; const maxLvl = npc.maxLevel; const forgeBonus = FORGE_BONUS[lvl] || 0;
+    const rar = obj.rarity ? RARITIES[obj.rarity] : null; const color = rar ? rar.color : '#c9a227'; const rawLevel = obj.forgeLevel; const lvl = Number.isSafeInteger(rawLevel) && rawLevel >= 0 ? Math.min(npc.maxLevel, rawLevel) : 0; const maxLvl = npc.maxLevel; const forgeBonus = FORGE_BONUS[lvl] || 0;
     let upgradeBlock = '';
     if (lvl >= maxLvl) upgradeBlock = `<div style="color:#60ff60;">Максимальный уровень: +${maxLvl}</div>`;
     else { const next = npc.upgrades[lvl]; const can = p.gold >= next.cost; upgradeBlock = `<div style="color:#a89060;font-size:12px;margin-bottom:6px;">Следующий уровень: <b style="color:#c9a227;">+${lvl + 1}</b> — <b style="color:#60ff60;">+5% к характеристикам</b> и +${next.forgeBonus} к ковке</div><button type="button" data-npc-action="upgrade" data-npc-value="${escapeHtml(slot)}" ${can ? '' : 'disabled'} class="sell-btn">⚒️ Улучшить за ${next.cost}💰</button>`; }
