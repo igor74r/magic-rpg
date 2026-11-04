@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { getClassTalents, findTalentById } from '../data/talents.js';
-import { getTalentBonus, getAvailableTalents } from '../systems/talents.js';
+import { getTalentBonus, getAvailableTalents, canTakeTalent, takeTalent } from '../systems/talents.js';
+import { state } from '../systems/state.js';
 
 const playableClasses = ['warrior', 'mage', 'archer'];
 
@@ -26,5 +27,33 @@ assert.equal(archerBonus.atkFlat, 2);
 const cryomancer = findTalentById('mage', 'm-cryomancer');
 assert.equal(cryomancer.effects.spellMult, 1.5, 'cryomancer effect must match its +50% description');
 assert.match(cryomancer.desc, /\+40% макс MP, \+50% урона заклинаниями/, 'cryomancer description must not contradict its effects');
+
+const malformedLegacy = { class: 'archer', level: 5, talents: 'corrupt-list', gold: 0 };
+const deadeye = findTalentById('archer', 'a-deadeye');
+assert.equal(canTakeTalent(malformedLegacy, deadeye), true,
+  'legacy talent availability must treat a malformed list as empty');
+assert.equal(malformedLegacy.talents, 'corrupt-list',
+  'availability checks must not mutate the player');
+const originalGame = state.game;
+const originalSlot = state.currentSlot;
+const originalStorage = globalThis.localStorage;
+state.game = { player: malformedLegacy };
+state.currentSlot = 1;
+globalThis.localStorage = {
+  getItem: () => null,
+  setItem: () => { throw new Error('simulated talent save failure'); },
+  removeItem() {}
+};
+try {
+  assert.equal(takeTalent(malformedLegacy, 'a-deadeye'), false,
+    'failed talent persistence must report failure');
+  assert.equal(malformedLegacy.talents, 'corrupt-list',
+    'failed talent persistence must restore the original malformed legacy value');
+} finally {
+  state.game = originalGame;
+  state.currentSlot = originalSlot;
+  if (originalStorage === undefined) delete globalThis.localStorage;
+  else globalThis.localStorage = originalStorage;
+}
 
 console.log('Class talent checks passed');
