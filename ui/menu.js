@@ -620,5 +620,18 @@ export function importSave(event) {
       event.target.value = '';
     }
   };
-  reader.readAsText(file);
+  reader.onerror = () => {
+    toast('❌ Не удалось прочитать файл сохранения');
+    event.target.value = '';
+  };
+  reader.onabort = () => {
+    toast('❌ Чтение файла сохранения отменено');
+    event.target.value = '';
+  };
+  try {
+    reader.readAsText(file);
+  } catch (error) {
+    console.error('[save] Не удалось запустить чтение файла:', error);
+    reader.onerror(error);
+  }
 }
