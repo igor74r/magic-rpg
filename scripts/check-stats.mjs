@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
-import { getEffStats, resolveCriticalChance } from '../systems/stats.js';
+import { getEffStats, getTotalKills, resolveCriticalChance } from '../systems/stats.js';
 
 const player = {
   class: 'warrior',
