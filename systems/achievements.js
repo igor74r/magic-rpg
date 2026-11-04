@@ -37,7 +37,7 @@ export function checkAchievements() {
     }
     for (const a of unlocked) {
       emit('log', { channel: 'game', msg: `🏆 Достижение: «${a.name}»${a.reward ? ` (+${a.reward}💰)` : ''}`, cls: 'success' });
-      emit('toast', `🏆 ${a.name}! +${a.reward}💰`);
+      emit('toast', `🏆 ${a.name}${a.reward ? `! +${a.reward}💰` : '!'}`);
       emit('achievement', { id: a.id, name: a.name, desc: a.desc, icon: a.icon, reward: a.reward });
       playSound('levelup');
     }
