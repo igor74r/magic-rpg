@@ -156,6 +156,13 @@ try {
     await page.keyboard.up('ArrowLeft');
     await page.waitForTimeout(350);
     await capture(page, `${vp.name}-01-aurora-courtyards`);
+    // A second short approach frames the northern residential frontage and
+    // checks that the camera keeps nearby building silhouettes readable.
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(1100);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(350);
+    await capture(page, `${vp.name}-01-aurora-north-yard`);
     assert.equal(await page.locator('#dashboard-context .dashboard-context-actions button').count(),1,
       `${vp.name}: mission guide must expose one primary portal action`);
     if(vp.width>1050) {
