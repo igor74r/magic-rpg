@@ -16,6 +16,10 @@ function ensureCampaignState(player) {
       if (mission.id in player.campaignClaimed) {
         player.campaignClaimed[mission.id] = player.campaignClaimed[mission.id] === true;
       }
+      if (mission.id in player.campaignKills) {
+        const count = player.campaignKills[mission.id];
+        player.campaignKills[mission.id] = Number.isSafeInteger(count) && count >= 0 ? count : 0;
+      }
     }
   }
   if (typeof player.activeCampaignMission !== 'string') player.activeCampaignMission = null;
@@ -34,9 +38,9 @@ export function getCampaignMission(missionId) {
 
 export function getMissionProgress(player, mission) {
   ensureCampaignState(player);
-  const rawKills = Number(player?.campaignKills?.[mission.id] || 0);
-  const kills = Number.isFinite(rawKills) ? Math.max(0, Math.floor(rawKills)) : 0;
-  const required = Math.max(1, Math.floor(Number(mission.count) || 1));
+  const rawKills = player?.campaignKills?.[mission.id];
+  const kills = Number.isSafeInteger(rawKills) && rawKills >= 0 ? rawKills : 0;
+  const required = Number.isSafeInteger(mission.count) && mission.count > 0 ? mission.count : 1;
   const claimed = player?.campaignClaimed?.[mission.id] === true;
   return {
     kills,
