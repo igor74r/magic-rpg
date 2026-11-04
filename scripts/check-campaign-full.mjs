@@ -3,7 +3,7 @@ import { STORY } from '../data/story.js';
 import { state } from '../systems/state.js';
 import {
   acceptCampaignMission, recordCampaignKill, claimCampaignMission,
-  getCampaignProgress, getNextCampaignMission, canCompleteMainQuest, countStoryShards
+  getCampaignProgress, getNextCampaignMission, getMissionProgress, canCompleteMainQuest, countStoryShards
 } from '../systems/campaign.js';
 import { STORY_DRAGONS, claimStoryDragonReward } from '../systems/story-dragons.js';
 import { isRiftReady } from '../systems/rift.js';
@@ -31,6 +31,21 @@ assert.equal(malformedCampaignPlayer.campaignClaimed[firstMission.id], false,
   'malformed completion flags must be normalized to boolean false');
 assert.equal(getCampaignProgress(malformedCampaignPlayer).completed, 0,
   'malformed completion flags must not inflate campaign progress');
+
+const malformedKillPlayer = {
+  campaignKills: { [firstMission.id]: '999999', 'a1-m2': -2, 'a1-m3': 1.5 },
+  campaignClaimed: {},
+  activeCampaignMission: firstMission.id
+};
+const malformedMissionProgress = getMissionProgress(malformedKillPlayer, firstMission);
+assert.equal(malformedMissionProgress.kills, 0,
+  'string campaign counters must not complete a mission');
+assert.equal(malformedKillPlayer.campaignKills[firstMission.id], 0,
+  'malformed campaign counters must be normalized to zero');
+assert.equal(recordCampaignKill(malformedKillPlayer, firstMission.locationId || STORY.acts[0].locationId, firstMission.enemyId)[0], firstMission.id,
+  'valid mission kills must still progress after counter recovery');
+assert.equal(malformedKillPlayer.campaignKills[firstMission.id], 1,
+  'recovered campaign counter must increment numerically');
 
 
 const game = {
