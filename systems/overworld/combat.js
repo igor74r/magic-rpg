@@ -1620,10 +1620,14 @@ function combatVictory() {
     'success'
   );
 
-  updateQuestProgress('kill', enemy.enemyId, 1);
+  // Defer daily quest persistence and feedback until the complete victory
+  // transaction (loot, stats, XP and enemy state) has been saved.
+  const deferredQuestUpdates = [
+    updateQuestProgress('kill', enemy.enemyId, 1, { persist: false, notify: false })
+  ];
 
   if (enemy.boss) {
-    updateQuestProgress('boss-kill', 'any', 1);
+    deferredQuestUpdates.push(updateQuestProgress('boss-kill', 'any', 1, { persist: false, notify: false }));
   }
 
   if (!p.stats) {
@@ -1641,12 +1645,12 @@ function combatVictory() {
   p.stats.flawlessStreak =
     (p.stats.flawlessStreak || 0) + 1;
 
-  updateQuestProgress(
+  deferredQuestUpdates.push(updateQuestProgress(
     'flawless',
     'any',
     p.stats.flawlessStreak,
-    'max'
-  );
+    { persist: false, notify: false }
+  ));
 
   spawnParticles(enemy.x, enemy.y, 'smoke', 15);
   spawnParticles(enemy.x, enemy.y, 'spark', 6);
@@ -1795,6 +1799,11 @@ function combatVictory() {
     ow.combat.turn = 'player';
     pushLog('Награда не сохранена. Победа отменена — попробуйте ещё раз.', 'warning');
     return;
+  }
+  for (const update of deferredQuestUpdates) {
+    for (const questText of update?.completedTexts || []) {
+      emit('toast', `📜 Квест выполнен: ${questText}!`);
+    }
   }
   endCombat();
   checkAchievements();
