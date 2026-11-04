@@ -50,6 +50,26 @@ try {
 
   game.player.achievements = [];
   globalThis.localStorage.setItem = () => {};
+  game.player.stats = {
+    kills: { goblin: '10', skeleton: -5, wolf: 1.5, ghost: Number.MAX_SAFE_INTEGER + 1 },
+    chestsOpened: '10',
+    goldEarned: 1000.5,
+    eliteKills: Infinity,
+    bossKills: -2,
+    dailyChestsOpened: '3'
+  };
+  game.player.level = '100';
+  game.player.riftBest = 50.5;
+  game.storyShards = { flame: 'true', ice: 1, blood: {} };
+  checkAchievements();
+  assert.deepEqual(game.player.achievements, [],
+    'malformed counters and truthy non-boolean shard values must not unlock achievements');
+  assert.equal(game.player.gold, 10, 'malformed counters must not grant rewards');
+
+  game.player.stats = { kills: { goblin: 1 } };
+  game.player.level = 1;
+  game.player.riftBest = 0;
+  game.storyShards = {};
   checkAchievements();
   assert.deepEqual(game.player.achievements, ['first-blood']);
   assert.equal(game.player.gold, 13);
