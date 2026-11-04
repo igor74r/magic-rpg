@@ -42,6 +42,9 @@ try {
   const p = state.game.player;
 
   assert.equal(NPCS.bard.cost, 15, 'bard cost must match the visible service price');
+  p.gold = Number.MAX_SAFE_INTEGER + 1;
+  assert.equal(payBardUI(), false, 'bard must reject unsafe gold balances');
+  p.gold = 30;
   assert.equal(payBardUI(), true);
   assert.equal(p.gold, 15);
   assert.equal(p.buffs.filter(b => b.id === 'bardBuff').length, 1);
