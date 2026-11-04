@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
+import { on, off } from '../systems/events.js';
 import { getDailyQuests, updateQuestProgress, claimQuestReward } from '../systems/dailyQuests.js';
 
 const previousStorage = globalThis.localStorage;
