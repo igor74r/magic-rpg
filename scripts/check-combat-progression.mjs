@@ -12,6 +12,7 @@ import { enterOverworld, advanceTowerFloor, advanceRiftFloor } from '../systems/
 import { getTowerBest, getTowerStartFloor } from '../systems/tower.js';
 import { getRiftBest } from '../systems/rift.js';
 import { getDailyQuests } from '../systems/dailyQuests.js';
+import { saveGame } from '../systems/save.js';
 
 const storage = new Map();
 globalThis.localStorage = {
@@ -219,6 +220,7 @@ try {
     ]
   };
   getDailyQuests();
+  assert.equal(saveGame(), true, 'persist the normalized daily quest baseline before the victory transaction');
   const victoryGoldBeforeSaveFailure = f.p.gold;
   const victoryKillsBeforeSaveFailure = f.p.stats.kills.goblin || 0;
   const savedBeforeVictory = storage.get('magic-rpg-save-1');
