@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { ITEMS } from '../data/items.js';
-import { addItemOrStore, claimPendingLoot } from '../systems/inventory.js';
+import { addItem, addItemOrStore, canAddItem, claimPendingLoot } from '../systems/inventory.js';
 
 const player = {
   str: 1000,
@@ -61,6 +61,19 @@ assert.equal(claimedHerbs.ok, true);
 assert.equal(state.game.player.inventory.at(-1).id, 'herb-life');
 assert.equal(state.game.player.inventory.at(-1).qty, 2);
 assert.equal(state.game.player.pendingLoot.length, 0);
+
+// Legacy stack entries without qty count as one item; additions must normalize them safely.
+state.game.player.inventory = [{ id: 'herb-life' }];
+assert.equal(addItem('herb-life', 2).length, 1);
+assert.equal(state.game.player.inventory[0].qty, 3,
+  'adding to a legacy stack without qty must start from its implicit quantity of one');
+
+// Stack quantities must remain safe integers so weight, saves and counts cannot be corrupted.
+state.game.player.inventory = [{ id: 'herb-life', qty: Number.MAX_SAFE_INTEGER }];
+assert.equal(canAddItem('herb-life', 1).ok, false,
+  'stack additions that overflow safe integer quantity must be rejected');
+assert.deepEqual(addItem('herb-life', 1), []);
+assert.equal(state.game.player.inventory[0].qty, Number.MAX_SAFE_INTEGER);
 
 const invalid = addItemOrStore('missing-item', 1);
 assert.equal(invalid.stored, false);
