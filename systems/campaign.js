@@ -1,5 +1,10 @@
 import { STORY } from '../data/story.js';
 
+export function countStoryShards(shards) {
+  if (!shards || typeof shards !== 'object' || Array.isArray(shards)) return 0;
+  return ['flame', 'ice', 'blood'].filter(id => shards[id] === true).length;
+}
+
 function ensureCampaignState(player) {
   if (!player) return;
   if (!player.campaignKills || typeof player.campaignKills !== 'object' || Array.isArray(player.campaignKills)) player.campaignKills = {};
