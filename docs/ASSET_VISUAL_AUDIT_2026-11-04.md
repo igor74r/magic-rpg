@@ -157,3 +157,5 @@
 
 
 - Final grass review against desktop and mobile captures: the earlier alpha 0.42 still left visible texture noise. The atlas is now drawn at alpha 0.26; decorative grass clusters are 2–3 per tile at alpha 0.14. Pixel character shadows use three stepped rectangular bands. The CI run `41886704221` passed all steps and its desktop/mobile screenshot artifact was manually reviewed.
+
+- Browser visual QA now includes a dedicated `aurora-02-npc-art-sheet.png` built through production `drawObject()`: all 12 village residents/special NPCs are rendered (blacksmith, healer, alchemist, merchant, elder, well, bard, guard, cat, kids, herald, questBoard). The latest CI run `41889099528` passed 81/81 steps; artifact `13351764287` was downloaded and the NPC sheet manually inspected. GitHub Pages run `41889099501` passed.
