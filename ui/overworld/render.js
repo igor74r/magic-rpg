@@ -705,6 +705,31 @@ function render() {
     lightGrad.addColorStop(1, 'rgba(0,0,0,0)');
     fctx.fillStyle = lightGrad; fctx.beginPath(); fctx.arc(px, py, 180, 0, Math.PI * 2); fctx.fill();
 
+    // Aurora's street lanterns and braziers cast compact, pixel-stepped pools.
+    // The cut-outs are made from flat rectangles (no blur or gradients), and
+    // remain limited to the village so other biome lighting is untouched.
+    if (ow.locationId === 'village') {
+      for (const source of ow.statics || []) {
+        const style = source.propStyle;
+        if (style !== 'lantern' && style !== 'brazier') continue;
+        const lx = Math.round(source.x - cam.x);
+        const ly = Math.round(source.y - cam.y);
+        if (lx < -100 || lx > VIEW_W + 100 || ly < -100 || ly > VIEW_H + 100) continue;
+        const radius = style === 'brazier' ? 58 : 46;
+        fctx.fillStyle = '#fff';
+        fctx.globalAlpha = 0.12;
+        fctx.fillRect(lx - radius, ly - 18, radius * 2, 36);
+        fctx.fillRect(lx - radius + 10, ly - 28, radius * 2 - 20, 56);
+        fctx.globalAlpha = 0.18;
+        fctx.fillRect(lx - 26, ly - 22, 52, 44);
+        fctx.globalAlpha = 0.24;
+        fctx.fillRect(lx - 14, ly - 14, 28, 28);
+        fctx.globalAlpha = 0.34;
+        fctx.fillRect(lx - 6, ly - 6, 12, 12);
+        fctx.globalAlpha = 1;
+      }
+    }
+
     // Секретные стены подсвечивают вокруг себя маленькую зону (только когда близко)
     if (!ow.combat && ow.secretWalls) {
       for (const sw of ow.secretWalls) {
