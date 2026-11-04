@@ -14,6 +14,8 @@ try {
     version: 17,
     player: {
       level: 1, exp: 0, expNext: 100, gold: 10,
+      stats: { kills: {}, goldEarned: 995, dailyChestsOpened: 0 },
+      achievements: [],
       dailyQuests: {
         date: now,
         list: [
@@ -42,8 +44,10 @@ try {
   assert.equal(target.gold, 8);
   assert.equal(target.exp, 50);
   assert.equal(claimQuestReward('q-kill-any'), true);
-  assert.equal(state.game.player.gold, 18, 'claim must use canonical reward, not imported save values');
-  assert.equal(state.game.player.stats.goldEarned, 8,
+  assert.equal(state.game.player.gold, 33, 'canonical daily reward and rich-achievement reward must both be granted');
+  assert.ok(state.game.player.achievements.includes('rich'),
+    'daily quest gold must immediately trigger the lifetime gold-earned achievement');
+  assert.equal(state.game.player.stats.goldEarned, 1003,
     'daily quest gold must count toward the lifetime gold-earned achievement');
   assert.equal(state.game.player.exp, 50);
   assert.equal(claimQuestReward('q-kill-any'), false, 'daily quest reward can only be claimed once');
