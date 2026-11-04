@@ -710,9 +710,9 @@ export function drawEnemy(ctx, enemy, x, y, shadowColor) {
   drawEnemyDetails(ctx, enemy, x, y, bob, scale);
 }
 
-function drawVillageBuilding(ctx, x, y, style = 'home') {
+function drawVillageBuilding(ctx, x, y, style = 'home', variant = 'default') {
   // Detailed Canvas architecture; gameplay anchors and collision footprints stay unchanged.
-  drawAuroraBuilding(ctx, x, y, style);
+  drawAuroraBuilding(ctx, x, y, style, variant);
 }
 let villagePropAtlas = null;
 let auroraWorldPortalAtlas = null;
@@ -853,7 +853,7 @@ export function drawObject(ctx, obj, x, y, shadowColor) {
     return;
   }
   if (obj.buildingStyle) {
-    drawVillageBuilding(ctx, x, y, obj.buildingStyle);
+    drawVillageBuilding(ctx, x, y, obj.buildingStyle, obj.id);
     return;
   }
   const id = obj.id;
