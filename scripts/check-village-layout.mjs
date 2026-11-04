@@ -81,7 +81,7 @@ const propColliders = getVillagePropColliders();
 const natureColliders = getVillageNatureColliders();
 assert.ok(propColliders.length >= 8, 'solid service props must have collision footprints');
 assert.ok(propColliders.every(rect => rect.width > 0 && rect.height > 0), 'solid prop colliders must have positive dimensions');
-assert.equal(natureColliders.length, 11, 'all large trees, rocks, stumps, hedges and fences must have ground-footprint colliders');
+assert.equal(natureColliders.length, 12, 'all large trees, rocks, stumps, hedges and fences must have ground-footprint colliders');
 assert.ok(natureColliders.every(rect => rect.width > 0 && rect.height > 0), 'nature colliders must have positive dimensions');
 for (const [id, x, y] of [
   ['aurora-oak-nw', 3, 3], ['aurora-pine-ne', 34, 3],
