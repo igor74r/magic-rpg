@@ -27,7 +27,7 @@ function drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY) {
     g.imageSmoothingEnabled = false;
     const colors = ['#71864a', '#849653', '#425c35', '#a2a55d', '#d5bd70', '#c4d07b'];
     let n = (seed ^ 0x9e3779b9) >>> 0;
-    const count = 8 + (n % 5);
+    const count = 3 + (n % 3);
     for (let i = 0; i < count; i++) {
       n = Math.imul(n ^ (n >>> 15), 2246822519) >>> 0;
       const px = 2 + n % 44;
@@ -58,7 +58,7 @@ function drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY) {
   const previousAlpha = ctx.globalAlpha;
   try {
     ctx.imageSmoothingEnabled = false;
-    ctx.globalAlpha = 0.42;
+    ctx.globalAlpha = 0.24;
     ctx.drawImage(detail, x, y, size, size);
   } finally {
     ctx.globalAlpha = previousAlpha;
@@ -151,7 +151,10 @@ export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0
     ctx.fillStyle = '#526b3f';
     ctx.fillRect(x, y, size, size);
     ctx.imageSmoothingEnabled = false;
+    const previousAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = type === 0 ? 0.42 : 1;
     ctx.drawImage(auroraGroundImage, sourceColumn * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, size, size);
+    ctx.globalAlpha = previousAlpha;
     if (type === 0) drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY);
     else drawAuroraPathDetails(ctx, x, y, size, tileX, tileY);
     return true;
