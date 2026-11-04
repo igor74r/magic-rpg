@@ -465,12 +465,15 @@ export function newGameSlot(slot) {
 export function deleteSlot(slot) {
   if (!confirm(`Удалить слот ${slot}? Это необратимо.`)) return false;
   const deletingActiveSlot = slot === state.currentSlot;
-  if (!deleteSave(slot)) {
+  if (!deleteSave(slot, { preserveActiveState: deletingActiveSlot })) {
     toast(`❌ Не удалось удалить слот ${slot}. Сохранение не удалено.`);
     renderSlots();
     return false;
   }
-  if (deletingActiveSlot) clearOverworldRuntime();
+  if (deletingActiveSlot) {
+    clearOverworldRuntime();
+    state.game = null;
+  }
   toast(`Слот ${slot} удалён`);
   renderSlots();
   return true;
