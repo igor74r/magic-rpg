@@ -20,6 +20,12 @@ assert.match(main, /recordRuntimeDiagnostic\(['"]resource-load['"]/,
   'resource failures must be recorded');
 assert.match(main, /recordRuntimeDiagnostic\(['"]uncaught-error['"]/,
   'uncaught JavaScript errors must be recorded');
+assert.match(main, /showErrorToast\(message\)/,
+  'uncaught errors and rejected promises must be surfaced to the player');
+assert.equal((main.match(/window\\.addEventListener\\(['"]error['"]/g) || []).length, 1,
+  'main.js must install only one global error listener');
+assert.equal((main.match(/window\\.addEventListener\\(['"]unhandledrejection['"]/g) || []).length, 1,
+  'main.js must install only one unhandled-rejection listener');
 assert.match(main, /window\.addEventListener\(['"]unhandledrejection['"]/,
   'unhandled promise rejections must be recorded');
 assert.match(main, /RUNTIME_DIAGNOSTICS_LIMIT\s*=\s*50/,
