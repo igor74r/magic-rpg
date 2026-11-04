@@ -206,7 +206,7 @@ try {
         `${vp.name}/${room}: interior modal must be visible`);
       assert.ok(await page.locator(`.village-room-art.room-${room}`).count() === 1,
         `${vp.name}/${room}: the correct room palette must be selected`);
-      assert.equal(await page.locator('.village-room-floor-mark').textContent(),' ',
+      assert.equal(await page.locator('.village-room-floor-mark').textContent(),'',
         `${vp.name}/${room}: floor marker must be a CSS pixel motif, not a glyph`);
       assert.equal(await page.locator('.village-room-pixel-icon').count(),3,
         `${vp.name}/${room}: interior must render three pixel-art prop silhouettes`);
