@@ -25,7 +25,8 @@ globalThis.localStorage = {
 globalThis.setTimeout = () => 1;
 
 try {
-  const { payBardUI, petCatUI, takeElderBlessingUI, useWellUI, acceptElderQuestUI, turnInElderQuestUI } = await import('../ui/npcs.js');
+  const { payBardUI, petCatUI, takeElderBlessingUI, useWellUI, acceptElderQuestUI, turnInElderQuestUI, openBlacksmith } = await import('../ui/npcs.js');
+  const { getEquipmentForgeLevel, canUpgrade } = await import('../systems/crafting.js');
   state.currentSlot = 1;
   state.overworld = { active: true };
   state.game = {
@@ -40,6 +41,12 @@ try {
     storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false }
   };
   const p = state.game.player;
+  p.equipped.weapon = { id: 'iron-sword', forgeLevel: 1.5 };
+  assert.equal(getEquipmentForgeLevel('weapon'), 0, 'invalid forge levels must normalize to the safe baseline');
+  assert.equal(canUpgrade('weapon').ok, true, 'invalid forge levels must not permanently block a valid upgrade');
+  assert.doesNotThrow(() => openBlacksmith(), 'blacksmith UI must recover from malformed saved forge levels');
+  p.equipped.weapon.forgeLevel = 2;
+  assert.equal(getEquipmentForgeLevel('weapon'), 2, 'valid forge levels must remain visible');
 
   assert.equal(NPCS.bard.cost, 15, 'bard cost must match the visible service price');
   p.gold = Number.MAX_SAFE_INTEGER + 1;
