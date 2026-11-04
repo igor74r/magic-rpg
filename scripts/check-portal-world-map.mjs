@@ -22,7 +22,7 @@ assert.match(pixelMap, /imageSmoothingEnabled = false/, 'portal canvas must pres
 const portalStyleStart = portal.indexOf('<style>');
 const portalStyleEnd = portal.indexOf('</style>', portalStyleStart);
 const portalCss = portal.slice(portalStyleStart, portalStyleEnd);
-assert.doesNotMatch(portalCss, /linear-gradient|radial-gradient|blur\\s*\\(|backdrop-filter|filter\\s*:/i,
+assert.doesNotMatch(portalCss, /linear-gradient|radial-gradient|blur\s*\(|backdrop-filter|filter\s*:/i,
   'portal UI must use flat colors without blur or filter effects');
 assert.match(portal, /portal-destination/, 'selecting a point must show its detailed destination panel');
 assert.match(portal, /canEnterStoryLocation\(state\.game\?\.player, id\)/, 'destination selection and travel must preserve story and level gating');
