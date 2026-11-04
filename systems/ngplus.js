@@ -115,6 +115,7 @@ export function startNGPlus() {
     g.riftOpenedAt = gameSnapshot.riftOpenedAt;
     g.shards = gameSnapshot.shards;
     g.quests = gameSnapshot.quests;
+    p.riftClearedLocations = gameSnapshot.riftClearedLocations;
     emit('toast', 'Не удалось сохранить новую игру+. Прогресс кампании восстановлен.');
     return false;
   }
