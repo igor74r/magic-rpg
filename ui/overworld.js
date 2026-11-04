@@ -189,7 +189,7 @@ export function initOverworld() {
     document.addEventListener('visibilitychange', () => { if (document.hidden) clearMovementKeys(); });
     overworldInputBound = true;
     const canvas = document.getElementById('overworld-canvas');
-    if (canvas) { canvas.addEventListener('mousemove', onCanvasMouseMove); canvas.addEventListener('mouseleave', hideMapTooltip); canvas.addEventListener('pointerdown', onOverworldCanvasClick); canvas.addEventListener('click', onOverworldCanvasClick); }
+    if (canvas) { canvas.addEventListener('mousemove', onCanvasMouseMove); canvas.addEventListener('mouseleave', hideMapTooltip); canvas.addEventListener('click', onOverworldCanvasClick); }
   }
   setSubPanel(null); setLastNpcKey(''); setPaused(false);
   initWeather(state.overworld ? (state.overworld.theme || state.overworld.locationId) : 'default');
