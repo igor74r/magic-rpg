@@ -144,24 +144,24 @@
 .village-room-prop { overflow-wrap:anywhere; }
 .village-interior-heading { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:12px; min-width:0; }
 .village-interior-heading > div { min-width:0; flex:1 1 180px; }
-.village-interior-heading > span { flex:0 1 auto; }
+
 .village-interior-heading h3 { margin:0; color:#f0d6a1; }
 .village-interior-heading p { margin:5px 0 0; color:#b7a68a; font-size:12px; }
-.village-interior-heading > span { color:#c9a66b; font-size:10px; letter-spacing:2px; white-space:nowrap; }
+
 .village-room-art { position:relative; height:260px; overflow:hidden; border:3px solid #604638; border-radius:0; background-color:#49372d; box-shadow:none; image-rendering:pixelated; }
 .village-room-art:before { content:""; position:absolute; inset:0 0 58% 0; background-color:#5b4640; border-bottom:8px solid #2b2020; box-shadow:inset 0 -4px 0 #80604b; }
 .village-room-art:after { content:""; position:absolute; left:0; right:0; bottom:0; height:42%; background-color:#6d4b35; border-top:5px solid #30231f; box-shadow:inset 0 4px 0 #382a25; }
 .village-room-window { position:absolute; z-index:1; top:17px; left:calc(50% - 34px); width:68px; height:58px; border:7px solid #332722; border-radius:0; background-color:#6c7881; box-shadow:inset 0 0 0 3px #34485b; }
 .village-room-window:before { content:""; position:absolute; left:25px; top:0; width:4px; height:100%; background:#332722; }
 .village-room-window:after { content:""; position:absolute; left:0; top:24px; width:100%; height:4px; background:#332722; }
-.village-room-hearth { position:absolute; z-index:2; right:7%; bottom:17%; width:78px; height:86px; border:8px solid #4a3028; border-radius:0; background-color:#241a1b; box-shadow:inset 0 -22px 0 #c74c28; }
+.village-room-hearth { position:absolute; z-index:2; top:30%; right:7%; bottom:auto; width:64px; height:58px; border:7px solid #4a3028; border-radius:0; background-color:#241a1b; box-shadow:inset 0 -18px 0 #c74c28; }
 .village-room-hearth:before { content:""; position:absolute; left:21px; bottom:12px; width:20px; height:18px; background:#ffb45b; box-shadow:-8px 8px 0 #c74c28, 8px 8px 0 #c74c28, 0 -8px 0 #ffe08a; }
 .village-room-prop { position:absolute; z-index:3; bottom:14%; width:28%; min-height:58px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; padding:7px; border:2px solid #b18a54; border-radius:0; color:#f0d9ad; background-color:#76543b; box-shadow:4px 4px 0 #211916; text-align:center; }
 .village-room-prop span { display:block; width:34px; height:26px; position:relative; flex:none; }
 .village-room-prop small { font-size:10px; line-height:1.25; }
-.village-room-prop.prop-1 { left:7%; }
-.village-room-prop.prop-2 { left:36%; bottom:20%; }
-.village-room-prop.prop-3 { left:65%; bottom:13%; }
+.village-room-prop.prop-1 { left:5%; bottom:12%; }
+.village-room-prop.prop-2 { left:36%; bottom:12%; }
+.village-room-prop.prop-3 { left:67%; bottom:12%; }
 .village-room-pixel-icon:before,.village-room-pixel-icon:after { content:""; position:absolute; display:block; }
 .village-room-pixel-icon:before { left:8px; top:8px; width:18px; height:8px; background:#9b7951; box-shadow:0 8px 0 #513b30, 4px 12px 0 #513b30; }
 .village-room-pixel-icon:after { left:14px; top:3px; width:6px; height:5px; background:#e7c58a; }
