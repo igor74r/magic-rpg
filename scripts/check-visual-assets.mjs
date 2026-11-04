@@ -142,8 +142,14 @@ assert.ok(!readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 
 for (const asset of pngAssets) assert.ok(existsSync(new URL(`../${asset}`, import.meta.url)), `missing PNG: ${asset}`);
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-assert.ok(html.includes('Три дракона удерживают его закрытым'));
-assert.ok(html.includes('Первые кровавые маги создали Кристалл Разлома'));
+const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+assert.ok(html.includes('id="prologue-art"'), 'cinematic prologue must provide its illustrated Canvas');
+assert.ok(html.includes('id="prologue-narration"'), 'cinematic prologue must provide a narration layer');
+assert.ok(main.includes('Первые маги крови создали Кристалл Разлома') || main.includes('маги крови создали Кристалл Разлома'));
+assert.ok(main.includes('Зарплата — опыт'), 'prologue narrator must retain its darkly comic voice');
+assert.ok(main.includes('Ты ведь понимаешь, что я вижу тебя?'), 'prologue must directly address the player beyond the screen');
+assert.ok((main.match(/chapter: 'Глава /g) || []).length >= 7, 'prologue must contain at least seven story chapters');
+assert.ok(main.includes('drawPrologueIllustration') && main.includes('imageSmoothingEnabled = false'));
 assert.ok(html.includes('css/2d-art-direction.css'));
 
 const renderer = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
