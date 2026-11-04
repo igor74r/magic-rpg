@@ -45,6 +45,7 @@ try {
   assert.equal(recordRiftFloor(5), true, 'valid floor should repair and persist a corrupted record');
   assert.equal(player.riftBest, 5);
   globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
+  player.riftBest = 2;
 
   assert.equal(recordRiftFloor(5), false, 'rift record must not confirm a failed save');
   assert.equal(player.riftBest, 2, 'rift record must roll back on save failure');
