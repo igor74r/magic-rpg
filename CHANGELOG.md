@@ -373,3 +373,6 @@
 - `main.js`: replaced emoji room props and the house emoji label with dedicated pixel-icon slots and text; the interior entry button no longer uses an emoji glyph.
 - `scripts/check-village-layout.mjs`: verifies all six interiors have pixel-art prop classes and rejects gradients/blur in the Aurora interior art block.
 - CI and Pages are pending; updated browser captures must be inspected before marking the interior art pass complete.
+
+
+- `scripts/browser-visual-regression.mjs`: desktop and mobile runs now enter and capture all six Aurora interiors, assert three pixel-art prop silhouettes per room, and verify the room backdrop has no background image/gradient or CSS filter.
