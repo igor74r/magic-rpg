@@ -69,6 +69,24 @@ const brokePlayer = {
   passives: ['start', 'mage-fire-1'],
   gold: 499
 };
+for (const invalidGold of [Infinity, Number.MAX_SAFE_INTEGER + 1, -1, NaN]) {
+  const invalidBalancePlayer = {
+    class: 'mage',
+    level: 20,
+    passivePoints: 0,
+    passives: ['start', 'mage-fire-1'],
+    gold: invalidGold
+  };
+  const invalidBalanceResult = resetPassives(invalidBalancePlayer);
+  assert.equal(invalidBalanceResult.ok, false, 'passive reset must reject invalid gold balances');
+  assert.deepEqual(invalidBalancePlayer.passives, ['start', 'mage-fire-1'],
+    'invalid gold must not reset passive allocations');
+  assert.equal(invalidBalancePlayer.passivePoints, 0,
+    'invalid gold must not refund passive points');
+  assert.ok(Object.is(invalidBalancePlayer.gold, invalidGold),
+    'invalid gold balance must remain unchanged');
+}
+
 const failed = resetPassives(brokePlayer);
 assert.equal(failed.ok, false);
 assert.equal(brokePlayer.passives.length, 2);
