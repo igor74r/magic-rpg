@@ -37,6 +37,18 @@ export function startNGPlus() {
   if (!cls?.baseStats) return false;
   const s = cls.baseStats;
   const newCycle = (p.ngPlus || 0) + 1;
+  const playerSnapshot = { ...p };
+  const gameSnapshot = {
+    location: g.location,
+    storyDragons: g.storyDragons,
+    storyShards: g.storyShards,
+    riftEnding: g.riftEnding,
+    riftOpeningSeen: g.riftOpeningSeen,
+    riftOpenedAt: g.riftOpenedAt,
+    riftClearedLocations: p.riftClearedLocations,
+    shards: g.shards,
+    quests: g.quests
+  };
 
   const carry = {
     inventory: p.inventory || [],
@@ -93,7 +105,19 @@ export function startNGPlus() {
   g.quests = {};
   STORY.quests.forEach(q => g.quests[q.id] = false);
 
-  saveGame();
+  if (!saveGame()) {
+    Object.assign(p, playerSnapshot);
+    g.location = gameSnapshot.location;
+    g.storyDragons = gameSnapshot.storyDragons;
+    g.storyShards = gameSnapshot.storyShards;
+    g.riftEnding = gameSnapshot.riftEnding;
+    g.riftOpeningSeen = gameSnapshot.riftOpeningSeen;
+    g.riftOpenedAt = gameSnapshot.riftOpenedAt;
+    g.shards = gameSnapshot.shards;
+    g.quests = gameSnapshot.quests;
+    emit('toast', 'Не удалось сохранить новую игру+. Прогресс кампании восстановлен.');
+    return false;
+  }
   emit('toast', `🔄 NG+${newCycle}! Враги сильнее, награды больше.`);
   emit('log', { channel: 'game', msg: `🔄 NG+${newCycle}: сложность растёт, прогресс сохранён!`, cls: 'success' });
   emit('game:started', {});
