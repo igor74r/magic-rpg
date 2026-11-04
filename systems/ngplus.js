@@ -127,7 +127,8 @@ export function startNGPlus() {
 
 // ⬇️ ВОЗВРАЩЁН: используется в spawn.js и combat.js
 export function getNGPlusMult() {
-  const n = state.game?.player?.ngPlus || 0;
+  const rawCycle = state.game?.player?.ngPlus;
+  const n = Number.isSafeInteger(rawCycle) && rawCycle >= 0 ? rawCycle : 0;
   return {
     hpMult: 1 + 0.5 * n,
     atkMult: 1 + 0.3 * n,
