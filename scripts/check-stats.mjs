@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
-import { getEffStats, getSafeCount, getTotalKills, resolveCriticalChance } from '../systems/stats.js';
+import { getEffStats, getSafeCount, getTotalKills, incrementSafeCount, resolveCriticalChance } from '../systems/stats.js';
 
 const player = {
   class: 'warrior',
@@ -22,6 +22,8 @@ assert.equal(getSafeCount(5), 5);
 assert.equal(getSafeCount('5'), 0);
 assert.equal(getSafeCount(-1), 0);
 assert.equal(getSafeCount(1.5), 0);
+assert.equal(incrementSafeCount('4'), 1);
+assert.equal(incrementSafeCount(Number.MAX_SAFE_INTEGER), Number.MAX_SAFE_INTEGER);
 assert.equal(getTotalKills({ goblin: 2, skeleton: 3 }), 5);
 assert.equal(getTotalKills({ goblin: '10', skeleton: -5, wolf: 1.5, ghost: Number.MAX_SAFE_INTEGER + 1 }), 0,
   'HUD kill total must ignore malformed save counters');
