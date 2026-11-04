@@ -75,8 +75,8 @@ export function isRiftReady() {
 
 export function recordRiftFloor(floor) {
   const p = state.game?.player;
-  const value = Number(floor);
-  if (!p || !Number.isSafeInteger(value) || value < 1) return false;
+  if (!p || !Number.isSafeInteger(floor) || floor < 1) return false;
+  const value = floor;
 
   const original = p.riftBest;
   const previous = Number.isSafeInteger(original) && original >= 0 ? original : 0;
