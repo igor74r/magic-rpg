@@ -2,7 +2,7 @@ import { state } from '../systems/state.js';
 import { CLASSES } from '../data/classes.js';
 import { LOCATIONS } from '../data/locations.js';
 import { EFFECTS } from '../systems/status.js';
-import { getEffStats } from '../systems/stats.js';
+import { getEffStats, getTotalKills } from '../systems/stats.js';
 import { saveGame } from '../systems/save.js';
 import { toast, escapeHtml } from './screens.js';
 import { renderInventory } from './inventory.js';
@@ -68,15 +68,6 @@ export function renderGame() {
   // below the fold and makes movement appear lost. Tabs render in modal only.
   const legacyTabPanel = document.getElementById('tab-content');
   if (legacyTabPanel) legacyTabPanel.innerHTML = '';
-}
-
-function totalKills() {
-  const kills = state.game.player.stats?.kills || {};
-
-  return Object.values(kills).reduce(
-    (sum, value) => sum + value,
-    0
-  );
 }
 
 export function renderHeader() {
@@ -183,7 +174,7 @@ export function renderHeader() {
       <span><i aria-hidden="true">💨</i> Уклон <b>${dodge}%</b></span>
       <span><i aria-hidden="true">🛡️</i> Блок <b>${block}%</b></span>
       <span><i aria-hidden="true">🎯</i> Крит <b>${crit}%</b></span>
-      <span><i aria-hidden="true">⚔️</i> Убийств <b>${totalKills()}</b></span>
+      <span><i aria-hidden="true">⚔️</i> Убийств <b>${getTotalKills(state.game.player.stats?.kills)}</b></span>
 
       ${
         passivePoints > 0
