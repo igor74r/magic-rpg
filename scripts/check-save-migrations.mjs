@@ -148,6 +148,8 @@ assert.ok(!['back', 'wrists', 'hands', 'seal'].some(slot => slot in freshSave.pl
 
 for (const [label, mutate] of [
   ['unsafe gold balance', player => { player.gold = Number.MAX_SAFE_INTEGER + 1; }],
+  ['unknown class', player => { player.class = 'dragon'; }],
+  ['missing class', player => { delete player.class; }],
   ['fractional level', player => { player.level = 1.5; }],
   ['level above the cap', player => { player.level = 101; }]
 ]) {
@@ -156,7 +158,11 @@ for (const [label, mutate] of [
   assert.throws(() => validateCurrentSaveShape(invalid), /Invalid current save structure/,
     `current save validator must reject ${label}`);
 }
-console.log('PASS current save validator rejects unsafe gold and invalid character levels');
+const legacyPriestShape = JSON.parse(JSON.stringify(freshSave));
+legacyPriestShape.player.class = 'priest';
+assert.doesNotThrow(() => validateCurrentSaveShape(legacyPriestShape),
+  'legacy priest saves must remain valid for backward compatibility');
+console.log('PASS current save validator rejects unsafe gold, unknown classes and invalid levels; legacy Priest remains supported');
 console.log('PASS new character creation runs v16/v17 migrations before first save');
 storage.set('magic-rpg-save-1', JSON.stringify({
   version: 16,
