@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { saveGame } from './save.js';
 import { emit } from './events.js';
 import { addExp } from './progression.js';
+import { checkAchievements } from './achievements.js';
 
 const POOL = [
   { id: 'q-kill-any', type: 'kill', text: 'Убей 10 врагов', target: 'any', max: 10, gold: 8, exp: 50 },
@@ -127,5 +128,6 @@ export function claimQuestReward(questId) {
     msg: `📜 Квест «${q.text}» — ${parts.join(', ')}`,
     cls: 'success'
   });
+  checkAchievements();
   return true;
 }
