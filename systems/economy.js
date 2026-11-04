@@ -54,3 +54,18 @@ export function getSellPrice(instance, player) {
   const total = Math.max(1, base) * quantity;
   return Number.isSafeInteger(total) ? total : 0;
 }
+
+/**
+ * Validate a gold reward against both the spendable balance and the
+ * lifetime-earned statistic before either value is mutated.
+ */
+export function getGoldRewardTotals(player, amount) {
+  if (!player || !Number.isSafeInteger(amount) || amount <= 0 ||
+      !Number.isSafeInteger(player.gold) || player.gold < 0) return null;
+  const earned = player.stats?.goldEarned ?? 0;
+  if (!Number.isSafeInteger(earned) || earned < 0) return null;
+  const gold = player.gold + amount;
+  const goldEarned = earned + amount;
+  if (!Number.isSafeInteger(gold) || !Number.isSafeInteger(goldEarned)) return null;
+  return { gold, goldEarned };
+}
