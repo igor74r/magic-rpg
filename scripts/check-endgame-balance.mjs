@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { ENEMIES } from '../data/enemies.js';
 import { LOCATIONS } from '../data/locations.js';
 import { TOWER_MAX_FLOOR, getTowerLocation, getTowerMult } from '../systems/tower.js';
-import { getRiftLocation, getRiftLocations, getRiftMult } from '../systems/rift.js';
+import { getRiftClearedCount, getRiftLocation, getRiftLocations, getRiftMult } from '../systems/rift.js';
 import { state } from '../systems/state.js';
 import { getNGPlusMult } from '../systems/ngplus.js';
 
@@ -88,6 +88,10 @@ for (const invalidFloor of [0, -1, 1.5, NaN, Infinity, -Infinity, '5', Number.MA
   assert.deepEqual(getRiftMult(invalidFloor), getRiftMult(1),
     `invalid Rift floor ${String(invalidFloor)} must use safe baseline multipliers`);
 }
+assert.equal(getRiftClearedCount({ riftClearedLocations: ['rift-01', 'rift-01', 'unknown', 7] }), 1,
+  'rift clear count must include unique known rift IDs only');
+assert.equal(getRiftClearedCount({ riftClearedLocations: {} }), 0,
+  'malformed rift clear collection must not crash or inflate the count');
 assert.equal(getRiftMult(5).hpMult, 1.6);
 assert.equal(getRiftMult(5).atkMult, 1.4);
 for (const invalidFloor of [0, -1, 1.5, NaN, Infinity, -Infinity, '5', Number.MAX_SAFE_INTEGER + 1]) {
