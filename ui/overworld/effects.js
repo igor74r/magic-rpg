@@ -219,7 +219,7 @@ export function drawFireflies(ctx, worldTime) {
     if (isVillage) {
       // Aurora motes use hard-edged 2D pixel clusters instead of blurred glows.
       ctx.globalAlpha = flicker * (f.warmMote ? 0.34 : 0.82);
-      ctx.fillStyle = f.warmMote ? '#ffd98a' : '#d8e99a';
+      ctx.fillStyle = f.warmMote ? '#f3c879' : '#d8e99a';
       const x = Math.round(f.x), y = Math.round(f.y);
       const size = f.warmMote ? 2 : 3;
       ctx.fillRect(x, y, size, size);
