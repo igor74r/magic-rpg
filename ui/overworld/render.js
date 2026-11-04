@@ -255,9 +255,97 @@ function drawAuroraContactShadow(ctx, item, x, y) {
   ctx.restore();
 }
 
+function drawAuroraFallbackTile(ctx, type, x, y, size, tileX, tileY) {
+  const previousSmoothing = ctx.imageSmoothingEnabled;
+  let seed = Math.imul(tileX + 43, 374761393) ^ Math.imul(tileY + 71, 668265263);
+  seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
+  const pick = (n) => {
+    seed = Math.imul(seed ^ (seed >>> 15), 2246822519) >>> 0;
+    return seed % n;
+  };
+  ctx.save();
+  try {
+    ctx.imageSmoothingEnabled = false;
+    if (type === 1) {
+      ctx.fillStyle = '#756b56';
+      ctx.fillRect(x, y, size, size);
+      const stones = ['#8a806a', '#a3977c', '#5b594a', '#77735f'];
+      for (let row = 0; row < 4; row++) {
+        const offset = row % 2 ? 8 : 0;
+        for (let col = -1; col < 4; col++) {
+          const px = x + offset + col * 16 + 1;
+          const py = y + row * 12 + 2;
+          ctx.fillStyle = stones[pick(stones.length)];
+          ctx.fillRect(px, py, 13, 8);
+          ctx.fillStyle = '#514d40';
+          ctx.fillRect(px + 2, py + 7, 8, 1);
+        }
+      }
+    } else {
+      ctx.fillStyle = '#526b3f';
+      ctx.fillRect(x, y, size, size);
+      const grass = ['#71864a', '#849653', '#425c35', '#a2a55d'];
+      for (let i = 0; i < 18; i++) {
+        const px = x + 3 + pick(42);
+        const py = y + 3 + pick(42);
+        ctx.fillStyle = grass[pick(grass.length)];
+        ctx.fillRect(px, py, 2, 1);
+        if (pick(4) === 0) ctx.fillRect(px + 1, py - 1, 1, 1);
+      }
+    }
+  } finally {
+    ctx.restore();
+    ctx.imageSmoothingEnabled = previousSmoothing;
+  }
+}
+
+function drawAuroraGardenBedTile(ctx, x, y, size, tileX, tileY) {
+  const previousSmoothing = ctx.imageSmoothingEnabled;
+  let seed = Math.imul(tileX + 61, 374761393) ^ Math.imul(tileY + 29, 668265263);
+  seed = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
+  const pick = (n) => {
+    seed = Math.imul(seed ^ (seed >>> 15), 2246822519) >>> 0;
+    return seed % n;
+  };
+  ctx.save();
+  try {
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = '#526b3f';
+    ctx.fillRect(x, y, size, size);
+    ctx.fillStyle = '#684b32';
+    ctx.fillRect(x + 5, y + 8, 38, 31);
+    ctx.fillStyle = '#a77a4b';
+    ctx.fillRect(x + 5, y + 8, 38, 3);
+    ctx.fillRect(x + 5, y + 36, 38, 3);
+    ctx.fillStyle = '#315d3b';
+    for (let i = 0; i < 9; i++) {
+      const px = x + 8 + pick(32);
+      const py = y + 13 + pick(20);
+      ctx.fillRect(px, py, 4, 3);
+      ctx.fillRect(px + 1, py - 2, 2, 2);
+      if (pick(3) === 0) {
+        ctx.fillStyle = pick(2) ? '#e6c77b' : '#d7a5b8';
+        ctx.fillRect(px + 1, py - 3, 2, 2);
+        ctx.fillStyle = '#315d3b';
+      }
+    }
+  } finally {
+    ctx.restore();
+    ctx.imageSmoothingEnabled = previousSmoothing;
+  }
+}
+
 function drawTile(ctx, type, x, y, size, themeName, colors, tileX = 0, tileY = 0, map = null) {
-  if (themeName === 'village' && drawAuroraGroundTile(ctx, type, x, y, size, tileX, tileY)) {
-    drawAuroraGroundTransitions(ctx, type, x, y, size, tileX, tileY, map);
+  if (themeName === 'village') {
+    if (type === 4) {
+      drawAuroraGardenBedTile(ctx, x, y, size, tileX, tileY);
+      return;
+    }
+    if (drawAuroraGroundTile(ctx, type, x, y, size, tileX, tileY)) {
+      drawAuroraGroundTransitions(ctx, type, x, y, size, tileX, tileY, map);
+      return;
+    }
+    drawAuroraFallbackTile(ctx, type, x, y, size, tileX, tileY);
     return;
   }
   if (drawAtlasTile(ctx, type, x, y, size, themeName)) {
