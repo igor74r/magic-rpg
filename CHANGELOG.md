@@ -409,3 +409,5 @@
 - Overworld audit: custom Aurora static collider sets now include nature ground footprints. Chest reward logs and effects are deferred until `saveGame()` succeeds, preventing false reward feedback after rollback. Both regressions have dedicated tests and passed CI/Pages.
 
 - Save export: defer Blob URL revocation by one second so browser downloads are not cut off; the safe-rendering contract covers this handoff.
+
+- Shop transaction QA: expanded economy regression tests to verify that failed storage writes roll back bulk sales and buybacks without losing items, gold, earned-gold stats, or retryable buyback records. CI 82/82 and Pages deployment passed.
