@@ -30,6 +30,22 @@ try {
   const originalSetItem = globalThis.localStorage.setItem;
   globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
 
+  for (const invalidFloor of [0, -1, 1.5, NaN, Infinity, -Infinity, '5', Number.MAX_SAFE_INTEGER + 1]) {
+    assert.equal(recordRiftFloor(invalidFloor), false,
+      `invalid rift floor ${String(invalidFloor)} must be rejected`);
+    assert.equal(player.riftBest, 2, 'invalid rift floor must not mutate the saved record');
+  }
+
+  player.riftBest = Infinity;
+  assert.equal(recordRiftFloor(5), false,
+    'a corrupted infinite record must be normalized instead of treated as a valid high score');
+  assert.equal(player.riftBest, Infinity,
+    'normalization must roll back when storage rejects the corrected record');
+  globalThis.localStorage.setItem = originalSetItem;
+  assert.equal(recordRiftFloor(5), true, 'valid floor should repair and persist a corrupted record');
+  assert.equal(player.riftBest, 5);
+  globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
+
   assert.equal(recordRiftFloor(5), false, 'rift record must not confirm a failed save');
   assert.equal(player.riftBest, 2, 'rift record must roll back on save failure');
   assert.equal(recordTowerFloor(7), false, 'tower record must not confirm a failed save');
