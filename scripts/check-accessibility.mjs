@@ -23,7 +23,14 @@ for (const [tag] of tabs) {
   assert.match(tag, /aria-controls="(?:tab-content|settings-content)"/);
   assert.match(tag, /tabindex="(?:0|-1)"/);
 }
-assert.match(html, /id="tab-content" role="tabpanel" aria-labelledby="game-tab-locations" tabindex="0"/);
+assert.match(html, /id="tab-content" role="tabpanel" aria-labelledby="game-tab-quests" tabindex="0"/,
+  'initial dashboard panel must be labelled by the existing default tab');
+const staticIds = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]));
+for (const [, labelledBy] of html.matchAll(/\baria-labelledby="([^"]+)"/g)) {
+  for (const id of labelledBy.split(/\s+/)) {
+    assert.ok(staticIds.has(id), 'static aria-labelledby target "' + id + '" must exist in the document');
+  }
+}
 assert.match(html, /id="game-tab-hero" role="tab"[^>]*data-tab="hero"/, 'the hero dossier must be reachable from primary navigation');
 assert.match(html, /id="dashboard-context"[^>]*aria-label="Текущая цель"/, 'the dashboard must expose a persistent current-objective panel');
 assert.match(html, /id="game-log-search" class="log-search" type="search"/, 'the event journal must provide text search');
