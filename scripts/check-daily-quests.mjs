@@ -36,6 +36,25 @@ try {
 
   const quests = getDailyQuests();
   assert.equal(quests.length, 3, 'malformed or duplicate daily quests should be replaced');
+  state.game.player.dailyQuests = {
+    date: now,
+    list: [
+      { id: 'q-kill-any', current: '10', claimed: false },
+      { id: 'q-kill-goblin', current: 1.5, claimed: false },
+      { id: 'q-kill-skeleton', current: -2, claimed: false }
+    ]
+  };
+  const malformedProgress = getDailyQuests();
+  assert.equal(malformedProgress.find(q => q.id === 'q-kill-any').current, 0,
+    'numeric strings must not complete a daily quest');
+  assert.equal(malformedProgress.find(q => q.id === 'q-kill-goblin').current, 0,
+    'fractional daily progress must be rejected');
+  assert.equal(malformedProgress.find(q => q.id === 'q-kill-skeleton').current, 0,
+    'negative daily progress must be rejected');
+  assert.equal(claimQuestReward('q-kill-any'), false,
+    'malformed saved progress must not grant a daily quest reward');
+  assert.equal(updateQuestProgress('kill', 'any', '10').changed, false,
+    'external numeric-string increments must be rejected');
   assert.ok(quests.every(quest => !quest.text.includes('<')), 'quest display text must come from trusted definitions');
 
   state.game.player.dailyQuests = {
