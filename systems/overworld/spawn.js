@@ -139,12 +139,20 @@ export function spawnNPCs(loc, locationId = '') {
 }
 
 export function spawnStatics(loc, locationId = null, cols = loc.mapCols || 40, rows = loc.mapRows || 30) {
-  const objects = (loc.statics || []).map(obj => ({
-    ...obj,
-    x: obj.x * TILE + TILE / 2,
-    y: obj.y * TILE + TILE / 2,
-    interactionRadius: obj.decorative ? 0 : (Number(obj.interactionRadius) || 65)
-  }));
+  const objects = (loc.statics || []).map(obj => {
+    const x = obj.x * TILE + TILE / 2;
+    const y = obj.y * TILE + TILE / 2;
+    // Depth follows each sprite's actual ground contact, not its visual center.
+    // Buildings/nature end at y+8; the 96px prop atlas is centered on y.
+    const depthY = (obj.buildingStyle || obj.natureStyle) ? y + 8
+      : obj.propStyle ? y + 48 : undefined;
+    return {
+      ...obj,
+      x, y,
+      ...(Number.isFinite(depthY) ? { depthY } : {}),
+      interactionRadius: obj.decorative ? 0 : (Number(obj.interactionRadius) || 65)
+    };
+  });
 
   // Aurora visibly records the campaign's victories without changing the
   // three-dragon story rules or creating new combat encounters.
