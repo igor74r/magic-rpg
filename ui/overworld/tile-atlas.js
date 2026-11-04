@@ -145,13 +145,13 @@ export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0
   const variant = (seed ^ (seed >>> 16)) >>> 0 & 3;
   const sourceColumn = type * 4 + variant;
   const previousSmoothing = ctx.imageSmoothingEnabled;
+  const previousAlpha = ctx.globalAlpha;
   try {
     // Keep transparent pixels in the authored path edges on grass instead
     // of exposing the dark scene clear color as repeated horizontal bands.
     ctx.fillStyle = '#526b3f';
     ctx.fillRect(x, y, size, size);
     ctx.imageSmoothingEnabled = false;
-    const previousAlpha = ctx.globalAlpha;
     ctx.globalAlpha = type === 0 ? 0.42 : 1;
     ctx.drawImage(auroraGroundImage, sourceColumn * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, x, y, size, size);
     ctx.globalAlpha = previousAlpha;
@@ -162,6 +162,7 @@ export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0
     auroraGroundFailed = true;
     return false;
   } finally {
+    ctx.globalAlpha = previousAlpha;
     ctx.imageSmoothingEnabled = previousSmoothing;
   }
 }
