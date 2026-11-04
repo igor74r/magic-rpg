@@ -780,3 +780,13 @@ index.html, main.js, data/story.js, data/enemies.js, data/items.js, data/locatio
 - GitHub Actions CI PASS на HEAD `e2fc88f2452b51a6a720729fbfb668792ec7119b`: синтаксис, импорты, профильные тесты, Aurora layout/collision, depth-sort, desktop/mobile smoke и desktop/mobile visual regression.
 - GitHub Pages deployment PASS на том же HEAD. CI: https://github.com/igor74r/magic-rpg/actions/runs/41869588042 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41869588012 .
 - Это завершает текущий инженерный блок, но не весь художественный rework Авроры: atlas props, дома/декорации, персонажи и последующая визуальная ревизия остаются открытыми.
+
+
+## 04.11.2026 — Aurora village props atlas: вторая художественная партия
+
+- Полностью заменён `assets/aurora/village-props-atlas.png`: 1024×64 RGBA, 16 кадров по 64×64, сохранены индексы кадров и порядок, используемые `ui/overworld/sprites.js`.
+- Обновлены все 16 игровых декораций: фонарь, мемориал, скамья, рыночный прилавок, фонтан, клумба, знамя, жаровня, наковальня, дрова, тележка, бочки, травяная стойка, морозный фонарь, знак Разлома и врата Башни.
+- Единая ограниченная палитра, пиксельные контуры, плоские цвета, без blur/gradient. Размер PNG 5,740 B против прежних 3,906 B (+1,834 B).
+- Визуально проверен новый atlas; сетка и формат подтверждены существующим контрактом renderer. GitHub Actions CI PASS, включая PNG integrity, desktop/mobile browser smoke и gameplay visual regression; GitHub Pages deployment PASS на HEAD `4659bdcc35b95c2618b54728cccc22bcbdd33837`.
+- CI: https://github.com/igor74r/magic-rpg/actions/runs/41870326122 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41870326188 .
+- Художественная переработка Aurora ещё не завершена: здания, природа, terrain, персонажи/NPC и повторная ручная оценка всей сцены остаются в очереди.
