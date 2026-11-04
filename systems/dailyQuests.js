@@ -37,6 +37,7 @@ export function getDailyQuests() {
     return { ...definition, current, completed, claimed: completed && entry.claimed === true };
   }).filter(Boolean);
   const expired = now - lastDate > dayMs;
+  let safeFallback = null;
 
   if (expired || normalized.length !== 3) {
     const shuffled = [...POOL].sort(() => 0.5 - Math.random());
@@ -44,12 +45,20 @@ export function getDailyQuests() {
       date: now,
       list: shuffled.slice(0, 3).map(quest => ({ ...quest, current: 0, completed: false, claimed: false }))
     };
-    if (!saveGame()) p.dailyQuests = saved;
+    if (!saveGame()) {
+      p.dailyQuests = saved;
+      safeFallback = [];
+    }
   } else if (p.dailyQuests !== saved || JSON.stringify(saved.list) !== JSON.stringify(normalized)) {
     p.dailyQuests = { date: lastDate, list: normalized };
-    if (!saveGame()) p.dailyQuests = saved;
+    if (!saveGame()) {
+      p.dailyQuests = saved;
+      safeFallback = normalized;
+    }
   }
-  return Array.isArray(p.dailyQuests?.list) ? p.dailyQuests.list : [];
+  return Array.isArray(safeFallback)
+    ? safeFallback
+    : (Array.isArray(p.dailyQuests?.list) ? p.dailyQuests.list : []);
 }
 
 export function updateQuestProgress(type, target, amount = 1, options = {}) {
