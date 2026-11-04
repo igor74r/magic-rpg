@@ -143,3 +143,10 @@ export function getEffStats() {
     armorPen
   };
 }
+export function getTotalKills(kills) {
+  if (!kills || typeof kills !== 'object' || Array.isArray(kills)) return 0;
+  return Object.values(kills).reduce((sum, value) => {
+    const count = Number.isSafeInteger(value) && value >= 0 ? value : 0;
+    return Math.min(Number.MAX_SAFE_INTEGER, sum + count);
+  }, 0);
+}
