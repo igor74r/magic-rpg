@@ -21,6 +21,26 @@ let saleSelection = [];
 let saleConfirmState = false;
 let saleReturnFocus = null;
 
+function capturePlayerState() {
+  const player = state.game?.player;
+  if (!player) return null;
+  try {
+    return { player, snapshot: JSON.parse(JSON.stringify(player)) };
+  } catch {
+    toast('Не удалось подготовить изменение. Состояние героя не изменено.');
+    return null;
+  }
+}
+
+function persistPlayerChange(captured, message = 'Не удалось сохранить изменение. Все изменения отменены.') {
+  if (saveGame()) return true;
+  const { player, snapshot } = captured;
+  for (const key of Object.keys(player)) delete player[key];
+  Object.assign(player, snapshot);
+  toast(message);
+  return false;
+}
+
 const FILTER_TYPES = {
   equipment: [...EQUIPMENT_TYPES],
   weapon: ['weapon'],
@@ -607,10 +627,12 @@ export function invSlotClick(idx) {
   if (!item) return;
 
   if (EQUIPMENT_TYPES.has(item.type)) {
+    const captured = capturePlayerState();
+    if (!captured) return;
     const slot = equipItemByIndex(idx);
     if (!slot) { toast('Не хватает места или грузоподъёмности, чтобы снять старую экипировку.'); return; }
+    if (!persistPlayerChange(captured)) return;
     toast(`Надето: ${item.name}`);
-    saveGame();
     renderGame();
   } else if (item.type === 'consumable') {
     useItemOutside(inst.id);
@@ -668,12 +690,14 @@ function openRuneSocketMenu(inventoryIndex) {
 }
 
 export function socketRuneUI(inventoryIndex, equipmentSlot) {
+  const captured = capturePlayerState();
+  if (!captured) return;
   if (!socketRune(inventoryIndex, equipmentSlot)) {
     toast('Не удалось установить руну: проверьте свободное гнездо.');
     return;
   }
+  if (!persistPlayerChange(captured)) return;
   document.getElementById('rune-socket-overlay')?.remove();
-  saveGame();
   toast('ᛉ Руна установлена. Характеристики обновлены.');
   renderGame();
 }
@@ -688,26 +712,31 @@ export function useItemOutside(id) {
     toast('Это заклинание уже изучено.');
     return;
   }
-  if (!useItem(id)) return;
+  const captured = capturePlayerState();
+  if (!captured || !useItem(id)) return;
+  if (!persistPlayerChange(captured)) return;
   if (item.type === 'scroll') toast(`📖 Изучено: ${SPELLS[item.spellId]?.name || item.spellId}`);
   else toast(`Использовано: ${item.name}`);
-  saveGame();
   renderGame();
 }
 
 export function equipItemByIndexUI(idx) {
+  const captured = capturePlayerState();
+  if (!captured) return;
   const slot = equipItemByIndex(idx);
   if (!slot) { toast('Сумка заполнена или превышен лимит веса.'); return; }
+  if (!persistPlayerChange(captured)) return;
   toast('Экипировка обновлена.');
-  saveGame();
   renderGame();
 }
 
 export function equipBestUI() {
+  const captured = capturePlayerState();
+  if (!captured) return;
   const changed = equipBest();
   if (changed) {
+    if (!persistPlayerChange(captured)) return;
     toast('⚡ Лучшие предметы надеты.');
-    saveGame();
     renderGame();
   } else {
     toast('Сейчас экипированы лучшие доступные предметы.');
@@ -715,8 +744,10 @@ export function equipBestUI() {
 }
 
 export function unequipItemUI(slot) {
+  const captured = capturePlayerState();
+  if (!captured) return;
   if (!unequipItemBySlot(slot)) { toast('Нельзя снять предмет: в сумке нет места или превышен лимит веса.'); return; }
-  saveGame();
+  if (!persistPlayerChange(captured)) return;
   renderGame();
 }
 
