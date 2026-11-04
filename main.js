@@ -95,11 +95,13 @@ window.addEventListener('error', (event) => {
     showErrorToast(`Не удалось загрузить ресурс: ${tag}`);
     return;
   }
-  recordRuntimeDiagnostic('uncaught-error', event.message || 'Uncaught error', {
+  const message = event.message || 'Uncaught error';
+  recordRuntimeDiagnostic('uncaught-error', message, {
     source: event.filename || '',
     line: event.lineno || 0,
     column: event.colno || 0
   });
+  showErrorToast(message);
 }, true);
 
 window.__GAME_DIAGNOSTICS_READY__ = true;
@@ -110,6 +112,7 @@ window.addEventListener('unhandledrejection', (event) => {
     ? reason.stack
     : (reason && reason.message) || String(reason);
   recordRuntimeDiagnostic('unhandled-rejection', message);
+  showErrorToast(message);
 });
 
 
@@ -221,16 +224,6 @@ function showErrorToast(msg) {
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 6000);
 }
-
-window.addEventListener('error', (e) => {
-  console.error('[global error]', e.error || e.message);
-  showErrorToast(e.message || 'Неизвестная ошибка');
-});
-window.addEventListener('unhandledrejection', (e) => {
-  console.error('[unhandled rejection]', e.reason);
-  const msg = (e.reason && e.reason.message) ? e.reason.message : String(e.reason || 'Promise');
-  showErrorToast(msg);
-});
 
 let audioBooted = false;
 let dashboardLogFilter = 'all';
