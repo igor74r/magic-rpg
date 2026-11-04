@@ -25,7 +25,7 @@ globalThis.localStorage = {
 globalThis.setTimeout = () => 1;
 
 try {
-  const { payBardUI, petCatUI, takeElderBlessingUI, useWellUI, turnInElderQuestUI } = await import('../ui/npcs.js');
+  const { payBardUI, petCatUI, takeElderBlessingUI, useWellUI, acceptElderQuestUI, turnInElderQuestUI } = await import('../ui/npcs.js');
   state.currentSlot = 1;
   state.overworld = { active: true };
   state.game = {
@@ -76,6 +76,14 @@ try {
     snapshot = JSON.stringify(p);
     assert.equal(useWellUI(), false, 'well healing must fail when persistence fails');
     assert.equal(JSON.stringify(p), snapshot, 'failed well use must restore health, mana and cooldown');
+
+    p.stats.metElder = true;
+    p.campaignKills = {};
+    p.campaignClaimed = {};
+    p.activeCampaignMission = null;
+    snapshot = JSON.stringify(p);
+    acceptElderQuestUI();
+    assert.equal(JSON.stringify(p), snapshot, 'failed quest acceptance must restore campaign state');
   } finally {
     globalThis.localStorage.setItem = originalSetItem;
   }
