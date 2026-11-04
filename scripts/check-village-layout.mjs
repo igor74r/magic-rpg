@@ -148,6 +148,8 @@ for (const room of ['forge','healer','alchemy','market','hall','tavern']) {
 }
 assert.ok(mainSource.includes('village-room-pixel-icon icon-') && !mainSource.includes("['⚒️','🛏️','⚗️','📦']"),
   'Aurora interior props must not use emoji as their visual assets');
+assert.ok(mainSource.includes('class="village-room-floor-mark" aria-hidden="true"></div>') && !mainSource.includes('village-room-floor-mark">✦'),
+  'Aurora interior floor motif must be drawn as crisp CSS pixels, not a text glyph');
 const spriteSource = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
 assert.ok(spriteSource.includes("['tower-gate', 15]"), 'tower portal must use its dedicated authored atlas frame');
 assert.ok(spriteSource.includes("style === 'world-portal' ? getAuroraWorldPortalAtlas()") || (spriteSource.includes("const isWorldPortal = style === 'world-portal'") && spriteSource.includes("getAuroraWorldPortalAtlas()")), 'Aurora world portal must load its dedicated authored PNG atlas');
