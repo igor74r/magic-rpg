@@ -83,6 +83,9 @@ jobs:
       - name: Check chest reward rollback on save failure
         run: node scripts/check-chest-save.mjs
 
+      - name: Check crafting order claim rollback on save failure
+        run: node scripts/check-crafting-jobs.mjs
+
       - name: Check passive trees and respec
         run: node scripts/check-passives.mjs
 
