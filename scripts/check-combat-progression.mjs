@@ -11,6 +11,7 @@ import {
 import { enterOverworld, advanceTowerFloor, advanceRiftFloor } from '../systems/overworld.js';
 import { getTowerBest, getTowerStartFloor } from '../systems/tower.js';
 import { getRiftBest } from '../systems/rift.js';
+import { getDailyQuests } from '../systems/dailyQuests.js';
 
 const storage = new Map();
 globalThis.localStorage = {
@@ -209,10 +210,24 @@ try {
   // A failed persistence write must roll back all victory rewards and keep the fight retryable.
   f = fixture('warrior', 'goblin');
   f.enemy.hp = 1;
+  f.p.dailyQuests = {
+    date: Date.now(),
+    list: [
+      { id: 'q-kill-goblin', type: 'kill', text: 'Убей 5 гоблинов', target: 'goblin', max: 5, gold: 6, exp: 30, current: 0, completed: false, claimed: false },
+      { id: 'q-kill-any', type: 'kill', text: 'Убей 10 врагов', target: 'any', max: 10, gold: 8, exp: 50, current: 0, completed: false, claimed: false },
+      { id: 'q-kill-skeleton', type: 'kill', text: 'Убей 5 скелетов', target: 'skeleton', max: 5, gold: 6, exp: 30, current: 0, completed: false, claimed: false }
+    ]
+  };
+  getDailyQuests();
   const victoryGoldBeforeSaveFailure = f.p.gold;
   const victoryKillsBeforeSaveFailure = f.p.stats.kills.goblin || 0;
+  const savedBeforeVictory = storage.get('magic-rpg-save-1');
   const originalSetItem = globalThis.localStorage.setItem;
-  globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
+  globalThis.localStorage.setItem = (key, value) => {
+    const candidate = JSON.parse(value);
+    if ((candidate.player.stats.kills.goblin || 0) === 1) throw new Error('simulated final victory save quota');
+    storage.set(key, String(value));
+  };
   combatAttack();
   globalThis.localStorage.setItem = originalSetItem;
   assert.equal(state.game.player.gold, victoryGoldBeforeSaveFailure, 'failed save must roll back victory gold');
@@ -220,6 +235,10 @@ try {
   assert.equal(f.enemy.dead, false, 'failed save must leave enemy alive');
   assert.equal(f.enemy.hp, f.enemy.maxHp, 'failed save must restore encounter health');
   assert.ok(f.ow.combat, 'failed save must keep combat active');
+  assert.equal(storage.get('magic-rpg-save-1'), savedBeforeVictory,
+    'daily kill progress must not be persisted separately when the victory save fails');
+  assert.equal(JSON.parse(storage.get('magic-rpg-save-1')).player.dailyQuests.list.find(q => q.id === 'q-kill-goblin').current, 0,
+    'failed victory transaction must leave daily kill progress unchanged');
   assert.equal(f.ow.combat.turn, 'player', 'failed save must return control to player');
   console.log('PASS failed victory save rolls back rewards and restores encounter');
 
