@@ -38,7 +38,7 @@ assert.ok(saveAndMenu.indexOf('clearOverworldRuntime()') < saveAndMenu.indexOf("
 const deleteSlotStart = menu.indexOf('export function deleteSlot(slot)');
 const deleteSlotEnd = menu.indexOf('\n}\n', deleteSlotStart);
 const deleteSlot = menu.slice(deleteSlotStart, deleteSlotEnd);
-assert.match(deleteSlot, /if \(!deleteSave\(slot\)\)/,
+assert.match(deleteSlot, /if \(!deleteSave\(slot, \{ preserveActiveState: deletingActiveSlot \}\)\)/,
   'a failed slot deletion must not be reported as successful');
 assert.match(deleteSlot, /deleteSave\(slot, \{ preserveActiveState: deletingActiveSlot \}\)/,
   'active slot deletion must defer game clearing until the overworld has stopped');
