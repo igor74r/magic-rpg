@@ -143,7 +143,13 @@ function openSecret(sw) {
 }
 
 
+let lastPortalPointerActivation = -Infinity;
+
 function onOverworldCanvasClick(event) {
+  // Pointerdown gives touch/mouse immediate response; suppress its synthetic click
+  // so one physical tap cannot interact with the same portal twice.
+  if (event.type === 'pointerdown') lastPortalPointerActivation = performance.now();
+  else if (event.type === 'click' && event.detail > 0 && performance.now() - lastPortalPointerActivation < 700) return;
   const ow = state.overworld;
   if (!ow || !ow.active || ow.combat || ow.defeated) return;
   const canvas = event.currentTarget;
@@ -189,7 +195,7 @@ export function initOverworld() {
     document.addEventListener('visibilitychange', () => { if (document.hidden) clearMovementKeys(); });
     overworldInputBound = true;
     const canvas = document.getElementById('overworld-canvas');
-    if (canvas) { canvas.addEventListener('mousemove', onCanvasMouseMove); canvas.addEventListener('mouseleave', hideMapTooltip); canvas.addEventListener('click', onOverworldCanvasClick); }
+    if (canvas) { canvas.addEventListener('mousemove', onCanvasMouseMove); canvas.addEventListener('mouseleave', hideMapTooltip); canvas.addEventListener('pointerdown', onOverworldCanvasClick); canvas.addEventListener('click', onOverworldCanvasClick); }
   }
   setSubPanel(null); setLastNpcKey(''); setPaused(false);
   initWeather(state.overworld ? (state.overworld.theme || state.overworld.locationId) : 'default');
