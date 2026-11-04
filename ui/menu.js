@@ -593,15 +593,23 @@ export function importSave(event) {
           throw new Error('Imported save verification failed');
         }
       } catch (writeError) {
-        // A storage implementation may write partially and then throw. Restore
-        // the previous slot so a failed import never destroys the existing save.
+        // A storage implementation may write partially and then throw. Attempt
+        // rollback, then verify the stored value before claiming it succeeded.
         try {
           if (previousSave === null) localStorage.removeItem(saveKey);
           else localStorage.setItem(saveKey, previousSave);
         } catch (rollbackError) {
           console.error('[save] Не удалось восстановить слот после неудачного импорта:', rollbackError);
         }
-        toast('❌ Не удалось записать импорт: сохранение в слоте восстановлено');
+        let rollbackSucceeded = false;
+        try {
+          rollbackSucceeded = localStorage.getItem(saveKey) === previousSave;
+        } catch (verifyError) {
+          console.error('[save] Не удалось проверить восстановление слота:', verifyError);
+        }
+        toast(rollbackSucceeded
+          ? '❌ Не удалось записать импорт: прежнее сохранение восстановлено'
+          : '❌ Не удалось записать импорт и подтвердить восстановление прежнего слота. Проверьте резервную копию.');
         event.target.value = '';
         return;
       }
