@@ -455,7 +455,7 @@ function openRiftMap() {
   const kills = getTotalKills(player.stats?.kills);
   const deaths = getSafeCount(player.stats?.deaths);
   const kd = deaths > 0 ? (kills / deaths).toFixed(2) : kills.toFixed(2);
-  const cleared = new Set(player.riftClearedLocations || []).size;
+  const cleared = getRiftClearedCount(player);
   const shards = countStoryShards(state.game.storyShards);
   const crystalStatus = shards === 3 && state.game.storyDragons?.['blood-crown'] === true ? 'Стабилизирован' : 'Нестабилен';
   const overlay = document.createElement('div');
