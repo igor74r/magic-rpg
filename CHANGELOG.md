@@ -339,3 +339,10 @@
 - `scripts/check-render-depth-order.mjs`: интеграционно проверяет depth anchors для всех трёх сюжетных декораций через реальный `spawnStatics()`, временно выставляя флаги побед и восстанавливая исходное состояние.
 - CI PASS (включая Aurora layout/collision, все depth-sort tests, desktop/mobile smoke и visual regression) и Pages deployment PASS на HEAD `fe14820833eab35a36bc6f592ce24fe1187aa274`.
 - CI: https://github.com/igor74r/magic-rpg/actions/runs/41872002645 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41872002846 .
+
+
+## 04.11.2026 — Финальная проверка сюжетных prop anchors
+
+- Проверка реальных сюжетных декораций (победы над тремя драконами) через `spawnStatics()` завершена; временное тестовое состояние игры корректно восстанавливается.
+- Полный GitHub Actions CI PASS, включая desktop/mobile smoke и gameplay visual regression; GitHub Pages deployment PASS на HEAD `3e2fbba68a69e0d29b910bb287929bdd4846e8cf`.
+- CI: https://github.com/igor74r/magic-rpg/actions/runs/41872353680 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41872353514 .
