@@ -13,6 +13,7 @@ export function checkAchievements() {
   const previousGold = p.gold;
 
   let any = false;
+  const unlocked = [];
   for (const a of ACHIEVEMENTS) {
     if (p.achievements.includes(a.id)) continue;
     let ok = false;
@@ -20,11 +21,7 @@ export function checkAchievements() {
     if (!ok) continue;
     p.achievements.push(a.id);
     if (a.reward) p.gold = (p.gold || 0) + a.reward;
-    emit('log', { channel: 'game', msg: `🏆 Достижение: «${a.name}»${a.reward ? ` (+${a.reward}💰)` : ''}`, cls: 'success' });
-    emit('toast', `🏆 ${a.name}! +${a.reward}💰`);
-    // ⬇️ НОВОЕ: событие для всплывающих карточек из ui/overworld.js
-    emit('achievement', { id: a.id, name: a.name, desc: a.desc, icon: a.icon, reward: a.reward });
-    playSound('levelup');
+    unlocked.push(a);
     any = true;
   }
 
@@ -34,6 +31,12 @@ export function checkAchievements() {
       p.achievements = previousAchievements;
       p.gold = previousGold;
       return;
+    }
+    for (const a of unlocked) {
+      emit('log', { channel: 'game', msg: `🏆 Достижение: «${a.name}»${a.reward ? ` (+${a.reward}💰)` : ''}`, cls: 'success' });
+      emit('toast', `🏆 ${a.name}! +${a.reward}💰`);
+      emit('achievement', { id: a.id, name: a.name, desc: a.desc, icon: a.icon, reward: a.reward });
+      playSound('levelup');
     }
     emit('game:update');
   }
