@@ -80,3 +80,12 @@
 - Визуально проверен новый atlas; сетка и формат подтверждены существующим контрактом renderer. GitHub Actions CI PASS, включая PNG integrity, desktop/mobile browser smoke и gameplay visual regression; GitHub Pages deployment PASS на HEAD `4659bdcc35b95c2618b54728cccc22bcbdd33837`.
 - CI: https://github.com/igor74r/magic-rpg/actions/runs/41870326122 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41870326188 .
 - Художественная переработка Aurora ещё не завершена: здания, природа, terrain, персонажи/NPC и повторная ручная оценка всей сцены остаются в очереди.
+
+
+## 04.11.2026 — Aurora: плоское освещение и интеграционная проверка глубины
+
+- `ui/overworld/render.js`: для Авроры отключены radial fog, radial vignette и soft bloom. Сохранены плоский тёплый tint и мягкий night tint; свет от lantern/brazier передаётся stepped flat-color прямоугольниками без blur/gradient. Остальные биомы не менялись.
+- `scripts/check-visual-assets.mjs`: добавлены проверки запрета bloom/fog/vignette для Aurora и наличия пиксельных световых пятен.
+- `scripts/check-render-depth-order.mjs`: проверяет фактические `depthY`, создаваемые `spawnStatics()`, для здания, дерева и 96px prop.
+- Повторно проверены desktop/mobile browser smoke и gameplay visual regression; скриншоты просмотрены вручную. Сцена Авроры стала заметно светлее и сохраняет чёткие пиксельные контуры.
+- GitHub Actions CI PASS и GitHub Pages deployment PASS на HEAD `8adb744fb95dbfcc59faf3b60e35649a2b741b1d`. CI: https://github.com/igor74r/magic-rpg/actions/runs/41871414096 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41871414112 .
