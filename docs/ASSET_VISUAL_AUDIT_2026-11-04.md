@@ -154,3 +154,6 @@
 - Пиксельный знак пола выведен на передний план поверх карточек предметов и опущен ближе к краю пола: он больше не выглядывает из-под центрального предмета. Финальные cache keys интерьерных JS/CSS — `20261104-aurora-interior-finish-4`.
 
 - Ручной просмотр двора показал, что трава оставалась шумной даже после уменьшения декоративных пикселей. Авторский grass atlas теперь смешивается с плоской базовой заливкой при alpha 0.42; дополнительных кластеров только 3–5 на тайл при alpha 0.24. Дорожки остаются непрозрачными. Alpha Canvas восстанавливается в `finally`; тест проверяет плотность, смешивание и восстановление состояния. Cache keys обновлены до `20261104-aurora-flat-ground-5`.
+
+
+- Final grass review against desktop and mobile captures: the earlier alpha 0.42 still left visible texture noise. The atlas is now drawn at alpha 0.26; decorative grass clusters are 2–3 per tile at alpha 0.14. Pixel character shadows use three stepped rectangular bands. The CI run `41886704221` passed all steps and its desktop/mobile screenshot artifact was manually reviewed.
