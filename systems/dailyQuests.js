@@ -50,10 +50,12 @@ export function getDailyQuests() {
   return p.dailyQuests.list;
 }
 
-export function updateQuestProgress(type, target, amount = 1) {
+export function updateQuestProgress(type, target, amount = 1, options = {}) {
   const p = state.game?.player;
   const increment = Number(amount);
-  if (!p || !Number.isSafeInteger(increment) || increment <= 0) return;
+  if (!p || !Number.isSafeInteger(increment) || increment <= 0) {
+    return { changed: false, completedTexts: [] };
+  }
   const quests = getDailyQuests();
 
   let previousQuests;
@@ -77,13 +79,16 @@ export function updateQuestProgress(type, target, amount = 1) {
     }
     changed = true;
   }
-  if (changed && !saveGame()) {
+  if (changed && options?.persist !== false && !saveGame()) {
     p.dailyQuests = previousQuests;
-    return;
+    return { changed: false, completedTexts: [] };
   }
-  for (const questText of completedTexts) {
-    emit('toast', `📜 Квест выполнен: ${questText}!`);
+  if (changed && options?.notify !== false) {
+    for (const questText of completedTexts) {
+      emit('toast', `📜 Квест выполнен: ${questText}!`);
+    }
   }
+  return { changed, completedTexts };
 }
 
 export function claimQuestReward(questId) {
