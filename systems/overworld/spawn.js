@@ -158,10 +158,14 @@ export function spawnStatics(loc, locationId = null, cols = loc.mapCols || 40, r
   // three-dragon story rules or creating new combat encounters.
   if (loc.theme === 'village') {
     const dragons = state.game?.storyDragons || {};
-    const addStoryProp = (id, name, x, y, propStyle) => objects.push({
-      id, name, x: x * TILE + TILE / 2, y: y * TILE + TILE / 2,
-      propStyle, decorative: true, interactionRadius: 0, storyDecoration: true
-    });
+    const addStoryProp = (id, name, x, y, propStyle) => {
+      const worldX = x * TILE + TILE / 2;
+      const worldY = y * TILE + TILE / 2;
+      objects.push({
+        id, name, x: worldX, y: worldY, depthY: worldY + 48,
+        propStyle, decorative: true, interactionRadius: 0, storyDecoration: true
+      });
+    };
     if (dragons['ash-herald']) addStoryProp('aurora-ash-victory', 'Знамя победы над Пепельным Вестником', 18, 6, 'banner');
     if (dragons['ice-grasp']) addStoryProp('aurora-ice-victory', 'Ледяной фонарь северного тракта', 27, 10, 'frost-lantern');
     if (dragons['blood-crown']) addStoryProp('aurora-rift-ward', 'Памятный знак открытого Разлома', 19, 5, 'rift-ward');
