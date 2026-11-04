@@ -4,7 +4,7 @@ import { ITEMS, RARITIES } from '../../data/items.js';
 import { SPELLS } from '../../data/spells.js';
 import { CLASSES } from '../../data/classes.js';
 import { LOCATIONS } from '../../data/locations.js';
-import { getEffStats, resolveCriticalChance } from '../stats.js';
+import { getEffStats, incrementSafeCount, resolveCriticalChance } from '../stats.js';
 import { addItemOrStore, countItem, removeItem } from '../inventory.js';
 import { addExp } from '../progression.js';
 import { checkAchievements } from '../achievements.js';
@@ -1660,7 +1660,7 @@ function combatVictory() {
   }
 
   p.stats.flawlessStreak =
-    (p.stats.flawlessStreak || 0) + 1;
+    incrementSafeCount(p.stats.flawlessStreak);
 
   deferredQuestUpdates.push(updateQuestProgress(
     'flawless',
@@ -1673,7 +1673,7 @@ function combatVictory() {
   spawnParticles(enemy.x, enemy.y, 'spark', 6);
 
   p.stats.kills[enemy.enemyId] =
-    (p.stats.kills[enemy.enemyId] || 0) + 1;
+    incrementSafeCount(p.stats.kills[enemy.enemyId]);
 
   const campaignUpdates = recordCampaignKill(p, ow.locationId, enemy.enemyId);
   if (campaignUpdates.length > 0) {
@@ -1697,11 +1697,11 @@ function combatVictory() {
   p.stats.goldEarned = Math.min(Number.MAX_SAFE_INTEGER, previousGoldEarned + gold);
 
   if (enemy.elite) {
-    p.stats.eliteKills = (p.stats.eliteKills || 0) + 1;
+    p.stats.eliteKills = incrementSafeCount(p.stats.eliteKills);
   }
 
   if (enemy.boss) {
-    p.stats.bossKills = (p.stats.bossKills || 0) + 1;
+    p.stats.bossKills = incrementSafeCount(p.stats.bossKills);
   }
 
   // Elites have a high chance for each listed drop. Bosses guarantee
@@ -1915,7 +1915,7 @@ function combatDefeat() {
     };
   }
 
-  p.stats.deaths = (p.stats.deaths || 0) + 1;
+  p.stats.deaths = incrementSafeCount(p.stats.deaths);
   p.stats.flawlessStreak = 0;
 
   if (p.dailyQuests?.list) {
