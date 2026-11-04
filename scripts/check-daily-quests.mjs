@@ -188,6 +188,41 @@ try {
     globalThis.localStorage.setItem = originalRewardSetItem;
   }
 
+  // A daily chest is one transaction: a failed write must not grant gold/items or consume the cooldown.
+  const { openDailyChest } = await import('../ui/village.js');
+  const chestPlayer = {
+    level: 3, gold: 25, inventory: [], pendingLoot: [],
+    stats: { kills: {}, deaths: 0, goldEarned: 0, chestsOpened: 0, dailyChestAt: 0, dailyChestsOpened: 0 }
+  };
+  state.game = { version: 17, player: chestPlayer };
+  const beforeFailedChest = JSON.parse(JSON.stringify(chestPlayer));
+  const originalChestSetItem = globalThis.localStorage.setItem;
+  let chestSuccessLogs = 0;
+  let chestSuccessToasts = 0;
+  let chestUpdates = 0;
+  const onChestLog = entry => { if (String(entry?.msg).includes('Ежедневный сундук')) chestSuccessLogs += 1; };
+  const onChestToast = message => {
+    if (String(message).includes('Ежедневный сундук') || String(message).includes('сохранено в хранилище добычи')) chestSuccessToasts += 1;
+  };
+  const onChestUpdate = () => { chestUpdates += 1; };
+  on('log', onChestLog);
+  on('toast', onChestToast);
+  on('game:update', onChestUpdate);
+  globalThis.localStorage.setItem = () => { throw new Error('simulated daily chest storage failure'); };
+  try {
+    openDailyChest();
+    assert.deepEqual(chestPlayer, beforeFailedChest,
+      'failed daily chest persistence must restore gold, item reward and cooldown');
+    assert.equal(chestSuccessLogs, 0, 'failed daily chest must not append a success log');
+    assert.equal(chestSuccessToasts, 0, 'failed daily chest must not show success feedback');
+    assert.equal(chestUpdates, 0, 'failed daily chest must not broadcast a successful update');
+  } finally {
+    off('log', onChestLog);
+    off('toast', onChestToast);
+    off('game:update', onChestUpdate);
+    globalThis.localStorage.setItem = originalChestSetItem;
+  }
+
   console.log('check-daily-quests: PASS (normalization, canonical rewards, forged completion, future dates, progress and reward rollback guards)');
 } finally {
   state.game = null;
