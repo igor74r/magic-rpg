@@ -51,6 +51,9 @@ try {
   assert.doesNotThrow(() => exportSave(), 'export must not throw when browser storage is blocked');
   assert.match(toastMessages.at(-1), /хранилище браузера недоступно/,
     'export must report a blocked storage read to the user');
+  assert.match(storage.get('magic-rpg-save-1'), /Export test hero/,
+    'export must persist the active in-memory game before reading the save slot');
+  storage.set('magic-rpg-save-1', 'KEEP-EXISTING-SAVE');
   globalThis.localStorage.getItem = originalGetItem;
 
   let readCalls = 0;
