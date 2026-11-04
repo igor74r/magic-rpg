@@ -24,6 +24,19 @@ globalThis.setInterval = callback => {
 globalThis.clearInterval = id => cleared.push(id);
 
 try {
+  const { initWeather, drawBloom } = await import('../ui/overworld/effects.js');
+  const originalDocument = globalThis.document;
+  globalThis.document = { createElement: () => ({ width: 0, height: 0, getContext: () => null }) };
+  try {
+    assert.doesNotThrow(() => initWeather('village'),
+      'weather initialization must survive unavailable offscreen canvas contexts');
+    assert.doesNotThrow(() => drawBloom(null),
+      'optional bloom must be skipped when its canvas context is unavailable');
+  } finally {
+    if (originalDocument === undefined) delete globalThis.document;
+    else globalThis.document = originalDocument;
+  }
+
   const { start, startAutosave } = await import('../ui/overworld/render.js');
   const renderSource = await readFile(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
   const overworldSource = await readFile(new URL('../ui/overworld.js', import.meta.url), 'utf8');
