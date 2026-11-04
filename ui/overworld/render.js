@@ -109,17 +109,17 @@ function tick(ts) {
       // Погодные эффекты в бою
       if (ow.combat) {
         if (theme.weather === 'rain' && _weatherEffectApplied !== 'def') {
-          p.effects = (p.effects || []).filter(e => e._weatherEffect !== true);
+          p.effects = (Array.isArray(p.effects) ? p.effects : []).filter(e => e?._weatherEffect !== true);
           p.effects.push({ id: 'defBuff', duration: 999, _weatherEffect: true });
           _weatherEffectApplied = 'def';
         } else if (['shadow', 'void-crater'].includes(ow.locationId) && _weatherEffectApplied !== 'atk') {
-          p.effects = (p.effects || []).filter(e => e._weatherEffect !== true);
+          p.effects = (Array.isArray(p.effects) ? p.effects : []).filter(e => e?._weatherEffect !== true);
           p.effects.push({ id: 'atkBuff', duration: 999, _weatherEffect: true });
           _weatherEffectApplied = 'atk';
         }
       } else {
         if (_weatherEffectApplied) {
-          p.effects = (p.effects || []).filter(e => e._weatherEffect !== true);
+          p.effects = (Array.isArray(p.effects) ? p.effects : []).filter(e => e?._weatherEffect !== true);
           _weatherEffectApplied = null;
         }
       }
