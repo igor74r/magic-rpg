@@ -59,6 +59,8 @@ for (let version = 1; version <= 16; version++) {
   }
   const migrated = migrateGame(fixture);
   try {
+    assert.doesNotThrow(() => validateCurrentSaveShape(migrated),
+      'every supported legacy version must migrate into a valid current save');
     assert.equal(migrated.version, 17);
     assert.equal(migrated.player.name, 'Migration Fixture');
     assert.equal(migrated.player.level, 12);
