@@ -67,6 +67,11 @@ assert.equal(equipBest(), true, 'equip-best must include socketed rune bonuses')
 assert.equal(player.equipped.ring1.id, 'ring-quiet-tide', 'rune-enhanced ring must replace weaker ring');
 
 const ui = await readFile(new URL('../ui/inventory.js', import.meta.url), 'utf8');
+assert.match(ui, /rune\.dex \|\| 0/);
+assert.match(ui, /rune\.armorPen \|\| 0/);
+assert.match(ui, /rune\.blockChance \|\| 0/);
+assert.match(ui, /rune\.blockPower \|\| 0/,
+  'inventory item power must include every combat-relevant rune bonus');
 assert.doesNotMatch(ui, /\son(?:click|mouseover|mouseout)\s*=/i, 'inventory UI must not emit inline event handlers');
 assert.match(ui, /data-inv-action="socket-rune"/);
 assert.match(ui, /data-sale-action="confirm"/);
