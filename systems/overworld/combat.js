@@ -134,8 +134,8 @@ function enemyDamageMultiplier(enemy, style) {
 
 function applyElementalReaction(enemy, element) {
   if (!enemy || !Array.isArray(enemy.effects)) return 1;
-  const has = id => enemy.effects.some(effect => effect.id === id);
-  const remove = id => { enemy.effects = enemy.effects.filter(effect => effect.id !== id); };
+  const has = id => enemy.effects.some(effect => effect?.id === id);
+  const remove = id => { enemy.effects = enemy.effects.filter(effect => effect?.id !== id); };
   let multiplier = 1;
 
   if (element === 'ice' && has('burn')) {
@@ -475,7 +475,7 @@ export function combatCastSpell(spellId) {
   }
 
   const freeMana = p.effects?.some(
-    effect => effect.id === 'manaShield'
+    effect => effect?.id === 'manaShield'
   );
 
   if (!freeMana && p.mp < spell.cost) {
@@ -615,7 +615,7 @@ export function combatUseAbility(abilityId) {
   }
 
   const freeMana = p.effects?.some(
-    effect => effect.id === 'manaShield'
+    effect => effect?.id === 'manaShield'
   );
 
   if (!freeMana && p.mp < (ability.cost || 0)) {
@@ -1590,7 +1590,7 @@ function combatVictory() {
   const goldWasCapped = gold < rawGold;
 
   const hasElderBlessing = p.effects?.some(
-    effect => effect.id === 'elderBlessing'
+    effect => effect?.id === 'elderBlessing'
   );
 
   let savedBlessingDuration = 0;
@@ -1606,7 +1606,7 @@ function combatVictory() {
     exp = Math.round(exp * 1.2);
 
     const blessing = p.effects.find(
-      effect => effect.id === 'elderBlessing'
+      effect => effect?.id === 'elderBlessing'
     );
 
     blessing.duration -= 1;
@@ -1614,7 +1614,7 @@ function combatVictory() {
 
     if (blessing.duration <= 0) {
       p.effects = p.effects.filter(
-        effect => effect.id !== 'elderBlessing'
+        effect => effect?.id !== 'elderBlessing'
       );
 
       pushLog(
