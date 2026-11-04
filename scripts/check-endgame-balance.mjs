@@ -90,6 +90,12 @@ for (const invalidFloor of [0, -1, 1.5, NaN, Infinity, -Infinity, '5', Number.MA
 }
 assert.equal(getRiftMult(5).hpMult, 1.6);
 assert.equal(getRiftMult(5).atkMult, 1.4);
+for (const invalidFloor of [0, -1, 1.5, NaN, Infinity, -Infinity, '5', Number.MAX_SAFE_INTEGER + 1]) {
+  assert.deepEqual(getTowerMult(invalidFloor), getTowerMult(1),
+    `invalid Tower floor ${String(invalidFloor)} must use safe baseline multipliers`);
+}
+assert.deepEqual(getTowerMult(TOWER_MAX_FLOOR + 1), getTowerMult(TOWER_MAX_FLOOR),
+  'valid floors above the Tower cap must remain clamped to the final floor');
 
 const previousGame = state.game;
 try {
