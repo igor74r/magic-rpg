@@ -12,7 +12,7 @@
 - **Этап 2 — коллизии:** существуют независимые коллайдеры стен зданий и крупных props; добавлены 12 природных ground-footprint коллайдеров для деревьев, камней, пня, изгородей и оград. Кроны остаются проходимыми.
 - **Этап 3 — depth-sort:** здания/природа сортируются по основанию спрайта, 96px prop-кадры — по нижней границе; тестируется и реальный вывод `spawnStatics()`.
 - **Этап 4 — художественная сборка:** обновлены Aurora ground atlas (8 вариантов) и village props atlas (16 кадров); восемь различных фасадов зданий уже имеют отдельные Pixel Art renderer designs; природные объекты рисуются в общей пиксельной палитре.
-- **Этап 5 — качество:** на HEAD `4659bdcc35b95c2618b54728cccc22bcbdd33837` CI, desktop/mobile smoke, desktop/mobile visual regression и GitHub Pages deployment прошли. Интеграционная проверка фактических depth anchor и плоского Aurora lighting прошла CI, desktop/mobile smoke, desktop/mobile visual regression и deployment на HEAD `8adb744`.
+- **Этап 5 — качество:** на HEAD `4659bdcc35b95c2618b54728cccc22bcbdd33837` CI, desktop/mobile smoke, desktop/mobile visual regression и GitHub Pages deployment прошли. Интеграционная проверка фактических depth anchor и плоского Aurora lighting прошла CI, desktop/mobile smoke, desktop/mobile visual regression и deployment на HEAD `fe148208`.
 
 **Открыто:** завершить визуальную переработку оставшихся природных/архитектурных вариантов и персонажей/NPC, оценить полный набор игровых сцен, проверить доступность всех проходов с новыми реальными depth anchors и повторить полный CI после текущих изменений. Это не финальная готовность Aurora Village.
 
@@ -263,3 +263,11 @@ assets/tiles/
 - `scripts/check-render-depth-order.mjs`: проверяет фактические `depthY`, создаваемые `spawnStatics()`, для здания, дерева и 96px prop.
 - Повторно проверены desktop/mobile browser smoke и gameplay visual regression; скриншоты просмотрены вручную. Сцена Авроры стала заметно светлее и сохраняет чёткие пиксельные контуры.
 - GitHub Actions CI PASS и GitHub Pages deployment PASS на HEAD `8adb744fb95dbfcc59faf3b60e35649a2b741b1d`. CI: https://github.com/igor74r/magic-rpg/actions/runs/41871414096 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41871414112 .
+
+
+## 04.11.2026 — Depth anchors для сюжетных декораций
+
+- `systems/overworld/spawn.js`: три динамически добавляемых сюжетных объекта Авроры (знамя Пепельного Вестника, морозный фонарь Ледяной Хватки, мемориал Кровавой Короны) теперь получают `depthY` по нижней границе 96px prop-кадра.
+- `scripts/check-render-depth-order.mjs`: интеграционно проверяет depth anchors для всех трёх сюжетных декораций через реальный `spawnStatics()`, временно выставляя флаги побед и восстанавливая исходное состояние.
+- CI PASS (включая Aurora layout/collision, все depth-sort tests, desktop/mobile smoke и visual regression) и Pages deployment PASS на HEAD `fe14820833eab35a36bc6f592ce24fe1187aa274`.
+- CI: https://github.com/igor74r/magic-rpg/actions/runs/41872002645 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41872002846 .
