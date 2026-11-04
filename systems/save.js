@@ -109,7 +109,14 @@ export function validateCurrentSaveShape(game) {
   if (version !== SAVE_VERSION) return true;
   const player = game.player;
   const isRecord = value => !!value && typeof value === 'object' && !Array.isArray(value);
-  if (typeof player.name !== 'string' || !player.name.trim() ||
+  const finitePlayerFields = ['hp', 'maxHp', 'mp', 'maxMp', 'str', 'int', 'wis', 'con', 'dex', 'luck'];
+  if (finitePlayerFields.some(key => !Number.isFinite(player[key])) ||
+      player.hp < 0 || player.maxHp <= 0 || player.mp < 0 || player.maxMp <= 0 ||
+      !Number.isSafeInteger(player.exp) || player.exp < 0 ||
+      !Number.isSafeInteger(player.statPoints) || player.statPoints < 0 ||
+      !Number.isSafeInteger(player.passivePoints) || player.passivePoints < 0 ||
+      player.luck < 0 || player.luck > 100 ||
+      typeof player.name !== 'string' || !player.name.trim() ||
       !['warrior', 'mage', 'archer', 'priest'].includes(player.class) ||
       !Number.isSafeInteger(player.level) || player.level < 1 || player.level > 100 ||
       !Number.isSafeInteger(player.gold) || player.gold < 0 ||
