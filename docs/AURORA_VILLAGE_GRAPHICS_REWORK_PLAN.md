@@ -327,3 +327,12 @@ assets/tiles/
 - Пиксельный орнамент пола перенесён на передний план, его положение больше не перекрывается карточками предметов; финальный cache-busting обновлён.
 
 - Уменьшена зернистость газона: основная текстура смешивается с плоской базой, декоративных травяных кластеров 3–5 на тайл при низкой alpha. Путь остаётся непрозрачным; Canvas alpha всегда восстанавливается.
+
+
+## Pixel cleanup follow-up — 04.11.2026
+
+- Grass atlas is drawn at alpha 0.26 over the flat ground base; decorative grass is limited to 2–3 low-contrast clusters per tile at alpha 0.14.
+- Character shadows (hero, NPCs and creatures) use three stepped rectangular bands instead of antialiased ellipses.
+- Visual contract checks guard grass density/opacity, Canvas alpha restoration and absence of ellipse shadows.
+- Browser visual regression and GitHub Pages deployment passed for the implementation commits. A later documentation-only commit is awaiting its own CI confirmation.
+- Remaining scope: continue the complete file-by-file main-branch audit and evaluate further Aurora art coverage (especially the remaining character and nature variants) before calling the rework complete.
