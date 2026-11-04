@@ -99,6 +99,36 @@ assert.equal(buyer.gold, Number.MAX_SAFE_INTEGER);
 assert.equal(buyer.inventory.length, 1, 'overflowing sale must not remove the item');
 buyer.gold = 1000;
 
+// A failed storage write must roll back bulk sale and buyback as one transaction.
+buyer.inventory = [{ id: 'iron-sword', qty: 1, rarity: 'common' }];
+buyer.buyback = [{ id: 'prior-record', soldAt: new Date().toDateString(), price: 50, item: { id: 'health-potion', qty: 1 } }];
+buyer.stats.goldEarned = 7;
+const saleBefore = {
+  inventory: JSON.stringify(buyer.inventory), gold: buyer.gold,
+  buyback: JSON.stringify(buyer.buyback), goldEarned: buyer.stats.goldEarned
+};
+globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
+const failedSale = sellItemsByIndices([0], { confirmed: true });
+assert.equal(failedSale.ok, false, 'sale must report a storage failure');
+assert.equal(JSON.stringify(buyer.inventory), saleBefore.inventory, 'failed sale must restore the exact inventory');
+assert.equal(buyer.gold, saleBefore.gold, 'failed sale must restore gold');
+assert.equal(JSON.stringify(buyer.buyback), saleBefore.buyback, 'failed sale must restore buyback records');
+assert.equal(buyer.stats.goldEarned, saleBefore.goldEarned, 'failed sale must restore earned-gold statistics');
+
+buyer.inventory = [];
+buyer.gold = 1000;
+buyer.buyback = [{
+  id: 'retry-buyback', soldAt: new Date().toDateString(), price: 50,
+  item: { id: 'iron-sword', qty: 1, rarity: 'common' }
+}];
+const buybackBefore = { gold: buyer.gold, buyback: JSON.stringify(buyer.buyback) };
+const failedBuyback = buybackItem(0);
+assert.equal(failedBuyback.ok, false, 'buyback must report a storage failure');
+assert.equal(buyer.inventory.length, 0, 'failed buyback must not grant an unpersisted item');
+assert.equal(buyer.gold, buybackBefore.gold, 'failed buyback must restore gold');
+assert.equal(JSON.stringify(buyer.buyback), buybackBefore.buyback, 'failed buyback must preserve its retryable record');
+globalThis.localStorage.setItem = (key, value) => saved.set(key, String(value));
+
 state.game = null;
 if (originalStorage === undefined) delete globalThis.localStorage;
 else globalThis.localStorage = originalStorage;
