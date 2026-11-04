@@ -463,20 +463,34 @@ export function newGameSlot(slot) {
 }
 
 export function deleteSlot(slot) {
-  if (!confirm(`Удалить слот ${slot}? Это необратимо.`)) return;
-  deleteSave(slot);
+  if (!confirm(`Удалить слот ${slot}? Это необратимо.`)) return false;
+  if (!deleteSave(slot)) {
+    toast(`❌ Не удалось удалить слот ${slot}. Сохранение не удалено.`);
+    renderSlots();
+    return false;
+  }
   toast(`Слот ${slot} удалён`);
   renderSlots();
+  return true;
 }
 
 export function deleteAllSaves() {
-  if (!confirm('Удалить ВСЕ сохранения во всех 3 слотах?\n\nЭто необратимо. Прогресс будет потерян.')) return;
+  if (!confirm('Удалить ВСЕ сохранения во всех 3 слотах?\n\nЭто необратимо. Прогресс будет потерян.')) return false;
   const max = getMaxSlot();
-  for (let i = 1; i <= max; i++) deleteSave(i);
+  const failedSlots = [];
+  for (let i = 1; i <= max; i++) {
+    if (!deleteSave(i)) failedSlots.push(i);
+  }
+  if (failedSlots.length) {
+    toast(`❌ Не удалось удалить слоты: ${failedSlots.join(', ')}. Проверьте доступ к хранилищу.`);
+    renderSlots();
+    return false;
+  }
   state.game = null;
   state.currentSlot = 1;
   toast('Все сохранения удалены');
   renderSlots();
+  return true;
 }
 
 export function saveAndMenu() {
