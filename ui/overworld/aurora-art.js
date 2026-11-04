@@ -124,6 +124,81 @@ function makeBuilding(style){
   const p=PALETTES[style]||PALETTES.home;
   rect(g,4,82,96,6,'#384034');rect(g,8,80,88,3,'#59624a');
   ({hall:drawHall,forge:drawForge,healer:drawHealer,alchemy:drawAlchemy,market:drawMarket,tavern:drawTavern,home:drawHome}[style]||drawHome)(g,p);
+  // Architectural finish pass: roof courses, projecting eaves, readable craft props,
+  // and small foreground garden pieces make each silhouette feel inhabited.
+  function roofCourses(){
+    for(let yy=28;yy<47;yy+=4){
+      const inset=Math.max(0,Math.floor((yy-28)*1.15));
+      for(let xx=10+inset;xx<94-inset;xx+=12){
+          rect(g,xx,yy,7,1,yy%8===0?p.roof2:p.roof);
+          pixel(g,xx+7,yy,p.trim);
+      }
+    }
+    rect(g,8,47,88,2,p.timber);
+    for(let xx=12;xx<94;xx+=10) rect(g,xx,48,2,3,p.trim);
+  }
+  roofCourses();
+  // Repeated timber braces and stone foundation joints, deliberately irregular.
+  for(let xx=14;xx<92;xx+=18){
+    rect(g,xx,44,2,27,p.timber);
+    rect(g,xx+2,44,4,2,p.trim);
+    rect(g,xx-1,70,5,2,p.stone);
+  }
+  // Lanterns are warm pixel clusters, never blurred lighting.
+  function lantern(xx,yy){
+    rect(g,xx,yy,4,5,p.timber); pixel(g,xx+1,yy+2,'#ffd87a');
+    pixel(g,xx+2,yy+2,'#ffe9a6'); rect(g,xx+1,yy+5,2,1,p.accent);
+  }
+  lantern(36,49); lantern(64,49);
+  // Individual building identities: signboards, planters, barrels, craft displays.
+  if(style==='hall'){
+    rect(g,41,31,22,5,p.timber);rect(g,43,32,18,2,p.accent);
+    pixel(g,51,32,'#f5e3b8');pixel(g,52,32,'#f5e3b8');
+    rect(g,37,78,30,2,p.trim);
+    for(let xx=39;xx<66;xx+=6){pixel(g,xx,76,p.accent);pixel(g,xx+1,75,p.trim);}
+  } else if(style==='forge'){
+    rect(g,9,53,16,3,p.timber);rect(g,11,51,12,2,p.accent);
+    rect(g,13,54,8,4,'#ff9b45');pixel(g,15,53,'#ffd27a');
+    rect(g,82,58,8,12,p.timber);rect(g,84,56,4,3,p.trim);
+    rect(g,87,58,2,5,p.accent);
+  } else if(style==='healer'){
+    // Herb troughs and colored medicinal bottles along the wall.
+    rect(g,12,67,18,5,p.timber);rect(g,13,66,16,2,p.stone);
+    for(let xx=14;xx<28;xx+=4){pixel(g,xx,64,'#7eaa69');pixel(g,xx+1,63,'#b7cf83');}
+    rect(g,73,67,15,5,p.timber);
+    pixel(g,76,65,'#91d4c1');pixel(g,80,64,'#d9a9c5');pixel(g,85,65,'#f1d88a');
+  } else if(style==='alchemy'){
+    rect(g,10,64,13,6,p.timber);rect(g,12,62,9,3,p.trim);
+    pixel(g,14,61,'#9de0c2');pixel(g,17,60,'#bca6e0');
+    rect(g,82,64,9,6,p.timber);pixel(g,84,62,'#9de0c2');pixel(g,87,61,'#d7b8ed');
+    rect(g,41,53,3,9,p.timber);rect(g,39,51,7,3,p.trim);
+  } else if(style==='market'){
+    // Awnings now carry scalloped hems and merchandise silhouettes.
+    for(let xx=20;xx<88;xx+=12){
+      rect(g,xx,59,7,2,p.trim);pixel(g,xx+3,61,p.timber);
+    }
+    rect(g,11,69,13,7,p.timber);rect(g,12,67,11,3,p.accent);
+    rect(g,78,69,14,7,p.timber);rect(g,79,67,12,3,p.roof2);
+    pixel(g,15,65,'#e8d4aa');pixel(g,82,65,'#e8d4aa');
+  } else if(style==='tavern'){
+    // Hanging sign and balcony rails distinguish the inn from a generic house.
+    rect(g,68,33,3,13,p.timber);rect(g,64,37,12,7,p.timber);
+    rect(g,65,38,10,5,p.accent);pixel(g,69,39,p.trim);
+    rect(g,30,42,44,2,p.timber);rect(g,32,39,2,4,p.trim);rect(g,70,39,2,4,p.trim);
+    for(let xx=35;xx<70;xx+=8) rect(g,xx,42,2,5,p.timber);
+  } else {
+    // Residential flower boxes, stacked firewood and a visible doorstep.
+    rect(g,17,64,14,3,p.timber);rect(g,18,65,12,2,p.accent);
+    for(let xx=19;xx<29;xx+=3){pixel(g,xx,63,'#7eaa69');pixel(g,xx+1,62,'#d5a5bf');}
+    rect(g,76,65,10,5,p.timber);rect(g,77,63,8,2,p.stone);
+    for(let xx=78;xx<85;xx+=3) rect(g,xx,64,2,4,p.accent);
+  }
+  // Moss and small grass tufts at the base break the hard cutout edge.
+  for(let xx=10;xx<95;xx+=11){
+    pixel(g,xx,81,'#71864a');pixel(g,xx+1,80,'#9aab66');
+    if(xx%3===0) pixel(g,xx+3,82,'#d5bd70');
+  }
+
   // Individual stone chips, moss and timber pegs; all aligned to the pixel grid.
   for(let i=0;i<16;i++){const x=9+(i*29)%86,y=73+(i*7)%9;pixel(g,x,y,i%3===0?p.accent:p.stone);}
   return c;
