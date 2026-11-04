@@ -132,6 +132,9 @@ assert.ok(effectsSource.includes("weather: 'ash'"), 'Aurora must have a restrain
 assert.ok(effectsSource.includes('vignette: 0.26') && effectsSource.includes('fog: 0.38'), 'Aurora ambient darkness must preserve village detail');
 assert.ok(effectsSource.includes("getCurrentBiome() === 'village' ? '#f3c879'"), 'Aurora night fireflies must use warm light');
 const renderSource = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
+assert.ok(renderSource.includes('drawAuroraGardenBedTile'), 'Aurora garden tiles must use their dedicated pixel-art renderer');
+assert.ok(renderSource.includes("if (themeName === 'village')"), 'Aurora terrain must be handled before generic biome atlases');
+assert.ok(renderSource.includes('drawAuroraFallbackTile'), 'Aurora must have a dedicated crisp fallback when its ground atlas is unavailable');
 assert.ok(renderSource.includes('villageNightAlpha'), 'Aurora must have a softer day/night tint');
 assert.ok(renderSource.includes("ow.locationId === 'village' ? 0.38"), 'Aurora ambient fog must be lighter than other regions');
 
