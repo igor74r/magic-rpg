@@ -156,7 +156,15 @@ export function canAddItem(id, qty = 1, player = state.game?.player) {
   const amount = qty;
   const nextWeight = getInventoryWeight(player) + getItemUnitWeight(item) * amount;
   const stackable = STACKABLE_TYPES.has(item.type);
-  const existing = stackable && (player.inventory || []).some(inst => inst.id === id && !inst.rarity);
+  const existing = stackable
+    ? (player.inventory || []).find(inst => inst.id === id && !inst.rarity)
+    : null;
+  const currentStackQty = existing
+    ? (Number.isSafeInteger(existing.qty) && existing.qty > 0 ? existing.qty : 1)
+    : 0;
+  if (existing && !Number.isSafeInteger(currentStackQty + amount)) {
+    return { ok: false, reason: 'quantity' };
+  }
   const addedSlots = ['quest', 'material'].includes(item.type) || existing ? 0 : stackable ? 1 : amount;
   const nextSlots = getInventorySlotCount(player) + addedSlots;
   if (nextSlots > 30) return { ok: false, reason: 'slots', slots: nextSlots, maxSlots: 30 };
@@ -176,8 +184,14 @@ export function addItem(id, qty = 1, opts = {}) {
 
   if (STACKABLE_TYPES.has(item.type)) {
     const existing = inv.find(i => i.id === id && !i.rarity);
-    if (existing) existing.qty += amount;
-    else inv.push({ id, qty: amount });
+    if (existing) {
+      const currentQty = Number.isSafeInteger(existing.qty) && existing.qty > 0
+        ? existing.qty
+        : 1;
+      existing.qty = currentQty + amount;
+    } else {
+      inv.push({ id, qty: amount });
+    }
     return [{ id, qty: amount }];
   }
 
