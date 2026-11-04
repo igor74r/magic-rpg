@@ -69,3 +69,14 @@
 
 ## Итог
 На проверенном HEAD все автоматические проверки CI, включая desktop/mobile browser smoke и visual regression, завершились успешно; GitHub Pages deployment также успешен. Исправлены три подтверждённых дефекта (неполная syntax coverage, несогласованный XP threshold NG+, отсутствие rollback при ошибке persistence). Этот статус не следует подменять утверждением, будто выполнен независимый построчный ручной аудит всех 198 файлов.
+
+
+## Продолжение аудита — срез 04.11.2026 после Aurora art pass
+
+- Текущий инвентарь main на проверке: Git tree API truncated=false, **202 файла**: 71 .js, 76 .mjs, 6 .css, 30 .png, 4 .mp3, 1 .html, 1 .json, 2 .yml, 9 .md, .gitignore и .nojekyll.
+- CI run [41883204150](https://github.com/igor74r/magic-rpg/actions/runs/41883204150) на commit 85bd4988204e609da78e165dd706a11ef5c75386 завершился **success**: все 81 шаг workflow успешны, включая синтаксис, импорты, GameAPI, игровые контракты, визуальные ресурсы, desktop/mobile browser smoke и gameplay visual regression.
+- Артефакт браузерных кадров: rpg-visual-regression-screenshots (artifact 13350720999). Визуально просмотрены desktop/mobile кадры двора Авроры и все шесть интерьеров.
+- Дополнительные исправления: crop PNG nature frames по alpha bounds; снижение шумности газона (grass atlas alpha 0.42, 3–5 низкоконтрастных кластеров alpha 0.24); шесть отдельных палитр очагов/окон; исправление перекрытия заголовка кнопкой закрытия; выравнивание props и передний план floor pixel motif.
+- index.html и scripts/check-startup-fallback.mjs согласованы по cache key 20261104-aurora-flat-ground-5 для main.js и css/2d-art-direction.css.
+- .gitignore теперь исключает node_modules/, .npm/, coverage, Playwright reports/results и генерируемые test-artifacts/visual-regression/.
+- Статус не завышать: CI подтверждает автоматические контракты и проверенные browser captures, но не заменяет независимый построчный ручной анализ всех 202 файлов. Полная художественная переработка Aurora остаётся открытой по NPC/персонажам и оставшимся вариантам природных/архитектурных ассетов. GitHub Pages deployment для этого среза ещё нужно подтвердить отдельно после завершения очереди deploy workflow.
