@@ -66,9 +66,38 @@ export function getVillagePropColliders(statics = LOCATIONS.village.statics) {
     });
 }
 
+// Solid natural scenery uses only its visible ground-contact footprint.
+// Canopies stay non-solid so the player can pass behind/under tree crowns.
+const NATURE_COLLISION_BOUNDS = Object.freeze({
+  oak: { left: -8, top: -3, width: 16, height: 12 },
+  pine: { left: -8, top: -3, width: 16, height: 12 },
+  rock: { left: -20, top: -23, width: 40, height: 15 },
+  stump: { left: -15, top: -23, width: 30, height: 16 },
+  hedge: { left: -31, top: -15, width: 62, height: 17 },
+  fence: { left: -35, top: -5, width: 70, height: 12 }
+});
+
+export function getVillageNatureColliders(statics = LOCATIONS.village.statics) {
+  return statics.filter(item => item?.natureStyle && NATURE_COLLISION_BOUNDS[item.natureStyle])
+    .map(item => {
+      const bounds = NATURE_COLLISION_BOUNDS[item.natureStyle];
+      const x = item.x * TILE + TILE / 2;
+      const y = item.y * TILE + TILE / 2;
+      return {
+        id: item.id,
+        part: 'nature-base',
+        x: x + bounds.left,
+        y: y + bounds.top,
+        width: bounds.width,
+        height: bounds.height
+      };
+    });
+}
+
 const DEFAULT_VILLAGE_COLLIDERS = [
   ...getVillageBuildingColliders(),
-  ...getVillagePropColliders()
+  ...getVillagePropColliders(),
+  ...getVillageNatureColliders()
 ];
 
 export function isVillagePositionBlocked(x, y, radius = 10, statics = LOCATIONS.village.statics) {
