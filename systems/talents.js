@@ -298,7 +298,14 @@ export function resetTalents(player) {
 
   const cost = 500;
 
-  if ((player.gold || 0) < cost) {
+  if (!Number.isSafeInteger(player.gold) || player.gold < 0 ||
+      !Number.isFinite(player.hp) || player.hp < 0 ||
+      !Number.isFinite(player.maxHp) || player.maxHp <= 0 ||
+      !Number.isFinite(player.mp) || player.mp < 0 ||
+      !Number.isFinite(player.maxMp) || player.maxMp < 0) {
+    return { ok: false, msg: 'Некорректное состояние персонажа' };
+  }
+  if (player.gold < cost) {
     return { ok: false, msg: `Нужно ${cost}💰` };
   }
 
