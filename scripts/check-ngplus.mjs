@@ -39,6 +39,7 @@ try {
       buffs: [{ id: 'bardBuff', duration: 2 }], effects: [{ id: 'poison', duration: 2 }]
     }
   };
+  ready.location = 'dragon-lair';
   state.game = ready;
   const readyPlayerSnapshot = { ...ready.player };
   const readyGameSnapshot = {
