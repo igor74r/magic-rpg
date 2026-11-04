@@ -39,7 +39,7 @@ export function tickEffects(target) {
     // ordinary end-of-turn damage tick that runs on the same action.
     if (!def.skipTurn) e.duration -= 1;
   }
-  target.effects = target.effects.filter(e => e && typeof e === 'object' && !Array.isArray(e) && !!EFFECTS[e.id] && Number.isFinite(e.duration) && e.duration > 0);
+  target.effects = target.effects.filter(e => e && typeof e === 'object' && !Array.isArray(e) && !!EFFECTS[e?.id] && Number.isFinite(e.duration) && e.duration > 0);
   if (target.stunImmunityTurns > 0) target.stunImmunityTurns -= 1;
   return { totalDamage, messages };
 }
@@ -53,7 +53,7 @@ export function getAtkMult(target) {
   if (!target || !Array.isArray(target.effects)) return 1;
   let mult = 1;
   for (const e of target.effects) {
-    const def = EFFECTS[e.id];
+    const def = EFFECTS[e?.id];
     if (def?.atkMult) mult *= def.atkMult;
   }
   return mult;
@@ -63,7 +63,7 @@ export function getDefMult(target) {
   if (!target || !Array.isArray(target.effects)) return 1;
   let mult = 1;
   for (const e of target.effects) {
-    const def = EFFECTS[e.id];
+    const def = EFFECTS[e?.id];
     if (def?.defMult) mult *= def.defMult;
   }
   return mult;
@@ -73,7 +73,7 @@ export function getLifesteal(target) {
   if (!target || !Array.isArray(target.effects)) return 0;
   let pct = 0;
   for (const e of target.effects) {
-    const def = EFFECTS[e.id];
+    const def = EFFECTS[e?.id];
     if (def?.lifestealPct) pct = Math.max(pct, def.lifestealPct);
   }
   return pct;
@@ -94,5 +94,5 @@ export function consumeStun(target) {
 
 export function clearDebuffs(target) {
   if (!target || !Array.isArray(target.effects)) return;
-  target.effects = target.effects.filter(e => e && typeof e === 'object' && !Array.isArray(e) && EFFECTS[e.id]?.type !== 'debuff');
+  target.effects = target.effects.filter(e => e && typeof e === 'object' && !Array.isArray(e) && EFFECTS[e?.id]?.type !== 'debuff');
 }
