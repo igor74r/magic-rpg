@@ -169,12 +169,19 @@ try {
   assert.equal(f.ow.combat.playerResurrectionUsed, true);
   f.p.hp = 1;
   f.ow.player.hp = 1;
-  combatBlock();
-  runEnemyTurn();
+  const originalSetItemForDefeat = globalThis.localStorage.setItem;
+  globalThis.localStorage.setItem = () => { throw new Error('simulated defeat save quota'); };
+  try {
+    combatBlock();
+    runEnemyTurn();
+  } finally {
+    globalThis.localStorage.setItem = originalSetItemForDefeat;
+  }
   assert.equal(f.ow.combat, null, 'second lethal hit must end combat after resurrection is spent');
   assert.equal(f.ow.defeated, true);
   assert.equal(f.p.stats.deaths, 1);
-  console.log('PASS resurrection is one-use and subsequent defeat is recorded');
+  assert.ok(f.ow.log.some(entry => entry.cls === 'warning' && entry.msg.includes('Не удалось сохранить поражение')), 'failed defeat save must be visible in the combat log');
+  console.log('PASS resurrection is one-use; defeat remains coherent and warns when persistence fails');
 
   // Forced flee ends combat without killing the enemy or awarding rewards.
   f = fixture('warrior', 'goblin');
