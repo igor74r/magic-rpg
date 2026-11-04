@@ -14,7 +14,7 @@ for (const [biome, row] of Object.entries(manifest.biomeRows)) {
 for (const asset of [
   'assets/tiles/terrain/atlas.png',
   'assets/aurora/ground-atlas.png',
-  'assets/aurora/village-props-atlas.png','assets/aurora/world-portal.png',
+  'assets/aurora/village-props-atlas.png','assets/aurora/nature-atlas.png','assets/aurora/world-portal.png',
   'assets/tiles/dungeons/atlas.png',
   'assets/tiles/props/atlas.png',
   'assets/branding/mana-crystal.png',
@@ -48,11 +48,17 @@ assert.deepEqual(manifest.auroraGround?.types, ['grass', 'path']);
 const propsPng = readFileSync(new URL('../assets/aurora/village-props-atlas.png', import.meta.url));
 assert.equal(propsPng.readUInt32BE(16), 1024, 'Aurora village prop atlas must contain sixteen 64px frames');
 assert.equal(propsPng.readUInt32BE(20), 64, 'Aurora village prop atlas must be 64px high');
+const naturePng = readFileSync(new URL('../assets/aurora/nature-atlas.png', import.meta.url));
+assert.equal(naturePng.readUInt32BE(16), 512, 'Aurora nature atlas must contain eight 64px frames');
+assert.equal(naturePng.readUInt32BE(20), 80, 'Aurora nature atlas must preserve 64×80 source frames');
+assert.equal(naturePng[25], 6, 'Aurora nature atlas must preserve transparent RGBA pixels');
+assert.equal(manifest.auroraNature?.columns, 8, 'Aurora nature atlas must define eight authored styles');
+assert.deepEqual(manifest.auroraNature?.styles, ['oak','pine','bush','rock','stump','hedge','fence','flowerbed']);
 const portalPng = readFileSync(new URL('../assets/aurora/world-portal.png', import.meta.url));
 assert.equal(portalPng.readUInt32BE(16), 64, 'Aurora world portal sprite must be 64px wide');
 assert.equal(portalPng.readUInt32BE(20), 64, 'Aurora world portal sprite must be 64px high');
 assert.equal(manifest.auroraWorldPortal?.columns, 1, 'Aurora world portal must use its dedicated authored sprite');
-const pngAssets = ['assets/aurora/ground-atlas.png','assets/aurora/village-props-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
+const pngAssets = ['assets/aurora/ground-atlas.png','assets/aurora/village-props-atlas.png','assets/aurora/nature-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
 function crc32Png(buffer) {
   let crc = 0xffffffff;
   for (const byte of buffer) {
@@ -95,6 +101,9 @@ const locationsSource = readFileSync(new URL('../data/locations.js', import.meta
 const locationPropStyles = [...locationsSource.matchAll(/propStyle:\s*['"]([^'"]+)['"]/g)].map(match => match[1]);
 const villageSprites = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
 assert.ok(villageSprites.includes('const VILLAGE_PROP_FRAMES = new Map(['), 'village props must use the authored PNG atlas');
+assert.ok(villageSprites.includes('const AURORA_NATURE_FRAMES = new Map(['), 'Aurora nature must use the authored PNG atlas');
+assert.ok(villageSprites.includes("new URL('../../assets/aurora/nature-atlas.png', import.meta.url)"), 'Aurora nature atlas must load from its manifest asset path');
+assert.ok(villageSprites.includes('ctx.drawImage(atlas,frame*64,0,64,80'), 'Aurora nature atlas must sample each 64×80 frame crisply');
 assert.ok(villageSprites.includes('frame * 64, 0, 64, 64'), 'village props must sample the 64px atlas frames');
 assert.ok(villageSprites.includes('ctx.imageSmoothingEnabled = false'), 'village prop atlas must render with crisp nearest-neighbour pixels');
 assert.ok(villageSprites.includes('  } finally {\n    ctx.restore();'), 'village prop draws must restore Canvas state after failures');
