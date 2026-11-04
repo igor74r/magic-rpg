@@ -2,6 +2,11 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const menu = await readFile(new URL('../ui/menu.js', import.meta.url), 'utf8');
+const save = await readFile(new URL('../systems/save.js', import.meta.url), 'utf8');
+assert.match(save, /export function deleteSave\(slot, \{ preserveActiveState = false \} = \{\}\)/,
+  'save deletion must support preserving the active game during a bulk transaction');
+assert.match(save, /if \(!preserveActiveState\) state\.game = null/,
+  'single-slot deletion must clear the active game while bulk deletion can defer it');
 
 const cleanupStart = menu.indexOf('function clearOverworldRuntime()');
 assert.notEqual(cleanupStart, -1, 'menu must expose a shared overworld runtime cleanup');
