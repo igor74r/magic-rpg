@@ -734,6 +734,21 @@ const VILLAGE_PROP_FRAMES = new Map([
   ['anvil', 8], ['woodpile', 9], ['cart', 10], ['barrels', 11],
   ['herb-rack', 12], ['frost-lantern', 13], ['rift-ward', 14], ['tower-gate', 15]
 ]);
+// Authored 16-bit nature atlas; keep the procedural canvas as a load-time fallback.
+const AURORA_NATURE_FRAMES = new Map([
+  ['oak', 0], ['pine', 1], ['bush', 2], ['rock', 3],
+  ['stump', 4], ['hedge', 5], ['fence', 6], ['flowerbed', 7]
+]);
+let auroraNatureAtlas = null;
+function getAuroraNatureAtlas() {
+  if (typeof Image === 'undefined') return null;
+  if (!auroraNatureAtlas) {
+    auroraNatureAtlas = new Image();
+    auroraNatureAtlas.src = new URL('../../assets/aurora/nature-atlas.png', import.meta.url).href;
+  }
+  return auroraNatureAtlas;
+}
+
 // Crisp, cached 16-bit pixel vegetation for Aurora's outer gardens.
 const AURORA_NATURE_CACHE = new Map();
 function getAuroraNatureSprite(style) {
@@ -800,15 +815,21 @@ function getAuroraNatureSprite(style) {
   return canvas;
 }
 function drawAuroraNature(ctx,x,y,style){
-  const sprite=getAuroraNatureSprite(style);
   const compact = style==='fence' || style==='flowerbed';
   const hedge = style==='hedge';
   const width = compact ? (style==='fence'?78:60) : hedge ? 78 : 72;
   const height = compact ? (style==='fence'?42:34) : hedge ? 62 : 90;
+  const frame = AURORA_NATURE_FRAMES.get(style);
+  const atlas = getAuroraNatureAtlas();
   ctx.save();
   try{
     ctx.imageSmoothingEnabled=false;
-    ctx.drawImage(sprite,Math.round(x-width/2),Math.round(y-height+8),width,height);
+    if (Number.isInteger(frame) && atlas && atlas.complete && atlas.naturalWidth) {
+      ctx.drawImage(atlas,frame*64,0,64,80,Math.round(x-width/2),Math.round(y-height+8),width,height);
+    } else {
+      const sprite=getAuroraNatureSprite(style);
+      ctx.drawImage(sprite,Math.round(x-width/2),Math.round(y-height+8),width,height);
+    }
   }finally{ctx.restore();}
 }
 
