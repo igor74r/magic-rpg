@@ -40,7 +40,8 @@ export function getSellPrice(instance, player) {
   const rarityMultiplier = rarity && RARITIES[rarity]?.multiplier
     ? RARITIES[rarity].multiplier
     : 1;
-  const stackable = item.type === 'consumable' || item.type === 'material' || item.type === 'rune';
+  const stackable = item.type === 'consumable' || item.type === 'material' ||
+    item.type === 'rune' || item.type === 'scroll';
   const rawQuantity = instance?.qty;
   const quantity = stackable
     ? (rawQuantity === undefined ? 1 : rawQuantity)
