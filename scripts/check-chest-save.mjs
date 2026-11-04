@@ -3,6 +3,7 @@ import { state } from '../systems/state.js';
 import { createCharacter } from '../systems/character.js';
 import { openChest } from '../systems/overworld/spawn.js';
 import { getDailyQuests } from '../systems/dailyQuests.js';
+import { saveGame } from '../systems/save.js';
 
 const storage = new Map();
 globalThis.localStorage = {
@@ -29,6 +30,7 @@ state.game.player.dailyQuests = {
   ]
 };
 getDailyQuests();
+assert.equal(saveGame(), true, 'persist the normalized daily quest baseline before the chest transaction');
 const before = JSON.stringify(state.game);
 const savedBefore = storage.get('magic-rpg-save-1');
 const originalSetItem = globalThis.localStorage.setItem;
