@@ -95,6 +95,23 @@ function hasActiveEntry(entries, id) {
   return Array.isArray(entries) && entries.some(entry => entry?.id === id && Number(entry.duration) > 0);
 }
 
+function cloneNpcPlayer(player) {
+  try { return JSON.parse(JSON.stringify(player)); }
+  catch { return null; }
+}
+
+function restoreNpcPlayer(player, snapshot) {
+  for (const key of Object.keys(player)) delete player[key];
+  Object.assign(player, snapshot);
+}
+
+function persistNpcPlayerMutation(player, snapshot, failureMessage) {
+  if (saveGame()) return true;
+  restoreNpcPlayer(player, snapshot);
+  toast(failureMessage);
+  return false;
+}
+
 function canUseWell(player, now = Date.now()) {
   const lastUse = Number(player?.stats?.lastWellUse) || 0;
   return now - lastUse > 24 * 60 * 60 * 1000;
@@ -214,9 +231,14 @@ export function openElder() {
   `);
 
   if (isFirstMeet) {
+    const snapshot = cloneNpcPlayer(p);
+    if (!snapshot) {
+      toast('Не удалось подготовить запись встречи со старейшиной.');
+      return;
+    }
     if (!p.stats) p.stats = {};
     p.stats.metElder = true;
-    saveGame();
+    persistNpcPlayerMutation(p, snapshot, 'Не удалось сохранить первую встречу со старейшиной.');
   }
 }
 
@@ -224,11 +246,23 @@ export function acceptElderQuestUI() {
   const p = state.game?.player;
   if (!p) return;
   const next = getNextCampaignMission(p);
-  if (!next || !acceptCampaignMission(p, next.mission.id)) {
+  if (!next) {
     toast('Сейчас нет доступного нового поручения.');
     return;
   }
-  saveGame();
+  const snapshot = cloneNpcPlayer(p);
+  if (!snapshot) {
+    toast('Не удалось подготовить поручение к сохранению.');
+    return;
+  }
+  if (!acceptCampaignMission(p, next.mission.id)) {
+    toast('Сейчас нет доступного нового поручения.');
+    return;
+  }
+  if (!persistNpcPlayerMutation(p, snapshot, 'Не удалось сохранить поручение. Изменения отменены.')) {
+    openElder();
+    return;
+  }
   openElder();
   toast(`📜 Принято поручение: ${next.mission.title}`);
 }
@@ -302,10 +336,15 @@ export function payBardUI() {
   const p = state.game?.player;
   const cost = NPCS.bard.cost;
   if (!p || hasActiveEntry(p.buffs, 'bardBuff') || !Number.isFinite(p.gold) || p.gold < cost) return false;
+  const snapshot = cloneNpcPlayer(p);
+  if (!snapshot) { toast('Не удалось подготовить оплату барду.'); return false; }
   if (!Array.isArray(p.buffs)) p.buffs = [];
   p.gold -= cost;
   p.buffs.push({ id: 'bardBuff', duration: 3 });
-  saveGame();
+  if (!persistNpcPlayerMutation(p, snapshot, 'Не удалось сохранить оплату барду. Золото возвращено.')) {
+    openBard();
+    return false;
+  }
   openBard();
   toast(`🎵 Бард вдохновил вас! (+10% опыта, −${cost}💰)`);
   return true;
@@ -314,9 +353,14 @@ export function payBardUI() {
 export function petCatUI() {
   const p = state.game?.player;
   if (!p || hasActiveEntry(p.buffs, 'catLuck')) return false;
+  const snapshot = cloneNpcPlayer(p);
+  if (!snapshot) { toast('Не удалось подготовить кошачью удачу.'); return false; }
   if (!Array.isArray(p.buffs)) p.buffs = [];
   p.buffs.push({ id: 'catLuck', duration: 1 });
-  saveGame();
+  if (!persistNpcPlayerMutation(p, snapshot, 'Не удалось сохранить кошачью удачу. Изменения отменены.')) {
+    openCat();
+    return false;
+  }
   openCat();
   toast('🐈 Кошка мурчит. Удача с вами! (+5% крита)');
   return true;
@@ -332,9 +376,14 @@ export function closeNpcAndResumeUI() {
 export function takeElderBlessingUI() {
   const p = state.game?.player;
   if (!p || hasActiveEntry(p.effects, 'elderBlessing')) return false;
+  const snapshot = cloneNpcPlayer(p);
+  if (!snapshot) { toast('Не удалось подготовить благословение.'); return false; }
   if (!Array.isArray(p.effects)) p.effects = [];
   p.effects.push({ id: 'elderBlessing', duration: 10 });
-  saveGame();
+  if (!persistNpcPlayerMutation(p, snapshot, 'Не удалось сохранить благословение. Изменения отменены.')) {
+    openElder();
+    return false;
+  }
   openElder();
   toast('✨ Вы получили благословение (+20% опыта)');
   return true;
@@ -345,11 +394,16 @@ export function useWellUI() {
   const now = Date.now();
   if (!p || !canUseWell(p, now)) return false;
   if (p.hp >= p.maxHp && (p.class === 'warrior' || p.mp >= p.maxMp)) return false;
+  const snapshot = cloneNpcPlayer(p);
+  if (!snapshot) { toast('Не удалось подготовить исцеление.'); return false; }
   p.hp = p.maxHp;
   if (p.class !== 'warrior') p.mp = p.maxMp;
   if (!p.stats || typeof p.stats !== 'object') p.stats = {};
   p.stats.lastWellUse = now;
-  saveGame();
+  if (!persistNpcPlayerMutation(p, snapshot, 'Не удалось сохранить исцеление. Здоровье и колодец восстановлены.')) {
+    openWell();
+    return false;
+  }
   openWell();
   toast('💧 Вы полностью исцелены!');
   return true;
