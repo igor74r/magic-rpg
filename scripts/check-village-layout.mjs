@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { LOCATIONS } from '../data/locations.js';
 import { generateMap, isBlocked } from '../systems/overworld/map.js';
-import { getVillageBuildingColliders, getVillagePropColliders, isVillagePositionBlocked } from '../systems/overworld/collisions.js';
+import { getVillageBuildingColliders, getVillagePropColliders, getVillageNatureColliders, isVillagePositionBlocked } from '../systems/overworld/collisions.js';
 
 const village = LOCATIONS.village;
 const staticIds = village.statics.map(item => item.id);
@@ -78,8 +78,25 @@ assert.deepEqual(northCourtyard.map(item => item.natureStyle), ['flowerbed', 'bu
 
 const colliders = getVillageBuildingColliders();
 const propColliders = getVillagePropColliders();
+const natureColliders = getVillageNatureColliders();
 assert.ok(propColliders.length >= 8, 'solid service props must have collision footprints');
 assert.ok(propColliders.every(rect => rect.width > 0 && rect.height > 0), 'solid prop colliders must have positive dimensions');
+assert.equal(natureColliders.length, 11, 'all large trees, rocks, stumps, hedges and fences must have ground-footprint colliders');
+assert.ok(natureColliders.every(rect => rect.width > 0 && rect.height > 0), 'nature colliders must have positive dimensions');
+for (const [id, x, y] of [
+  ['aurora-oak-nw', 3, 3], ['aurora-pine-ne', 34, 3],
+  ['aurora-pine-sw', 3, 25], ['aurora-oak-se', 34, 25],
+  ['aurora-rock-north', 5, 5], ['aurora-rock-east', 35, 21],
+  ['aurora-stump', 5, 23], ['aurora-hedge-west', 4, 12],
+  ['aurora-hedge-east', 34, 12], ['aurora-fence-southwest', 8, 26],
+  ['aurora-fence-southeast', 29, 26]
+]) {
+  const stat = village.statics.find(item => item.id === id);
+  assert.ok(stat, `${id}: expected nature obstacle must exist`);
+  const contactY = y * 48 + 24 + (stat.natureStyle === 'rock' || stat.natureStyle === 'stump' ? -15 : stat.natureStyle === 'hedge' ? -6 : stat.natureStyle === 'fence' ? 1 : 3);
+  assert.equal(isVillagePositionBlocked(x * 48 + 24, contactY, 8), true,
+    `${id}: visible solid base must block the player`);
+}
 for (const prop of village.statics.filter(item => ['fountain', 'bench', 'memorial', 'anvil', 'woodpile', 'cart', 'barrels', 'stall', 'herb-rack'].includes(item.propStyle))) {
   assert.equal(isVillagePositionBlocked(prop.x * 48 + 24, prop.y * 48 + 24, 8), true,
     `${prop.id}: solid prop center must block player`);
@@ -167,6 +184,7 @@ for (let i = 0; i < queue.length; i++) {
     const nx = x + dx, ny = y + dy, key = `${nx},${ny}`;
     if (nx < 0 || nx >= village.mapCols || ny < 0 || ny >= village.mapRows || visited.has(key)) continue;
     if (isBlocked(map, nx, ny, 'village')) continue;
+    if (isVillagePositionBlocked(nx * 48 + 24, ny * 48 + 24, 8)) continue;
     visited.add(key);
     queue.push({ x: nx, y: ny });
   }
