@@ -335,7 +335,7 @@ export function openHerald() { showNpcUI(`<div class="npc-header"><div class="np
 export function payBardUI() {
   const p = state.game?.player;
   const cost = NPCS.bard.cost;
-  if (!p || hasActiveEntry(p.buffs, 'bardBuff') || !Number.isFinite(p.gold) || p.gold < cost) return false;
+  if (!p || hasActiveEntry(p.buffs, 'bardBuff') || !Number.isSafeInteger(p.gold) || p.gold < 0 || p.gold < cost) return false;
   const snapshot = cloneNpcPlayer(p);
   if (!snapshot) { toast('Не удалось подготовить оплату барду.'); return false; }
   if (!Array.isArray(p.buffs)) p.buffs = [];
