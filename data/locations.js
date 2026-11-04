@@ -75,6 +75,11 @@ export const LOCATIONS = {
       { id: 'aurora-fence-southeast', name: 'Ограда двора', x: 29, y: 26, natureStyle: 'fence', decorative: true },
       { id: 'aurora-flowerbed-healer', name: 'Лекарственный цветник', x: 33, y: 9, natureStyle: 'flowerbed', decorative: true },
       { id: 'aurora-flowerbed-alchemy', name: 'Травяной сад', x: 5, y: 20, natureStyle: 'flowerbed', decorative: true },
+      // A compact ornamental pocket links the northern homes with the craft yard.
+      { id: 'aurora-north-garden-west', name: 'Цветник северного двора', x: 16, y: 6, natureStyle: 'flowerbed', decorative: true },
+      { id: 'aurora-north-garden-bush', name: 'Куст северного двора', x: 17, y: 8, natureStyle: 'bush', decorative: true },
+      { id: 'aurora-north-garden-east', name: 'Цветник у восточной тропы', x: 22, y: 8, natureStyle: 'flowerbed', decorative: true },
+      { id: 'aurora-north-garden-hedge', name: 'Низкая изгородь северного двора', x: 23, y: 10, natureStyle: 'hedge', decorative: true },
     ]
   },
 
