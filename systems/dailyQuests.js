@@ -28,8 +28,10 @@ export function getDailyQuests() {
     const definition = POOL.find(quest => quest.id === entry?.id);
     if (!definition || seen.has(definition.id)) return null;
     seen.add(definition.id);
-    const rawCurrent = Number(entry.current);
-    const current = Number.isSafeInteger(rawCurrent) ? Math.max(0, Math.min(definition.max, rawCurrent)) : 0;
+    const rawCurrent = entry.current;
+    const current = Number.isSafeInteger(rawCurrent) && rawCurrent >= 0
+      ? Math.min(definition.max, rawCurrent)
+      : 0;
     // Completion is derived from normalized progress, never trusted from a save file.
     const completed = current >= definition.max;
     return { ...definition, current, completed, claimed: completed && entry.claimed === true };
@@ -52,7 +54,7 @@ export function getDailyQuests() {
 
 export function updateQuestProgress(type, target, amount = 1, options = {}) {
   const p = state.game?.player;
-  const increment = Number(amount);
+  const increment = amount;
   if (!p || !Number.isSafeInteger(increment) || increment <= 0) {
     return { changed: false, completedTexts: [] };
   }
