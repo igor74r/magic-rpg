@@ -346,3 +346,13 @@
 - Проверка реальных сюжетных декораций (победы над тремя драконами) через `spawnStatics()` завершена; временное тестовое состояние игры корректно восстанавливается.
 - Полный GitHub Actions CI PASS, включая desktop/mobile smoke и gameplay visual regression; GitHub Pages deployment PASS на HEAD `3e2fbba68a69e0d29b910bb287929bdd4846e8cf`.
 - CI: https://github.com/igor74r/magic-rpg/actions/runs/41872353680 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41872353514 .
+
+
+## 04.11.2026 — Aurora nature atlas: третья художественная партия
+
+- Добавлен `assets/aurora/nature-atlas.png`: 512×80 RGBA, 8 кадров 64×80 для oak, pine, bush, rock, stump, hedge, fence и flowerbed.
+- `ui/overworld/sprites.js` теперь использует авторский PNG atlas как основной источник для природных объектов; процедурный pixel fallback остаётся только на время загрузки изображения/при недоступности Image.
+- `assets/tiles/manifest.json` регистрирует точную геометрию, кадры и display sizes.
+- `scripts/check-visual-assets.mjs` проверяет PNG dimensions, RGBA color type, список стилей, путь загрузки и nearest-neighbour sampling. Скриншоты desktop/mobile visual regression просмотрены: новый atlas отображается в игровой сцене, без потери layout.
+- CI PASS и Pages deployment PASS на HEAD `89ad2c79188b79e5b25d267755c7bd7a4153f66a`. CI: https://github.com/igor74r/magic-rpg/actions/runs/41873200313 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41873200129 .
+- Остаётся завершить ручную проверку каждого природного кадра на полном масштабе и пройти оставшиеся архитектурные/NPC арт-этапы.
