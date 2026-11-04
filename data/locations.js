@@ -68,6 +68,13 @@ export const LOCATIONS = {
       { id: 'aurora-rock-north', name: 'Мшистый валун', x: 5, y: 5, natureStyle: 'rock', decorative: true },
       { id: 'aurora-rock-east', name: 'Камни у ограды', x: 35, y: 21, natureStyle: 'rock', decorative: true },
       { id: 'aurora-stump', name: 'Старый пень', x: 5, y: 23, natureStyle: 'stump', decorative: true },
+      // Низкие ограды и посадки обозначают частные дворики, не перекрывая проходы.
+      { id: 'aurora-hedge-west', name: 'Живая изгородь', x: 4, y: 12, natureStyle: 'hedge', decorative: true },
+      { id: 'aurora-hedge-east', name: 'Живая изгородь', x: 34, y: 12, natureStyle: 'hedge', decorative: true },
+      { id: 'aurora-fence-southwest', name: 'Ограда сада', x: 8, y: 26, natureStyle: 'fence', decorative: true },
+      { id: 'aurora-fence-southeast', name: 'Ограда двора', x: 29, y: 26, natureStyle: 'fence', decorative: true },
+      { id: 'aurora-flowerbed-healer', name: 'Лекарственный цветник', x: 33, y: 9, natureStyle: 'flowerbed', decorative: true },
+      { id: 'aurora-flowerbed-alchemy', name: 'Травяной сад', x: 5, y: 20, natureStyle: 'flowerbed', decorative: true },
     ]
   },
 
