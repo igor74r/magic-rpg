@@ -45,7 +45,7 @@ for (let version = 1; version <= 16; version++) {
   const player = {
     name: 'Migration Fixture', class: 'warrior', level: 12, exp: 345, gold: 678,
     hp: 100, maxHp: 120, mp: 40, maxMp: 80,
-    str: 12, int: 8, wis: 9, con: 10, dex: 10,
+    str: 12, int: 8, wis: 9, con: 10, dex: 10, luck: 5,
     statPoints: 0, passivePoints: 0,
     inventory: [{ id: 'mana-crystal', qty: 2 }, { id: 'health-potion', qty: 3 }],
     spells: ['fireball'],
