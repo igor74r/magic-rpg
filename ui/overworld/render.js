@@ -241,10 +241,10 @@ function tick(ts) {
 // Visual only: no collision, navigation, or interaction coordinates are changed.
 function drawAuroraContactShadow(ctx, item, x, y) {
   const buildingWidths = { hall: 112, forge: 88, healer: 88, alchemy: 88, market: 92, tavern: 104, home: 78 };
+  const natureWidths = { oak: 76, pine: 68, bush: 52, rock: 46, stump: 42, hedge: 64, fence: 72, flowerbed: 52 };
   const width = item.buildingStyle ? (buildingWidths[item.buildingStyle] || 84)
-    : item.natureStyle === 'oak' || item.natureStyle === 'pine' ? 54
-      : item.natureStyle === 'hedge' || item.natureStyle === 'fence' ? 42 : 30;
-  const depth = item.buildingStyle ? 22 : item.natureStyle ? 12 : 9;
+    : item.natureStyle ? (natureWidths[item.natureStyle] || 36) : 30;
+  const depth = item.buildingStyle ? 22 : item.natureStyle ? 14 : 9;
   const left = Math.round(x - width / 2);
   const top = Math.round(y - depth / 2 + 5);
   ctx.save();
