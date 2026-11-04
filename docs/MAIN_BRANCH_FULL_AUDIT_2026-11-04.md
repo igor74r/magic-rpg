@@ -202,3 +202,14 @@
 - CI [41930421238](https://github.com/igor74r/magic-rpg/actions/runs/41930421238) — `completed / success`, 82/82 шагов; combat progression, campaign, stats, accessibility, visual assets, desktop/mobile smoke и gameplay visual regression — success.
 - GitHub Pages deployment [41930421170](https://github.com/igor74r/magic-rpg/actions/runs/41930421170) — `completed / success` на том же SHA.
 - Ручной аудит остаётся незавершённым. В частности, требуется отдельная визуальная ревизия общих CSS-слоёв: 232 gradient-декларации, 11 blur-функций, 8 `backdrop-filter` и 40 `filter`-деклараций не соответствуют строгому flat-color pixel-art профилю. Не делал массовую замену без просмотра всех экранов.
+
+
+## Контрольная точка — 05.11.2026, ежедневные задания и транзакции
+
+- Последний проверенный функциональный SHA: `67446057282c0e6c91462078dc364bf9cc28c65d`.
+- Ежедневные задания больше не преобразуют строковые значения в числовой прогресс; дробные и отрицательные значения нормализуются в ноль. API `updateQuestProgress` принимает только положительные safe integers.
+- Исправлен rollback при неудачной записи нормализации: UI получает только безопасный fallback, а detached fallback-список нельзя использовать для изменения прогресса или получения награды до успешного сохранения. Это закрывает повторное получение награды при временном сбое localStorage.
+- Добавлены регрессии в `scripts/check-daily-quests.mjs`: повреждённые счётчики, forged completion, storage quota failure, detached fallback и отказ в выдаче награды.
+- CI [41932133797](https://github.com/igor74r/magic-rpg/actions/runs/41932133797) — `completed / success`, 82/82 шагов; ежедневные задания, кампании, боевые проверки, accessibility, browser smoke desktop/mobile и gameplay visual regression — success.
+- GitHub Pages deployment [41932133939](https://github.com/igor74r/magic-rpg/actions/runs/41932133939) — `completed / success` на том же SHA.
+- **Статус:** кодовые регрессии зелёные, ручной построчный аудит всех файлов продолжается. Pixel-art UI ревизия остаётся открытой: текущие общие CSS-слои содержат градиенты, blur/filter, drop-shadow и скругления; без визуального просмотра всех экранов их массовая замена небезопасна.
