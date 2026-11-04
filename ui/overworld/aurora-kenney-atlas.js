@@ -18,7 +18,8 @@ export const AURORA_KENNEY_NATURE_TILE = Object.freeze({
   flowerbed: 2,
   pine: 4,
   oak: 5,
-  bush: 6
+  bush: 6,
+  fence: 68
 });
 
 export function drawAuroraKenneyTile(ctx, tileIndex, x, y, displaySize = 48) {
