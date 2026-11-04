@@ -34,18 +34,21 @@ try {
     await artPage.goto(baseUrl, { waitUntil:'domcontentloaded' });
     const artCheck = await artPage.evaluate(async () => {
       const { drawAuroraBuilding } = await import('/ui/overworld/aurora-art.js');
-      const styles = ['hall','forge','healer','alchemy','market','tavern','home'];
+      const designs = [
+        ['hall','hall'],['forge','forge'],['healer','healer'],['alchemy','alchemy'],
+        ['market','market'],['tavern','tavern'],['home-nw','home'],['home-se','home']
+      ];
       const canvas = document.createElement('canvas');
       canvas.width = 1360; canvas.height = 640;
       const ctx = canvas.getContext('2d');
       ctx.imageSmoothingEnabled = false;
       ctx.fillStyle = '#263b32'; ctx.fillRect(0,0,canvas.width,canvas.height);
-      styles.forEach((style,index) => {
+      designs.forEach(([variant,style],index) => {
         const col = index % 4, row = Math.floor(index / 4);
         const x = col * 340 + 170, y = row * 300 + 280;
-        if (!drawAuroraBuilding(ctx,x,y,style)) throw new Error(style + ': renderer returned false');
+        if (!drawAuroraBuilding(ctx,x,y,style,variant)) throw new Error(variant + ': renderer returned false');
         ctx.fillStyle = '#f0dfb8'; ctx.font = 'bold 16px monospace';
-        ctx.textAlign = 'center'; ctx.fillText(style.toUpperCase(),x,y+35);
+        ctx.textAlign = 'center'; ctx.fillText(variant.toUpperCase(),x,y+35);
       });
       const pixels = ctx.getImageData(0,0,canvas.width,canvas.height).data;
       let colored = 0;
@@ -54,9 +57,9 @@ try {
       document.body.innerHTML = '';
       document.body.style.cssText = 'margin:0;background:#17251f;display:grid;place-items:center;min-height:100vh';
       document.body.appendChild(canvas);
-      return { styles, coloredPixels: colored, width: canvas.width, height: canvas.height };
+      return { designs, coloredPixels: colored, width: canvas.width, height: canvas.height };
     });
-    assert.equal(artCheck.styles.length,7,'all seven distinct Aurora building designs must render');
+    assert.equal(artCheck.designs.length,8,'all seven building types and both residential facades must render');
     assert.ok(artCheck.coloredPixels>50000,'building art sheet must contain substantial rendered detail');
     await capture(artPage,'aurora-00-building-art-sheet');
     await artPage.close();
