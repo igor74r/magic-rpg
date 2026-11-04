@@ -24,6 +24,28 @@ readAtlas(manifest.terrain.file, 480, 768, 'terrain atlas');
 readAtlas(manifest.props.file, 768, 384, 'props atlas');
 readAtlas(manifest.dungeons.file, 480, 192, 'dungeon atlas');
 
+// Aurora has dedicated local PNG atlases. Validate the manifest contract and
+// physical dimensions before these resources are used by the Canvas renderer.
+assert.equal(manifest.auroraGround.file, '../aurora/ground-atlas.png');
+assert.equal(manifest.auroraGround.tileSize, 96);
+assert.equal(manifest.auroraGround.columns, 8);
+assert.equal(manifest.auroraGround.rows, 1);
+assert.deepEqual(manifest.auroraGround.types, ['grass', 'path']);
+assert.equal(manifest.auroraGround.displaySize, 48);
+readAtlas(manifest.auroraGround.file, 768, 96, 'Aurora ground atlas');
+
+assert.equal(manifest.villageProps.file, '../aurora/village-props-atlas.png');
+assert.equal(manifest.villageProps.tileSize, 64);
+assert.equal(manifest.villageProps.columns, 16);
+assert.equal(manifest.villageProps.rows, 1);
+assert.equal(manifest.villageProps.displaySize, 96);
+assert.equal(manifest.villageProps.styles.length, 16);
+readAtlas(manifest.villageProps.file, 1024, 64, 'Aurora village props atlas');
+
+assert.equal(manifest.auroraWorldPortal.file, '../aurora/world-portal.png');
+assert.equal(manifest.auroraWorldPortal.tileSize, 64);
+readAtlas(manifest.auroraWorldPortal.file, 64, 64, 'Aurora world portal atlas');
+
 for (const [biome, row] of Object.entries(manifest.biomeRows)) {
   assert.ok(Number.isInteger(row) && row >= 0 && row < manifest.terrain.rows.length,
     `${biome} must map to an existing terrain row`);
