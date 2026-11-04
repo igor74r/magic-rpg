@@ -931,65 +931,236 @@ function skipPrologue() {
   updateMainMenu();
 }
 
-// ==== ОЗВУЧКА ПРОЛОГА: русская TTS-легенда ====
-function getPrologueText(screen) {
-  if (!screen) return '';
-  const parts = [];
-  screen.querySelectorAll('h1, h2, h3, p, li').forEach(el => {
-    if (el.closest('button')) return;
-    const t = (el.textContent || '').trim();
-    if (t) parts.push(t);
-  });
-  return parts.join('. ');
-}
-
-function resetPrologueBtn(btn) {
-  btn.textContent = '🔊 Озвучить пролог';
-}
-
-function playTtsPrologue(screen, btn) {
-  if (!isVoiceSupported()) {
-    btn.textContent = '🔇 Голос недоступен';
-    return;
+// ==== КИНЕМАТОГРАФИЧЕСКИЙ ПРОЛОГ И РАССКАЗЧИК ====
+const PROLOGUE_SCENES = [
+  {
+    chapter: 'Глава I · До того, как всё сломалось',
+    caption: 'МИР ДО ПАДЕНИЯ',
+    text: 'Когда-то этот мир принадлежал драконам. Их империи простирались от звёздных лесов до огненных гор. Магия была частью самой земли, а люди верили, что так будет всегда. Знаешь, что обычно происходит, когда кто-то говорит «так будет всегда»? Правильно. Вселенная воспринимает это как личный вызов.'
+  },
+  {
+    chapter: 'Глава II · Рождение Разлома',
+    caption: 'ТРЕЩИНА В РЕАЛЬНОСТИ',
+    text: 'В глубине мира появилась трещина. Не в земле — в самой реальности. Её назвали Разломом. Из-за него исчезали целые поселения, менялись законы магии, а из темноты приходило нечто, чему ещё не придумали названия. Первые маги крови создали Кристалл Разлома. Они отдали за него собственные жизни, чтобы закрыть рану мира. Но кристалл раскололся на три части. Три дракона стали живыми хранителями печати.'
+  },
+  {
+    chapter: 'Глава III · Мир после падения',
+    caption: 'ПЕПЕЛЬНЫЙ СУМРАК',
+    text: 'Империи пали. Города превратились в руины. Пепельный сумрак накрыл пять земель. Люди забыли имена древних героев, но страх перед Разломом пережил века. Три дракона всё ещё удерживают печать. Пока жив хотя бы один — мир защищён. Но если исчезнет последняя печать… пожалуй, даже мне не хватит слов, чтобы описать последствия. А я, между прочим, рассказчик.'
+  },
+  {
+    chapter: 'Глава IV · Неожиданный кандидат',
+    caption: 'ГЕРОЙ ПО ТУ СТОРОНУ ЭКРАНА',
+    text: 'В маленькой деревне начинается история, которая, как водится, совершенно не собиралась становиться великой. Старейшина Эдвин обнаружил следы древней печати в Глухой чаще. Он ищет того, кто сможет пройти туда, куда остальные боятся даже смотреть. И тут на сцену выходишь ты. Да, именно ты, человек по ту сторону экрана. Не оглядывайся — других кандидатов пока нет. Хотя, если честно, конкурс был не слишком напряжённым.'
+  },
+  {
+    chapter: 'Глава V · Начало пути',
+    caption: 'ПЯТЬ ЗЕМЕЛЬ ЖДУТ',
+    text: 'Тебе предстоит пройти пять земель, раскрыть тайну Кристалла, встретиться с тремя драконами и узнать, что на самом деле скрывается за Разломом. Но запомни: не всякая древняя тайна хочет быть раскрытой. Не каждый герой получает счастливый конец. И не каждый рассказчик обязан делать вид, будто всё идёт по плану. Хотя… теперь, когда ты здесь, у нас хотя бы появился шанс. Ну что, герой? Хватит читать предисловие. Мир сам себя не спасёт. И да… постарайся не умереть в первой же пещере. Мне потом всё это пересказывать.'
   }
-  if (window.speechSynthesis.speaking) {
-    stopVoice();
-    resetPrologueBtn(btn);
-    return;
+];
+
+let prologueSceneIndex = 0;
+let prologueAnimationFrame = 0;
+let prologueVoiceCheck = 0;
+
+function drawPrologueIllustration(canvas, sceneIndex, tick = 0) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.imageSmoothingEnabled = false;
+  ctx.setTransform(2, 0, 0, 2, 0, 0);
+  const ink = '#171717';
+  const mid = '#777';
+  const pale = '#dedede';
+  const light = '#f4f4f4';
+  ctx.fillStyle = pale;
+  ctx.fillRect(0, 0, 320, 180);
+  ctx.fillStyle = '#bcbcbc';
+  ctx.fillRect(0, 0, 320, 96);
+  // Engraved cloud bands and distant mountains.
+  for (let i = 0; i < 7; i++) {
+    ctx.fillStyle = i % 2 ? '#aaa' : '#c8c8c8';
+    ctx.fillRect((i * 53 + 17) % 320, 18 + (i % 3) * 13, 42, 3);
   }
-  const text = getPrologueText(screen);
-  const ok = speakVoice(text, { rate: 0.82, pitch: 0.78, volume: 1 });
-  if (ok) {
-    btn.textContent = '⏹ Остановить';
-    const check = setInterval(() => {
-      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
-        clearInterval(check);
-        resetPrologueBtn(btn);
-      }
-    }, 400);
+  ctx.fillStyle = mid;
+  ctx.beginPath();
+  ctx.moveTo(0, 116); ctx.lineTo(48, 67); ctx.lineTo(86, 105);
+  ctx.lineTo(137, 51); ctx.lineTo(190, 111); ctx.lineTo(244, 63);
+  ctx.lineTo(320, 119); ctx.lineTo(320, 180); ctx.lineTo(0, 180); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = ink;
+  ctx.fillRect(0, 143, 320, 37);
+  // Scene-specific silhouettes, built from crisp flat pixel blocks.
+  if (sceneIndex === 0) {
+    ctx.fillStyle = light; ctx.fillRect(238, 20, 35, 35);
+    ctx.fillStyle = ink;
+    for (let d = 0; d < 3; d++) {
+      const x = 48 + d * 104;
+      ctx.fillRect(x, 66 + d * 4, 44, 8);
+      ctx.fillRect(x + 13, 54 + d * 4, 20, 12);
+      ctx.fillRect(x + 19, 43 + d * 4, 8, 12);
+      ctx.fillRect(x - 13, 60 + d * 4, 18, 5);
+      ctx.fillRect(x + 38, 56 + d * 4, 18, 5);
+      ctx.fillRect(x + 21, 74 + d * 4, 5, 20);
+      ctx.fillRect(x + 8, 90 + d * 4, 30, 5);
+    }
+    ctx.fillStyle = '#555'; ctx.fillRect(0, 128, 320, 8);
+    ctx.fillStyle = ink; ctx.fillRect(22, 119, 18, 24); ctx.fillRect(280, 112, 18, 31);
+  } else if (sceneIndex === 1) {
+    ctx.fillStyle = light; ctx.fillRect(132, 22, 56, 56);
+    ctx.fillStyle = ink; ctx.fillRect(151, 22, 18, 56);
+    ctx.fillRect(132, 41, 56, 18);
+    ctx.fillStyle = '#555'; ctx.fillRect(155, 78, 10, 74);
+    ctx.fillStyle = ink;
+    for (let i = 0; i < 6; i++) ctx.fillRect(30 + i * 48, 118 + (i % 2) * 8, 3, 38);
+    ctx.fillRect(0, 156, 320, 5);
+    ctx.fillStyle = light; ctx.fillRect(145, 35, 8, 8); ctx.fillRect(169, 55, 8, 8);
+  } else if (sceneIndex === 2) {
+    ctx.fillStyle = ink;
+    for (let i = 0; i < 8; i++) {
+      const x = i * 43;
+      ctx.fillRect(x, 103 - (i % 3) * 9, 26, 54);
+      ctx.fillRect(x - 4, 97 - (i % 3) * 9, 34, 8);
+      ctx.fillRect(x + 7, 83 - (i % 3) * 9, 4, 14);
+      ctx.fillStyle = light; ctx.fillRect(x + 7, 118 - (i % 3) * 9, 4, 7); ctx.fillStyle = ink;
+    }
+    ctx.fillStyle = '#eee'; ctx.fillRect(148, 18, 24, 24);
+    ctx.fillStyle = ink; ctx.fillRect(158, 18, 5, 24);
+    for (let i = 0; i < 18; i++) ctx.fillRect((i * 37 + 13) % 320, 90 + (i * 19) % 74, 2, 2);
+  } else if (sceneIndex === 3) {
+    ctx.fillStyle = '#eee'; ctx.fillRect(20, 28, 78, 52);
+    ctx.fillStyle = ink; ctx.fillRect(20, 28, 78, 5); ctx.fillRect(20, 75, 78, 5);
+    ctx.fillRect(20, 28, 5, 52); ctx.fillRect(93, 28, 5, 52);
+    ctx.fillStyle = mid; ctx.fillRect(34, 42, 50, 3);
+    ctx.fillStyle = ink; ctx.fillRect(152, 104, 16, 38); ctx.fillRect(145, 98, 30, 9);
+    ctx.fillRect(147, 139, 7, 18); ctx.fillRect(165, 139, 7, 18);
+    ctx.fillStyle = light; ctx.fillRect(157, 110, 5, 5);
+    ctx.fillStyle = ink; ctx.fillRect(230, 116, 52, 4); ctx.fillRect(244, 104, 24, 12);
+    ctx.fillRect(239, 120, 7, 25); ctx.fillRect(267, 120, 7, 25);
   } else {
-    btn.textContent = '🔇 Голос недоступен';
+    ctx.fillStyle = ink;
+    ctx.fillRect(0, 133, 320, 7);
+    ctx.fillRect(40, 103, 7, 39); ctx.fillRect(32, 97, 24, 8);
+    ctx.fillRect(273, 96, 8, 46); ctx.fillRect(265, 90, 24, 8);
+    ctx.fillStyle = '#eee'; ctx.fillRect(143, 23, 34, 34);
+    ctx.fillStyle = ink; ctx.fillRect(151, 31, 18, 18);
+    ctx.fillStyle = '#555'; ctx.fillRect(157, 57, 6, 31);
+    ctx.fillStyle = ink; ctx.fillRect(143, 84, 34, 6); ctx.fillRect(136, 91, 48, 7);
+    ctx.fillRect(148, 98, 9, 37); ctx.fillRect(164, 98, 9, 37);
+    ctx.fillRect(137, 105, 10, 6); ctx.fillRect(174, 105, 10, 6);
+    ctx.fillStyle = '#eee'; ctx.fillRect(145, 38, 5, 5); ctx.fillRect(170, 38, 5, 5);
+    ctx.fillStyle = mid; ctx.fillRect(20, 154, 280, 3);
   }
+  // Moving ash / ink flecks add restrained life without blur or gradients.
+  ctx.fillStyle = '#fff';
+  for (let i = 0; i < 24; i++) {
+    const x = (i * 47 + Math.floor(tick * (0.35 + (i % 3) * 0.12))) % 320;
+    const y = (i * 29 + Math.floor(tick * (0.18 + (i % 4) * 0.05))) % 175;
+    ctx.fillRect(x, y, i % 5 === 0 ? 2 : 1, 1);
+  }
+  ctx.fillStyle = ink;
+  ctx.fillRect(0, 0, 320, 2);
+  ctx.fillRect(0, 178, 320, 2);
+}
+
+function renderPrologueScene() {
+  const scene = PROLOGUE_SCENES[prologueSceneIndex];
+  if (!scene) return;
+  const screen = document.getElementById('screen-prologue');
+  const canvas = document.getElementById('prologue-art');
+  const chapter = document.getElementById('prologue-chapter');
+  const caption = document.getElementById('prologue-art-caption');
+  const counter = document.getElementById('prologue-frame-counter');
+  const narration = document.getElementById('prologue-narration');
+  const previous = document.getElementById('prologue-prev-btn');
+  const next = document.getElementById('prologue-next-btn');
+  const progress = document.getElementById('prologue-progress-fill');
+  if (!screen || !canvas || !narration) return;
+  chapter.textContent = scene.chapter;
+  caption.textContent = scene.caption;
+  counter.textContent = String(prologueSceneIndex + 1).padStart(2, '0') + ' / ' + String(PROLOGUE_SCENES.length).padStart(2, '0');
+  narration.textContent = scene.text;
+  previous.disabled = prologueSceneIndex === 0;
+  next.textContent = prologueSceneIndex === PROLOGUE_SCENES.length - 1 ? 'Начать путь ⚔' : 'Далее →';
+  progress.style.width = ((prologueSceneIndex + 1) / PROLOGUE_SCENES.length * 100) + '%';
+  drawPrologueIllustration(canvas, prologueSceneIndex);
+}
+
+function stopPrologueAnimation() {
+  if (prologueAnimationFrame) cancelAnimationFrame(prologueAnimationFrame);
+  prologueAnimationFrame = 0;
+}
+
+function animatePrologue() {
+  stopPrologueAnimation();
+  const screen = document.getElementById('screen-prologue');
+  const canvas = document.getElementById('prologue-art');
+  if (!screen || !canvas || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  let tick = 0;
+  const frame = () => {
+    if (!screen.classList.contains('active')) {
+      stopPrologueAnimation();
+      return;
+    }
+    drawPrologueIllustration(canvas, prologueSceneIndex, tick++);
+    prologueAnimationFrame = requestAnimationFrame(frame);
+  };
+  prologueAnimationFrame = requestAnimationFrame(frame);
+}
+
+function stopPrologueVoice() {
+  stopVoice();
+  if (prologueVoiceCheck) window.clearInterval(prologueVoiceCheck);
+  prologueVoiceCheck = 0;
+  const button = document.getElementById('prologue-voice-btn');
+  if (button) button.textContent = '🔊 Озвучить';
+}
+
+function playPrologueVoice() {
+  const button = document.getElementById('prologue-voice-btn');
+  if (!button) return;
+  if (!isVoiceSupported()) {
+    button.textContent = '🔇 Голос недоступен';
+    return;
+  }
+  if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+    stopPrologueVoice();
+    return;
+  }
+  const text = PROLOGUE_SCENES[prologueSceneIndex]?.text || '';
+  const ok = speakVoice(text, { rate: 0.94, pitch: 1.04, volume: 1 });
+  if (!ok) {
+    button.textContent = '🔇 Голос недоступен';
+    return;
+  }
+  button.textContent = '⏹ Остановить';
+  prologueVoiceCheck = window.setInterval(() => {
+    if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) stopPrologueVoice();
+  }, 350);
 }
 
 function setupPrologueVoice() {
   const screen = document.getElementById('screen-prologue');
-  if (!screen || document.getElementById('prologue-voice-btn')) return;
-
-  const btn = document.createElement('button');
-  btn.id = 'prologue-voice-btn';
-  btn.type = 'button';
-  btn.className = 'btn secondary';
-  btn.textContent = '🔊 Прослушать легенду';
-  btn.style.cssText = 'display:block; margin:14px auto 8px; padding:10px 18px;';
-  const startButton = screen.querySelector('.center-flex > button');
-  if (startButton) startButton.before(btn);
-  else screen.appendChild(btn);
-
-  btn.addEventListener('click', (event) => {
-    event.stopPropagation();
-    playTtsPrologue(screen, btn);
+  if (!screen || screen.dataset.cinematicReady === '1') return;
+  screen.dataset.cinematicReady = '1';
+  document.getElementById('prologue-voice-btn')?.addEventListener('click', playPrologueVoice);
+  document.getElementById('prologue-prev-btn')?.addEventListener('click', () => {
+    stopPrologueVoice();
+    prologueSceneIndex = Math.max(0, prologueSceneIndex - 1);
+    renderPrologueScene();
   });
+  document.getElementById('prologue-next-btn')?.addEventListener('click', () => {
+    stopPrologueVoice();
+    if (prologueSceneIndex >= PROLOGUE_SCENES.length - 1) {
+      skipPrologue();
+      return;
+    }
+    prologueSceneIndex++;
+    renderPrologueScene();
+  });
+  document.getElementById('prologue-skip-btn')?.addEventListener('click', stopPrologueVoice);
+  renderPrologueScene();
+  animatePrologue();
 }
 
 window.GameAPI = {
