@@ -713,7 +713,7 @@ function addVillageInteriorButton(interiorId) {
   const content = document.getElementById('npc-dialog-content');
   if (!content || content.innerHTML.includes('data-village-interior')) return;
   content.innerHTML +=
-    `<button data-village-interior onclick="GameAPI.enterVillageInterior('${interiorId}')" class="village-interior-enter">🚪 Войти внутрь</button>`;
+    `<button data-village-interior onclick="GameAPI.enterVillageInterior('${interiorId}')" class="village-interior-enter">Войти внутрь</button>`;
 }
 
 function enterVillageInterior(interiorId) {
@@ -723,10 +723,10 @@ function enterVillageInterior(interiorId) {
   ow.interior = interiorId;
   const content = document.getElementById('npc-dialog-content');
   const modal = document.getElementById('npc-dialog-modal');
-  const decor = room.details.map((item, index) => `<div class="village-room-prop prop-${index + 1}"><span>${['⚒️','🛏️','⚗️','📦'][index] || '🪑'}</span><small>${item}</small></div>`).join('');
+  const decor = room.details.map((item, index) => `<div class="village-room-prop prop-${index + 1}"><span class="village-room-pixel-icon icon-${interiorId}-${index + 1}" aria-hidden="true"></span><small>${item}</small></div>`).join('');
   content.innerHTML = `
     <div class="village-interior-view">
-      <div class="village-interior-heading"><div><h3>${room.title}</h3><p>${room.subtitle}</p></div><span>🏠 АВРОРА</span></div>
+      <div class="village-interior-heading"><div><h3>${room.title}</h3><p>${room.subtitle}</p></div><span>АВРОРА</span></div>
       <div class="village-room-art room-${interiorId}">
         <div class="village-room-window"></div><div class="village-room-hearth"></div>
         <div class="village-room-furniture">${decor}</div>
