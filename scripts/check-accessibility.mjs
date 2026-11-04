@@ -66,6 +66,10 @@ for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'E
 }
 assert.match(main, /tabs\[nextIndex\]\.focus\(\)/);
 assert.match(main, /tabs\[nextIndex\]\.click\(\)/);
+assert.match(header, /function syncDashboardTabSelection\(tab\)/,
+  'dashboard tab selection must be synchronized from the current game state');
+assert.match(header, /syncDashboardTabSelection\(state\.currentTab\)/,
+  'the initial game render must activate the default tab and expose it to keyboard navigation');
 assert.match(header, /setAttribute\('aria-selected', String\(active\)\)/);
 assert.match(header, /setAttribute\('aria-labelledby', activeTab\.id\)/);
 assert.match(menu, /setAttribute\('aria-selected', String\(active\)\)/);
