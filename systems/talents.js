@@ -172,7 +172,10 @@ export function resetPassives(player) {
   }
 
   const cost = 500;
-  if ((player.gold || 0) < cost) {
+  if (!Number.isSafeInteger(player.gold) || player.gold < 0) {
+    return { ok: false, msg: 'Некорректный баланс золота' };
+  }
+  if (player.gold < cost) {
     return { ok: false, msg: `Нужно ${cost}💰` };
   }
 
