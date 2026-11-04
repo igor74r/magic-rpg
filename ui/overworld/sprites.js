@@ -825,10 +825,14 @@ function getAuroraNatureSprite(style) {
   return canvas;
 }
 function drawAuroraNature(ctx,x,y,style){
-  const compact = style==='fence' || style==='flowerbed';
-  const hedge = style==='hedge';
-  const width = compact ? (style==='fence'?78:60) : hedge ? 78 : 72;
-  const height = compact ? (style==='fence'?42:34) : hedge ? 62 : 90;
+  // The authored atlas has transparent margins around each silhouette.
+  // Give each species its own world footprint so trees read as landmarks,
+  // while low garden pieces remain below the player's waist.
+  const size = {
+    oak: [120, 150], pine: [108, 144], bush: [90, 72], rock: [78, 66],
+    stump: [72, 66], hedge: [96, 72], fence: [108, 54], flowerbed: [84, 48]
+  }[style] || [72, 72];
+  const [width, height] = size;
   const frame = AURORA_NATURE_FRAMES.get(style);
   const atlas = getAuroraNatureAtlas();
   ctx.save();
