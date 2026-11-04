@@ -213,13 +213,14 @@ export function drawFireflies(ctx, worldTime) {
   if (!isNight) return;
 
   const isVillage = getCurrentBiome() === 'village';
+  const villageFireflyColor = getCurrentBiome() === 'village' ? '#f3c879' : '#a0ff60';
   ctx.save();
   for (let f of fireflies) {
     const flicker = 0.4 + 0.6 * Math.abs(Math.sin(f.phase * 3));
     if (isVillage) {
       // Aurora motes use hard-edged 2D pixel clusters instead of blurred glows.
       ctx.globalAlpha = flicker * (f.warmMote ? 0.34 : 0.82);
-      ctx.fillStyle = f.warmMote ? '#f3c879' : '#d8e99a';
+      ctx.fillStyle = f.warmMote ? villageFireflyColor : '#d8e99a';
       const x = Math.round(f.x), y = Math.round(f.y);
       const size = f.warmMote ? 2 : 3;
       ctx.fillRect(x, y, size, size);
@@ -233,7 +234,7 @@ export function drawFireflies(ctx, worldTime) {
       continue;
     }
     ctx.globalAlpha = flicker * 0.9;
-    ctx.fillStyle = '#a0ff60';
+    ctx.fillStyle = villageFireflyColor;
     ctx.shadowBlur = 12;
     ctx.shadowColor = '#80ff40';
     ctx.beginPath();
