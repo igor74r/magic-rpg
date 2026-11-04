@@ -799,3 +799,11 @@ index.html, main.js, data/story.js, data/enemies.js, data/items.js, data/locatio
 - `scripts/check-render-depth-order.mjs`: проверяет фактические `depthY`, создаваемые `spawnStatics()`, для здания, дерева и 96px prop.
 - Повторно проверены desktop/mobile browser smoke и gameplay visual regression; скриншоты просмотрены вручную. Сцена Авроры стала заметно светлее и сохраняет чёткие пиксельные контуры.
 - GitHub Actions CI PASS и GitHub Pages deployment PASS на HEAD `8adb744fb95dbfcc59faf3b60e35649a2b741b1d`. CI: https://github.com/igor74r/magic-rpg/actions/runs/41871414096 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41871414112 .
+
+
+## 04.11.2026 — Depth anchors для сюжетных декораций
+
+- `systems/overworld/spawn.js`: три динамически добавляемых сюжетных объекта Авроры (знамя Пепельного Вестника, морозный фонарь Ледяной Хватки, мемориал Кровавой Короны) теперь получают `depthY` по нижней границе 96px prop-кадра.
+- `scripts/check-render-depth-order.mjs`: интеграционно проверяет depth anchors для всех трёх сюжетных декораций через реальный `spawnStatics()`, временно выставляя флаги побед и восстанавливая исходное состояние.
+- CI PASS (включая Aurora layout/collision, все depth-sort tests, desktop/mobile smoke и visual regression) и Pages deployment PASS на HEAD `fe14820833eab35a36bc6f592ce24fe1187aa274`.
+- CI: https://github.com/igor74r/magic-rpg/actions/runs/41872002645 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41872002846 .
