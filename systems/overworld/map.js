@@ -131,7 +131,13 @@ export function generateVillageMap(cols, rows) {
     { x: 10, y: 2, rows: [[1,2],[0,3],[1,2]] },
     { x: cols - 13, y: 2, rows: [[1,2],[0,3],[1,2]] },
     { x: 2, y: 12, rows: [[1,2],[0,3],[1,2]] },
-    { x: cols - 5, y: 13, rows: [[1,2],[0,3],[1,2]] }
+    { x: cols - 5, y: 13, rows: [[1,2],[0,3],[1,2]] },
+    // Four narrow planted strips soften the edges of the craft and residential
+    // quarters. They only claim untouched grass; streets and approach cells win.
+    { x: 5, y: 2, rows: [[1,3],[0,4],[1,3]] },
+    { x: cols - 10, y: 2, rows: [[1,3],[0,4],[1,3]] },
+    { x: 5, y: rows - 6, rows: [[1,3],[0,4],[1,3]] },
+    { x: cols - 10, y: rows - 6, rows: [[1,3],[0,4],[1,3]] }
   ];
   for (const patch of gardens) {
     patch.rows.forEach(([left, right], row) => {
