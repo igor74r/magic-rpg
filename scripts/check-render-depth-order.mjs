@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildDepthItems } from '../ui/overworld/depth-order.js';
+import { LOCATIONS } from '../data/locations.js';
+import { spawnStatics } from '../systems/overworld/spawn.js';
 
 const stat = { id: 'house', x: 10, y: 80, depthOffset: 4 };
 const npc = { id: 'villager', x: 20, y: 60 };
@@ -31,6 +33,15 @@ const contactSorted = buildDepthItems({
 });
 assert.deepEqual(contactSorted.map(entry => entry.item.id), ['hero', 'building', 'large-prop'],
   'large Aurora props and buildings must sort against their rendered ground-contact points');
+
+const auroraStatics = spawnStatics(LOCATIONS.village, 'village');
+const byId = id => auroraStatics.find(item => item.id === id);
+assert.equal(byId('forge-building').depthY, 7 * 48 + 24 + 8,
+  'Aurora buildings must use the rendered sprite base as their depth anchor');
+assert.equal(byId('aurora-oak-nw').depthY, 3 * 48 + 24 + 8,
+  'Aurora nature sprites must use their ground-contact base as their depth anchor');
+assert.equal(byId('world-portal').depthY, 13 * 48 + 24 + 48,
+  '64px prop-atlas frames scaled to 96px must sort by their bottom edge');
 
 const renderSource = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
 assert.ok(renderSource.includes('const depthItems = buildDepthItems(ow);'), 'renderer must use the shared depth-order helper');
