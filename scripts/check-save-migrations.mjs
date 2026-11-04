@@ -87,8 +87,8 @@ for (let version = 1; version <= 16; version++) {
     assert.equal(migrated.player.equipped.gloves?.id, 'oath-bracers');
     assert.equal(migrated.player.equipped.amulet?.id, 'seal-five-orders');
     assert.deepEqual(Object.keys(migrated.player.equipped).sort(), [...expectedSlots].sort());
-    assert.equal(migrated.player.luck, version >= 15 ? 10.5 : 5,
-      'Luck is preserved from v15 onward and defaults safely for older saves');
+    assert.equal(migrated.player.luck, 10.5,
+      'legacy characters receive the Luck progression bonus during v15 migration');
     assert.equal(migrated.player.campaignClaimed['a1-m1'], true);
     assert.equal(migrated.storyShards.flame, false);
     assert.equal(migrated.storyShards.ice, false);
