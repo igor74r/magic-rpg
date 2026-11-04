@@ -15,7 +15,10 @@ assert.match(portal, /drawPortalPixelMap\(overlay\.querySelector\('#portal-map-a
   'pixel map canvas must be drawn from the current destination and story route points');
 assert.equal(portal.includes('<svg'), false, 'portal must not use inline SVG graphics');
 assert.equal(portal.includes('</svg>'), false, 'portal must not use inline SVG graphics');
-assert.match(portal, /imageSmoothingEnabled = false/, 'portal canvas must preserve crisp pixel edges');
+const pixelMapStart = main.indexOf('function drawPortalPixelMap(');
+const pixelMapEnd = main.indexOf('function openWorldPortalMenu()', pixelMapStart);
+const pixelMap = main.slice(pixelMapStart, pixelMapEnd);
+assert.match(pixelMap, /imageSmoothingEnabled = false/, 'portal canvas must preserve crisp pixel edges');
 const portalStyleStart = portal.indexOf('<style>');
 const portalStyleEnd = portal.indexOf('</style>', portalStyleStart);
 const portalCss = portal.slice(portalStyleStart, portalStyleEnd);
