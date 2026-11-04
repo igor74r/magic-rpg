@@ -730,7 +730,7 @@ function enterVillageInterior(interiorId) {
       <div class="village-room-art room-${interiorId}">
         <div class="village-room-window"></div><div class="village-room-hearth"></div>
         <div class="village-room-furniture">${decor}</div>
-        <div class="village-room-floor-mark">✦</div>
+        <div class="village-room-floor-mark" aria-hidden="true"></div>
       </div>
       <p class="village-room-caption">${room.room} · Можно осмотреться, затем вернуться во двор.</p>
       <button onclick="GameAPI.exitVillageInterior()" class="village-interior-exit">← Выйти во двор</button>
