@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildDepthItems } from '../ui/overworld/depth-order.js';
 import { LOCATIONS } from '../data/locations.js';
+import { state } from '../systems/state.js';
 import { spawnStatics } from '../systems/overworld/spawn.js';
 
 const stat = { id: 'house', x: 10, y: 80, depthOffset: 4 };
@@ -42,6 +43,21 @@ assert.equal(byId('aurora-oak-nw').depthY, 3 * 48 + 24 + 8,
   'Aurora nature sprites must use their ground-contact base as their depth anchor');
 assert.equal(byId('world-portal').depthY, 13 * 48 + 24 + 48,
   '64px prop-atlas frames scaled to 96px must sort by their bottom edge');
+
+const previousGame = state.game;
+try {
+  state.game = { storyDragons: { 'ash-herald': true, 'ice-grasp': true, 'blood-crown': true } };
+  const storyStatics = spawnStatics(LOCATIONS.village, 'village');
+  const storyById = id => storyStatics.find(item => item.id === id);
+  assert.equal(storyById('aurora-ash-victory').depthY, 6 * 48 + 24 + 48,
+    'Ash Herald victory banner must use the prop atlas ground-contact anchor');
+  assert.equal(storyById('aurora-ice-victory').depthY, 10 * 48 + 24 + 48,
+    'Ice Grasp victory lantern must use the prop atlas ground-contact anchor');
+  assert.equal(storyById('aurora-rift-ward').depthY, 5 * 48 + 24 + 48,
+    'Blood Crown memorial must use the prop atlas ground-contact anchor');
+} finally {
+  state.game = previousGame;
+}
 
 const renderSource = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
 assert.ok(renderSource.includes('const depthItems = buildDepthItems(ow);'), 'renderer must use the shared depth-order helper');
