@@ -212,7 +212,7 @@ try {
       assert.equal(roomArt.filter,'none',`${vp.name}/${room}: interior must not blur or filter pixel art`);
       await capture(page,`${vp.name}-02-aurora-interior-${room}`);
       await page.evaluate(() => window.GameAPI.exitVillageInterior());
-      await page.locator('.village-room-art').waitFor({state:'detached'});
+      await page.locator('#npc-dialog-modal').waitFor({state:'hidden'});
     }
     assert.equal(await page.locator('#dashboard-context .dashboard-context-actions button').count(),1,
       `${vp.name}: mission guide must expose one primary portal action`);
