@@ -30,4 +30,20 @@ assert.ok(saveAndMenu.indexOf('if (!saveGame())') < saveAndMenu.indexOf('clearOv
 assert.ok(saveAndMenu.indexOf('clearOverworldRuntime()') < saveAndMenu.indexOf("showScreen('screen-main')"),
   'successful save must stop hidden gameplay loops before switching to the menu');
 
+const deleteSlotStart = menu.indexOf('export function deleteSlot(slot)');
+const deleteSlotEnd = menu.indexOf('\n}\n', deleteSlotStart);
+const deleteSlot = menu.slice(deleteSlotStart, deleteSlotEnd);
+assert.match(deleteSlot, /if \(!deleteSave\(slot\)\)/,
+  'a failed slot deletion must not be reported as successful');
+
+const deleteAllStart = menu.indexOf('export function deleteAllSaves()');
+const deleteAllEnd = menu.indexOf('\n}\n', deleteAllStart);
+const deleteAll = menu.slice(deleteAllStart, deleteAllEnd);
+assert.match(deleteAll, /failedSlots/,
+  'bulk deletion must track slots that could not be removed');
+assert.ok(deleteAll.indexOf('if (failedSlots.length)') < deleteAll.indexOf('state.game = null'),
+  'bulk deletion must not clear the active game before confirming every slot was removed');
+assert.match(deleteAll, /Не удалось удалить слоты/,
+  'bulk deletion must explain partial storage failures');
+
 console.log('check-save-menu-lifecycle: PASS (save-to-menu and slot-load stop stale overworld runtime)');
