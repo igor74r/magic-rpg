@@ -75,22 +75,24 @@ export function isRiftReady() {
 
 export function recordRiftFloor(floor) {
   const p = state.game?.player;
-  if (!p) return false;
-  if (typeof p.riftBest !== 'number') p.riftBest = 0;
-  if (floor > p.riftBest) {
-    const previous = p.riftBest;
-    p.riftBest = floor;
-    if (!saveGame()) {
-      p.riftBest = previous;
-      return false;
-    }
-    return true;
+  const value = Number(floor);
+  if (!p || !Number.isSafeInteger(value) || value < 1) return false;
+
+  const original = p.riftBest;
+  const previous = Number.isSafeInteger(original) && original >= 0 ? original : 0;
+  if (value <= previous && original === previous) return false;
+
+  p.riftBest = Math.max(previous, value);
+  if (!saveGame()) {
+    p.riftBest = original;
+    return false;
   }
-  return false;
+  return p.riftBest > previous;
 }
 
 export function getRiftBest() {
-  return state.game?.player?.riftBest || 0;
+  const value = state.game?.player?.riftBest;
+  return Number.isSafeInteger(value) && value >= 0 ? value : 0;
 }
 
 export function endRift() {
