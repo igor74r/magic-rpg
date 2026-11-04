@@ -23,7 +23,8 @@ for (const contract of [
 assert.match(ui, /<canvas class="passive-lines"/, 'passive connections must use a canvas rather than SVG');
 assert.match(ui, /function drawPassiveLines\(connections\)/);
 assert.match(ui, /imageSmoothingEnabled = false/);
-assert.doesNotMatch(ui, /<svg|<\\/svg>/, 'passive tree must not emit SVG markup');
+assert.equal(ui.includes('<svg'), false, 'passive tree must not emit SVG markup');
+assert.equal(ui.includes('</svg>'), false, 'passive tree must not emit SVG markup');
 
 assert.match(ui, /treeZoom = Math\.max\(0\.65, Math\.min\(1\.6/);
 assert.match(ui, /best\?\.focus\(\)/);
