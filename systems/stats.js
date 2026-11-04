@@ -82,7 +82,7 @@ export function getEffStats() {
 
   if (Array.isArray(p.effects)) {
     for (const effect of p.effects) {
-      const data = EFFECTS[effect.id];
+      const data = EFFECTS[effect?.id];
       if (!data) continue;
 
       atk += data.atkFlat || 0;
