@@ -11,7 +11,9 @@ const spawn = readFileSync(new URL('../systems/overworld/spawn.js', import.meta.
 assert.match(main, /class="portal-atlas"/, 'portal must expose one unified world atlas');
 assert.match(main, /portal-map-stage/, 'the portal must render a large map viewport');
 assert.match(main, /portal-map-node/, 'destinations must be represented by map points');
-assert.match(main, /portal-route/, 'the map must show the ordered campaign route');
+assert.match(main, /routePoints/, 'the map must preserve the ordered campaign route data');
+assert.match(main, /drawPortalPixelMap\(overlay\.querySelector\('#portal-map-art'\), points, routePoints\)/,
+  'the ordered route must be drawn on the portal canvas');
 assert.match(main, /portal-destination/, 'the selected map point must show destination details');
 assert.match(main, /canEnterStoryLocation\(state\.game\?\.player, id\)/, 'portal selection must retain campaign and level restrictions');
 assert.match(main, /latestAccess\.allowed/, 'travel must revalidate access before transition');
