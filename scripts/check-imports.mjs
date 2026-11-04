@@ -15,7 +15,7 @@ function walk(dir, out = []) {
     if (entry.name.startsWith('.') || entry.name === 'node_modules' || entry.name.startsWith('p0_backup_')) continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
-    else if (entry.isFile() && entry.name.endsWith('.js')) out.push(full);
+    else if (entry.isFile() && (entry.name.endsWith('.js') || entry.name.endsWith('.mjs'))) out.push(full);
   }
   return out;
 }
