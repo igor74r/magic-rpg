@@ -27,21 +27,28 @@ function drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY) {
     g.imageSmoothingEnabled = false;
     const colors = ['#71864a', '#849653', '#425c35', '#a2a55d', '#d5bd70', '#c4d07b'];
     let n = (seed ^ 0x9e3779b9) >>> 0;
-    const count = 4 + (n % 4);
+    const count = 18 + (n % 9);
     for (let i = 0; i < count; i++) {
       n = Math.imul(n ^ (n >>> 15), 2246822519) >>> 0;
-      const px = 3 + n % 42;
+      const px = 2 + n % 44;
       n = Math.imul(n ^ (n >>> 13), 3266489917) >>> 0;
-      const py = 3 + n % 42;
+      const py = 2 + n % 44;
       g.fillStyle = colors[(n >>> 5) % colors.length];
+      // Short paired blades form recognizable tufts at the 48px world scale.
       g.fillRect(px, py, 2, 1);
-      if ((n & 7) === 0) g.fillRect(px + 1, py - 1, 1, 1);
-      // A few tiny flower pixels create a lived-in meadow without emoji or blur.
+      if ((n & 3) === 0) g.fillRect(px + 1, py - 1, 1, 1);
+      if ((n & 7) === 2) g.fillRect(px + 2, py, 1, 1);
+      // Flower accents are sparse and clustered, not scattered confetti.
       if ((n & 15) === 3) {
         g.fillStyle = (n & 32) ? '#e8d9a0' : '#d9a9b8';
         g.fillRect(px, py + 1, 1, 1);
         g.fillStyle = '#e8d9a0';
         g.fillRect(px + 1, py, 1, 1);
+      }
+      // Occasional darker soil fleck adds subtle ground depth.
+      if ((n & 31) === 11) {
+        g.fillStyle = '#526b3f';
+        g.fillRect(px - 1, py + 1, 1, 1);
       }
     }
     auroraGrassDetailCache.set(key, detail);
@@ -92,17 +99,24 @@ function drawAuroraPathDetails(ctx, x, y, size, tileX, tileY) {
     g.imageSmoothingEnabled = false;
     let n = (seed ^ 0x85ebca6b) >>> 0;
     const colors = ['#6b6654', '#8a806a', '#a3977c', '#5b594a', '#77735f'];
-    const count = 3 + (n % 4);
+    const count = 12 + (n % 9);
     for (let i = 0; i < count; i++) {
       n = Math.imul(n ^ (n >>> 16), 2246822519) >>> 0;
       const px = 2 + n % 44;
       n = Math.imul(n ^ (n >>> 13), 3266489917) >>> 0;
       const py = 2 + n % 44;
       g.fillStyle = colors[(n >>> 4) % colors.length];
+      // Small worn stone highlights remain flat and crisp after scaling.
       g.fillRect(px, py, 2 + (n & 1), 1);
-      if ((n & 31) === 7) {
+      if ((n & 7) === 3) g.fillRect(px + 1, py - 1, 1, 1);
+      // Moss follows cracks at a low density, preserving a readable path.
+      if ((n & 15) === 7) {
         g.fillStyle = '#9ba06a';
-        g.fillRect(px, py + 2, 1, 1);
+        g.fillRect(px, py + 2, 2, 1);
+      }
+      if ((n & 31) === 13) {
+        g.fillStyle = '#514d40';
+        g.fillRect(px + 2, py + 1, 1, 1);
       }
     }
     auroraPathDetailCache.set(key, detail);
