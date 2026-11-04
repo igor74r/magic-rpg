@@ -53,7 +53,9 @@ export function getRiftLocation(id) {
 }
 
 export function getRiftMult(floor) {
-  const f = Math.max(1, floor || 1);
+  // Rift floors are unbounded, but corrupted/non-integer values must never
+  // propagate NaN or Infinity into enemy stats and reward calculations.
+  const f = Number.isSafeInteger(floor) && floor >= 1 ? floor : 1;
   return {
     hpMult: 1 + (f - 1) * 0.15,
     atkMult: 1 + (f - 1) * 0.10,
