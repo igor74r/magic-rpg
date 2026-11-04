@@ -128,11 +128,12 @@ for (const file of files) {
     if (!resolveSpec(file, spec)) unresolved.push({ file, spec });
   }
 
-  const importRe = /import\s+([\s\S]*?)\s*from\s*['"](\.[^'"]+)['"]/g;
+  const importRe = /import\s+([\s\S]*?)\s*from\s*['"]([^'"]+)['"]/g;
   let m;
   while ((m = importRe.exec(src)) !== null) {
     const clause = m[1];
     const spec = m[2];
+    if (!spec.startsWith('.')) continue; // Не анализируем package/builtin imports.
     const named = clause.match(/\{([\s\S]*?)\}/);
     if (!named) continue;
     const target = resolveSpec(file, spec);
