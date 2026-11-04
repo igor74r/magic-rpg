@@ -84,6 +84,12 @@ assert.equal(getTowerMult(TOWER_MAX_FLOOR).hpMult, 4.12);
 assert.equal(getTowerMult(TOWER_MAX_FLOOR).atkMult, 3.145);
 assert.equal(getRiftMult(1).hpMult, 1);
 assert.equal(getRiftMult(1).atkMult, 1);
+for (const invalidFloor of [0, -1, 1.5, NaN, Infinity, -Infinity, '5', Number.MAX_SAFE_INTEGER + 1]) {
+  assert.deepEqual(getRiftMult(invalidFloor), getRiftMult(1),
+    `invalid Rift floor ${String(invalidFloor)} must use safe baseline multipliers`);
+}
+assert.equal(getRiftMult(5).hpMult, 1.6);
+assert.equal(getRiftMult(5).atkMult, 1.4);
 
 const previousGame = state.game;
 try {
