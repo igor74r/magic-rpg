@@ -2,6 +2,20 @@ import { readFileSync } from 'node:fs';
 import { Script } from 'node:vm';
 import assert from 'node:assert/strict';
 
+const main = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+assert.match(main, /function readLocalStorage\(key\)/,
+  'main bootstrap must guard storage reads');
+assert.match(main, /function writeLocalStorage\(key, value\)/,
+  'prologue dismissal must guard storage writes');
+assert.match(main, /function removeLocalStorage\(key\)/,
+  'prologue reset must guard storage removal');
+assert.match(main, /const prologueSeen = readLocalStorage\(/,
+  'startup must use the guarded prologue read');
+assert.match(main, /\[1, 2, 3\]\.some\(slot => !!readLocalStorage\(/,
+  'startup must use guarded reads for all save slots');
+assert.equal([...main.matchAll(/localStorage\.(?:getItem|setItem|removeItem)\(/g)].length, 3,
+  'raw localStorage calls must remain confined to the three guarded wrappers');
+
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const match = html.match(/<script>([\s\S]*?)<\/script>/i);
 assert.ok(match, 'index.html must contain an early inline startup guard');
