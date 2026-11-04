@@ -19,8 +19,11 @@ export function checkAchievements() {
     let ok = false;
     try { ok = !!a.check(g); } catch (e) { console.warn('[achievements]', a.id, e); }
     if (!ok) continue;
+    if (a.reward) {
+      if (!Number.isSafeInteger(p.gold) || p.gold < 0 || !Number.isSafeInteger(p.gold + a.reward)) continue;
+      p.gold += a.reward;
+    }
     p.achievements.push(a.id);
-    if (a.reward) p.gold = (p.gold || 0) + a.reward;
     unlocked.push(a);
     any = true;
   }
