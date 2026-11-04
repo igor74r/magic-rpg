@@ -1,10 +1,11 @@
-import { drawAuroraBuilding } from './aurora-art.js';
+﻿import { drawAuroraBuilding } from './aurora-art.js';
+import { drawAuroraVillagePackNature } from './aurora-village-pack.js';
 import { AURORA_KENNEY_NATURE_TILE, drawAuroraKenneyTile } from './aurora-kenney-atlas.js';
 
-// Пиксельные 2D-модели героев и существ; архитектура Авроры рисуется Canvas 2D.
-// Все спрайты создаются локально через Canvas 2D.
-// Маски: o — контур, a — основной цвет, b — тень,
-// s — кожа, e — глаза/свечение, w — металл, c — акцент.
+// РџРёРєСЃРµР»СЊРЅС‹Рµ 2D-РјРѕРґРµР»Рё РіРµСЂРѕРµРІ Рё СЃСѓС‰РµСЃС‚РІ; Р°СЂС…РёС‚РµРєС‚СѓСЂР° РђРІСЂРѕСЂС‹ СЂРёСЃСѓРµС‚СЃСЏ Canvas 2D.
+// Р’СЃРµ СЃРїСЂР°Р№С‚С‹ СЃРѕР·РґР°СЋС‚СЃСЏ Р»РѕРєР°Р»СЊРЅРѕ С‡РµСЂРµР· Canvas 2D.
+// РњР°СЃРєРё: o вЂ” РєРѕРЅС‚СѓСЂ, a вЂ” РѕСЃРЅРѕРІРЅРѕР№ С†РІРµС‚, b вЂ” С‚РµРЅСЊ,
+// s вЂ” РєРѕР¶Р°, e вЂ” РіР»Р°Р·Р°/СЃРІРµС‡РµРЅРёРµ, w вЂ” РјРµС‚Р°Р»Р», c вЂ” Р°РєС†РµРЅС‚.
 
 const OUTLINE = '#080a12';
 
@@ -186,7 +187,7 @@ const ALTAR = [
   '..oo....oo..'
 ];
 
-// ---------- МОДЕЛИ ГЕРОЕВ ----------
+// ---------- РњРћР”Р•Р›Р Р“Р•Р РћР•Р’ ----------
 
 const HEROES = {
   warrior: pal(
@@ -216,7 +217,7 @@ const HEROES = {
     '#d8bd71'
   ),
 
-  // Только для визуальной совместимости старых сохранений.
+  // РўРѕР»СЊРєРѕ РґР»СЏ РІРёР·СѓР°Р»СЊРЅРѕР№ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё СЃС‚Р°СЂС‹С… СЃРѕС…СЂР°РЅРµРЅРёР№.
   priest: pal(
     '#d8d2c0',
     '#ffd27a',
@@ -227,7 +228,7 @@ const HEROES = {
   )
 };
 
-// ---------- МОДЕЛИ ВРАГОВ ----------
+// ---------- РњРћР”Р•Р›Р Р’Р РђР“РћР’ ----------
 
 const ENEMY_ART = {
   goblin: {
@@ -380,7 +381,7 @@ const ENEMY_ART = {
     scale: 3
   },
 
-  // Акт I — заражённый лес.
+  // РђРєС‚ I вЂ” Р·Р°СЂР°Р¶С‘РЅРЅС‹Р№ Р»РµСЃ.
   'thorn-stalker': {
     mask: HUMANOID,
     pal: pal('#385c36', '#8bad4e', '#99ad77', '#f0d070'),
@@ -405,7 +406,7 @@ const ENEMY_ART = {
     scale: 3
   },
 
-  // Акт II — некрополь.
+  // РђРєС‚ II вЂ” РЅРµРєСЂРѕРїРѕР»СЊ.
   'grave-scout': {
     mask: HUMANOID,
     pal: pal('#777b86', '#383c4d', '#d1c6a5', '#b8e3ff'),
@@ -430,7 +431,7 @@ const ENEMY_ART = {
     scale: 3
   },
 
-  // Акт III — вулкан.
+  // РђРєС‚ III вЂ” РІСѓР»РєР°РЅ.
   'ash-harpy': {
     mask: HARPY,
     pal: pal('#5e3830', '#c06436', '#c68d6a', '#ffd36d'),
@@ -443,7 +444,7 @@ const ENEMY_ART = {
     scale: 3
   },
 
-  // Акт IV — ледяная крепость.
+  // РђРєС‚ IV вЂ” Р»РµРґСЏРЅР°СЏ РєСЂРµРїРѕСЃС‚СЊ.
   'rime-witch': {
     mask: GHOST,
     pal: pal('#79a9c6', '#3c668d', '#c0e3ef', '#ffffff'),
@@ -456,7 +457,7 @@ const ENEMY_ART = {
     scale: 3
   },
 
-  // Акт V — бездна.
+  // РђРєС‚ V вЂ” Р±РµР·РґРЅР°.
   'void-harbinger': {
     mask: GHOST,
     pal: pal('#392b58', '#8c4fb5', '#ad91c8', '#ff6cf0'),
@@ -464,7 +465,7 @@ const ENEMY_ART = {
   }
 };
 
-// ---------- МОДЕЛИ NPC ----------
+// ---------- РњРћР”Р•Р›Р NPC ----------
 
 const NPC_ART = {
   blacksmith: pal('#6a4a3a', '#c9a227', '#e8b48a', '#101018'),
@@ -587,7 +588,7 @@ function shadow(ctx, x, y, color, width = 14) {
   blob(ctx, x, y + 14, width, width * 0.42, color);
 }
 
-// ---------- ОТРИСОВКА ГЕРОЯ ----------
+// ---------- РћРўР РРЎРћР’РљРђ Р“Р•Р РћРЇ ----------
 
 export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false) {
   const colors = HEROES[playerClass] || HEROES.warrior;
@@ -608,7 +609,7 @@ export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false) {
   ctx.lineCap = 'round';
 
   if (playerClass === 'warrior') {
-    // Меч и щит.
+    // РњРµС‡ Рё С‰РёС‚.
     ctx.strokeStyle = '#dbe6f6';
     ctx.beginPath();
     ctx.moveTo(px, py - 14);
@@ -627,8 +628,8 @@ export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false) {
     ctx.strokeStyle = '#dbe6f6';
     ctx.strokeRect(px - 11, py - 1, 6, 10);
   } else if (playerClass === 'archer') {
-    // Лук, тетива и стрела.
-    // Геометрия рисуется Canvas, а не заменяется символом.
+    // Р›СѓРє, С‚РµС‚РёРІР° Рё СЃС‚СЂРµР»Р°.
+    // Р“РµРѕРјРµС‚СЂРёСЏ СЂРёСЃСѓРµС‚СЃСЏ Canvas, Р° РЅРµ Р·Р°РјРµРЅСЏРµС‚СЃСЏ СЃРёРјРІРѕР»РѕРј.
     ctx.strokeStyle = '#9b6836';
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -658,7 +659,7 @@ export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false) {
     ctx.lineTo(px + 9, py + 3);
     ctx.stroke();
   } else {
-    // Посох мага и наследуемый посох жреца.
+    // РџРѕСЃРѕС… РјР°РіР° Рё РЅР°СЃР»РµРґСѓРµРјС‹Р№ РїРѕСЃРѕС… Р¶СЂРµС†Р°.
     ctx.strokeStyle = '#5a4a3a';
     ctx.beginPath();
     ctx.moveTo(px, py - 16);
@@ -677,7 +678,7 @@ export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false) {
   ctx.restore();
 }
 
-// ---------- ОТРИСОВКА ВРАГА ----------
+// ---------- РћРўР РРЎРћР’РљРђ Р’Р РђР“Рђ ----------
 
 export function drawEnemy(ctx, enemy, x, y, shadowColor) {
   const art = ENEMY_ART[enemy.enemyId] || ENEMY_ART.goblin;
@@ -844,7 +845,7 @@ function drawVillageProp(ctx, x, y, style) {
   }
 }
 
-// ---------- ОТРИСОВКА ПРЕДМЕТОВ И ОБЪЕКТОВ ----------
+// ---------- РћРўР РРЎРћР’РљРђ РџР Р•Р”РњР•РўРћР’ Р РћР‘РЄР•РљРўРћР’ ----------
 
 export function drawObject(ctx, obj, x, y, shadowColor) {
   if (obj.natureStyle) {
@@ -956,13 +957,13 @@ export function drawObject(ctx, obj, x, y, shadowColor) {
   );
   drawNpcDetails(ctx, id, x, y, bob);
 }
-// ---------- ДЕТАЛИЗАЦИЯ СИЛУЭТОВ (визуальный слой, без изменения хитбоксов) ----------
+// ---------- Р”Р•РўРђР›РР—РђР¦РРЇ РЎРР›РЈР­РўРћР’ (РІРёР·СѓР°Р»СЊРЅС‹Р№ СЃР»РѕР№, Р±РµР· РёР·РјРµРЅРµРЅРёСЏ С…РёС‚Р±РѕРєСЃРѕРІ) ----------
 function drawHeroDetails(ctx, x, y, playerClass, bob) {
   ctx.save();
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
   if (playerClass === 'warrior') {
-    // Наплечники, нагрудная пластина и центральная заклёпка.
+    // РќР°РїР»РµС‡РЅРёРєРё, РЅР°РіСЂСѓРґРЅР°СЏ РїР»Р°СЃС‚РёРЅР° Рё С†РµРЅС‚СЂР°Р»СЊРЅР°СЏ Р·Р°РєР»С‘РїРєР°.
     ctx.fillStyle = '#dbe6f6';
     ctx.strokeStyle = '#080a12';
     ctx.lineWidth = 2;
@@ -971,13 +972,13 @@ function drawHeroDetails(ctx, x, y, playerClass, bob) {
     ctx.fillStyle = '#9b4c3b'; ctx.fillRect(x-5,y-21+bob,10,13);
     ctx.fillStyle = '#ffcf6e'; ctx.fillRect(x-1,y-19+bob,2,2);
   } else if (playerClass === 'mage') {
-    // Капюшон и светящийся знак на мантии.
+    // РљР°РїСЋС€РѕРЅ Рё СЃРІРµС‚СЏС‰РёР№СЃСЏ Р·РЅР°Рє РЅР° РјР°РЅС‚РёРё.
     ctx.fillStyle = '#20264e'; ctx.strokeStyle = '#7ce7ff'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(x-12,y-32+bob); ctx.lineTo(x,y-42+bob); ctx.lineTo(x+12,y-32+bob); ctx.lineTo(x+9,y-25+bob); ctx.lineTo(x-9,y-25+bob); ctx.closePath(); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#b28dff'; ctx.beginPath(); ctx.moveTo(x,y-18+bob); ctx.lineTo(x-3,y-13+bob); ctx.lineTo(x,y-8+bob); ctx.lineTo(x+3,y-13+bob); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#7ce7ff'; ctx.fillRect(x-1,y-15+bob,2,4);
   } else if (playerClass === 'archer') {
-    // Кожаная перевязь, капюшон и колчан со стрелами.
+    // РљРѕР¶Р°РЅР°СЏ РїРµСЂРµРІСЏР·СЊ, РєР°РїСЋС€РѕРЅ Рё РєРѕР»С‡Р°РЅ СЃРѕ СЃС‚СЂРµР»Р°РјРё.
     ctx.strokeStyle = '#d8bd71'; ctx.lineWidth = 2.5;
     ctx.beginPath(); ctx.moveTo(x-8,y-25+bob); ctx.lineTo(x+8,y-10+bob); ctx.stroke();
     ctx.fillStyle = '#384b32'; ctx.strokeStyle = '#c5a66b'; ctx.lineWidth = 1.5;
@@ -997,43 +998,3 @@ function drawEnemyDetails(ctx, enemy, x, y, bob, scale) {
     ctx.beginPath(); ctx.moveTo(x-5*scale,y-10*scale+bob); ctx.lineTo(x+5*scale,y-10*scale+bob); ctx.stroke();
     ctx.fillStyle = '#ff6262'; ctx.fillRect(x-4*scale,y-26*scale+bob,2*scale,2*scale); ctx.fillRect(x+2*scale,y-26*scale+bob,2*scale,2*scale);
   } else if (id.includes('frost') || id.includes('ice') || id === 'rime-witch') {
-    ctx.strokeStyle = '#d8f7ff'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(x,y-35*scale+bob); ctx.lineTo(x-5*scale,y-43*scale+bob); ctx.moveTo(x,y-35*scale+bob); ctx.lineTo(x+5*scale,y-43*scale+bob); ctx.stroke();
-    ctx.fillStyle = '#b9efff'; ctx.fillRect(x-2*scale,y-16*scale+bob,4*scale,3*scale);
-  } else if (id.includes('fire') || id.includes('magma') || id.includes('flame') || id.includes('ash') || id.includes('obsidian')) {
-    ctx.fillStyle = '#ff9a43'; ctx.globalAlpha = .8;
-    ctx.beginPath(); ctx.arc(x,y-20*scale+bob,2.2*scale,0,Math.PI*2); ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.strokeStyle = '#54251f'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(x-6*scale,y-8*scale+bob); ctx.lineTo(x+6*scale,y-8*scale+bob); ctx.stroke();
-  } else if (id.includes('void') || id.includes('wraith') || id.includes('shadow')) {
-    ctx.strokeStyle = '#c69cff'; ctx.globalAlpha = .7; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(x,y-19*scale+bob,7*scale,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function drawNpcDetails(ctx, id, x, y, bob) {
-  ctx.save();
-  ctx.lineWidth = 2;
-  if (id === 'blacksmith') {
-    ctx.fillStyle = '#8b929e'; ctx.strokeStyle = '#171923';
-    ctx.fillRect(x-9,y-20+bob,18,5); ctx.strokeRect(x-9,y-20+bob,18,5);
-    ctx.fillStyle = '#c9a227'; ctx.fillRect(x+9,y-9+bob,4,8);
-  } else if (id === 'healer') {
-    ctx.strokeStyle = '#a9ef9b'; ctx.beginPath(); ctx.moveTo(x,y-21+bob); ctx.lineTo(x,y-11+bob); ctx.moveTo(x-5,y-16+bob); ctx.lineTo(x+5,y-16+bob); ctx.stroke();
-  } else if (id === 'merchant') {
-    ctx.fillStyle = '#8a5a2a'; ctx.strokeStyle = '#d8bd71';
-    ctx.beginPath(); ctx.moveTo(x-13,y-28+bob); ctx.lineTo(x,y-37+bob); ctx.lineTo(x+13,y-28+bob); ctx.closePath(); ctx.fill(); ctx.stroke();
-  } else if (id === 'guard') {
-    ctx.fillStyle = '#9aa8c0'; ctx.fillRect(x-13,y-21+bob,5,11); ctx.fillRect(x+8,y-21+bob,5,11);
-  } else if (id === 'elder') {
-    ctx.strokeStyle = '#d8d0bb'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(x+10,y-8+bob); ctx.lineTo(x+13,y+13+bob); ctx.stroke();
-    ctx.fillStyle = '#d8d0bb'; ctx.beginPath(); ctx.arc(x+13,y-9+bob,2,0,Math.PI*2); ctx.fill();
-  } else if (id === 'alchemist') {
-    ctx.strokeStyle = '#9bdb77'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x+11,y-13+bob,4,0,Math.PI*2); ctx.stroke();
-  } else if (id === 'herald') {
-    ctx.fillStyle = '#c9a227'; ctx.fillRect(x-2,y-38+bob,4,13);
-  }
-  ctx.restore();
-}

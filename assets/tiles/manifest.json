@@ -1,121 +1,134 @@
 {
-  "name": "Shards of the Rift вЂ” high-detail original 2D terrain atlas",
-  "license": "Original project assets; created for this game",
-  "tileSize": 96,
-  "terrain": {
-    "file": "terrain/atlas.png",
-    "columns": [
-      "grass",
-      "path",
-      "biome-object",
-      "liquid",
-      "rock"
-    ],
-    "rows": [
-      "village",
-      "forest",
-      "ruins",
-      "shadow",
-      "swamp",
-      "volcano",
-      "ice",
-      "desert"
-    ],
-    "displaySize": 48,
-    "sourceScale": 2
-  },
-  "dungeons": {
-    "file": "dungeons/atlas.png",
-    "tileSize": 48,
-    "columns": 10,
-    "rows": 4,
-    "usage": "decorative dungeon floors, walls, doors, cracks and seals"
-  },
-  "props": {
-    "file": "props/atlas.png",
-    "tileSize": 96,
-    "displaySize": 48,
-    "columns": 8,
-    "rows": 4,
-    "usage": "chests, crystals, altars, lanterns, bridges, portals, bones, mushrooms"
-  },
-  "biomeRows": {
-    "village": 0,
-    "forest": 1,
-    "ruins": 2,
-    "shadow": 3,
-    "swamp": 4,
-    "graveyard": 3,
-    "volcano": 5,
-    "dragon": 5,
-    "ice": 6,
-    "desert": 7,
-    "library": 2,
-    "briar-hollow": 1,
-    "sunken-necropolis": 2,
-    "obsidian-fields": 5,
-    "frost-citadel": 6,
-    "void-crater": 3
-  },
-  "auroraGround": {
-    "file": "../aurora/ground-atlas.png",
-    "tileSize": 96,
-    "columns": 8,
-    "rows": 1,
-    "variantsPerType": 4,
-    "types": [
-      "grass",
-      "path"
-    ],
-    "displaySize": 48,
-    "usage": "Original 16-bit village ground tiles; four seamless visual variants for grass and cobblestone"
-  },
-  "villageProps": {
-    "file": "../aurora/village-props-atlas.png",
-    "tileSize": 64,
-    "columns": 16,
-    "rows": 1,
-    "displaySize": 96,
-    "styles": [
-      "lantern",
-      "memorial",
-      "bench",
-      "stall",
-      "fountain",
-      "planter",
-      "banner",
-      "brazier",
-      "anvil",
-      "woodpile",
-      "cart",
-      "barrels",
-      "herb-rack",
-      "frost-lantern",
-      "rift-ward",
-      "tower-gate"
-    ],
-    "usage": "Authored 16-bit pixel-art village prop sprites with transparent backgrounds; nearest-neighbour rendering"
-  },
-  "auroraWorldPortal": {
-    "file": "../aurora/world-portal.png",
-    "tileSize": 64,
-    "columns": 1,
-    "rows": 1,
-    "displaySize": 96,
-    "usage": "Dedicated 16-bit pixel-art stone arch and rift aperture for Aurora's central world portal"
-  },
-  "auroraKenneyTinyTown": {
-    "file": "../aurora/kenney-tiny-town-atlas.png",
-    "tileSize": 16,
-    "columns": 12,
-    "rows": 11,
-    "spacing": 1,
-    "stride": 17,
-    "displaySize": 48,
-    "source": "Kenney Tiny Town (1.1)",
-    "author": "Kenney",
-    "license": "CC0-1.0",
-    "sourceUrl": "https://kenney.nl/assets/tiny-town",
-    "usage": "Optional local modular village nature sprites; Canvas 2D nearest-neighbour rendering"
-  }
+    "name":  "Shards of the Rift РІР‚вЂќ high-detail original 2D terrain atlas",
+    "license":  "Original project assets; created for this game",
+    "tileSize":  96,
+    "terrain":  {
+                    "file":  "terrain/atlas.png",
+                    "columns":  [
+                                    "grass",
+                                    "path",
+                                    "biome-object",
+                                    "liquid",
+                                    "rock"
+                                ],
+                    "rows":  [
+                                 "village",
+                                 "forest",
+                                 "ruins",
+                                 "shadow",
+                                 "swamp",
+                                 "volcano",
+                                 "ice",
+                                 "desert"
+                             ],
+                    "displaySize":  48,
+                    "sourceScale":  2
+                },
+    "dungeons":  {
+                     "file":  "dungeons/atlas.png",
+                     "tileSize":  48,
+                     "columns":  10,
+                     "rows":  4,
+                     "usage":  "decorative dungeon floors, walls, doors, cracks and seals"
+                 },
+    "props":  {
+                  "file":  "props/atlas.png",
+                  "tileSize":  96,
+                  "displaySize":  48,
+                  "columns":  8,
+                  "rows":  4,
+                  "usage":  "chests, crystals, altars, lanterns, bridges, portals, bones, mushrooms"
+              },
+    "biomeRows":  {
+                      "village":  0,
+                      "forest":  1,
+                      "ruins":  2,
+                      "shadow":  3,
+                      "swamp":  4,
+                      "graveyard":  3,
+                      "volcano":  5,
+                      "dragon":  5,
+                      "ice":  6,
+                      "desert":  7,
+                      "library":  2,
+                      "briar-hollow":  1,
+                      "sunken-necropolis":  2,
+                      "obsidian-fields":  5,
+                      "frost-citadel":  6,
+                      "void-crater":  3
+                  },
+    "auroraGround":  {
+                         "file":  "../aurora/ground-atlas.png",
+                         "tileSize":  96,
+                         "columns":  8,
+                         "rows":  1,
+                         "variantsPerType":  4,
+                         "types":  [
+                                       "grass",
+                                       "path"
+                                   ],
+                         "displaySize":  48,
+                         "usage":  "Original 16-bit village ground tiles; four seamless visual variants for grass and cobblestone"
+                     },
+    "villageProps":  {
+                         "file":  "../aurora/village-props-atlas.png",
+                         "tileSize":  64,
+                         "columns":  16,
+                         "rows":  1,
+                         "displaySize":  96,
+                         "styles":  [
+                                        "lantern",
+                                        "memorial",
+                                        "bench",
+                                        "stall",
+                                        "fountain",
+                                        "planter",
+                                        "banner",
+                                        "brazier",
+                                        "anvil",
+                                        "woodpile",
+                                        "cart",
+                                        "barrels",
+                                        "herb-rack",
+                                        "frost-lantern",
+                                        "rift-ward",
+                                        "tower-gate"
+                                    ],
+                         "usage":  "Authored 16-bit pixel-art village prop sprites with transparent backgrounds; nearest-neighbour rendering"
+                     },
+    "auroraWorldPortal":  {
+                              "file":  "../aurora/world-portal.png",
+                              "tileSize":  64,
+                              "columns":  1,
+                              "rows":  1,
+                              "displaySize":  96,
+                              "usage":  "Dedicated 16-bit pixel-art stone arch and rift aperture for Aurora\u0027s central world portal"
+                          },
+    "auroraKenneyTinyTown":  {
+                                 "file":  "../aurora/kenney-tiny-town-atlas.png",
+                                 "tileSize":  16,
+                                 "columns":  12,
+                                 "rows":  11,
+                                 "spacing":  1,
+                                 "stride":  17,
+                                 "displaySize":  48,
+                                 "source":  "Kenney Tiny Town (1.1)",
+                                 "author":  "Kenney",
+                                 "license":  "CC0-1.0",
+                                 "sourceUrl":  "https://kenney.nl/assets/tiny-town",
+                                 "usage":  "Optional local modular village nature sprites; Canvas 2D nearest-neighbour rendering"
+                             },
+    "auroraVillagePack":  {
+                              "source":  "Basic Village Tileset",
+                              "author":  "Forchild",
+                              "license":  "CC0-1.0",
+                              "sourceUrl":  "https://forchild.itch.io/village-tileset",
+                              "files":  [
+                                            "aurora/village-pack/Outdoor_tileset-aurora.png",
+                                            "aurora/village-pack/House_tileset-aurora.png",
+                                            "aurora/village-pack/Trees_and_bushes-aurora.png",
+                                            "aurora/village-pack/Furniture-aurora.png"
+                                        ],
+                              "usage":  "Darkened CC0 village sprites for Aurora nature and modular architecture; nearest-neighbour Canvas 2D"
+                          }
 }
