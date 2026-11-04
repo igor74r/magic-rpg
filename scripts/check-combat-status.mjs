@@ -38,6 +38,9 @@ const corruptedEffects = {
 };
 assert.doesNotThrow(() => applyEffect(corruptedEffects, 'burn'),
   'adding a status must tolerate malformed existing entries');
+assert.equal(getAtkMult(corruptedEffects), 1, 'attack modifiers must ignore malformed entries');
+assert.equal(getDefMult(corruptedEffects), 1, 'defense modifiers must ignore malformed entries');
+assert.equal(getLifesteal(corruptedEffects), 0, 'lifesteal must ignore malformed entries');
 assert.doesNotThrow(() => tickEffects(corruptedEffects),
   'status ticks must tolerate malformed effect entries');
 assert.equal(hasEffect(corruptedEffects, 'poison'), true,
