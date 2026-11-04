@@ -150,7 +150,45 @@ try {
     globalThis.localStorage.setItem = originalSetItem;
   }
 
-  console.log('check-daily-quests: PASS (save normalization, canonical rewards, forged completion, future dates, progress and rollback guards)');
+  state.game.player.dailyQuests = {
+    date: Date.now(),
+    list: [
+      { id: 'q-kill-goblin', current: 5, completed: true, claimed: false },
+      { id: 'q-kill-any', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-skeleton', current: 0, completed: false, claimed: false }
+    ]
+  };
+  getDailyQuests();
+  state.game.player.gold = 10;
+  state.game.player.exp = 0;
+  state.game.player.level = 1;
+  const beforeFailedReward = JSON.parse(JSON.stringify(state.game.player));
+  const originalRewardSetItem = globalThis.localStorage.setItem;
+  let rewardToasts = 0;
+  let rewardLogs = 0;
+  const onRewardToast = message => {
+    if (String(message).includes('Награда')) rewardToasts += 1;
+  };
+  const onRewardLog = entry => {
+    if (String(entry?.msg).includes('Квест')) rewardLogs += 1;
+  };
+  on('toast', onRewardToast);
+  on('log', onRewardLog);
+  globalThis.localStorage.setItem = () => { throw new Error('simulated quota failure'); };
+  try {
+    assert.equal(claimQuestReward('q-kill-goblin'), false,
+      'a reward must not be claimed when its save fails');
+    assert.deepEqual(state.game.player, beforeFailedReward,
+      'failed reward persistence must roll back gold, experience and claimed state');
+    assert.equal(rewardToasts, 0, 'failed reward must not show success feedback');
+    assert.equal(rewardLogs, 0, 'failed reward must not append a success log');
+  } finally {
+    off('toast', onRewardToast);
+    off('log', onRewardLog);
+    globalThis.localStorage.setItem = originalRewardSetItem;
+  }
+
+  console.log('check-daily-quests: PASS (normalization, canonical rewards, forged completion, future dates, progress and reward rollback guards)');
 } finally {
   state.game = null;
   if (previousStorage === undefined) delete globalThis.localStorage;
