@@ -110,6 +110,7 @@ export function validateCurrentSaveShape(game) {
   const player = game.player;
   const isRecord = value => !!value && typeof value === 'object' && !Array.isArray(value);
   if (typeof player.name !== 'string' || !player.name.trim() ||
+      !['warrior', 'mage', 'archer', 'priest'].includes(player.class) ||
       !Number.isSafeInteger(player.level) || player.level < 1 || player.level > 100 ||
       !Number.isSafeInteger(player.gold) || player.gold < 0 ||
       !Array.isArray(player.inventory) ||
