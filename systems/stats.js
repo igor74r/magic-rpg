@@ -147,6 +147,11 @@ export function getSafeCount(value) {
   return Number.isSafeInteger(value) && value >= 0 ? value : 0;
 }
 
+export function incrementSafeCount(value) {
+  const count = getSafeCount(value);
+  return count >= Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : count + 1;
+}
+
 export function getTotalKills(kills) {
   if (!kills || typeof kills !== 'object' || Array.isArray(kills)) return 0;
   return Object.values(kills).reduce((sum, value) => {
