@@ -56,6 +56,21 @@ function runEnemyTurn() {
 }
 
 try {
+  // Corrupted saved counters must recover safely when a real combat kill is recorded.
+  const counterFixture = fixture('warrior', 'goblin');
+  counterFixture.enemy.hp = 1;
+  counterFixture.enemy.elite = true;
+  counterFixture.enemy.boss = true;
+  counterFixture.p.stats.kills.goblin = '7';
+  counterFixture.p.stats.flawlessStreak = 'invalid';
+  counterFixture.p.stats.eliteKills = '2';
+  counterFixture.p.stats.bossKills = 1.5;
+  combatAttack();
+  assert.equal(counterFixture.p.stats.kills.goblin, 1, 'invalid enemy kill counter must restart at one');
+  assert.equal(counterFixture.p.stats.flawlessStreak, 1, 'invalid flawless streak must restart at one');
+  assert.equal(counterFixture.p.stats.eliteKills, 1, 'invalid elite counter must restart at one');
+  assert.equal(counterFixture.p.stats.bossKills, 1, 'invalid boss counter must restart at one');
+
   // double, snipe and drain specials are exercised on their scheduled turn.
   for (const [enemyId, expectedEffect] of [
     ['wolf', 'bleed'],
