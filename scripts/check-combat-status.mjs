@@ -52,4 +52,4 @@ assert.doesNotThrow(() => clearDebuffs(corruptedEffects));
 assert.ok(corruptedEffects.effects.every(effect => effect && typeof effect === 'object' && Number.isFinite(effect.duration)),
   'malformed entries must be removed before they can crash later combat ticks');
 
-console.log('Combat status regression: 18/18 checks passed (player/enemy stun, anti-chain immunity, poison tick and duration).');
+console.log('Combat status regression passed (player/enemy stun, anti-chain immunity, poison tick and malformed-entry guards).');
