@@ -824,3 +824,13 @@ index.html, main.js, data/story.js, data/enemies.js, data/items.js, data/locatio
 - `scripts/check-visual-assets.mjs` проверяет PNG dimensions, RGBA color type, список стилей, путь загрузки и nearest-neighbour sampling. Скриншоты desktop/mobile visual regression просмотрены: новый atlas отображается в игровой сцене, без потери layout.
 - CI PASS и Pages deployment PASS на HEAD `89ad2c79188b79e5b25d267755c7bd7a4153f66a`. CI: https://github.com/igor74r/magic-rpg/actions/runs/41873200313 ; Deploy: https://github.com/igor74r/magic-rpg/actions/runs/41873200129 .
 - Остаётся завершить ручную проверку каждого природного кадра на полном масштабе и пройти оставшиеся архитектурные/NPC арт-этапы.
+
+
+## 04.11.2026 — проверка после Aurora art pass и очистка репозитория
+
+- Git tree main: 202 tracked files, tree API not truncated.
+- CI run 41883204150 на commit 85bd4988 завершился success: все 81 шага прошли, в том числе browser smoke и visual regression desktop/mobile.
+- Получен и вручную просмотрен visual-regression artifact 13350720999: кадры двора и все шесть интерьеров на двух viewport.
+- Исправлены crop прозрачных полей nature atlas, зернистость grass atlas, интерьерные палитры/композиция и cache-busting JS/CSS.
+- .gitignore дополнен исключениями для node_modules и временных результатов Playwright.
+- Это подтверждает автоматический прогон и конкретный визуальный набор, но не означает завершение построчного ручного аудита всех файлов или всей художественной переработки деревни. Открыты NPC/персонажи и дополнительные художественные варианты; deployment Pages ожидает отдельного финального подтверждения.
