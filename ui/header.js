@@ -264,31 +264,48 @@ const STAT_NAMES = {
 };
 
 export function spendStat(stat) {
-  const p = state.game.player;
+  const p = state.game?.player;
 
   if (
-    !p.statPoints ||
+    !p ||
+    !Number.isSafeInteger(p.statPoints) ||
     p.statPoints <= 0 ||
-    !(stat in STAT_NAMES)
+    !Object.prototype.hasOwnProperty.call(STAT_NAMES, stat) ||
+    !Number.isSafeInteger(p[stat]) ||
+    p[stat] >= Number.MAX_SAFE_INTEGER
   ) {
-    return;
+    return false;
   }
 
-  p[stat] = (p[stat] || 0) + 1;
+  if (stat === 'con' && (!Number.isSafeInteger(p.maxHp) || p.maxHp > Number.MAX_SAFE_INTEGER - 10)) return false;
+  if (stat === 'int' && (!Number.isSafeInteger(p.maxMp) || p.maxMp > Number.MAX_SAFE_INTEGER - 5)) return false;
+
+  const previous = {
+    value: p[stat],
+    statPoints: p.statPoints,
+    maxHp: p.maxHp,
+    maxMp: p.maxMp
+  };
+
+  p[stat] += 1;
   p.statPoints -= 1;
 
-  if (stat === 'con') {
-    p.maxHp += 10;
+  if (stat === 'con') p.maxHp += 10;
+  if (stat === 'int') p.maxMp += 5;
+
+  if (!saveGame()) {
+    p[stat] = previous.value;
+    p.statPoints = previous.statPoints;
+    p.maxHp = previous.maxHp;
+    p.maxMp = previous.maxMp;
+    renderHeader();
+    toast('Не удалось сохранить характеристику. Изменения отменены.');
+    return false;
   }
 
-  if (stat === 'int') {
-    p.maxMp += 5;
-  }
-
-  saveGame();
   renderHeader();
-
   toast(`+1 к ${STAT_NAMES[stat]}`);
+  return true;
 }
 
 function renderLocation() {
