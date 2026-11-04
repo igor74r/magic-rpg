@@ -202,7 +202,7 @@ try {
   let chestUpdates = 0;
   const onChestLog = entry => { if (String(entry?.msg).includes('Ежедневный сундук')) chestSuccessLogs += 1; };
   const onChestToast = message => {
-    if (String(message).includes('Ежедневный сундук') || String(message).includes('сохранено в хранилище добычи')) chestSuccessToasts += 1;
+    if (String(message).includes('🎁 +8💰')) chestSuccessToasts += 1;
   };
   const onChestUpdate = () => { chestUpdates += 1; };
   on('log', onChestLog);
