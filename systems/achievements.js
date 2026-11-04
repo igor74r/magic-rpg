@@ -49,7 +49,12 @@ export function checkAchievements() {
   }
 }
 
+export function getUnlockedAchievementIds(player = state.game?.player) {
+  const knownIds = new Set(ACHIEVEMENTS.map(achievement => achievement.id));
+  const values = Array.isArray(player?.achievements) ? player.achievements : [];
+  return new Set(values.filter(id => typeof id === 'string' && knownIds.has(id)));
+}
+
 export function unlockedCount() {
-  const achievements = state.game?.player?.achievements;
-  return Array.isArray(achievements) ? achievements.length : 0;
+  return getUnlockedAchievementIds().size;
 }
