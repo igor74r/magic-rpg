@@ -142,3 +142,5 @@
 - Обновлён query-параметр ES-модуля в `index.html` на `main.js?v=20261104-aurora-interior-pixel-pass`, чтобы браузер не использовал предыдущий кэш `main.js`; `scripts/check-startup-fallback.mjs` проверяет актуальный URL.
 
 - Cache-busting распространён и на `css/2d-art-direction.css`; `scripts/check-startup-fallback.mjs` проверяет оба URL. Это не позволяет браузеру соединить новую разметку комнат со старым интерьерным CSS.
+
+- Просмотр desktop/mobile screenshots выявил наложение: декоративная метка «АВРОРА» попадала под кнопку закрытия модального окна. Метка удалена; очаг перенесён выше в правую часть стены, а три карточки предметов выровнены по одной нижней линии. Cache keys `main.js` и art-direction CSS обновлены до `20261104-aurora-interior-layout-2`, оба значения закреплены startup-тестом.
