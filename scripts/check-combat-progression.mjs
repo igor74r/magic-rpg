@@ -248,6 +248,17 @@ try {
     'failed victory save must not leave loot messages in the combat log');
   console.log('PASS failed victory save rolls back rewards and restores encounter');
 
+  // Gold rewards at the numeric cap must be safely truncated, not overflow the save.
+  f = fixture('warrior', 'goblin');
+  f.p.gold = Number.MAX_SAFE_INTEGER - 1;
+  f.enemy.hp = 1;
+  combatAttack();
+  assert.equal(state.game.player.gold, Number.MAX_SAFE_INTEGER,
+    'victory gold must stop at the largest safe integer');
+  assert.ok(f.ow.log.some(entry => entry.msg.includes('безопасного предела')),
+    'capped victory gold must be explained in the combat log');
+  console.log('PASS victory gold is capped at the safe integer limit');
+
   // Tower floor events are tied to the floor that emitted them.
   assert.equal(createCharacter('Tower Regression', 'warrior'), true);
   state.game.player.hp = state.game.player.maxHp;
