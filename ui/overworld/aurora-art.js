@@ -118,10 +118,13 @@ function drawHome(c,p){
   rect(c,16,43,15,4,p.accent);rect(c,18,47,11,2,p.trim);
   rect(c,75,43,14,4,p.accent);
 }
-function makeBuilding(style){
+function makeBuilding(style,variant='default'){
   const c=document.createElement('canvas');c.width=W;c.height=H;
   const g=c.getContext('2d');g.imageSmoothingEnabled=false;
-  const p=PALETTES[style]||PALETTES.home;
+  const basePalette=PALETTES[style]||PALETTES.home;
+  const p=style==='home'&&variant==='home-se'
+    ? {...basePalette,wall:'#d8c49d',shade:'#aa8d68',roof:'#76504a',roof2:'#a76b55',accent:'#c58c58'}
+    : basePalette;
   rect(g,4,82,96,6,'#384034');rect(g,8,80,88,3,'#59624a');
   ({hall:drawHall,forge:drawForge,healer:drawHealer,alchemy:drawAlchemy,market:drawMarket,tavern:drawTavern,home:drawHome}[style]||drawHome)(g,p);
   // Architectural finish pass: roof courses, projecting eaves, readable craft props,
@@ -151,6 +154,15 @@ function makeBuilding(style){
     for(let xx=left+12;xx<right-10;xx+=12) rect(g,xx,base+1,2,2,p.trim);
   }
   roofCourses();
+  if(style==='home'&&variant==='home-se'){
+    // The southern cottage has a compact front dormer and a second chimney,
+    // making it visibly distinct from the northern half-timbered residence.
+    rect(g,40,27,24,15,p.timber);rect(g,43,30,18,12,p.wall);
+    rect(g,46,32,12,8,p.glass);rect(g,51,32,2,8,p.timber);
+    rect(g,37,27,30,3,p.roof);rect(g,40,24,24,3,p.roof2);
+    rect(g,17,16,9,27,p.timber);rect(g,19,18,5,23,p.stone);
+    rect(g,15,14,13,3,p.trim);
+  }
   // Repeated timber braces and stone foundation joints, deliberately irregular.
   for(let xx=14;xx<92;xx+=18){
     rect(g,xx,44,2,27,p.timber);
@@ -216,14 +228,15 @@ function makeBuilding(style){
   for(let i=0;i<16;i++){const x=9+(i*29)%86,y=73+(i*7)%9;pixel(g,x,y,i%3===0?p.accent:p.stone);}
   return c;
 }
-export function drawAuroraBuilding(ctx,x,y,style='home'){
+export function drawAuroraBuilding(ctx,x,y,style='home',variant='default'){
   if(!ctx||typeof document==='undefined') return false;
   const key=PALETTES[style]?style:'home';
-  if(!cache.has(key)) cache.set(key,makeBuilding(key));
+  const cacheKey=key==='home'&&variant==='home-se'?'home:home-se':key;
+  if(!cache.has(cacheKey)) cache.set(cacheKey,makeBuilding(key,variant));
   ctx.save();
   try {
     ctx.imageSmoothingEnabled=false;
-    ctx.drawImage(cache.get(key),Math.round(x-W*SCALE/2),Math.round(y-H*SCALE+8),W*SCALE,H*SCALE);
+    ctx.drawImage(cache.get(cacheKey),Math.round(x-W*SCALE/2),Math.round(y-H*SCALE+8),W*SCALE,H*SCALE);
     return true;
   } finally {
     ctx.restore();
