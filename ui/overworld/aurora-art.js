@@ -127,15 +127,28 @@ function makeBuilding(style){
   // Architectural finish pass: roof courses, projecting eaves, readable craft props,
   // and small foreground garden pieces make each silhouette feel inhabited.
   function roofCourses(){
-    for(let yy=28;yy<47;yy+=4){
-      const inset=Math.max(0,Math.floor((yy-28)*1.15));
-      for(let xx=10+inset;xx<94-inset;xx+=12){
-          rect(g,xx,yy,7,1,yy%8===0?p.roof2:p.roof);
-          pixel(g,xx+7,yy,p.trim);
+    // Tile accents follow each roof's actual gable footprint. The previous
+    // one-size-fits-all pass crossed roof edges and painted horizontal marks
+    // over walls, flattening the silhouettes of the individual buildings.
+    const roofShape = {
+      hall: [8, 96, 20, 48], forge: [8, 95, 20, 48],
+      healer: [9, 95, 24, 48], alchemy: [7, 96, 18, 48],
+      market: [8, 96, 17, 30], tavern: [6, 98, 17, 48],
+      home: [8, 96, 26, 48]
+    }[style] || [8, 96, 26, 48];
+    const [left, right, peak, base] = roofShape;
+    for(let yy=peak+9; yy<base-3; yy+=4){
+      const step=Math.round((yy-peak)/1.25);
+      const inset=step*2;
+      const start=left+inset+3, end=right-inset-3;
+      for(let xx=start; xx<end; xx+=12){
+        rect(g,xx,yy,7,1,((Math.floor((yy-peak)/4)+Math.floor(xx/12))%3===0)?p.roof2:p.roof);
+        pixel(g,xx+7,yy,p.trim);
       }
     }
-    rect(g,8,47,88,2,p.timber);
-    for(let xx=12;xx<94;xx+=10) rect(g,xx,48,2,3,p.trim);
+    // A continuous dark eave and evenly spaced pale rafter ends anchor the roof.
+    rect(g,left+8,base-1,right-left-16,3,p.timber);
+    for(let xx=left+12;xx<right-10;xx+=12) rect(g,xx,base+1,2,2,p.trim);
   }
   roofCourses();
   // Repeated timber braces and stone foundation joints, deliberately irregular.
