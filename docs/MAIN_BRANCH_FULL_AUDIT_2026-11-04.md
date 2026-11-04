@@ -90,3 +90,12 @@
 - `check-visual-assets.mjs` расширен проверками всех 9 NPC с ролевыми пиксельными деталями и специальных pixel renderers для `well`, `questBoard`, `cat`; также проверяются отсутствие эллипсов, разреженность травы и восстановление Canvas alpha.
 - CI [41887283837](https://github.com/igor74r/magic-rpg/actions/runs/41887283837) на commit `7d9c0d5509b365512f7d5c9977215ccb8b6ec9b9` завершился **success: 81/81 шагов**. GitHub Pages deployment [41887283034](https://github.com/igor74r/magic-rpg/actions/runs/41887283034) — **success**.
 - Ограничение статуса: это не завершает независимый построчный ручной аудит всех 202 файлов и художественную переработку всех биомов/персонажей/драконов/предметов. Дальше аудит продолжается по оставшимся исходникам и игровым ассетам; полный проект пока не объявлять завершённым.
+
+
+## Дополнительные исправления после проверки рендеринга и транзакций
+
+- `systems/overworld/collisions.js`: обнаружен пропуск — при передаче пользовательского массива `statics` `isVillagePositionBlocked()` собирал коллайдеры зданий и props, но забывал ground-footprint природных объектов. Исправлено добавлением `getVillageNatureColliders(statics)` в custom branch. `scripts/check-overworld-collision.mjs` теперь проверяет oak footprint на custom statics.
+- `systems/overworld/spawn.js`: `openChest()` раньше публиковал reward log, floating number, particles и звук до результата `saveGame()`. При ошибке сохранения данные откатывались, но игрок видел ложную выдачу награды. Все reward feedback/effects перенесены после успешного сохранения; при rollback остаётся только предупреждение. `scripts/check-chest-save.mjs` проверяет отсутствие ложных log entries, floating numbers и particles.
+- CI [41888073492](https://github.com/igor74r/magic-rpg/actions/runs/41888073492) на commit `80d71cc8954674343b79e0dce459e64384d65535` — **success, 81/81 шагов**; профильные шаги `Check chest reward rollback on save failure`, `Check player footprint and swept collision`, `Check Aurora village layout...` и browser desktop/mobile smoke + visual regression прошли.
+- GitHub Pages deployment [41888073631](https://github.com/igor74r/magic-rpg/actions/runs/41888073631) — **success**.
+- Полный построчный ручной аудит всех файлов и художественная переработка всех биомов/персонажей/драконов/предметов по-прежнему не завершены; текущие результаты не должны выдаваться за полный финал.
