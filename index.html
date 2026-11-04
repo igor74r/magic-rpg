@@ -127,25 +127,33 @@
 </head>
 <body>
 
-<!-- ================== ПРОЛОГ ================== -->
+<!-- ================== КИНЕМАТОГРАФИЧЕСКИЙ ПРОЛОГ ================== -->
 <div id="screen-prologue" class="screen">
-  <div class="center-flex prologue-shell" style="max-width:700px;text-align:center;">
-    <div style="font-size:80px;margin-bottom:20px;filter:drop-shadow(0 0 30px rgba(177,55,70,0.75));animation:gemPulse 3s ease-in-out infinite;">🔮</div>
-    <h1>Осколки Разлома</h1>
-    <p class="subtitle" style="font-size:16px;line-height:1.85;max-width:620px;color:#cbb89d;">
-      Когда-то драконьи империи правили этим миром. Теперь от них остались пепел, руины и бледное солнце, едва пробивающееся сквозь серое небо.<br><br>
-      В самом сердце земель зияет Разлом — рана в самой ткани реальности. Три дракона удерживают его закрытым. Не боги и не чудовища, а последние живые печати древнего мира.
-    </p>
-    <div class="divider" style="width:100%;max-width:440px;"></div>
-    <p style="color:#b99a87;font-size:14px;line-height:1.8;max-width:600px;">
-      Первые кровавые маги создали Кристалл Разлома, отдав за него собственные жизни. Кристалл раскололся, и три его осколка оказались у драконов.<br><br>
-      Пока жив хотя бы один из них, Разлом останется закрытым. Но если падут все трое, печать исчезнет — и то, что ждёт по ту сторону, сможет войти в наш мир.<br><br>
-      Тебе предстоит пройти пять земель, раскрыть правду о древней печати и решить, что заслуживает спасения: мир, каким он был, или мир, который ещё можно создать.
-    </p>
-    <button onclick="GameAPI.skipPrologue()" style="min-width:280px;margin-top:26px;border-color:#b85b65;font-size:16px;padding:14px 30px;">
-      ⚔️ Начать путь
-    </button>
-  </div>
+  <main class="prologue-cinematic" aria-label="Пролог: Осколки Разлома">
+    <header class="prologue-heading">
+      <span class="prologue-kicker">ЛЕТОПИСЬ ПЯТИ ЗЕМЕЛЬ</span>
+      <h1>Осколки Разлома</h1>
+      <span class="prologue-chapter" id="prologue-chapter">Глава I · До того, как всё сломалось</span>
+    </header>
+    <div class="prologue-illustration-frame">
+      <canvas id="prologue-art" width="640" height="360" role="img" aria-label="Монохромная рисованная сцена пролога"></canvas>
+      <span class="prologue-art-caption" id="prologue-art-caption">МИР ДО ПАДЕНИЯ</span>
+      <span class="prologue-frame-counter" id="prologue-frame-counter">01 / 05</span>
+    </div>
+    <section class="prologue-narrative" aria-live="polite" aria-atomic="true">
+      <p id="prologue-narration"></p>
+    </section>
+    <div class="prologue-progress" aria-label="Ход повествования">
+      <span id="prologue-progress-fill"></span>
+    </div>
+    <div class="prologue-controls">
+      <button type="button" id="prologue-voice-btn" class="prologue-control">🔊 Озвучить</button>
+      <button type="button" id="prologue-prev-btn" class="prologue-control" disabled>← Назад</button>
+      <button type="button" id="prologue-next-btn" class="prologue-control prologue-next">Далее →</button>
+      <button type="button" id="prologue-skip-btn" class="prologue-skip" onclick="GameAPI.skipPrologue()">Пропустить пролог</button>
+    </div>
+    <p class="prologue-footnote">История продолжается, даже когда рассказчик делает вид, что всё под контролем.</p>
+  </main>
 </div>
 
 <!-- ================== ГЛАВНОЕ МЕНЮ ================== -->
