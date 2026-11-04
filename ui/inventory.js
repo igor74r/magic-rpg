@@ -74,7 +74,9 @@ function itemScore(inst) {
   for (const id of (obj.runes || [])) {
     const rune = ITEMS[id]?.runeBonus || {};
     score += (rune.attack || 0) + (rune.magic || 0) + (rune.defense || 0);
+    score += (rune.dex || 0) + (rune.armorPen || 0) * 2;
     score += (rune.critChance || 0) * 100 + (rune.dodgeChance || 0) * 100;
+    score += (rune.blockChance || 0) * 80 + (rune.blockPower || 0) * 60;
   }
   score += FORGE_BONUS[obj.forgeLevel || 0] || 0;
   return score;
