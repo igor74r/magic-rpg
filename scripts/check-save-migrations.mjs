@@ -50,7 +50,10 @@ for (let version = 1; version <= 16; version++) {
     equipped,
     campaignKills: { 'a1-m1': 3 }
   };
-  if (version >= 12) player.campaignClaimed = { 'a1-m1': true };
+  if (version >= 12) {
+    player.campaignClaimed = { 'a1-m1': true };
+    player.activeCampaignMission = null;
+  }
   if (version >= 15) player.luck = 10.5;
   const fixture = { version, player, location: 'village', shards: { forest: true } };
   if (version >= 14) {
@@ -157,8 +160,12 @@ console.log('PASS current save validator rejects unsafe gold and invalid charact
 console.log('PASS new character creation runs v16/v17 migrations before first save');
 storage.set('magic-rpg-save-1', JSON.stringify({
   version: 16,
-  player: { name: 'Storage Fixture', level: 8, luck: 8.5, inventory: [{ id: 'mana-crystal', qty: 4 }],
-    equipped: Object.fromEntries(expectedSlots.map(slot => [slot, null])) },
+  player: {
+    name: 'Storage Fixture', class: 'mage', level: 8, gold: 0, luck: 8.5,
+    inventory: [{ id: 'mana-crystal', qty: 4 }], spells: [],
+    stats: { kills: {} }, campaignKills: {}, campaignClaimed: {}, activeCampaignMission: null,
+    equipped: Object.fromEntries(expectedSlots.map(slot => [slot, null]))
+  },
   storyShards: { flame: false, ice: false, blood: false },
   storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false }
 }));
