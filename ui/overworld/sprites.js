@@ -734,6 +734,66 @@ const VILLAGE_PROP_FRAMES = new Map([
   ['anvil', 8], ['woodpile', 9], ['cart', 10], ['barrels', 11],
   ['herb-rack', 12], ['frost-lantern', 13], ['rift-ward', 14], ['tower-gate', 15]
 ]);
+// Crisp, cached 16-bit pixel vegetation for Aurora's outer gardens.
+const AURORA_NATURE_CACHE = new Map();
+function getAuroraNatureSprite(style) {
+  if (AURORA_NATURE_CACHE.has(style)) return AURORA_NATURE_CACHE.get(style);
+  const canvas = document.createElement('canvas');
+  canvas.width = 32; canvas.height = 40;
+  const g = canvas.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  const px=(x,y,color,w=1,h=1)=>{g.fillStyle=color;g.fillRect(x,y,w,h);};
+  const cluster=(x,y,w,h,colors)=>{
+    for(let row=0;row<h;row++){
+      const inset=(row%3===0?1:0);
+      px(x+inset,y+row,colors[row%colors.length],w-inset,1);
+    }
+  };
+  if(style==='oak'||style==='pine'){
+    // Trunk and roots first; the canopy is layered with stepped pixel clusters.
+    cluster(14,26,5,12,['#68452d','#805638','#563a28']);
+    px(11,36,'#563a28',11,2);
+    if(style==='pine'){
+      cluster(8,5,17,6,['#31563d','#3e7049','#285039']);
+      cluster(5,11,23,7,['#2d6042','#39754a','#285039']);
+      cluster(3,18,27,7,['#285039','#326743','#244832']);
+      cluster(1,25,31,5,['#244832','#2b5a3a','#244832']);
+      px(15,2,'#5b8b56',3,2);px(11,9,'#56864e',3,2);px(20,15,'#4c7e48',3,2);
+    } else {
+      cluster(6,6,20,7,['#356442','#42794a','#2c593a']);
+      cluster(3,12,26,8,['#2f603c','#3c7146','#285536']);
+      cluster(5,19,22,7,['#285536','#356b3f','#244a30']);
+      cluster(9,24,15,4,['#244a30','#315e38','#244a30']);
+      px(8,10,'#6a9858',4,2);px(19,13,'#6a9858',3,2);px(12,20,'#57844e',3,2);px(21,21,'#4f7d47',2,2);
+    }
+  } else if(style==='bush'){
+    cluster(6,18,20,8,['#315d3b','#3c7146','#285536']);
+    cluster(3,23,26,7,['#285536','#356b3f','#244a30']);
+    cluster(7,28,19,4,['#244a30','#315e38','#244a30']);
+    px(7,21,'#6a9858',3,2);px(17,24,'#6a9858',3,2);px(23,22,'#57844e',2,2);
+    px(10,31,'#d7b978');px(20,30,'#d9a5b7');
+  } else if(style==='rock'){
+    cluster(8,22,16,8,['#777b78','#90958c','#666b68']);
+    cluster(5,27,22,6,['#666b68','#858b83','#5b605d']);
+    px(10,23,'#b1b4a5',5,2);px(21,27,'#a0a497',2,2);
+    px(9,31,'#516148',4,1);px(20,32,'#516148',3,1);
+  } else if(style==='stump'){
+    cluster(11,22,10,10,['#815b3b','#986a43','#68482f']);
+    px(10,21,'#b68a58',12,2);px(13,23,'#c39a65',4,2);
+    px(9,31,'#563a28',14,2);px(8,32,'#315d3b',4,2);px(21,32,'#315d3b',3,2);
+  }
+  AURORA_NATURE_CACHE.set(style,canvas);
+  return canvas;
+}
+function drawAuroraNature(ctx,x,y,style){
+  const sprite=getAuroraNatureSprite(style);
+  ctx.save();
+  try{
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(sprite,Math.round(x-36),Math.round(y-78),72,90);
+  }finally{ctx.restore();}
+}
+
 function drawVillageProp(ctx, x, y, style) {
   const isWorldPortal = style === 'world-portal';
   const frame = isWorldPortal ? 0 : VILLAGE_PROP_FRAMES.get(style);
@@ -766,6 +826,10 @@ function drawVillageProp(ctx, x, y, style) {
 // ---------- ОТРИСОВКА ПРЕДМЕТОВ И ОБЪЕКТОВ ----------
 
 export function drawObject(ctx, obj, x, y, shadowColor) {
+  if (obj.natureStyle) {
+    drawAuroraNature(ctx, x, y, obj.natureStyle);
+    return;
+  }
   if (obj.propStyle) {
     drawVillageProp(ctx, x, y, obj.propStyle);
     return;
