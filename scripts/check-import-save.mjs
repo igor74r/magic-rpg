@@ -8,9 +8,10 @@ const originalConfirm = globalThis.confirm;
 const originalSetTimeout = globalThis.setTimeout;
 
 const nodes = new Map();
+const toastMessages = [];
 globalThis.document = {
   createElement: () => ({ className: '', textContent: '', setAttribute() {}, remove() {} }),
-  body: { appendChild() {} }
+  body: { appendChild(node) { toastMessages.push(node.textContent); } }
 };
 const storage = new Map([['magic-rpg-save-1', 'KEEP-EXISTING-SAVE']]);
 let failImportWrite = false;
@@ -84,7 +85,10 @@ try {
   assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE', 'failed import write must restore the previous slot');
 
   runImport(legacy);
-  const imported = JSON.parse(storage.get('magic-rpg-save-1'));
+  const importedText = storage.get('magic-rpg-save-1');
+  assert.notEqual(importedText, 'KEEP-EXISTING-SAVE',
+    `legacy import should persist; last notification: ${toastMessages.at(-1) || 'none'}`);
+  const imported = JSON.parse(importedText);
   assert.equal(imported.version, 17, 'legacy save should be migrated before storage');
   assert.equal(imported.player.inventory[0].id, 'old-archive-seal', 'legacy quest item migration should be retained');
   assert.equal(imported.player.name, 'Legacy hero');
