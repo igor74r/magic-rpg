@@ -105,7 +105,8 @@ assert.ok(villageSprites.includes('const AURORA_NATURE_FRAMES = new Map(['), 'Au
 assert.ok(villageSprites.includes("oak: [120, 150], pine: [108, 144], bush: [90, 72], rock: [78, 66]"), 'Aurora trees and low nature props must use species-specific world dimensions');
 assert.ok(villageSprites.includes("stump: [72, 66], hedge: [96, 72], fence: [108, 54], flowerbed: [84, 48]"), 'Aurora garden pieces must remain low and proportionate to their silhouettes');
 assert.ok(villageSprites.includes("new URL('../../assets/aurora/nature-atlas.png', import.meta.url)"), 'Aurora nature atlas must load from its manifest asset path');
-assert.ok(villageSprites.includes('ctx.drawImage(atlas,frame*64,0,64,80'), 'Aurora nature atlas must sample each 64×80 frame crisply');
+assert.ok(villageSprites.includes('getAuroraNatureFrameBounds(atlas, frame)') && villageSprites.includes('pixels[(py * 64 + px) * 4 + 3] === 0'), 'Aurora nature atlas must crop transparent frame margins to the visible sprite bounds');
+assert.ok(villageSprites.includes('ctx.drawImage(atlas,frame*64+crop.x,crop.y,crop.width,crop.height'), 'Aurora nature atlas must render the cropped visible sprite with nearest-neighbour sampling');
 const npcDetails = villageSprites.slice(villageSprites.indexOf('function drawNpcDetails('));
 assert.ok(npcDetails.includes('integer pixel clusters only') && npcDetails.includes("id === 'blacksmith'") && npcDetails.includes("id === 'bard'"), 'Aurora NPCs must use role-specific pixel-art details');
 assert.ok(!/ctx\.(?:beginPath|arc|stroke|strokeRect)\s*\(/.test(npcDetails), 'Aurora NPC role details must avoid antialiased vector strokes');
