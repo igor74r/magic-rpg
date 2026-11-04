@@ -541,6 +541,10 @@ function prepareImportedSave(raw) {
 export function exportSave() {
   if (!state.game) { toast('Нет активной игры для экспорта. Загрузите слот.'); return; }
   const slot = state.currentSlot || 1;
+  if (!saveGame()) {
+    toast('❌ Не удалось сохранить текущий прогресс; экспорт отменён.');
+    return;
+  }
   let data;
   try {
     data = globalThis.localStorage.getItem(`magic-rpg-save-${slot}`);
