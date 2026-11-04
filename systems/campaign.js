@@ -4,6 +4,15 @@ function ensureCampaignState(player) {
   if (!player) return;
   if (!player.campaignKills || typeof player.campaignKills !== 'object' || Array.isArray(player.campaignKills)) player.campaignKills = {};
   if (!player.campaignClaimed || typeof player.campaignClaimed !== 'object' || Array.isArray(player.campaignClaimed)) player.campaignClaimed = {};
+  // Only the literal boolean true can complete a mission; malformed truthy values
+  // must never make a mission disappear from the campaign journal.
+  for (const act of STORY.acts) {
+    for (const mission of act.missions) {
+      if (mission.id in player.campaignClaimed) {
+        player.campaignClaimed[mission.id] = player.campaignClaimed[mission.id] === true;
+      }
+    }
+  }
   if (typeof player.activeCampaignMission !== 'string') player.activeCampaignMission = null;
 }
 
@@ -40,7 +49,7 @@ export function getActiveCampaignMission(player) {
   ensureCampaignState(player);
   if (!player?.activeCampaignMission) return null;
   const found = getCampaignMission(player.activeCampaignMission);
-  if (!found || player.campaignClaimed[found.mission.id]) {
+  if (!found || player.campaignClaimed[found.mission.id] === true) {
     player.activeCampaignMission = null;
     return null;
   }
@@ -56,7 +65,7 @@ export function getNextCampaignMission(player) {
     const act = STORY.acts[actIndex];
     for (let missionIndex = 0; missionIndex < act.missions.length; missionIndex++) {
       const mission = act.missions[missionIndex];
-      if (!player.campaignClaimed[mission.id]) return { act, mission, actIndex, missionIndex };
+      if (player.campaignClaimed[mission.id] !== true) return { act, mission, actIndex, missionIndex };
     }
   }
   return null;
