@@ -103,7 +103,7 @@ const DEFAULT_VILLAGE_COLLIDERS = [
 export function isVillagePositionBlocked(x, y, radius = 10, statics = LOCATIONS.village.statics) {
   const colliders = statics === LOCATIONS.village.statics
     ? DEFAULT_VILLAGE_COLLIDERS
-    : [...getVillageBuildingColliders(statics), ...getVillagePropColliders(statics)];
+    : [...getVillageBuildingColliders(statics), ...getVillagePropColliders(statics), ...getVillageNatureColliders(statics)];
   return colliders.some(rect => circleIntersectsRect(x, y, radius, rect));
 }
 
