@@ -380,3 +380,5 @@
 
 - `ui/overworld/tile-atlas.js`: reduced the extra Aurora grass flecks from 18–26 to 8–12 per detail tile and lowered overlay alpha from 0.72 to 0.42. The authored ground atlas remains the dominant surface; sparse pixel tufts/flowers now add texture without making the lawn look grainy.
 - `scripts/check-visual-assets.mjs`: guards the restrained detail density and opacity.
+
+- Removed the last text glyph used as an interior floor ornament; it is now an empty, aria-hidden CSS pixel motif. Static and browser regression checks assert the glyph-free floor marker, visible room modal, selected room palette and three rendered prop silhouettes.
