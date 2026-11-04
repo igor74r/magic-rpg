@@ -1,13 +1,24 @@
 import assert from 'node:assert/strict';
 import { ITEMS } from '../data/items.js';
 import { STORY } from '../data/story.js';
-import { getCurrentActIndex, getActPriceMultiplier, getBuyPrice, getSellPrice } from '../systems/economy.js';
+import { getCurrentActIndex, getActPriceMultiplier, getBuyPrice, getSellPrice, getGoldRewardTotals } from '../systems/economy.js';
 import { getMissionReward } from '../systems/campaign.js';
 import { state } from '../systems/state.js';
 import { buyItem, buybackItem, getBuybackItems, sellItemsByIndices } from '../systems/shop.js';
 import { NPCS } from '../data/npcs.js';
 
 const player = { campaignClaimed: {} };
+assert.deepEqual(getGoldRewardTotals({ gold: 10, stats: { goldEarned: 20 } }, 5),
+  { gold: 15, goldEarned: 25 });
+for (const invalid of [
+  { gold: Number.MAX_SAFE_INTEGER, stats: { goldEarned: 0 } },
+  { gold: 0, stats: { goldEarned: Number.MAX_SAFE_INTEGER } },
+  { gold: Infinity, stats: { goldEarned: 0 } },
+  { gold: 0, stats: { goldEarned: NaN } }
+]) {
+  assert.equal(getGoldRewardTotals(invalid, 1), null,
+    'world and campaign rewards must reject unsafe balance or lifetime-stat totals');
+}
 assert.equal(getCurrentActIndex(player), 0);
 assert.equal(getActPriceMultiplier(player), 1);
 assert.equal(getBuyPrice('health-potion', player), ITEMS['health-potion'].price);
