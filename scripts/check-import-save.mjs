@@ -107,7 +107,7 @@ try {
   runImport(legacy);
   assert.notEqual(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE',
     'test must simulate a rollback failure after a partial import write');
-  assert.match(toastMessages.at(-1), /не удалось записать импорт и подтвердить восстановление/,
+  assert.match(toastMessages.at(-1), /не удалось записать импорт и подтвердить восстановление/i,
     'import must warn when rollback cannot be verified');
   storage.set('magic-rpg-save-1', 'KEEP-EXISTING-SAVE');
 
