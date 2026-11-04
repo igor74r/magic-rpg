@@ -68,6 +68,9 @@ export function updateQuestProgress(type, target, amount = 1, options = {}) {
     return { changed: false, completedTexts: [] };
   }
   const quests = getDailyQuests();
+  if (quests !== p.dailyQuests?.list) {
+    return { changed: false, completedTexts: [] };
+  }
 
   let previousQuests;
   try {
@@ -105,7 +108,9 @@ export function updateQuestProgress(type, target, amount = 1, options = {}) {
 export function claimQuestReward(questId) {
   const p = state.game?.player;
   if (!p) return false;
-  const q = getDailyQuests().find(entry => entry.id === questId);
+  const quests = getDailyQuests();
+  if (quests !== p.dailyQuests?.list) return false;
+  const q = quests.find(entry => entry.id === questId);
   const definition = POOL.find(entry => entry.id === questId);
   if (!q || !definition || q.completed !== true || q.claimed === true) return false;
 
