@@ -73,6 +73,35 @@ function recordRuntimeDiagnostic(type, message, details = {}) {
   return entry;
 }
 
+function readLocalStorage(key) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch (error) {
+    recordRuntimeDiagnostic('storage-read', error?.message || 'Storage read failed', { resource: key });
+    return null;
+  }
+}
+
+function writeLocalStorage(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    recordRuntimeDiagnostic('storage-write', error?.message || 'Storage write failed', { resource: key });
+    return false;
+  }
+}
+
+function removeLocalStorage(key) {
+  try {
+    window.localStorage.removeItem(key);
+    return true;
+  } catch (error) {
+    recordRuntimeDiagnostic('storage-remove', error?.message || 'Storage remove failed', { resource: key });
+    return false;
+  }
+}
+
 // Transfer errors that occurred while HTML was parsing and modules were loading.
 const earlyDiagnostics = Array.isArray(window.__GAME_DIAGNOSTICS_EARLY__)
   ? window.__GAME_DIAGNOSTICS_EARLY__.splice(0)
@@ -842,7 +871,9 @@ function handleWorldEvent(eventId) {
 
 function skipPrologue() {
   stopVoice();
-  localStorage.setItem('magic-rpg-prologue-seen', '1');
+  if (!writeLocalStorage('magic-rpg-prologue-seen', '1')) {
+    toast('Не удалось сохранить отметку пролога. При следующем запуске он может показаться снова.');
+  }
   showScreen('screen-main');
   updateMainMenu();
 }
@@ -979,7 +1010,10 @@ window.GameAPI = {
   importSave,
   stopVoice,
   resetPrologue: () => {
-    localStorage.removeItem('magic-rpg-prologue-seen');
+    if (!removeLocalStorage('magic-rpg-prologue-seen')) {
+      toast('Не удалось сбросить пролог: браузер заблокировал хранилище.');
+      return;
+    }
     location.reload();
   },
   voiceInfo: () => {
@@ -994,8 +1028,8 @@ migrateLegacySave();
 loadSettings();
 applyFontScale();
 
-const prologueSeen = localStorage.getItem('magic-rpg-prologue-seen');
-const hasAnySave = !!(localStorage.getItem('magic-rpg-save-1') || localStorage.getItem('magic-rpg-save-2') || localStorage.getItem('magic-rpg-save-3'));
+const prologueSeen = readLocalStorage('magic-rpg-prologue-seen');
+const hasAnySave = [1, 2, 3].some(slot => !!readLocalStorage(`magic-rpg-save-${slot}`));
 const prologueEl = document.getElementById('screen-prologue');
 
 const showPrologue = ALWAYS_SHOW_PROLOGUE || (!prologueSeen && !hasAnySave);
