@@ -28,9 +28,9 @@ assert.match(guard, /window\.addEventListener\(['"]unhandledrejection['"]/,
   'guard must intercept rejected startup promises');
 assert.match(guard, /tag === 'script'/,
   'failed script/module resources must trigger the fallback');
-assert.match(html, /main\.js\?v=20261104-aurora-interior-finish-4/,
+assert.match(html, /main\.js\?v=20261104-aurora-flat-ground-5/,
   'entry module URL must be cache-busted after the latest visual asset update');
-assert.match(html, /css\/2d-art-direction\.css\?v=20261104-aurora-interior-finish-4/,
+assert.match(html, /css\/2d-art-direction\.css\?v=20261104-aurora-flat-ground-5/,
   'Aurora art-direction stylesheet URL must be cache-busted after the latest visual asset update');
 
 console.log('Startup fallback contract and inline syntax: OK');
