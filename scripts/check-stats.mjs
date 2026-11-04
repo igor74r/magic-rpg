@@ -18,6 +18,13 @@ const player = {
 };
 state.game = { player };
 
+assert.equal(getTotalKills({ goblin: 2, skeleton: 3 }), 5);
+assert.equal(getTotalKills({ goblin: '10', skeleton: -5, wolf: 1.5, ghost: Number.MAX_SAFE_INTEGER + 1 }), 0,
+  'HUD kill total must ignore malformed save counters');
+assert.equal(getTotalKills({ goblin: Number.MAX_SAFE_INTEGER, skeleton: 1 }), Number.MAX_SAFE_INTEGER,
+  'HUD kill total must saturate at the safe integer limit');
+assert.equal(getTotalKills([]), 0, 'malformed kill collections must not contribute to HUD totals');
+
 const stats = getEffStats();
 assert.equal(stats.atk, 39, 'base, rolled instance, rune, effect and passive attack bonuses must stack');
 assert.equal(stats.mag, 4);
