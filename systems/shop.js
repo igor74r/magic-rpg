@@ -52,9 +52,12 @@ export function sellItemsByIndices(indices, options = {}) {
         getSellPrice(inst, p) > 0;
     });
   const total = candidates.reduce((sum, entry) => sum + getSellPrice(entry.inst, p), 0);
+  const earnedGold = p.stats?.goldEarned ?? 0;
   if (!Number.isSafeInteger(total) || total <= 0 ||
       !Number.isSafeInteger(p.gold) || p.gold < 0 ||
-      !Number.isSafeInteger(p.gold + total)) {
+      !Number.isSafeInteger(p.gold + total) ||
+      !Number.isSafeInteger(earnedGold) || earnedGold < 0 ||
+      !Number.isSafeInteger(earnedGold + total)) {
     return { ok: false, count: 0, total: 0, msg: 'Некорректная стоимость продажи или баланс золота' };
   }
   const hasHighTier = candidates.some(({ inst }) => (RARITIES[inst.rarity]?.tier || 1) >= 4);
@@ -84,7 +87,7 @@ export function sellItemsByIndices(indices, options = {}) {
   for (const { index } of candidates) p.inventory.splice(index, 1);
   p.gold = (p.gold || 0) + total;
   if (!p.stats) p.stats = {};
-  p.stats.goldEarned = (p.stats.goldEarned || 0) + total;
+  p.stats.goldEarned = earnedGold + total;
   if (!saveGame()) {
     p.inventory = previousInventory;
     p.gold = previousGold;
