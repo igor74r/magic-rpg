@@ -43,6 +43,8 @@ try {
   assert.equal(target.exp, 50);
   assert.equal(claimQuestReward('q-kill-any'), true);
   assert.equal(state.game.player.gold, 18, 'claim must use canonical reward, not imported save values');
+  assert.equal(state.game.player.stats.goldEarned, 8,
+    'daily quest gold must count toward the lifetime gold-earned achievement');
   assert.equal(state.game.player.exp, 50);
   assert.equal(claimQuestReward('q-kill-any'), false, 'daily quest reward can only be claimed once');
 
