@@ -102,6 +102,8 @@ const locationPropStyles = [...locationsSource.matchAll(/propStyle:\s*['"]([^'"]
 const villageSprites = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
 assert.ok(villageSprites.includes('const VILLAGE_PROP_FRAMES = new Map(['), 'village props must use the authored PNG atlas');
 assert.ok(villageSprites.includes('const AURORA_NATURE_FRAMES = new Map(['), 'Aurora nature must use the authored PNG atlas');
+assert.ok(villageSprites.includes("oak: [120, 150], pine: [108, 144], bush: [90, 72], rock: [78, 66]"), 'Aurora trees and low nature props must use species-specific world dimensions');
+assert.ok(villageSprites.includes("stump: [72, 66], hedge: [96, 72], fence: [108, 54], flowerbed: [84, 48]"), 'Aurora garden pieces must remain low and proportionate to their silhouettes');
 assert.ok(villageSprites.includes("new URL('../../assets/aurora/nature-atlas.png', import.meta.url)"), 'Aurora nature atlas must load from its manifest asset path');
 assert.ok(villageSprites.includes('ctx.drawImage(atlas,frame*64,0,64,80'), 'Aurora nature atlas must sample each 64×80 frame crisply');
 assert.ok(villageSprites.includes('frame * 64, 0, 64, 64'), 'village props must sample the 64px atlas frames');
