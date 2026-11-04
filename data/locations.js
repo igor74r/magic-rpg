@@ -58,6 +58,16 @@ export const LOCATIONS = {
       { id: 'tavern-building', name: 'Таверна «Тихий угол»', x: 13, y: 24, buildingStyle: 'tavern', decorative: true },
       { id: 'home-nw', name: 'Дом у северной дороги', x: 13, y: 3, buildingStyle: 'home', decorative: true },
       { id: 'home-se', name: 'Дом у южной дороги', x: 25, y: 24, buildingStyle: 'home', decorative: true },
+      // Pixel-art nature frames form a soft green village boundary without blocking routes.
+      { id: 'aurora-oak-nw', name: 'Старый дуб', x: 3, y: 3, natureStyle: 'oak', decorative: true },
+      { id: 'aurora-pine-ne', name: 'Сосна у дороги', x: 34, y: 3, natureStyle: 'pine', decorative: true },
+      { id: 'aurora-pine-sw', name: 'Сосна у южных ворот', x: 3, y: 25, natureStyle: 'pine', decorative: true },
+      { id: 'aurora-oak-se', name: 'Дуб у окраины', x: 34, y: 25, natureStyle: 'oak', decorative: true },
+      { id: 'aurora-bush-west', name: 'Куст у тропы', x: 3, y: 15, natureStyle: 'bush', decorative: true },
+      { id: 'aurora-bush-east', name: 'Цветущий куст', x: 34, y: 16, natureStyle: 'bush', decorative: true },
+      { id: 'aurora-rock-north', name: 'Мшистый валун', x: 5, y: 5, natureStyle: 'rock', decorative: true },
+      { id: 'aurora-rock-east', name: 'Камни у ограды', x: 35, y: 21, natureStyle: 'rock', decorative: true },
+      { id: 'aurora-stump', name: 'Старый пень', x: 5, y: 23, natureStyle: 'stump', decorative: true },
     ]
   },
 
