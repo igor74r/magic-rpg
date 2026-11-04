@@ -1,6 +1,7 @@
 import { state } from '../systems/state.js';
 import { CLASSES } from '../data/classes.js';
 import { LOCATIONS } from '../data/locations.js';
+import { countStoryShards } from '../systems/campaign.js';
 import { EFFECTS } from '../systems/status.js';
 import { getEffStats, getTotalKills } from '../systems/stats.js';
 import { saveGame } from '../systems/save.js';
@@ -216,8 +217,7 @@ export function renderHeader() {
 }
 
 function renderEndgameHint(p) {
-  const shards = state.game.storyShards || {};
-  const shardCount = Object.values(shards).filter(Boolean).length;
+  const shardCount = countStoryShards(state.game.storyShards);
   const riftBest = p.riftBest || 0;
   const towerBest = p.towerBest || 0;
   const riftOpen = state.game.storyDragons?.['blood-crown'] === true && state.game.riftEnding !== 'closed';
