@@ -28,13 +28,12 @@ try {
   delete player.unexpectedExtensionValue;
 
   const originalSetItem = globalThis.localStorage.setItem;
-  globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
-
   for (const invalidFloor of [0, -1, 1.5, NaN, Infinity, -Infinity, '5', Number.MAX_SAFE_INTEGER + 1]) {
     assert.equal(recordRiftFloor(invalidFloor), false,
       `invalid rift floor ${String(invalidFloor)} must be rejected`);
     assert.equal(player.riftBest, 2, 'invalid rift floor must not mutate the saved record');
   }
+  globalThis.localStorage.setItem = () => { throw new Error('simulated storage quota'); };
 
   player.riftBest = Infinity;
   assert.equal(recordRiftFloor(5), false,
