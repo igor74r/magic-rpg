@@ -55,6 +55,28 @@ try {
     'malformed saved progress must not grant a daily quest reward');
   assert.equal(updateQuestProgress('kill', 'any', '10').changed, false,
     'external numeric-string increments must be rejected');
+
+  const corruptDailySave = {
+    date: now,
+    list: [
+      { id: 'q-kill-any', current: '10', completed: true, claimed: false },
+      { id: 'q-kill-goblin', current: 0, completed: false, claimed: false },
+      { id: 'q-kill-skeleton', current: 0, completed: false, claimed: false }
+    ]
+  };
+  state.game.player.dailyQuests = corruptDailySave;
+  const originalSetItemForCounterFailure = globalThis.localStorage.setItem;
+  globalThis.localStorage.setItem = () => { throw new Error('simulated quota failure'); };
+  const safeFallback = getDailyQuests();
+  assert.equal(safeFallback.find(q => q.id === 'q-kill-any').current, 0,
+    'failed normalization must return safe progress, not the raw corrupted save');
+  assert.equal(safeFallback.find(q => q.id === 'q-kill-any').completed, false,
+    'failed normalization must not trust a forged completion flag');
+  assert.equal(claimQuestReward('q-kill-any'), false,
+    'storage failure must not let corrupted progress claim a reward');
+  assert.deepEqual(state.game.player.dailyQuests, corruptDailySave,
+    'failed normalization must still roll back the original persisted state');
+  globalThis.localStorage.setItem = originalSetItemForCounterFailure;
   assert.ok(quests.every(quest => !quest.text.includes('<')), 'quest display text must come from trusted definitions');
 
   state.game.player.dailyQuests = {
