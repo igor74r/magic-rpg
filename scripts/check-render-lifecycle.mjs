@@ -53,6 +53,13 @@ try {
     'the saved indicator must only appear after a successful write');
   assert.match(renderSource, /ошибка сохранения/,
     'the canvas should distinguish a failed write from a successful save');
+  assert.match(renderSource, /Array\.isArray\(p\.effects\) \? p\.effects : \[\]/,
+    'weather updates must normalize a malformed effects container');
+  assert.match(renderSource, /e\?\._weatherEffect !== true/,
+    'weather updates must ignore null entries while filtering temporary effects');
+  assert.doesNotMatch(renderSource, /\(p\.effects \|\| \[\]\)\.filter\(e => e\._weatherEffect/,
+    'weather updates must not dereference malformed effect entries');
+
   assert.match(renderSource, /autosaveAt = now/,
     'failed writes must be throttled instead of retried every second');
   state.overworld = null;
