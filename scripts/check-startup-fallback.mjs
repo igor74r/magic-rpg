@@ -28,7 +28,7 @@ assert.match(guard, /window\.addEventListener\(['"]unhandledrejection['"]/,
   'guard must intercept rejected startup promises');
 assert.match(guard, /tag === 'script'/,
   'failed script/module resources must trigger the fallback');
-assert.match(html, /main\.js\?v=20261103-menu-layout-fix/,
-  'entry module URL must be cache-busted after the fix');
+assert.match(html, /main\.js\?v=20261104-aurora-interior-pixel-pass/,
+  'entry module URL must be cache-busted after the latest visual asset update');
 
 console.log('Startup fallback contract and inline syntax: OK');
