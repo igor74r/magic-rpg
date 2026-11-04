@@ -38,6 +38,13 @@ const RIFT_LOCATIONS = Object.freeze([
   ['rift-30', 'Сердцевина Разлома', 'void-crater', 50]
 ].map(([id, name, sourceId, minLevel]) => Object.freeze({ id, name, sourceId, minLevel })));
 
+const RIFT_LOCATION_IDS = new Set(RIFT_LOCATIONS.map(location => location.id));
+
+export function getRiftClearedCount(player = state.game?.player) {
+  const values = Array.isArray(player?.riftClearedLocations) ? player.riftClearedLocations : [];
+  return new Set(values.filter(id => RIFT_LOCATION_IDS.has(id))).size;
+}
+
 export function getRiftLocations(level = state.game?.player?.level || 1) {
   return RIFT_LOCATIONS.map(location => ({
     ...location,
