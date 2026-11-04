@@ -38,7 +38,7 @@ function drawAuroraGrassDetails(ctx, x, y, size, tileX, tileY) {
       g.fillRect(px, py, 2, 1);
       if ((n & 3) === 0) g.fillRect(px + 1, py - 1, 1, 1);
       if ((n & 7) === 2) g.fillRect(px + 2, py, 1, 1);
-      // Flower accents are sparse and clustered, not scattered confetti.
+      // A few tiny flower pixels create a lived-in meadow without emoji or blur; keep them sparse and clustered.
       if ((n & 15) === 3) {
         g.fillStyle = (n & 32) ? '#e8d9a0' : '#d9a9b8';
         g.fillRect(px, py + 1, 1, 1);
