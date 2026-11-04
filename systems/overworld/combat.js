@@ -1575,13 +1575,19 @@ function combatVictory() {
     ? getRiftMult(ow.rifFloor)
     : ow.towerMode ? getTowerMult(ow.towerFloor) : { goldMult: 1, expMult: 1 };
 
-  const gold = Math.round(
+  const rawGold = Math.round(
     def.gold * 0.15 *
     getActPriceMultiplier(p) *
     (enemy.elite ? 2 : 1) *
     ng.goldMult *
     rift.goldMult
   );
+  // Keep the live balance a safe integer. At the cap, award the remaining
+  // representable amount instead of corrupting the next save.
+  const gold = Number.isSafeInteger(p.gold) && p.gold >= 0 && Number.isSafeInteger(rawGold) && rawGold >= 0
+    ? Math.min(rawGold, Number.MAX_SAFE_INTEGER - p.gold)
+    : 0;
+  const goldWasCapped = gold < rawGold;
 
   const hasElderBlessing = p.effects?.some(
     effect => effect.id === 'elderBlessing'
@@ -1627,6 +1633,9 @@ function combatVictory() {
     `🏆 Победа! +${exp} опыта, +${gold} золота`,
     'success'
   );
+  if (goldWasCapped) {
+    pushLog('Баланс золота достиг безопасного предела: начислена только доступная сумма.', 'warning');
+  }
 
   // Defer daily quest persistence and feedback until the complete victory
   // transaction (loot, stats, XP and enemy state) has been saved.
@@ -1682,8 +1691,10 @@ function combatVictory() {
     }
   }
 
-  p.stats.goldEarned =
-    (p.stats.goldEarned || 0) + gold;
+  const previousGoldEarned = Number.isSafeInteger(p.stats.goldEarned) && p.stats.goldEarned >= 0
+    ? p.stats.goldEarned
+    : 0;
+  p.stats.goldEarned = Math.min(Number.MAX_SAFE_INTEGER, previousGoldEarned + gold);
 
   if (enemy.elite) {
     p.stats.eliteKills = (p.stats.eliteKills || 0) + 1;
