@@ -3,10 +3,15 @@ import { STORY } from '../data/story.js';
 import { state } from '../systems/state.js';
 import {
   acceptCampaignMission, recordCampaignKill, claimCampaignMission,
-  getCampaignProgress, getNextCampaignMission, canCompleteMainQuest
+  getCampaignProgress, getNextCampaignMission, canCompleteMainQuest, countStoryShards
 } from '../systems/campaign.js';
 import { STORY_DRAGONS, claimStoryDragonReward } from '../systems/story-dragons.js';
 import { isRiftReady } from '../systems/rift.js';
+
+assert.equal(countStoryShards({ flame: true, ice: true, blood: true }), 3);
+assert.equal(countStoryShards({ flame: 'true', ice: 1, blood: {}, extra: true }), 0,
+  'HUD shard total must ignore malformed truthy values and unknown flags');
+assert.equal(countStoryShards([]), 0, 'malformed shard collections must not contribute to HUD totals');
 
 assert.equal(STORY.acts.length, 5, 'campaign must contain exactly five acts');
 assert.equal(STORY.acts.reduce((sum, act) => sum + act.missions.length, 0), 25, 'campaign must contain exactly 25 missions');
