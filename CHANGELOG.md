@@ -390,3 +390,5 @@
 - Browser screenshots exposed a desktop/mobile header collision: the redundant Aurora corner label sat under the modal close control. Removed that label, moved the hearth into the upper-right wall area so it remains visible, and aligned all three prop cards along one bottom baseline. Cache keys for both `main.js` and the art-direction stylesheet were advanced to `20261104-aurora-interior-layout-2`; the startup contract test tracks both.
 
 - Interior visual regression now validates the actual computed `::before` and `::after` colors for all three props in each of the six rooms; static checks require all 36 room/item pseudo-element rules (18 bodies + 18 highlights), not merely one representative icon per room.
+
+- Manual inspection of the nature contact sheet showed that the PNG frames contained large transparent margins, making trees, bushes and garden props read much smaller than their world footprints. `drawAuroraNature()` now measures each 64×80 frame's non-transparent bounds once, caches the crop, and scales the visible sprite to its authored world dimensions with smoothing disabled. `check-visual-assets.mjs` guards the alpha-bound crop path.
