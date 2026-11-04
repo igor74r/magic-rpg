@@ -119,6 +119,7 @@ export function validateCurrentSaveShape(game) {
       typeof player.name !== 'string' || !player.name.trim() ||
       !['warrior', 'mage', 'archer', 'priest'].includes(player.class) ||
       !Number.isSafeInteger(player.level) || player.level < 1 || player.level > 100 ||
+      !Number.isSafeInteger(player.ngPlus) || player.ngPlus < 0 ||
       !Number.isSafeInteger(player.gold) || player.gold < 0 ||
       !Array.isArray(player.inventory) ||
       !player.inventory.every(item => item && typeof item === 'object' && !Array.isArray(item) && typeof item.id === 'string' && item.id.trim() && (item.qty == null || (Number.isSafeInteger(item.qty) && item.qty > 0))) ||
@@ -532,6 +533,12 @@ export function migrateGame(game) {
       player.exp = Math.min(nextExp - 1, Math.floor(progress * nextExp));
     }
     player.expNext = nextExp;
+  }
+
+  // NG+ is a non-negative whole-number cycle counter. Normalize malformed
+  // legacy values before validating and exposing the migrated save.
+  if (!Number.isSafeInteger(game.player.ngPlus) || game.player.ngPlus < 0) {
+    game.player.ngPlus = 0;
   }
 
   return game;
