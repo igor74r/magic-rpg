@@ -29,6 +29,9 @@ assert.equal(isVillagePositionBlocked(5 * 48 + 24 - 66, 5 * 48 + 24, 12, customV
   'custom village building wall must block the player');
 assert.equal(isVillagePositionBlocked(5 * 48 + 24, 5 * 48 + 24 + 8, 10, customVillage), false,
   'custom village front doorway must stay open');
+const customNature = [{ id: 'test-oak', natureStyle: 'oak', x: 5, y: 5 }];
+assert.equal(isVillagePositionBlocked(5 * 48 + 24, 5 * 48 + 24 + 3, 5, customNature), true,
+  'custom village nature footprints must block their solid ground-contact bases');
 
 console.log('Overworld collision checks passed: full player footprint, diagonal corners, clearance, bounds and village doorways');
 
