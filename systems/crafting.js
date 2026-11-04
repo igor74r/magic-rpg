@@ -58,8 +58,11 @@ export function upgradeEquipment(slot) {
       ? Number(scaled.toFixed(4))
       : Math.round(scaled);
   }
-  inst.upgradePercent = Math.min(1, (inst.upgradePercent || 0) + check.statPercent);
-  inst.forgeLevel = (inst.forgeLevel || 0) + 1;
+  const previousPercent = Number.isFinite(inst.upgradePercent) && inst.upgradePercent >= 0
+    ? Math.min(1, inst.upgradePercent)
+    : 0;
+  inst.upgradePercent = Math.min(1, previousPercent + check.statPercent);
+  inst.forgeLevel = check.nextLevel;
 
   if (!saveGame()) {
     p.gold = previousGold;
