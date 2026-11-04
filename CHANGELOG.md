@@ -407,3 +407,5 @@
 - Aurora visual pass: grass atlas opacity reduced to 0.26 and decorative tufts to 2–3 per tile at 0.14; character shadows changed to stepped pixel bands. Desktop/mobile browser smoke and visual regression passed; Pages deployment passed.
 
 - Overworld audit: custom Aurora static collider sets now include nature ground footprints. Chest reward logs and effects are deferred until `saveGame()` succeeds, preventing false reward feedback after rollback. Both regressions have dedicated tests and passed CI/Pages.
+
+- Save export: defer Blob URL revocation by one second so browser downloads are not cut off; the safe-rendering contract covers this handoff.
