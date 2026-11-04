@@ -38,7 +38,8 @@ import {
 import { openDailyChest } from './ui/village.js';
 import { exitOverworld, enterOverworld } from './systems/overworld.js';
 import { isRiftReady, getRiftLocations } from './systems/rift.js';
-import { getStoryLocationProgression, canEnterStoryLocation } from './systems/campaign.js';
+import { getStoryLocationProgression, canEnterStoryLocation, countStoryShards } from './systems/campaign.js';
+import { getTotalKills, getSafeCount } from './systems/stats.js';
 import { getTowerBest, getTowerStartFloor, TOWER_MAX_FLOOR } from './systems/tower.js';
 import { startNGPlus } from './systems/ngplus.js';
 import { showScreen, toast, logTo, escapeHtml } from './ui/screens.js';
@@ -451,12 +452,12 @@ function openRiftMap() {
   const player = state.game.player;
   const level = player.level || 1;
   const locations = getRiftLocations(level);
-  const kills = Object.values(player.stats?.kills || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
-  const deaths = player.stats?.deaths || 0;
+  const kills = getTotalKills(player.stats?.kills);
+  const deaths = getSafeCount(player.stats?.deaths);
   const kd = deaths > 0 ? (kills / deaths).toFixed(2) : kills.toFixed(2);
   const cleared = new Set(player.riftClearedLocations || []).size;
-  const shards = Object.values(state.game.storyShards || {}).filter(Boolean).length;
-  const crystalStatus = shards === 3 && state.game.storyDragons?.['blood-crown'] ? 'Стабилизирован' : 'Нестабилен';
+  const shards = countStoryShards(state.game.storyShards);
+  const crystalStatus = shards === 3 && state.game.storyDragons?.['blood-crown'] === true ? 'Стабилизирован' : 'Нестабилен';
   const overlay = document.createElement('div');
   overlay.id = 'rift-map-overlay';
   overlay.style.cssText = 'position:fixed;inset:0;z-index:10050;background:rgba(7,5,13,.96);color:#f4e9e9;padding:24px;overflow:auto;font-family:inherit;';
