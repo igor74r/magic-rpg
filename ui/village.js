@@ -56,12 +56,16 @@ export function openDailyChest() {
   const previousDailyCount = Number.isSafeInteger(p.stats.dailyChestsOpened) && p.stats.dailyChestsOpened >= 0
     ? p.stats.dailyChestsOpened
     : 0;
-  if (!Number.isSafeInteger(previousDailyCount + 1)) {
-    emit('toast', '❌ Не удалось выдать награду: счётчик сундуков переполнен.');
+  const previousGoldEarned = Number.isSafeInteger(p.stats.goldEarned) && p.stats.goldEarned >= 0
+    ? p.stats.goldEarned
+    : 0;
+  if (!Number.isSafeInteger(previousDailyCount + 1) || !Number.isSafeInteger(previousGoldEarned + 8)) {
+    emit('toast', '❌ Не удалось выдать награду: счётчик сундуков или золота переполнен.');
     return;
   }
 
   p.gold += 8;
+  p.stats.goldEarned = previousGoldEarned + 8;
   p.stats.dailyChestAt = Date.now();
   p.stats.dailyChestsOpened = previousDailyCount + 1;
 
