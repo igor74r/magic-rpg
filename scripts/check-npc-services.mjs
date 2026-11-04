@@ -26,7 +26,7 @@ globalThis.setTimeout = () => 1;
 
 try {
   const { payBardUI, petCatUI, takeElderBlessingUI, useWellUI, acceptElderQuestUI, turnInElderQuestUI, openBlacksmith } = await import('../ui/npcs.js');
-  const { getEquipmentForgeLevel, canUpgrade } = await import('../systems/crafting.js');
+  const { getEquipmentForgeLevel, canUpgrade, upgradeEquipment } = await import('../systems/crafting.js');
   state.currentSlot = 1;
   state.overworld = { active: true };
   state.game = {
@@ -45,6 +45,11 @@ try {
   assert.equal(getEquipmentForgeLevel('weapon'), 0, 'invalid forge levels must normalize to the safe baseline');
   assert.equal(canUpgrade('weapon').ok, true, 'invalid forge levels must not permanently block a valid upgrade');
   assert.doesNotThrow(() => openBlacksmith(), 'blacksmith UI must recover from malformed saved forge levels');
+  p.gold = 100;
+  p.equipped.weapon.upgradePercent = 'invalid';
+  assert.equal(upgradeEquipment('weapon').ok, true, 'a malformed forge level must still allow a baseline upgrade');
+  assert.equal(p.equipped.weapon.forgeLevel, 1, 'upgrade must store the validated next forge level');
+  assert.equal(p.equipped.weapon.upgradePercent, 0.05, 'invalid upgrade percentages must reset to a safe baseline');
   p.equipped.weapon.forgeLevel = 2;
   assert.equal(getEquipmentForgeLevel('weapon'), 2, 'valid forge levels must remain visible');
 
