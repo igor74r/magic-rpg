@@ -401,3 +401,5 @@
 
 
 - Проверенный срез Aurora (CI run 41883204150, commit 85bd4988): 81/81 шагов CI PASS, включая desktop/mobile browser smoke и visual regression. Вручную просмотрены кадры двора и шести интерьеров. Исправлены crop прозрачных полей природы, шумность травы, интерьерные палитры/композиция, cache-busting JS/CSS и .gitignore. Полный ручной аудит всех файлов и художественный этап NPC остаются незавершёнными.
+
+- Replaced the remaining antialiased ellipse shadow under overworld characters with three stepped rectangular pixel bands. The shared helper covers hero, NPC and creature footprints; `check-visual-assets.mjs` now rejects a return to Canvas ellipses. JS/CSS cache keys advanced to `20261104-aurora-pixel-shadows-6`.
