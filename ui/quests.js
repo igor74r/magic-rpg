@@ -8,6 +8,7 @@ import { LOCATIONS } from '../data/locations.js';
 import { getDailyQuests, claimQuestReward } from '../systems/dailyQuests.js';
 import { takeTalent, resetTalents } from '../systems/talents.js';
 import { saveGame } from '../systems/save.js';
+import { getSafeCount, getTotalKills } from '../systems/stats.js';
 import { showScreen, toast } from './screens.js';
 import { renderGame, renderHeader } from './header.js';
 
@@ -407,20 +408,20 @@ export function renderAchievements() {
 export function renderStatistics() {
   const player = state.game.player;
   const stats = player.stats || {};
-  const kills = stats.kills || {};
+  const kills = stats.kills && typeof stats.kills === 'object' && !Array.isArray(stats.kills)
+    ? stats.kills
+    : {};
 
-  const totalKills = Object.values(kills)
-    .reduce((sum, value) => sum + value, 0);
-
-  const deaths = stats.deaths || 0;
-  const goldEarned = stats.goldEarned || 0;
-  const chestsOpened = stats.chestsOpened || 0;
-  const playtimeSec = player.playtimeSec || 0;
-  const eliteKills = stats.eliteKills || 0;
-  const bossKills = stats.bossKills || 0;
-  const riftBest = player.riftBest || 0;
-  const towerBest = player.towerBest || 0;
-  const ngPlus = player.ngPlus || 0;
+  const totalKills = getTotalKills(kills);
+  const deaths = getSafeCount(stats.deaths);
+  const goldEarned = getSafeCount(stats.goldEarned);
+  const chestsOpened = getSafeCount(stats.chestsOpened);
+  const playtimeSec = getSafeCount(player.playtimeSec);
+  const eliteKills = getSafeCount(stats.eliteKills);
+  const bossKills = getSafeCount(stats.bossKills);
+  const riftBest = getSafeCount(player.riftBest);
+  const towerBest = getSafeCount(player.towerBest);
+  const ngPlus = getSafeCount(player.ngPlus);
   const achievementsCount = (player.achievements || []).length;
 
   const hours = Math.floor(playtimeSec / 3600);
@@ -431,6 +432,7 @@ export function renderStatistics() {
     : `${minutes}м`;
 
   const killRows = Object.entries(kills)
+    .map(([id, count]) => [id, getSafeCount(count)])
     .filter(([id, count]) => count > 0 && ENEMIES[id])
     .sort((a, b) => b[1] - a[1])
     .map(([id, count]) => `
@@ -513,17 +515,17 @@ export function renderStatistics() {
 }
 
 export function renderBestiary() {
-  const kills = state.game.player.stats?.kills || {};
-  const totalKilled = Object.values(kills)
-    .reduce((sum, value) => sum + value, 0);
+  const rawKills = state.game.player.stats?.kills;
+  const kills = rawKills && typeof rawKills === 'object' && !Array.isArray(rawKills) ? rawKills : {};
+  const totalKilled = getTotalKills(kills);
 
   const allIds = Object.keys(ENEMIES);
   const totalEnemies = allIds.length;
-  const known = allIds.filter(id => (kills[id] || 0) > 0).length;
+  const known = allIds.filter(id => getSafeCount(kills[id]) > 0).length;
 
   const sorted = allIds.sort((a, b) => {
-    const aKnown = (kills[a] || 0) > 0 ? 0 : 1;
-    const bKnown = (kills[b] || 0) > 0 ? 0 : 1;
+    const aKnown = getSafeCount(kills[a]) > 0 ? 0 : 1;
+    const bKnown = getSafeCount(kills[b]) > 0 ? 0 : 1;
 
     if (aKnown !== bKnown) return aKnown - bKnown;
 
@@ -532,7 +534,7 @@ export function renderBestiary() {
 
   const cards = sorted.map(id => {
     const enemy = ENEMIES[id];
-    const count = kills[id] || 0;
+    const count = getSafeCount(kills[id]);
     const killed = count > 0;
 
     if (!killed) {
