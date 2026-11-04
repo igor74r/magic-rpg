@@ -9,7 +9,9 @@ const TOWER_REGIONS = ['forest', 'ruins', 'swamp', 'graveyard', 'volcano', 'ice-
 const TOWER_BOSSES = ['grave-king', 'sand-king', 'archmage', 'elder-treant', 'bone-tyrant', 'bone-colossus', 'void-harbinger', 'shadow-mage'];
 
 export function getTowerMult(floor = 1) {
-  const f = Math.max(1, Math.min(TOWER_MAX_FLOOR, Math.floor(Number(floor) || 1)));
+  const f = Number.isSafeInteger(floor) && floor >= 1
+    ? Math.min(TOWER_MAX_FLOOR, floor)
+    : 1;
   return {
     hpMult: 1 + (f - 1) * 0.08,
     atkMult: 1 + (f - 1) * 0.055,
