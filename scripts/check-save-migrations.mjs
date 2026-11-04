@@ -168,7 +168,11 @@ for (const [label, mutate] of [
   ['invalid strength', player => { player.str = 'strong'; }],
   ['negative stat points', player => { player.statPoints = -1; }],
   ['fractional level', player => { player.level = 1.5; }],
-  ['level above the cap', player => { player.level = 101; }]
+  ['level above the cap', player => { player.level = 101; }],
+  ['negative NG+ cycle', player => { player.ngPlus = -1; }],
+  ['fractional NG+ cycle', player => { player.ngPlus = 1.5; }],
+  ['string NG+ cycle', player => { player.ngPlus = '2'; }],
+  ['unsafe NG+ cycle', player => { player.ngPlus = Number.MAX_SAFE_INTEGER + 1; }]
 ]) {
   const invalid = JSON.parse(JSON.stringify(freshSave));
   mutate(invalid.player);
@@ -180,6 +184,15 @@ legacyPriestShape.player.class = 'priest';
 assert.doesNotThrow(() => validateCurrentSaveShape(legacyPriestShape),
   'legacy priest saves must remain valid for backward compatibility');
 console.log('PASS current save validator rejects invalid core stats, balances, classes and levels; legacy Priest remains supported');
+const malformedLegacyCycle = JSON.parse(JSON.stringify(freshSave));
+malformedLegacyCycle.version = 16;
+malformedLegacyCycle.player.ngPlus = -4;
+migrateGame(malformedLegacyCycle);
+assert.equal(malformedLegacyCycle.player.ngPlus, 0,
+  'legacy saves with invalid NG+ counters must normalize to cycle zero');
+assert.doesNotThrow(() => validateCurrentSaveShape(malformedLegacyCycle),
+  'normalized legacy NG+ counters must pass current schema validation');
+console.log('PASS malformed legacy NG+ counters normalize safely; current saves reject invalid counters');
 console.log('PASS new character creation runs v16/v17 migrations before first save');
 storage.set('magic-rpg-save-1', JSON.stringify({
   version: 16,
