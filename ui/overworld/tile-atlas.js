@@ -120,7 +120,7 @@ function drawAuroraPathDetails(ctx, x, y, size, tileX, tileY) {
   }
 }
 
-function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0) {
+export function drawAuroraGroundTile(ctx, type, x, y, size, tileX = 0, tileY = 0) {
   if ((type !== 0 && type !== 1) || auroraGroundFailed) return false;
   if (!auroraGroundRequested) requestAuroraGroundAtlas();
   if (!auroraGroundReady || !auroraGroundImage) return false;
