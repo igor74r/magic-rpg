@@ -212,11 +212,11 @@ export function getAvailablePassives(player) {
 // Совместимый интерфейс прежней системы талантов.
 export function canTakeTalent(player, talent) {
   if (!player || !talent) return false;
-  if (!Array.isArray(player.talents)) player.talents = [];
-  if (player.talents.includes(talent.id)) return false;
+  const talents = Array.isArray(player.talents) ? player.talents : [];
+  if (talents.includes(talent.id)) return false;
   if ((player.level || 1) < talent.tier) return false;
 
-  const tierTaken = player.talents.some(id => {
+  const tierTaken = talents.some(id => {
     const taken = findTalentById(player.class, id);
     return taken && taken.tier === talent.tier;
   });
@@ -232,6 +232,7 @@ export function takeTalent(player, talentId) {
   const snapshot = tracked ? snapshotPlayer(player) : null;
   if (tracked && !snapshot) return false;
 
+  if (!Array.isArray(player.talents)) player.talents = [];
   player.talents.push(talentId);
 
   const effects = talent.effects || {};
