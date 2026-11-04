@@ -1560,6 +1560,14 @@ function combatVictory() {
     hp: enemy.hp,
     state: enemy.state
   };
+  const previousOverworld = {
+    log: Array.isArray(ow.log) ? [...ow.log] : null,
+    particles: Array.isArray(ow.particles) ? [...ow.particles] : null,
+    floatingNumbers: Array.isArray(ow.floatingNumbers) ? [...ow.floatingNumbers] : null,
+    shake: ow.shake
+  };
+  const campaignNotifications = [];
+  let riftOpened = false;
 
   const ng = getNGPlusMult();
 
@@ -1670,7 +1678,7 @@ function combatVictory() {
         : missionProgress.current >= missionProgress.required && !missionProgress.shardFound
           ? `📜 ${missionTitle}: убийства выполнены (${progressLabel}), но нужен сюжетный осколок.`
           : `📜 ${missionTitle}: ${progressLabel}`;
-      emit('toast', notification);
+      campaignNotifications.push(notification);
     }
   }
 
@@ -1748,7 +1756,7 @@ function combatVictory() {
       pushLog(`💎 Получен сюжетный осколок: ${ITEMS[shardId].name}`, shardResult.created.length || shardResult.stored ? 'success' : 'warning');
       if (dragonReward.dragon.id === 'blood-crown') {
         state.game.riftOpenedAt = Date.now();
-        setTimeout(() => emit('rift:opened'), 900);
+        riftOpened = true;
       }
     }
   }
@@ -1795,16 +1803,23 @@ function combatVictory() {
     enemy.effects = previousEnemy.effects;
     enemy.hp = enemy.maxHp;
     enemy.state = previousEnemy.state || 'idle';
+    if (previousOverworld.log) ow.log = previousOverworld.log;
+    if (previousOverworld.particles) ow.particles = previousOverworld.particles;
+    if (previousOverworld.floatingNumbers) ow.floatingNumbers = previousOverworld.floatingNumbers;
+    ow.shake = previousOverworld.shake;
     ow.player.hp = state.game.player.hp;
+    ow.player.mp = state.game.player.mp;
     ow.combat.turn = 'player';
     pushLog('Награда не сохранена. Победа отменена — попробуйте ещё раз.', 'warning');
     return;
   }
+  for (const notification of campaignNotifications) emit('toast', notification);
   for (const update of deferredQuestUpdates) {
     for (const questText of update?.completedTexts || []) {
       emit('toast', `📜 Квест выполнен: ${questText}!`);
     }
   }
+  if (riftOpened) setTimeout(() => emit('rift:opened'), 900);
   endCombat();
   checkAchievements();
 
