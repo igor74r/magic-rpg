@@ -18,7 +18,7 @@ export function buyItem(id) {
     emit('toast', 'Этот предмет нельзя купить');
     return false;
   }
-  if (!Number.isFinite(p.gold) || p.gold < price) { emit('toast', 'Недостаточно золота'); return false; }
+  if (!Number.isSafeInteger(p.gold) || p.gold < 0 || p.gold < price) { emit('toast', 'Недостаточно золота'); return false; }
   const capacity = canAddItem(id, 1, p);
   if (!capacity.ok) { emit('toast', capacity.reason === 'slots' ? 'Сумка заполнена' : 'Превышен лимит переносимого веса'); return false; }
   const previousInventory = p.inventory.map(inst => ({ ...inst, bonus: inst.bonus ? { ...inst.bonus } : inst.bonus }));
@@ -136,7 +136,7 @@ export function buybackItem(index) {
       item.bossOnly || !RARITIES[rarity] || RARITIES[rarity].bossOnly) {
     return { ok: false, msg: 'Предмет больше нельзя выкупить' };
   }
-  if (!Number.isFinite(p.gold) || p.gold < record.price) return { ok: false, msg: 'Не хватает золота для обратного выкупа' };
+  if (!Number.isSafeInteger(p.gold) || p.gold < 0 || p.gold < record.price) return { ok: false, msg: 'Не хватает золота для обратного выкупа' };
   const capacity = canAddItem(record.item.id, qty, p);
   if (!capacity.ok) return { ok: false, msg: capacity.reason === 'slots' ? 'Сумка заполнена' : 'Превышен лимит переносимого веса' };
   const previousInventory = p.inventory.map(inst => JSON.parse(JSON.stringify(inst)));
