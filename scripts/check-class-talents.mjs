@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { getClassTalents, findTalentById } from '../data/talents.js';
-import { getTalentBonus, getAvailableTalents, canTakeTalent, takeTalent } from '../systems/talents.js';
+import { getTalentBonus, getAvailableTalents, canTakeTalent, takeTalent, resetTalents } from '../systems/talents.js';
 import { state } from '../systems/state.js';
 
 const playableClasses = ['warrior', 'mage', 'archer'];
@@ -54,6 +54,18 @@ try {
   state.currentSlot = originalSlot;
   if (originalStorage === undefined) delete globalThis.localStorage;
   else globalThis.localStorage = originalStorage;
+}
+
+for (const invalidGold of [Infinity, NaN, -1, Number.MAX_SAFE_INTEGER + 1]) {
+  const invalidReset = {
+    class: 'mage', level: 20, gold: invalidGold, talents: ['m-cryomancer'],
+    hp: 100, maxHp: 100, mp: 100, maxMp: 100
+  };
+  const before = JSON.stringify(invalidReset);
+  assert.equal(resetTalents(invalidReset).ok, false,
+    'talent reset must reject invalid currency balances');
+  assert.equal(JSON.stringify(invalidReset), before,
+    'invalid reset balance must not mutate player state');
 }
 
 console.log('Class talent checks passed');
