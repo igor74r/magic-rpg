@@ -13,6 +13,36 @@ let treePan = { x: -150, y: -170 };
 let treeZoom = 1;
 let treeDrag = null;
 
+function drawPassiveLines(connections) {
+  if (typeof document === 'undefined') return;
+  const canvas = document.getElementById('passive-lines-canvas');
+  const world = document.getElementById('passive-tree-world');
+  if (!canvas || !world || typeof canvas.getContext !== 'function') return;
+
+  const width = world.clientWidth || 1200;
+  const height = world.clientHeight || 900;
+  const pixelRatio = typeof window !== 'undefined'
+    ? Math.min(window.devicePixelRatio || 1, 2)
+    : 1;
+  canvas.width = Math.round(width * pixelRatio);
+  canvas.height = Math.round(height * pixelRatio);
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.imageSmoothingEnabled = false;
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+  for (const edge of connections) {
+    ctx.beginPath();
+    ctx.moveTo(Math.round(width * edge.x1 / 100), Math.round(height * edge.y1 / 100));
+    ctx.lineTo(Math.round(width * edge.x2 / 100), Math.round(height * edge.y2 / 100));
+    ctx.strokeStyle = edge.active ? '#d7b85d' : '#6c5b3b';
+    ctx.lineWidth = edge.active ? 3 : 2;
+    ctx.lineCap = 'square';
+    ctx.stroke();
+  }
+}
+
 function applyPassiveTreeTransform() {
   const world = document.getElementById('passive-tree-world');
   if (world) world.style.transform = `translate(${treePan.x}px, ${treePan.y}px) scale(${treeZoom})`;
@@ -161,15 +191,13 @@ export function renderPassives() {
         allocated.includes(node.id) &&
         allocated.includes(parentId);
 
-      lines.push(`
-        <line
-          x1="${parent.x}%"
-          y1="${parent.y}%"
-          x2="${node.x}%"
-          y2="${node.y}%"
-          class="${active ? 'active' : ''}"
-        />
-      `);
+      lines.push({
+        x1: parent.x,
+        y1: parent.y,
+        x2: node.x,
+        y2: node.y,
+        active
+      });
     }
   }
 
@@ -218,13 +246,7 @@ export function renderPassives() {
       onpointercancel="GameAPI.passiveTreePointerUp(event)">
       <div class="passive-tree-expanded" id="passive-tree-world"
         style="transform:translate(${treePan.x}px,${treePan.y}px) scale(${treeZoom})">
-      <svg
-        class="passive-lines"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-      >
-        ${lines.join('')}
-      </svg>
+      <canvas class="passive-lines" id="passive-lines-canvas" width="1200" height="900" aria-hidden="true"></canvas>
   `;
 
   for (const node of Object.values(nodes)) {
@@ -303,6 +325,11 @@ export function renderPassives() {
   }
 
   html += '</div></div>';
+
+  if (typeof requestAnimationFrame === 'function') {
+    const connectionData = lines.map(edge => ({ ...edge }));
+    requestAnimationFrame(() => drawPassiveLines(connectionData));
+  }
 
   return html;
 }
