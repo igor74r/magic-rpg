@@ -40,6 +40,15 @@ try {
     }
   };
   state.game = ready;
+  const readyPlayerSnapshot = { ...ready.player };
+  const readyGameSnapshot = {
+    location: ready.location,
+    storyShards: ready.storyShards,
+    storyDragons: ready.storyDragons,
+    riftEnding: ready.riftEnding,
+    shards: ready.shards,
+    quests: ready.quests
+  };
   const inventoryBefore = JSON.stringify(ready.player.inventory);
   const jobsBefore = JSON.stringify(ready.player.craftingJobs);
   const pendingBefore = JSON.stringify(ready.player.pendingLoot);
@@ -60,7 +69,19 @@ try {
   assert.deepEqual(ready.storyShards, { flame: false, ice: false, blood: false });
   assert.equal(ready.player.victoryAchieved, false);
   assert.ok(saved.has('magic-rpg-save-1'), 'new cycle should be saved');
-  console.log('check-ngplus: PASS (completion gate, preserved inventory/jobs/loot, reset temporary state)');
+
+  // Failed persistence must not report a successful cycle or destroy the completed campaign in memory.
+  Object.assign(ready.player, readyPlayerSnapshot);
+  Object.assign(ready, readyGameSnapshot);
+  const originalSetItem = globalThis.localStorage.setItem;
+  globalThis.localStorage.setItem = () => { throw new Error('simulated quota failure'); };
+  assert.equal(startNGPlus(), false, 'NG+ must abort when the new cycle cannot be persisted');
+  assert.equal(ready.player.level, 50, 'failed NG+ must restore the completed character level');
+  assert.equal(ready.player.ngPlus, 2, 'failed NG+ must not increment the cycle');
+  assert.deepEqual(ready.player.campaignClaimed, claimed, 'failed NG+ must restore all campaign flags');
+  assert.equal(ready.location, 'dragon-lair', 'failed NG+ must restore the previous world location');
+  globalThis.localStorage.setItem = originalSetItem;
+  console.log('check-ngplus: PASS (completion gate, carry-over, XP threshold, and save-failure rollback)');
 } finally {
   state.game = null;
   if (originalStorage === undefined) delete globalThis.localStorage;
