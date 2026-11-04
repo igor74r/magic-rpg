@@ -218,29 +218,27 @@
 /* ---------- Древо пассивных навыков ---------- */
 .passive-tree-expanded {
   position:relative; min-height:620px; margin:14px 0; overflow:hidden;
-  border:1px solid rgba(201,162,39,.22); border-radius:8px;
-  background:radial-gradient(circle at 50% 50%,rgba(111,83,42,.17),transparent 55%),linear-gradient(180deg,rgba(20,15,10,.96),rgba(8,7,6,.98));
+  border:1px solid #5a4a2d; border-radius:0;
+  background:#101820;
 }
-.passive-lines { position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
-.passive-lines line { stroke:rgba(163,139,91,.35); stroke-width:.7; vector-effect:non-scaling-stroke; }
-.passive-lines line.active { stroke:#d7b85d; stroke-width:1.5; filter:drop-shadow(0 0 2px rgba(230,190,80,.55)); }
+.passive-lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; image-rendering:pixelated; z-index:1; }
 .passive-node {
   position:absolute; z-index:2; width:68px; min-height:54px; padding:5px 3px;
-  transform:translate(-50%,-50%); border:1px solid rgba(177,145,82,.65); border-radius:7px;
-  background:linear-gradient(180deg,#332719,#15100b); color:#d7c49a;
-  cursor:default; text-align:center; box-shadow:0 3px 8px rgba(0,0,0,.45);
+  transform:translate(-50%,-50%); border:1px solid #8b7449; border-radius:0;
+  background:#211a13; color:#d7c49a;
+  cursor:default; text-align:center; box-shadow:none;
 }
 .passive-node .node-icon { display:block; font-size:18px; line-height:1.2; }
 .passive-node .node-name { display:block; margin-top:3px; font-size:9px; line-height:1.2; }
-.passive-node.available { border-color:#84b86a; color:#d9f0c1; cursor:pointer; box-shadow:0 0 12px rgba(115,190,91,.22); }
-.passive-node.allocated { border-color:#e4c46b; color:#ffe6a0; background:linear-gradient(180deg,#5a4522,#241a0c); }
+.passive-node.available { border-color:#84b86a; color:#d9f0c1; cursor:pointer; box-shadow:none; }
+.passive-node.allocated { border-color:#e4c46b; color:#ffe6a0; background:#4a391c; }
 .passive-node.keystone { width:82px; min-height:66px; border-width:2px; border-color:#b88c44; }
-.passive-node.start { width:76px; min-height:62px; border-color:#f0d47b; background:linear-gradient(180deg,#725326,#33220d); }
+.passive-node.start { width:76px; min-height:62px; border-color:#f0d47b; background:#61471e; }
 .passive-node:disabled { opacity:.55; }
 .passive-legend, .passive-heading { color:#c6b894; font-size:12px; line-height:1.6; }
 .passive-legend { display:flex; flex-wrap:wrap; gap:8px 16px; margin:8px 0 16px; }
 .passive-detail-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px; }
-.passive-detail { padding:10px; border:1px solid rgba(177,145,82,.22); border-radius:6px; background:rgba(0,0,0,.16); }
+.passive-detail { padding:10px; border:1px solid #493d2b; border-radius:0; background:#0b1118; }
 .passive-detail b { color:#e6cf8e; }
 .passive-detail small { display:block; margin-top:3px; color:#a89060; }
 .passive-detail p { margin:6px 0; color:#c6b894; font-size:12px; }
@@ -393,10 +391,8 @@
 .passive-tree-viewport {
   position:relative; height:570px; min-height:430px; margin:14px 0;
   overflow:hidden; touch-action:none; user-select:none; cursor:grab;
-  border:1px solid rgba(201,162,39,.3); border-radius:8px;
-  background:
-    radial-gradient(circle at 50% 50%,rgba(111,83,42,.16),transparent 48%),
-    linear-gradient(180deg,rgba(20,15,10,.96),rgba(8,7,6,.98));
+  border:1px solid #5a4a2d; border-radius:0;
+  background:#0d151d;
 }
 .passive-tree-viewport.dragging { cursor:grabbing; }
 .passive-tree-viewport .passive-tree-expanded {
@@ -404,7 +400,7 @@
   min-height:0; margin:0; overflow:visible; border:0; border-radius:0;
   background:transparent; will-change:transform;
 }
-.passive-tree-viewport .passive-lines { position:absolute; inset:0; width:100%; height:100%; }
+.passive-tree-viewport .passive-lines { position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; }
 .passive-tree-viewport .passive-node { cursor:pointer; }
 .passive-tree-viewport .passive-node:disabled { cursor:default; }
 
