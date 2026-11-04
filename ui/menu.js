@@ -464,11 +464,13 @@ export function newGameSlot(slot) {
 
 export function deleteSlot(slot) {
   if (!confirm(`Удалить слот ${slot}? Это необратимо.`)) return false;
+  const deletingActiveSlot = slot === state.currentSlot;
   if (!deleteSave(slot)) {
     toast(`❌ Не удалось удалить слот ${slot}. Сохранение не удалено.`);
     renderSlots();
     return false;
   }
+  if (deletingActiveSlot) clearOverworldRuntime();
   toast(`Слот ${slot} удалён`);
   renderSlots();
   return true;
@@ -477,15 +479,43 @@ export function deleteSlot(slot) {
 export function deleteAllSaves() {
   if (!confirm('Удалить ВСЕ сохранения во всех 3 слотах?\n\nЭто необратимо. Прогресс будет потерян.')) return false;
   const max = getMaxSlot();
+  const backups = new Map();
+  try {
+    for (let i = 1; i <= max; i++) {
+      backups.set(i, globalThis.localStorage.getItem(`magic-rpg-save-${i}`));
+    }
+  } catch (error) {
+    console.error('[save] Не удалось подготовить массовое удаление:', error);
+    toast('❌ Не удалось проверить сохранения. Ни один слот не удалён.');
+    return false;
+  }
+
   const failedSlots = [];
   for (let i = 1; i <= max; i++) {
-    if (!deleteSave(i)) failedSlots.push(i);
+    if (!deleteSave(i, { preserveActiveState: true })) {
+      failedSlots.push(i);
+      break;
+    }
   }
   if (failedSlots.length) {
-    toast(`❌ Не удалось удалить слоты: ${failedSlots.join(', ')}. Проверьте доступ к хранилищу.`);
+    let rollbackSucceeded = true;
+    for (const [slot, backup] of backups) {
+      try {
+        if (backup === null) globalThis.localStorage.removeItem(`magic-rpg-save-${slot}`);
+        else globalThis.localStorage.setItem(`magic-rpg-save-${slot}`, backup);
+      } catch (rollbackError) {
+        rollbackSucceeded = false;
+        console.error(`[save] Не удалось восстановить слот ${slot} после массового удаления:`, rollbackError);
+      }
+    }
+    toast(rollbackSucceeded
+      ? `❌ Не удалось удалить слоты: ${failedSlots.join(', ')}. Предыдущие сохранения восстановлены.`
+      : `❌ Не удалось удалить слоты: ${failedSlots.join(', ')}. Восстановление не подтверждено; проверьте резервные копии.`);
     renderSlots();
     return false;
   }
+
+  clearOverworldRuntime();
   state.game = null;
   state.currentSlot = 1;
   toast('Все сохранения удалены');
