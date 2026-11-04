@@ -61,7 +61,7 @@ const portalPng = readFileSync(new URL('../assets/aurora/world-portal.png', impo
 assert.equal(portalPng.readUInt32BE(16), 64, 'Aurora world portal sprite must be 64px wide');
 assert.equal(portalPng.readUInt32BE(20), 64, 'Aurora world portal sprite must be 64px high');
 assert.equal(manifest.auroraWorldPortal?.columns, 1, 'Aurora world portal must use its dedicated authored sprite');
-const pngAssets = ['assets/aurora/ground-atlas.png','assets/aurora/village-props-atlas.png','assets/aurora/nature-atlas.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
+const pngAssets = ['assets/aurora/ground-atlas.png','assets/aurora/village-props-atlas.png','assets/aurora/nature-atlas.png','assets/aurora/world-portal.png','assets/tiles/terrain/atlas.png','assets/tiles/dungeons/atlas.png','assets/tiles/props/atlas.png','assets/branding/mana-crystal.png'];
 function crc32Png(buffer) {
   let crc = 0xffffffff;
   for (const byte of buffer) {
