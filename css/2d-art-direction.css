@@ -201,7 +201,7 @@
 .icon-tavern-2:after { left:8px; top:2px; width:18px; height:5px; background:#d8bd91; }
 .icon-tavern-3:before { left:14px; top:4px; width:4px; height:20px; background:#68452d; box-shadow:-7px 8px 0 #b18a54,7px 8px 0 #b18a54; }
 .icon-tavern-3:after { left:8px; top:2px; width:16px; height:4px; background:#d8bd91; }
-.village-room-floor-mark { position:absolute; z-index:2; left:50%; bottom:8%; width:8px; height:8px; background:#e4bd7d; transform:translateX(-50%); box-shadow:8px 0 0 #e4bd7d,-8px 0 0 #e4bd7d,0 8px 0 #e4bd7d,0 -8px 0 #e4bd7d; }
+.village-room-floor-mark { position:absolute; z-index:4; left:50%; bottom:4%; width:8px; height:8px; background:#e4bd7d; transform:translateX(-50%); box-shadow:8px 0 0 #e4bd7d,-8px 0 0 #e4bd7d,0 8px 0 #e4bd7d,0 -8px 0 #e4bd7d; }
 .room-forge .village-room-art { background-color:#3a2924; }
 .room-healer .village-room-art { background-color:#554534; }
 .room-alchemy .village-room-art { background-color:#352b3d; }
