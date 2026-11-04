@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { state } from '../systems/state.js';
 import { STORY } from '../data/story.js';
-import { startNGPlus } from '../systems/ngplus.js';
+import { startNGPlus, getNGPlusMult } from '../systems/ngplus.js';
 import { getExpNext } from '../systems/progression.js';
 
 const originalStorage = globalThis.localStorage;
@@ -10,6 +10,14 @@ globalThis.localStorage = { setItem: (key, value) => saved.set(key, String(value
 state.currentSlot = 1;
 
 try {
+  for (const invalidCycle of [-1, 1.5, '2', Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+    state.game = { player: { ngPlus: invalidCycle } };
+    assert.deepEqual(getNGPlusMult(), { hpMult: 1, atkMult: 1, goldMult: 1, expMult: 1 },
+      `malformed NG+ cycle ${String(invalidCycle)} must not poison combat or reward scaling`);
+  }
+  state.game = { player: { ngPlus: 2 } };
+  assert.deepEqual(getNGPlusMult(), { hpMult: 2, atkMult: 1.6, goldMult: 1.6, expMult: 1.6 },
+    'valid NG+ scaling must remain unchanged');
   const incomplete = {
     storyShards: { flame: false, ice: false, blood: false },
     storyDragons: { 'blood-crown': false },
