@@ -386,3 +386,5 @@
 - Updated the `index.html` module query to `main.js?v=20261104-aurora-interior-pixel-pass` so browsers do not reuse the previous cached game module; `scripts/check-startup-fallback.mjs` now asserts the current cache-busted URL.
 
 - Cache-busted `css/2d-art-direction.css` as well as `main.js`; the startup contract test now asserts both URLs. This prevents deployed browsers from pairing the new room markup with a stale interior stylesheet.
+
+- Browser screenshots exposed a desktop/mobile header collision: the redundant Aurora corner label sat under the modal close control. Removed that label, moved the hearth into the upper-right wall area so it remains visible, and aligned all three prop cards along one bottom baseline. Cache keys for both `main.js` and the art-direction stylesheet were advanced to `20261104-aurora-interior-layout-2`; the startup contract test tracks both.
