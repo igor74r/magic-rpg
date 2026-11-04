@@ -103,5 +103,19 @@
     "rows": 1,
     "displaySize": 96,
     "usage": "Dedicated 16-bit pixel-art stone arch and rift aperture for Aurora's central world portal"
+  },
+  "auroraKenneyTinyTown": {
+    "file": "../aurora/kenney-tiny-town-atlas.png",
+    "tileSize": 16,
+    "columns": 12,
+    "rows": 11,
+    "spacing": 1,
+    "stride": 17,
+    "displaySize": 48,
+    "source": "Kenney Tiny Town (1.1)",
+    "author": "Kenney",
+    "license": "CC0-1.0",
+    "sourceUrl": "https://kenney.nl/assets/tiny-town",
+    "usage": "Optional local modular village nature sprites; Canvas 2D nearest-neighbour rendering"
   }
 }

@@ -1,4 +1,5 @@
 import { drawAuroraBuilding } from './aurora-art.js';
+import { AURORA_KENNEY_NATURE_TILE, drawAuroraKenneyTile } from './aurora-kenney-atlas.js';
 
 // Пиксельные 2D-модели героев и существ; архитектура Авроры рисуется Canvas 2D.
 // Все спрайты создаются локально через Canvas 2D.
@@ -800,6 +801,8 @@ function getAuroraNatureSprite(style) {
   return canvas;
 }
 function drawAuroraNature(ctx,x,y,style){
+  const kenneyTile = AURORA_KENNEY_NATURE_TILE[style];
+  if (Number.isInteger(kenneyTile) && drawAuroraKenneyTile(ctx, kenneyTile, x, y, 48)) return;
   const sprite=getAuroraNatureSprite(style);
   const compact = style==='fence' || style==='flowerbed';
   const hedge = style==='hedge';
