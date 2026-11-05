@@ -1,5 +1,6 @@
 // Regression coverage for skip-turn effects in both combat directions.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { applyEffect, tickEffects, isStunned, consumeStun, hasEffect, getAtkMult, getDefMult, getLifesteal, clearDebuffs } from '../systems/status.js';
 
 for (const targetName of ['player', 'enemy']) {
@@ -26,6 +27,12 @@ tickEffects(recovering);
 assert.equal(recovering.stunImmunityTurns, 0);
 applyEffect(recovering, 'stun');
 assert.equal(isStunned(recovering), true, 'stun must be available again after one protected enemy turn');
+
+const combatSource = readFileSync(new URL('../systems/overworld/combat.js', import.meta.url), 'utf8');
+assert.match(combatSource, /const actualDamage = applyPlayerDamage\(p, ow, result\.totalDamage\)/,
+  'player damage-over-time feedback must use HP actually removed');
+assert.match(combatSource, /text: '-' \+ actualDamage/,
+  'damage-over-time floating numbers must not show overkill');
 
 const poisoned = { effects: [] };
 applyEffect(poisoned, 'poison');
