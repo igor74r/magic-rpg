@@ -1458,7 +1458,8 @@ function enemyCombatTurn() {
     const damage = baseDamage;
     actualDamage = applyPlayerDamage(p, ow, damage);
 
-    enemy.hp = Math.min(enemy.maxHp, enemy.hp + damage);
+    // Drain healing is limited to HP actually removed, including lethal hits.
+    enemy.hp = Math.min(enemy.maxHp, enemy.hp + actualDamage);
 
     ow.floatingNumbers.push({
       x: ow.player.x,
