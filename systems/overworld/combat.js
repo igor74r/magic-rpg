@@ -475,6 +475,13 @@ export function combatCastSpell(spellId) {
     return;
   }
 
+  const stats = getEffStats();
+  const talent = getTalentBonus(p);
+  const enemy = ow.combat.enemy;
+
+  // Reject invalid derived stats before spending mana or changing combat state.
+  if (!hasValidCombatStats(stats, talent)) return;
+
   const freeMana = p.effects?.some(
     effect => effect?.id === 'manaShield'
   );
@@ -490,12 +497,6 @@ export function combatCastSpell(spellId) {
   } else {
     pushLog('💧 Эликсир маны: мана не тратится', 'success');
   }
-
-  const stats = getEffStats();
-  const talent = getTalentBonus(p);
-  const enemy = ow.combat.enemy;
-
-  if (!hasValidCombatStats(stats, talent)) return;
 
   if (spell.damage) {
     recordPlayerStyle(ow, 'magic');
@@ -615,6 +616,13 @@ export function combatUseAbility(abilityId) {
     return;
   }
 
+  const enemy = ow.combat.enemy;
+  const stats = getEffStats();
+  const talent = getTalentBonus(p);
+
+  // Reject invalid derived stats before spending class resource or starting cooldown.
+  if (!hasValidCombatStats(stats, talent)) return;
+
   const freeMana = p.effects?.some(
     effect => effect?.id === 'manaShield'
   );
@@ -644,12 +652,6 @@ export function combatUseAbility(abilityId) {
   if (!p.cooldowns) {
     p.cooldowns = {};
   }
-
-  const enemy = ow.combat.enemy;
-  const stats = getEffStats();
-  const talent = getTalentBonus(p);
-
-  if (!hasValidCombatStats(stats, talent)) return;
 
   p.cooldowns[abilityId] = Math.max(
     1,
