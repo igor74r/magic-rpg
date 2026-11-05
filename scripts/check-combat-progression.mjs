@@ -93,6 +93,24 @@ try {
     console.log(`PASS ${enemyId} ${ENEMIES[enemyId].special.type} special and status effect`);
   }
 
+  // Drain must restore only the HP actually removed from a low-health player.
+  scheduled.length = 0;
+  const lowHealthDrain = fixture('warrior', 'ghost');
+  lowHealthDrain.enemy.hp = 1000;
+  lowHealthDrain.ow.combat.turnCount = 2;
+  combatAttack();
+  runEnemyTurn(); // telegraph the drain
+  lowHealthDrain.p.hp = 1;
+  lowHealthDrain.ow.player.hp = 1;
+  const enemyHpBeforeLowHealthDrain = lowHealthDrain.enemy.hp;
+  combatBlock();
+  runEnemyTurn();
+  assert.equal(lowHealthDrain.enemy.hp, enemyHpBeforeLowHealthDrain + 1,
+    'drain must heal only the one HP actually removed from a nearly defeated player');
+  assert.ok(lowHealthDrain.ow.floatingNumbers.some(number => number.text === '-1'),
+    'drain feedback must show actual damage rather than overkill');
+  console.log('PASS drain healing and combat feedback use actual HP removed');
+
   // Vampiric modifier must heal from actual multi-hit damage, not the pre-special base hit.
   scheduled.length = 0;
   const vampiric = fixture('warrior', 'wolf');
