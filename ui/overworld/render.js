@@ -1121,82 +1121,109 @@ export function setLastNpcKey(k) { lastNpcKey = k; }
 
 // HUD в стиле «осколков»: срезанные углы, тонкие бары, пипсы осколков
 function drawHud(ctx, p, stats, pClass) {
-  const x = 12, y = 12, w = 250, h = 100;
-  
-  ctx.fillStyle = 'rgba(15, 8, 4, 0.92)';
+  const x = 12, y = 12, w = 292, h = 142;
+  const clampRatio = (value, max) => max > 0
+    ? Math.max(0, Math.min(1, (Number(value) || 0) / max))
+    : 0;
+  const hpRatio = clampRatio(p.hp, p.maxHp);
+  const resourceRatio = clampRatio(p.mp, p.maxMp);
+  const expRatio = clampRatio(p.exp, p.expNext);
+  const isRage = pClass === 'warrior';
+  const resourceLabel = isRage ? 'ЯРОСТЬ' : pClass === 'archer' ? 'ФОКУС' : 'МАНА';
+  const classLabels = {
+    warrior: 'ВОИН', mage: 'МАГ', archer: 'ЛУЧНИК', priest: 'ЖРЕЦ'
+  };
+  const name = String(p.name || 'Путник').slice(0, 18);
+  const level = Math.max(1, Number(p.level) || 1);
+  const gold = Math.max(0, Number(p.gold) || 0);
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+
+  // Compact 16-bit status frame: flat fills, stepped borders, no glow or gradients.
+  ctx.fillStyle = '#080d13';
   ctx.fillRect(x, y, w, h);
-  
-  ctx.strokeStyle = '#c9a227';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, w, h);
-  ctx.strokeStyle = 'rgba(201, 162, 39, 0.3)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x + 4, y + 4, w - 8, h - 8);
+  ctx.fillStyle = '#111b25';
+  ctx.fillRect(x + 3, y + 3, w - 6, h - 6);
+  ctx.fillStyle = '#40566a';
+  ctx.fillRect(x, y, w, 2);
+  ctx.fillRect(x, y + h - 2, w, 2);
+  ctx.fillRect(x, y, 2, h);
+  ctx.fillRect(x + w - 2, y, 2, h);
+  ctx.fillStyle = '#e6c36d';
+  ctx.fillRect(x + 5, y + 5, 5, 2);
+  ctx.fillRect(x + w - 10, y + 5, 5, 2);
+  ctx.fillRect(x + 5, y + h - 7, 5, 2);
+  ctx.fillRect(x + w - 10, y + h - 7, 5, 2);
 
-  ctx.fillStyle = '#c9a227';
-  ctx.fillRect(x, y, 6, 6);
-  ctx.fillRect(x + w - 6, y, 6, 6);
-  ctx.fillRect(x, y + h - 6, 6, 6);
-  ctx.fillRect(x + w - 6, y + h - 6, 6, 6);
-
-  const hpPct = Math.max(0, p.hp / p.maxHp);
-  ctx.fillStyle = '#1a0505';
-  ctx.fillRect(x + 10, y + 15, w - 20, 14);
-  ctx.fillStyle = '#b02020';
-  ctx.fillRect(x + 10, y + 15, (w - 20) * hpPct, 14);
-  ctx.fillStyle = 'rgba(255,255,255,0.2)';
-  ctx.fillRect(x + 10, y + 15, (w - 20) * hpPct, 4);
-  
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 10px "Segoe UI", sans-serif';
-  ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`HP ${p.hp}/${p.maxHp}`, x + w/2, y + 22);
-
-  const isRage = (pClass === 'warrior');
-  const mpPct = Math.max(0, p.mp / p.maxMp);
-  ctx.fillStyle = isRage ? '#1a051a' : '#05051a';
-  ctx.fillRect(x + 10, y + 35, w - 20, 12);
-  ctx.fillStyle = isRage ? '#b020b0' : '#3060d0';
-  ctx.fillRect(x + 10, y + 35, (w - 20) * mpPct, 12);
-  ctx.fillStyle = 'rgba(255,255,255,0.2)';
-  ctx.fillRect(x + 10, y + 35, (w - 20) * mpPct, 3);
-  
-  ctx.fillStyle = '#fff';
-  ctx.fillText(`${isRage ? 'ЯРОСТЬ' : 'МАНА'} ${p.mp}/${p.maxMp}`, x + w/2, y + 41);
-
-  // === ИСПРАВЛЕННЫЙ БЛОК СТАТОВ (чтобы не было наложения) ===
   ctx.textAlign = 'left';
-  ctx.fillStyle = '#ffcf6e';
-  ctx.font = 'bold 11px "Segoe UI", sans-serif';
-  const level = p.level || 1;
-  const atk = stats.atk || 0;
-  const def = stats.def || 0;
-  
-  ctx.fillText(`УР. ${level}`, x + 10, y + 62);
-  
-  ctx.fillStyle = '#dfe9f5';
-  ctx.fillText(`⚔️ ${atk}`, x + 70, y + 62);
-  ctx.fillText(`🛡️ ${def}`, x + 130, y + 62);
-  ctx.fillText(`✨ ${stats.mag || 0}`, x + 180, y + 62);
+  ctx.font = 'bold 12px monospace';
+  ctx.fillStyle = '#eee5d0';
+  ctx.fillText(name, x + 12, y + 16);
+  ctx.font = 'bold 9px monospace';
+  ctx.fillStyle = '#e6c36d';
+  ctx.fillText(classLabels[pClass] || 'ГЕРОЙ', x + 12, y + 29);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#ffe7a7';
+  ctx.font = 'bold 10px monospace';
+  ctx.fillText(`УР. ${level}`, x + w - 12, y + 15);
+  ctx.fillStyle = '#c8b987';
+  ctx.font = '9px monospace';
+  ctx.fillText(`◆ ${gold.toLocaleString('ru-RU')}`, x + w - 12, y + 29);
 
-  const shards = state.game?.shards || {};
-  const shardKeys = ['forest', 'ruins', 'shadow'];
-  const shardLabels = ['ЛЕС', 'РУИНЫ', 'ТЕНЬ'];
-  
-  ctx.textAlign = 'left';
-  shardKeys.forEach((key, i) => {
-    const sx = x + 12 + i * 75, sy = y + 80;
-    ctx.fillStyle = shards[key] ? '#c9a227' : '#333';
-    ctx.beginPath();
-    ctx.moveTo(sx, sy - 5); ctx.lineTo(sx + 5, sy); ctx.lineTo(sx, sy + 5); ctx.lineTo(sx - 5, sy);
-    ctx.fill();
-    ctx.strokeStyle = shards[key] ? '#fff' : '#666';
+  const drawBar = (label, value, max, ratio, top, fill, track) => {
+    const bx = x + 12, by = y + top, bw = w - 24, bh = 13;
+    ctx.fillStyle = '#080d13';
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.fillStyle = track;
+    ctx.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
+    const fillWidth = Math.round((bw - 2) * ratio);
+    if (fillWidth > 0) {
+      ctx.fillStyle = fill;
+      ctx.fillRect(bx + 1, by + 1, fillWidth, bh - 2);
+    }
+    ctx.fillStyle = '#40566a';
+    ctx.strokeStyle = '#40566a';
     ctx.lineWidth = 1;
-    ctx.stroke();
+    ctx.strokeRect(bx, by, bw, bh);
+    // Small pixel divisions make resource levels readable at a glance.
+    for (let i = 1; i < 10; i++) {
+      const sx = bx + Math.round((bw / 10) * i);
+      ctx.fillStyle = 'rgba(8,13,19,0.55)';
+      ctx.fillRect(sx, by + 1, 1, bh - 2);
+    }
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 8px monospace';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff1d2';
+    ctx.fillText(label, bx + 5, by + bh / 2);
+    ctx.textAlign = 'right';
+    ctx.fillText(`${Math.max(0, Number(value) || 0)} / ${Math.max(0, Number(max) || 0)}`, bx + bw - 5, by + bh / 2);
+  };
 
-    ctx.fillStyle = shards[key] ? '#dfe9f5' : '#666';
-    ctx.font = '9px "Segoe UI", sans-serif';
-    ctx.fillText(shardLabels[i], sx + 10, sy);
-  });
+  drawBar('ЗДОРОВЬЕ', p.hp, p.maxHp, hpRatio, 39, '#b83b43', '#351820');
+  drawBar(resourceLabel, p.mp, p.maxMp, resourceRatio, 56,
+    isRage ? '#a34b9b' : pClass === 'archer' ? '#4c9b78' : '#3978b8',
+    isRage ? '#30172f' : '#14263a');
+  drawBar('ОПЫТ', p.exp, p.expNext, expRatio, 73, '#c7a34e', '#302817');
+
+  const statY = y + 101;
+  ctx.textAlign = 'left';
+  ctx.font = 'bold 9px monospace';
+  ctx.fillStyle = '#e6c36d';
+  ctx.fillText(`⚔ ${Math.round(stats.atk || 0)}`, x + 12, statY);
+  ctx.fillStyle = '#a8c5d7';
+  ctx.fillText(`🛡 ${Math.round(stats.def || 0)}`, x + 82, statY);
+  ctx.fillStyle = '#b9a0df';
+  ctx.fillText(`✦ ${Math.round(stats.mag || 0)}`, x + 152, statY);
+
+  const shards = state.game?.storyShards || {};
+  const shardCount = ['flame', 'ice', 'blood'].filter(id => shards[id] === true).length;
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 9px monospace';
+  ctx.fillStyle = '#c8b987';
+  ctx.fillText(`ОСКОЛКИ ${shardCount}/3`, x + w - 12, statY);
+
+  ctx.restore();
 }
