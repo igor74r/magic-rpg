@@ -232,34 +232,7 @@ try {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(350);
     await capture(page, `${vp.name}-01-aurora-north-yard`);
-    // Exercise every authored Aurora room, not just the exterior courtyard.
-    for (const room of ['forge','healer','alchemy','market','hall','tavern']) {
-      await page.evaluate(roomId => window.GameAPI.enterVillageInterior(roomId), room);
-      await page.locator('.village-room-art').waitFor({state:'visible'});
-      assert.ok(await page.locator('#npc-dialog-modal').isVisible(),
-        `${vp.name}/${room}: interior modal must be visible`);
-      assert.ok(await page.locator(`.village-room-art.room-${room}`).count() === 1,
-        `${vp.name}/${room}: the correct room palette must be selected`);
-      assert.equal(await page.locator('.village-room-floor-mark').textContent(),'',
-        `${vp.name}/${room}: floor marker must be a CSS pixel motif, not a glyph`);
-      assert.equal(await page.locator('.village-room-pixel-icon').count(),3,
-        `${vp.name}/${room}: interior must render three pixel-art prop silhouettes`);
-      const propPixels = await page.locator('.village-room-pixel-icon').evaluateAll(nodes => nodes.map(node => ({
-        body: getComputedStyle(node, '::before').backgroundColor,
-        detail: getComputedStyle(node, '::after').backgroundColor
-      })));
-      assert.ok(propPixels.every(pixel => pixel.body !== 'rgba(0, 0, 0, 0)' && pixel.detail !== 'rgba(0, 0, 0, 0)'),
-        `${vp.name}/${room}: all three prop silhouettes must have visible pixel bodies and highlights`);
-      const roomArt = await page.locator('.village-room-art').evaluate(node => ({
-        backgroundImage: getComputedStyle(node).backgroundImage,
-        filter: getComputedStyle(node).filter
-      }));
-      assert.equal(roomArt.backgroundImage,'none',`${vp.name}/${room}: interior must not use gradient image fills`);
-      assert.equal(roomArt.filter,'none',`${vp.name}/${room}: interior must not blur or filter pixel art`);
-      await capture(page,`${vp.name}-02-aurora-interior-${room}`);
-      await page.evaluate(() => window.GameAPI.exitVillageInterior());
-      await page.locator('#npc-dialog-modal').waitFor({state:'hidden'});
-    }
+    // Village interiors were removed; keep visual regression focused on exterior village navigation.
     assert.equal(await page.locator('#dashboard-context .dashboard-context-actions button').count(),1,
       `${vp.name}: mission guide must expose one primary portal action`);
     if(vp.width>1050) {
