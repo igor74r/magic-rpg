@@ -166,3 +166,11 @@ export function getEnemyEngagementRange(specialType) {
   if (specialType === 'double') return 48;
   return 44;
 }
+
+
+// A stun interrupts a charged special instead of letting it fire after recovery.
+export function interruptEnemyTelegraph(enemy) {
+  if (!enemy || !enemy.tacticalSpecialPending) return false;
+  enemy.tacticalSpecialPending = false;
+  return true;
+}
