@@ -782,63 +782,18 @@ function interactNpc(npcId) {
   if (npcId === 'tower-portal' || npcId === 'tower-gate') { exitOverworld(); openTowerMenu(); return; }
   if (npcId.startsWith('event-')) { handleWorldEvent(npcId); return; }
 
-  if (npcId === 'blacksmith') { openBlacksmith(); addVillageInteriorButton('forge'); }
-  else if (npcId === 'healer') { openHealer(); addVillageInteriorButton('healer'); }
-  else if (npcId === 'alchemist') { openAlchemist(); addVillageInteriorButton('alchemy'); }
-  else if (npcId === 'merchant') { openMerchant(); addVillageInteriorButton('market'); }
-  else if (npcId === 'elder') { openElder(); addVillageInteriorButton('hall'); }
+  if (npcId === 'blacksmith') openBlacksmith()
+  else if (npcId === 'healer') openHealer()
+  else if (npcId === 'alchemist') openAlchemist()
+  else if (npcId === 'merchant') openMerchant()
+  else if (npcId === 'elder') openElder()
   else if (npcId === 'well') openWell();
-  else if (npcId === 'bard') { openBard(); addVillageInteriorButton('tavern'); }
+  else if (npcId === 'bard') openBard()
   else if (npcId === 'guard') openGuard();
   else if (npcId === 'cat') openCat();
   else if (npcId === 'kids') openKids();
   else if (npcId === 'herald') openHerald();
   else if (npcId === 'questBoard') openQuestBoard();
-}
-
-const VILLAGE_INTERIORS = {
-  forge: { title: 'Кузница Борина', subtitle: 'Жар горна, запах угля и звон молота', room: 'Кузнечный горн', details: ['Наковальня у раскалённого очага', 'Стойка с клинками и щитами', 'Полки с инструментами'] },
-  healer: { title: 'Лечебный дом Мирры', subtitle: 'Травяные настои и мягкий свет свечей', room: 'Лечебная комната', details: ['Кровать для раненых путников', 'Шкаф с лекарствами', 'Сушёные травы под потолком'] },
-  alchemy: { title: 'Алхимическая мастерская', subtitle: 'Колбы тихо светятся в полумраке', room: 'Стол алхимика', details: ['Рабочий стол с колбами', 'Печь для настоев', 'Стеллажи с эссенциями'] },
-  market: { title: 'Торговый дом', subtitle: 'Тёплый свет, тканевые тюки и редкие товары', room: 'Торговый зал', details: ['Прилавок с товарами', 'Весы и сундуки', 'Полки с припасами'] },
-  hall: { title: 'Дом старейшины', subtitle: 'Карты старых земель и хроники трёх драконов', room: 'Зал совета', details: ['Большой стол с картой мира', 'Камин и кресла', 'Книжные полки'] },
-  tavern: { title: 'Таверна «Тихий угол»', subtitle: 'Музыка, горячая похлёбка и разговоры путников', room: 'Общий зал', details: ['Столики у камина', 'Стойка хозяина', 'Уголок барда'] }
-};
-
-function addVillageInteriorButton(interiorId) {
-  if (state.overworld?.locationId !== 'village') return;
-  const content = document.getElementById('npc-dialog-content');
-  if (!content || content.innerHTML.includes('data-village-interior')) return;
-  content.innerHTML +=
-    `<button data-village-interior onclick="GameAPI.enterVillageInterior('${interiorId}')" class="village-interior-enter">Войти внутрь</button>`;
-}
-
-function enterVillageInterior(interiorId) {
-  const ow = state.overworld;
-  const room = VILLAGE_INTERIORS[interiorId];
-  if (!ow || ow.locationId !== 'village' || !room) return;
-  ow.interior = interiorId;
-  const content = document.getElementById('npc-dialog-content');
-  const modal = document.getElementById('npc-dialog-modal');
-  const decor = room.details.map((item, index) => `<div class="village-room-prop prop-${index + 1}"><span class="village-room-pixel-icon icon-${interiorId}-${index + 1}" aria-hidden="true"></span><small>${item}</small></div>`).join('');
-  content.innerHTML = `
-    <div class="village-interior-view">
-      <div class="village-interior-heading"><div><h3>${room.title}</h3><p>${room.subtitle}</p></div></div>
-      <div class="village-room-art room-${interiorId}">
-        <div class="village-room-window"></div><div class="village-room-hearth"></div>
-        <div class="village-room-furniture">${decor}</div>
-        <div class="village-room-floor-mark" aria-hidden="true"></div>
-      </div>
-      <p class="village-room-caption">${room.room} · Можно осмотреться, затем вернуться во двор.</p>
-      <button onclick="GameAPI.exitVillageInterior()" class="village-interior-exit">← Выйти во двор</button>
-    </div>`;
-  if (modal) modal.style.display = 'flex';
-}
-
-function exitVillageInterior() {
-  if (state.overworld) state.overworld.interior = null;
-  const modal = document.getElementById('npc-dialog-modal');
-  if (modal) modal.style.display = 'none';
 }
 
 function handleWorldEvent(eventId) {
@@ -1244,8 +1199,6 @@ window.GameAPI = {
   petCat: petCatUI,
   claimQuest: claimQuestUI,
   interactNpc,
-  enterVillageInterior,
-  exitVillageInterior,
   upgradeEquipment: upgradeEquipmentUI,
   healAtHealer: healAtHealerUI,
   craftRecipe: craftRecipeUI,
