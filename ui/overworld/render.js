@@ -549,10 +549,6 @@ function render() {
   }
   const heroKeys = ow.keys || {};
   const heroMoving = !ow.combat && !ow.defeated && !!(heroKeys.w || heroKeys.a || heroKeys.s || heroKeys.d || heroKeys.arrowup || heroKeys.arrowdown || heroKeys.arrowleft || heroKeys.arrowright);
-  const heroDirection = heroKeys.w || heroKeys.arrowup ? 'up'
-    : heroKeys.s || heroKeys.arrowdown ? 'down'
-      : heroKeys.a || heroKeys.arrowleft ? 'left'
-        : heroKeys.d || heroKeys.arrowright ? 'right' : 'down';
 
   const activeMission = getActiveCampaignMission(state.game.player);
   const missionLocationId = activeMission?.mission.locationId || activeMission?.act.locationId;
@@ -645,7 +641,7 @@ function render() {
         }
       }
     } else if (entry.kind === 'player') {
-      drawPlayerByClass(ctx, sx + pLungeX, sy + pLungeY, state.game.player.class, theme.shadow, heroMoving, heroDirection);
+      drawPlayerByClass(ctx, sx + pLungeX, sy + pLungeY, state.game.player.class, theme.shadow, heroMoving);
     }
   }
 

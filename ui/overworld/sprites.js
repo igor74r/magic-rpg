@@ -226,6 +226,89 @@ const HEROES = {
   )
 };
 
+// Отдельные силуэты игровых классов: 18×16 пикселей, масштаб 3×.
+function centerMask(rows, width = 20) {
+  return rows.map(row => {
+    const left = Math.floor((width - row.length) / 2);
+    return '.'.repeat(left) + row + '.'.repeat(width - left - row.length);
+  });
+}
+
+const HERO_MASKS = {
+  warrior: centerMask([
+    '......oooo......',
+    '.....owwwwo.....',
+    '....owwwwwwo....',
+    '....owssesswo...',
+    '....owssesswo...',
+    '.....owwwwo.....',
+    '...oowaaaa wooo'.replaceAll(' ', ''),
+    '..owwaaaaaawwo..',
+    '..owwacaaacawwo..',
+    '..owwwwwwwwwwo..',
+    '...owwaaaawwo...',
+    '...obbaaaabbo....',
+    '....obb..bbo.....',
+    '....ooo..ooo.....',
+    '...oww....wwo....',
+    '...ooo....ooo....'
+  ]),
+  mage: centerMask([
+    '........c........',
+    '.......oco.......',
+    '......occco......',
+    '.....ocaaaco.....',
+    '....ocasssaco....',
+    '....ocasssaco....',
+    '.....ocaaaco.....',
+    '....ocaaaaaco....',
+    '...occcaaaccco...',
+    '..occcaaaaaccco..',
+    '..occcaaaaaccco..',
+    '.occcaaaaaaaccco.',
+    '.occcaaaaaaaccco.',
+    '..occcaaaaaccco..',
+    '...occcaaaccco...',
+    '....ooo..ooo.....'
+  ]),
+  archer: centerMask([
+    '......oooo......',
+    '.....owwwwo.....',
+    '....owwsswwo....',
+    '...owwssesswwo...',
+    '...owwssesswwo...',
+    '....owwwwwwo....',
+    '..oowaaaaaaawoo..',
+    '.owwaaaaaaaaawwo.',
+    '.owwacaaaaacawwo.',
+    '..owwbaaaabawwo..',
+    '...owwbaaaabwo...',
+    '...owwwwwwwwo....',
+    '....oww..wwwo.....',
+    '....oww..wwwo.....',
+    '...oww....wwo.....',
+    '...ooo....ooo.....'
+  ]),
+  priest: centerMask([
+    '........c........',
+    '.......oco.......',
+    '......occco......',
+    '.....ocaaaco.....',
+    '....ocasssaco....',
+    '....ocasssaco....',
+    '.....ocaaaco.....',
+    '....ocaaaaaco....',
+    '...ocaaaaaacco...',
+    '..ocaaaaaaaacco..',
+    '..ocaaaaaaaacco..',
+    '..ocaaaaaaaacco..',
+    '..ocaaaaaaaacco..',
+    '...ocaaaaaacco...',
+    '....occcccc......',
+    '....ooo..ooo.....'
+  ])
+};
+
 // ---------- МОДЕЛИ ВРАГОВ ----------
 
 const ENEMY_ART = {
@@ -575,39 +658,6 @@ function drawGait(ctx, x, y, phase, palette, scale = 1) {
   }
   ctx.restore();
 }
-const CLASS_SPRITE_SHEETS = Object.freeze({
-  warrior: 'knight.png',
-  mage: 'wizard.png',
-  archer: 'rogue.png'
-});
-const CLASS_SPRITE_IMAGES = new Map();
-const CLASS_SPRITE_ROWS = Object.freeze({ down: 0, left: 1, right: 2, up: 3 });
-
-function drawClassSpriteSheet(ctx, x, y, playerClass, moving, direction, bob) {
-  const filename = CLASS_SPRITE_SHEETS[playerClass];
-  if (!filename || typeof Image === 'undefined') return false;
-
-  let image = CLASS_SPRITE_IMAGES.get(filename);
-  if (!image) {
-    image = new Image();
-    image.src = new URL(`../../assets/characters/overworld/${filename}`, import.meta.url).href;
-    CLASS_SPRITE_IMAGES.set(filename, image);
-  }
-  if (!image.complete || !image.naturalWidth) return false;
-
-  const row = CLASS_SPRITE_ROWS[direction] ?? CLASS_SPRITE_ROWS.down;
-  const frame = moving ? Math.floor(performance.now() / 145) % 4 : 0;
-  ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(
-    image,
-    frame * 48, row * 48, 48, 48,
-    Math.round(x - 24), Math.round(y - 34 + bob), 48, 48
-  );
-  ctx.restore();
-  return true;
-}
-
 function shadow(ctx, x, y, color, width = 14) {
   // Stepped rectangular footprint: crisp pixel-art shadow, no antialiased ellipse.
   const w = Math.max(6, Math.round(width));
@@ -620,92 +670,45 @@ function shadow(ctx, x, y, color, width = 14) {
 
 // ---------- ОТРИСОВКА ГЕРОЯ ----------
 
-export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false, direction = 'down') {
+export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false) {
   const colors = HEROES[playerClass] || HEROES.warrior;
   const now = performance.now();
   const phase = now / (moving ? 78 : 520);
   const bob = moving ? Math.abs(Math.sin(phase)) * 2.2 : Math.sin(phase) * 0.65;
 
   shadow(ctx, x, y, shadowColor, 15);
-  if (drawClassSpriteSheet(ctx, x, y, playerClass, moving, direction, bob)) return;
   if (moving) drawGait(ctx, x, y + 5, phase, colors, 1.25);
-  blit(ctx, sprite(HUMANOID, colors, 3), x, y, bob);
+  blit(ctx, sprite(HERO_MASKS[playerClass] || HUMANOID, colors, 3), x, y, bob);
   drawHeroDetails(ctx, x, y, playerClass, bob);
 
-  const px = x + 17;
-  const py = y + 2 + bob;
-
-  ctx.save();
-  ctx.lineWidth = 2;
-  ctx.lineCap = 'round';
+  const px = Math.round(x + 17);
+  const py = Math.round(y + 2 + bob);
+  const pixel = (dx, dy, w, h, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(px + dx, py + dy, w, h);
+  };
 
   if (playerClass === 'warrior') {
-    // Меч и щит.
-    ctx.strokeStyle = '#dbe6f6';
-    ctx.beginPath();
-    ctx.moveTo(px, py - 14);
-    ctx.lineTo(px, py + 6);
-    ctx.stroke();
-
-    ctx.strokeStyle = '#c9a227';
-    ctx.beginPath();
-    ctx.moveTo(px - 4, py + 2);
-    ctx.lineTo(px + 4, py + 2);
-    ctx.stroke();
-
-    ctx.fillStyle = '#7d8ca8';
-    ctx.fillRect(px - 11, py - 1, 6, 10);
-
-    ctx.strokeStyle = '#dbe6f6';
-    ctx.strokeRect(px - 11, py - 1, 6, 10);
+    // Короткий меч и башенный щит — крупные читаемые пиксельные формы.
+    pixel(0,-16,4,20,'#101018'); pixel(1,-15,2,16,'#dbe6f6');
+    pixel(-2,2,8,3,'#c9a227'); pixel(-1,5,3,4,'#6a4935');
+    pixel(-13,-2,8,13,'#101018'); pixel(-12,-1,6,11,'#7d8ca8');
+    pixel(-11,2,4,2,'#dbe6f6'); pixel(-10,5,2,3,'#c9a227');
   } else if (playerClass === 'archer') {
-    // Лук, тетива и стрела.
-    // Геометрия рисуется Canvas, а не заменяется символом.
-    ctx.strokeStyle = '#9b6836';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(
-      px + 1,
-      py,
-      13,
-      -Math.PI * 0.72,
-      Math.PI * 0.72
-    );
-    ctx.stroke();
-
-    ctx.strokeStyle = '#e7d7b3';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(px - 7, py - 10);
-    ctx.lineTo(px + 8, py + 10);
-    ctx.stroke();
-
-    ctx.strokeStyle = '#d8bd71';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(px - 8, py);
-    ctx.lineTo(px + 13, py);
-    ctx.lineTo(px + 9, py - 3);
-    ctx.moveTo(px + 13, py);
-    ctx.lineTo(px + 9, py + 3);
-    ctx.stroke();
+    // Лук и натянутая тетива без сглаженных кривых.
+    pixel(9,-15,3,3,'#9b6836'); pixel(12,-12,3,5,'#9b6836');
+    pixel(12,-7,3,5,'#9b6836'); pixel(9,-2,3,3,'#9b6836');
+    pixel(11,-12,1,12,'#e7d7b3');
+    pixel(-5,-7,17,2,'#d8bd71'); pixel(9,-9,4,2,'#d8bd71');
+    pixel(9,-5,4,2,'#d8bd71');
   } else {
-    // Посох мага и наследуемый посох жреца.
-    ctx.strokeStyle = '#5a4a3a';
-    ctx.beginPath();
-    ctx.moveTo(px, py - 16);
-    ctx.lineTo(px, py + 8);
-    ctx.stroke();
-
-    ctx.fillStyle = playerClass === 'priest'
-      ? '#ffd27a'
-      : '#7ce7ff';
-
-    ctx.beginPath();
-    ctx.arc(px, py - 18, 4, 0, Math.PI * 2);
-    ctx.fill();
+    // Посох мага и жреца с контрастным кристаллом.
+    pixel(0,-19,3,29,'#101018'); pixel(1,-18,1,26,'#8b633d');
+    pixel(-2,-22,7,5,'#101018');
+    pixel(-1,-21,5,3,playerClass === 'priest' ? '#ffd27a' : '#7ce7ff');
+    pixel(1,-20,2,1,'#fff4d6');
   }
-
+}
   ctx.restore();
 }
 
@@ -1053,37 +1056,28 @@ export function drawObject(ctx, obj, x, y, shadowColor) {
 }
 // ---------- ДЕТАЛИЗАЦИЯ СИЛУЭТОВ (визуальный слой, без изменения хитбоксов) ----------
 function drawHeroDetails(ctx, x, y, playerClass, bob) {
-  ctx.save();
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
+  // Классные акценты собраны из целых пиксельных прямоугольников.
+  const px = (dx, dy, w, h, color) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(Math.round(x + dx), Math.round(y + dy + bob), w, h);
+  };
   if (playerClass === 'warrior') {
-    // Наплечники, нагрудная пластина и центральная заклёпка.
-    ctx.fillStyle = '#dbe6f6';
-    ctx.strokeStyle = '#080a12';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(x-13,y-24+bob); ctx.lineTo(x-19,y-20+bob); ctx.lineTo(x-15,y-14+bob); ctx.lineTo(x-9,y-17+bob); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x+13,y-24+bob); ctx.lineTo(x+19,y-20+bob); ctx.lineTo(x+15,y-14+bob); ctx.lineTo(x+9,y-17+bob); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#9b4c3b'; ctx.fillRect(x-5,y-21+bob,10,13);
-    ctx.fillStyle = '#ffcf6e'; ctx.fillRect(x-1,y-19+bob,2,2);
+    px(-13,-22,6,5,'#dbe6f6'); px(7,-22,6,5,'#dbe6f6');
+    px(-7,-19,14,10,'#526782'); px(-5,-17,10,6,'#9fb4d0');
+    px(-2,-15,4,3,'#ffcf6e'); px(-6,-6,12,3,'#b4543a');
   } else if (playerClass === 'mage') {
-    // Капюшон и светящийся знак на мантии.
-    ctx.fillStyle = '#20264e'; ctx.strokeStyle = '#7ce7ff'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(x-12,y-32+bob); ctx.lineTo(x,y-42+bob); ctx.lineTo(x+12,y-32+bob); ctx.lineTo(x+9,y-25+bob); ctx.lineTo(x-9,y-25+bob); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#b28dff'; ctx.beginPath(); ctx.moveTo(x,y-18+bob); ctx.lineTo(x-3,y-13+bob); ctx.lineTo(x,y-8+bob); ctx.lineTo(x+3,y-13+bob); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#7ce7ff'; ctx.fillRect(x-1,y-15+bob,2,4);
+    px(-8,-31,16,4,'#20264e'); px(-5,-35,10,4,'#20264e');
+    px(-2,-18,4,7,'#b28dff'); px(-1,-17,2,5,'#7ce7ff');
+    px(-10,-5,20,3,'#26345e');
   } else if (playerClass === 'archer') {
-    // Кожаная перевязь, капюшон и колчан со стрелами.
-    ctx.strokeStyle = '#d8bd71'; ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.moveTo(x-8,y-25+bob); ctx.lineTo(x+8,y-10+bob); ctx.stroke();
-    ctx.fillStyle = '#384b32'; ctx.strokeStyle = '#c5a66b'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(x-11,y-31+bob); ctx.lineTo(x,y-38+bob); ctx.lineTo(x+11,y-31+bob); ctx.lineTo(x+8,y-25+bob); ctx.lineTo(x-8,y-25+bob); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#8b633d'; ctx.fillRect(x+9,y-13+bob,5,13);
-    ctx.strokeStyle = '#e8d8b9'; ctx.lineWidth = 1;
-    for (let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x+10+i*2,y-17+bob);ctx.lineTo(x+10+i*2,y-8+bob);ctx.stroke();}
+    px(-7,-22,14,3,'#d8bd71'); px(-4,-19,3,12,'#8b633d');
+    px(7,-28,5,16,'#8b633d'); px(8,-30,2,4,'#e8d8b9');
+    px(11,-27,2,5,'#e8d8b9'); px(14,-24,2,5,'#e8d8b9');
+  } else if (playerClass === 'priest') {
+    px(-2,-20,4,12,'#ffd27a'); px(-7,-8,14,3,'#fff4d6');
+    px(-1,-17,2,6,'#fff4d6');
   }
-  ctx.restore();
 }
-
 function drawEnemyDetails(ctx, enemy, x, y, bob, scale) {
   const id = enemy.enemyId || '';
   ctx.save();
