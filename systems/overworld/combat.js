@@ -672,7 +672,7 @@ export function combatUseAbility(abilityId) {
           )
         ) *
         talent.dmgMult *
-        talent.critMult *
+        resolveCriticalMultiplier(talent.critMult) *
         enemyDamageMultiplier(enemy, 'ranged')
       )
     );
