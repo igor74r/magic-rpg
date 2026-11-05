@@ -283,7 +283,7 @@
 .classes-grid .class-card:focus-visible { outline: 3px solid #f4d58b; outline-offset: 4px; }
 .classes-grid .class-card.selected { border-color: #e5c36e; background: radial-gradient(ellipse at 50% 20%, rgba(193,154,73,.2), transparent 72%), linear-gradient(155deg, #30271b, #14141b); box-shadow: 0 0 0 1px rgba(235,199,115,.15), 0 0 30px rgba(201,162,39,.16), inset 0 0 25px rgba(201,162,39,.07); }
 .classes-grid .class-model-frame { display: grid; place-items: center; width: 100%; min-height: 112px; margin: 0 auto 5px; border-radius: 9px; background: radial-gradient(ellipse at 50% 82%, rgba(100,170,158,.15), transparent 65%); }
-.classes-grid .class-model-frame canvas { width: 100px; height: 112px; image-rendering: pixelated; filter: drop-shadow(0 7px 9px rgba(0,0,0,.6)); }
+.classes-grid .class-model-frame .class-portrait { display: block; width: 100px; height: 112px; object-fit: contain; image-rendering: pixelated; }
 .classes-grid .class-card h3 { margin: 7px 0 5px; color: #f2d28a; font-size: clamp(18px, 2vw, 23px); }
 .classes-grid .class-role { color: #9acbc0; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
 .classes-grid .class-description { min-height: 48px; margin: 10px 0 12px; color: #c2b9a8; font-size: 12px; line-height: 1.55; }
@@ -305,7 +305,7 @@
 .class-review-card { display: grid; grid-template-columns: minmax(220px, .75fr) minmax(0, 1.25fr); gap: clamp(16px, 3vw, 32px); width: min(880px, 100%); margin: 0 auto; padding: clamp(14px, 2.5vw, 28px); border: 1px solid rgba(205,173,103,.52); border-radius: 14px; background: radial-gradient(ellipse at 15% 0%, rgba(103,154,144,.14), transparent 55%), linear-gradient(145deg, #1d2228, #101116); box-shadow: 0 16px 45px rgba(0,0,0,.35), inset 0 1px rgba(255,255,255,.035); }
 .class-review-art { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-height: 290px; overflow: hidden; border-radius: 10px; background: radial-gradient(ellipse at 50% 65%, rgba(119,174,164,.18), transparent 66%), linear-gradient(180deg, rgba(6,9,13,.2), rgba(5,8,12,.75)); }
 .class-review-glow { position: absolute; width: 190px; height: 190px; top: 20%; border-radius: 50%; background: radial-gradient(circle, rgba(221,187,107,.13), transparent 70%); filter: blur(4px); }
-.class-review-art canvas { position: relative; width: 180px; height: 210px; filter: drop-shadow(0 8px 14px rgba(0,0,0,.65)); }
+.class-review-art .class-review-portrait { position: relative; display: block; width: 180px; height: 210px; object-fit: contain; image-rendering: pixelated; }
 .class-review-level { position: relative; width: 100%; padding: 10px 6px; color: #d7bd80; font-size: 9px; font-weight: 800; letter-spacing: .12em; text-align: center; border-top: 1px solid rgba(195,166,103,.2); }
 .class-review-details { min-width: 0; align-self: center; }
 .class-review-details h2 { margin: 7px 0 2px; overflow-wrap: anywhere; color: #f3e5c7; font-size: clamp(26px, 4vw, 38px); }
@@ -320,14 +320,14 @@
   .classes-grid { grid-template-columns: 1fr; max-width: 540px; }
   .classes-grid .class-card { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 2px 12px; text-align: left; }
   .classes-grid .class-model-frame { grid-row: 1 / 4; width: 86px; min-height: 120px; margin: 0; }
-  .classes-grid .class-model-frame canvas { width: 82px; height: 112px; }
+  .classes-grid .class-model-frame .class-portrait { width: 82px; height: 112px; }
   .classes-grid .class-card h3 { align-self: end; }
   .classes-grid .class-role { align-self: start; }
   .classes-grid .class-description { min-height: 0; margin: 6px 0 10px; }
   .classes-grid .class-base-stats { grid-column: 1 / -1; margin-top: 4px; }
   .class-review-card { grid-template-columns: minmax(0,1fr); }
   .class-review-art { min-height: 240px; }
-  .class-review-art canvas { width: 160px; height: 190px; }
+  .class-review-art .class-review-portrait { width: 160px; height: 190px; }
 }
 @media (max-width: 480px) {
   .character-creation-container { padding: 12px; }

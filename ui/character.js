@@ -2,34 +2,16 @@ import { state } from '../systems/state.js';
 import { CLASSES } from '../data/classes.js';
 import { createCharacter } from '../systems/character.js';
 import { toast, escapeHtml } from './screens.js';
-import { drawHero } from './overworld/sprites.js';
+
 
 const PLAYABLE_CLASSES = ['warrior', 'mage', 'archer'];
 
-function drawClassModels() {
-  for (const classId of PLAYABLE_CLASSES) {
-    const canvas = document.getElementById(`class-model-${classId}`);
+const CLASS_PORTRAITS = {
+  warrior: 'assets/characters/classes/warrior.png',
+  mage: 'assets/characters/classes/mage.png',
+  archer: 'assets/characters/classes/archer.png'
+};
 
-    if (!canvas) continue;
-
-    const ctx = canvas.getContext('2d');
-
-    ctx.clearRect(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    drawHero(
-      ctx,
-      canvas.width / 2,
-      canvas.height - 12,
-      classId,
-      'rgba(0,0,0,0.38)'
-    );
-  }
-}
 
 export function renderClassSelection() {
   setCharacterStage('selection');
@@ -71,12 +53,16 @@ export function renderClassSelection() {
           aria-pressed="${state.selectedClass === id}"
         >
           <div class="class-model-frame">
-            <canvas
-              id="class-model-${id}"
+            <img
+              class="class-portrait"
+              src="${CLASS_PORTRAITS[id]}"
+              alt="${escapeHtml(`Портрет класса: ${cls.name}`)}"
               width="100"
               height="112"
-              aria-label="Модель класса ${cls.name}"
-            ></canvas>
+              loading="eager"
+              decoding="async"
+              draggable="false"
+            >
           </div>
 
           <h3>${cls.name}</h3>
@@ -116,7 +102,6 @@ export function renderClassSelection() {
     })
     .join('');
 
-  requestAnimationFrame(drawClassModels);
   const nextButton = document.getElementById('class-review-next');
   if (nextButton) nextButton.disabled = !PLAYABLE_CLASSES.includes(state.selectedClass);
 }
@@ -162,7 +147,16 @@ export function reviewClassSelection() {
     <article class="class-review-card">
       <div class="class-review-art">
         <div class="class-review-glow" aria-hidden="true"></div>
-        <canvas id="class-model-review" width="180" height="210" aria-label="Портрет выбранного героя: ${cls.name}"></canvas>
+        <img
+          class="class-review-portrait"
+          src="${CLASS_PORTRAITS[state.selectedClass]}"
+          alt="${escapeHtml(`Портрет выбранного класса: ${cls.name}`)}"
+          width="180"
+          height="210"
+          loading="eager"
+          decoding="async"
+          draggable="false"
+        >
         <span class="class-review-level">УРОВЕНЬ 1 · НАЧАЛО ПУТИ</span>
       </div>
       <div class="class-review-details">
@@ -186,13 +180,6 @@ export function reviewClassSelection() {
   `;
 
   setCharacterStage('review');
-  requestAnimationFrame(() => {
-    const canvas = document.getElementById('class-model-review');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawHero(ctx, canvas.width / 2, canvas.height - 14, state.selectedClass, 'rgba(0,0,0,0.45)');
-  });
 }
 
 export function cancelClassReview() {
