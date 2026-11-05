@@ -196,3 +196,171 @@
 @media (prefers-reduced-motion:reduce) {
   #screen-game .inv-slot.has-item:hover { transform:none; }
 }
+
+/* Legacy visual cleanup: replace the old glossy fantasy skin with one flat 16-bit UI language. */
+:root {
+  --font-display: "Courier New", monospace;
+  --font-body: "Courier New", monospace;
+  --bg-deep: #080d13;
+  --bg-dark: #0d151e;
+  --bg-panel: #111b25;
+  --bg-elevated: #182633;
+  --ink: #eee5d0;
+  --ink-dim: #a8b2b5;
+  --gold: #e6c36d;
+  --gold-bright: #ffe7a7;
+  --gold-dark: #8b713b;
+}
+body {
+  color: var(--ui-pixel-text);
+  background: var(--ui-pixel-ink) !important;
+  background-image: none !important;
+  font-family: var(--font-body);
+}
+.screen {
+  background: var(--ui-pixel-ink) !important;
+  background-image: none !important;
+}
+.screen,
+.screen *:not(canvas):not(svg):not(path) {
+  border-radius: 0 !important;
+  text-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+.screen *:not(canvas):not(svg):not(path) {
+  background-image: none !important;
+}
+.screen h1,
+.screen h2,
+.screen h3,
+.screen h4,
+.screen p,
+.screen label,
+.screen small,
+.screen button,
+.screen input,
+.screen select,
+.screen textarea {
+  font-family: var(--font-body);
+}
+.screen h1,
+.screen h2,
+.screen h3,
+.screen h4 {
+  color: var(--ui-pixel-gold);
+  letter-spacing: .04em;
+}
+.screen button,
+.screen .mm-btn,
+.screen .settings-tab,
+.screen .dashboard-sidebar .tab,
+.screen .actions button,
+.screen .location-list button {
+  border: 2px solid var(--ui-pixel-line);
+  border-radius: 0 !important;
+  background: #172633 !important;
+  color: var(--ui-pixel-text);
+  box-shadow: 2px 2px 0 #05080c !important;
+  transition: border-color .08s steps(2), color .08s steps(2), background-color .08s steps(2);
+}
+.screen button:hover:not(:disabled),
+.screen .settings-tab.active,
+.screen .dashboard-sidebar .tab.active {
+  border-color: var(--ui-pixel-gold);
+  background: #302a1c !important;
+  color: #ffe7a7;
+  box-shadow: 2px 2px 0 #05080c !important;
+}
+.screen button:focus-visible,
+.screen a:focus-visible,
+.screen input:focus-visible,
+.screen select:focus-visible,
+.screen textarea:focus-visible {
+  outline: 3px solid var(--ui-pixel-blue);
+  outline-offset: 2px;
+}
+.screen .panel,
+.screen .slot-card,
+.screen .class-card,
+.screen .stat-card,
+.screen .item,
+.screen .recipe,
+.screen .npc-slot,
+.screen .npc-slot-item,
+.screen .help-keys,
+.screen .dashboard-sidebar,
+.screen .dashboard-header,
+.screen .dashboard-log,
+.screen .dashboard-content,
+.screen .menu-story-panel,
+.screen .slots-area,
+.screen .prologue-cinematic,
+.screen .modal-content,
+.screen .pause-panel,
+.screen .npc-modal-content {
+  border: 2px solid var(--ui-pixel-line);
+  border-radius: 0 !important;
+  background: var(--ui-pixel-panel) !important;
+  box-shadow: 3px 3px 0 #05080c !important;
+}
+.screen .slot-card:hover,
+.screen .class-card:hover,
+.screen .item:hover,
+.screen .actions button:hover:not(:disabled),
+.screen .location-list button:hover:not(:disabled) {
+  border-color: var(--ui-pixel-gold);
+  transform: none;
+  box-shadow: 3px 3px 0 #05080c !important;
+}
+.screen .dashboard-sidebar .tab,
+.screen .dashboard-sidebar .tab:hover,
+.screen .dashboard-sidebar .tab.active {
+  border-left: 2px solid var(--ui-pixel-line);
+}
+.screen .bar,
+.screen .bar-hp,
+.screen .bar-mp,
+.screen .bar-rage,
+.screen .bar-exp,
+.screen .campaign-progress,
+.screen .campaign-act-progress-track {
+  border-radius: 0 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.screen .bar { border: 2px solid var(--ui-pixel-line); background-color: #080d13 !important; }
+.screen .bar-hp { background-color: #b83b43 !important; }
+.screen .bar-mp { background-color: #3978b8 !important; }
+.screen .bar-rage { background-color: #9b4a9b !important; }
+.screen .bar-exp { background-color: #c7a34e !important; }
+.screen .bar-text { text-shadow: 1px 1px 0 #080d13 !important; }
+.screen .logo-block,
+.screen .logo-gem {
+  animation: none !important;
+}
+.screen .logo-gem,
+.screen .npc-emoji,
+.screen .dashboard-sidebar .tab-icon {
+  filter: none !important;
+}
+.screen .divider {
+  height: 2px;
+  background: var(--ui-pixel-line) !important;
+  box-shadow: none !important;
+}
+.screen .dashboard-content::-webkit-scrollbar-thumb {
+  background: #536b7e !important;
+  border: 1px solid #080d13;
+  border-radius: 0 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen *,
+  .screen *::before,
+  .screen *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
