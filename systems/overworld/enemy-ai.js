@@ -134,15 +134,16 @@ export function getEnemyCombatDecision({
   const cadenceDue = Math.floor(turnCount) > 0 && Math.floor(turnCount) % scheduled === 0;
   const bossEnrage = isBoss && enemyHpRatio <= 0.25;
   const bossPunishBlock = isBoss && blocking;
+  const survivalOpening = enemyHpRatio <= 0.30 && role !== 'leech';
   const tacticalOpening =
-    (role === 'marksman' && playerHpRatio <= 0.35) ||
-    (role === 'leech' && enemyHpRatio <= 0.45) ||
-    (role === 'bruiser' && blocking) || bossEnrage || bossPunishBlock;
+    (role === 'marksman' && playerHpRatio <= 0.45) ||
+    (role === 'leech' && enemyHpRatio <= 0.50) ||
+    (role === 'bruiser' && blocking) || survivalOpening || bossEnrage || bossPunishBlock;
   if (cadenceDue || tacticalOpening) {
     return {
       role,
       action: 'telegraph',
-      reason: bossEnrage ? 'enrage' : bossPunishBlock ? 'punish-block' : tacticalOpening ? 'opening' : 'cadence'
+      reason: bossEnrage ? 'enrage' : bossPunishBlock ? 'punish-block' : survivalOpening ? 'survival' : tacticalOpening ? 'opening' : 'cadence'
     };
   }
   return { role, action: 'attack', reason: 'basic' };
