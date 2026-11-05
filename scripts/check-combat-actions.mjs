@@ -74,6 +74,15 @@ try {
   assert.equal(f.player.mp, mpBeforeMalformedSpell, 'NaN spell damage must not consume mana');
   assert.equal(f.enemy.hp, hpBeforeMalformedSpell, 'NaN spell damage must not mutate enemy HP');
   SPELLS.fireball = fireball;
+
+  f = fixture('mage');
+  const manaBeforeInvalidStats = f.player.mp;
+  f.player.int = Number.POSITIVE_INFINITY;
+  combatCastSpell('fireball');
+  assert.equal(f.player.mp, manaBeforeInvalidStats, 'invalid derived stats must not consume spell mana');
+  assert.equal(f.ow.combat.turn, 'player', 'invalid derived stats must not consume the turn');
+  console.log('PASS Invalid derived spell stats are rejected before mana or turn changes');
+
   console.log('PASS Malformed spell cost/damage is rejected before resource or turn changes');
 
   f = fixture('mage');
@@ -111,6 +120,18 @@ try {
   CLASSES.archer.abilities = CLASSES.archer.abilities.map(item =>
     item.id === 'aimed-shot' ? archerAbility : item
   );
+
+  f = fixture('warrior');
+  f.player.mp = 100;
+  f.ow.player.mp = 100;
+  const rageBeforeInvalidStats = f.player.mp;
+  f.player.str = Number.POSITIVE_INFINITY;
+  combatUseAbility('shield-bash');
+  assert.equal(f.player.mp, rageBeforeInvalidStats, 'invalid derived stats must not consume rage');
+  assert.equal(f.player.cooldowns['shield-bash'], undefined, 'invalid derived stats must not start cooldown');
+  assert.equal(f.ow.combat.turn, 'player', 'invalid derived stats must not consume the turn');
+  console.log('PASS Invalid derived ability stats are rejected before resource/cooldown/turn changes');
+
   console.log('PASS Unsupported or malformed ability is rejected before resource/cooldown changes');
 
   f = fixture('archer');
