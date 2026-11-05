@@ -196,6 +196,9 @@ try {
   console.log('PASS Mage frost nova damages, stuns, and animates');
 
   f = fixture('archer');
+  // Archer abilities consume concentration; prime it before testing the damage handler.
+  f.player.mp = 100;
+  f.ow.player.mp = 100;
   const piercingHp = f.enemy.hp;
   combatUseAbility('piercing-shot');
   assert.ok(f.enemy.hp < piercingHp, 'Piercing shot must damage the target');
