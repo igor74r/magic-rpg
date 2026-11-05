@@ -56,6 +56,25 @@ function runEnemyTurn() {
 }
 
 try {
+  // A delayed enemy response must not leak into a later encounter.
+  scheduled.length = 0;
+  const previousEncounter = fixture('warrior', 'goblin');
+  combatAttack();
+  assert.equal(scheduled.length, 1, 'first encounter should schedule one enemy response');
+  combatFlee(true);
+  const nextEncounter = fixture('warrior', 'goblin');
+  combatAttack();
+  const nextEncounterHp = nextEncounter.p.hp;
+  runEnemyTurn(); // stale callback from the encounter that was fled
+  assert.equal(nextEncounter.p.hp, nextEncounterHp,
+    'stale enemy callback must not damage the player in a new encounter');
+  assert.equal(nextEncounter.ow.combat.turn, 'enemy',
+    'stale callback must not consume the new encounter turn');
+  runEnemyTurn(); // current encounter response
+  assert.ok(nextEncounter.p.hp < nextEncounterHp,
+    'current encounter callback must still resolve the enemy response');
+  console.log('PASS delayed enemy responses stay bound to their original encounter');
+
   // Corrupted saved counters must recover safely when a real combat kill is recorded.
   const counterFixture = fixture('warrior', 'goblin');
   counterFixture.enemy.hp = 1;
