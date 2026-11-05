@@ -144,7 +144,7 @@ try {
     prologuePage.on('pageerror', e => prologueErrors.push(e.message));
     await prologuePage.goto(baseUrl, { waitUntil:'networkidle' });
     await prologuePage.locator('#screen-prologue.active').waitFor();
-    assert.ok(await prologuePage.locator('#screen-prologue .center-flex').isVisible(),
+    assert.ok(await prologuePage.locator('#screen-prologue .prologue-cinematic').isVisible(),
       `${vp.name}: cinematic prologue shell must be visible`);
     await capture(prologuePage, `${vp.name}-00-prologue`);
     assert.deepEqual(prologueErrors, [], `${vp.name}: prologue runtime errors: ${prologueErrors.join('; ')}`);
