@@ -45,7 +45,8 @@ const HERB_DROP_CHANCE_ELITE = 0.70;
 
 const COMBAT_ABILITY_IDS = new Set([
   'aimed-shot', 'evasion', 'toxic-blade', 'charge', 'war-cry',
-  'bloodthirst', 'mana-shield', 'teleport', 'meteor', 'prayer', 'sanctify'
+  'bloodthirst', 'mana-shield', 'teleport', 'meteor', 'prayer', 'sanctify',
+  'shield-bash', 'frost-nova', 'piercing-shot'
 ]);
 
 function isFiniteNonNegative(value) {
@@ -743,6 +744,45 @@ export function combatUseAbility(abilityId) {
       return combatVictory();
     }
 
+    checkBossPhase(enemy);
+  } else if (abilityId === 'shield-bash') {
+    recordPlayerStyle(ow, 'melee');
+    consumeEnemyAdaptation(enemy, 'melee');
+    const defense = Math.max(0, enemyDefenseForStyle(enemy, 'melee', stats.armorPen || 0));
+    const damage = Math.max(1, Math.floor((stats.atk * 1.05 - defense * 0.65) * talent.dmgMult));
+    enemy.hp = Math.max(0, enemy.hp - damage);
+    applyEffect(enemy, 'stun');
+    ow.floatingNumbers.push({ x: enemy.x, y: enemy.y - 22, text: '🛡️-' + damage, type: 'crit', life: 1.25 });
+    pushLog(`🛡️ Щитовой удар: ${damage} урона и оглушение!`, 'success');
+    playSound('hit');
+    spawnParticles(enemy.x, enemy.y, 'impact', 12);
+    triggerShake(4, 0.14);
+    if (enemy.hp <= 0) { enemy.hp = 0; return combatVictory(); }
+    checkBossPhase(enemy);
+  } else if (abilityId === 'frost-nova') {
+    recordPlayerStyle(ow, 'magic');
+    consumeEnemyAdaptation(enemy, 'magic');
+    const damage = Math.max(1, Math.floor((34 + Math.floor(stats.mag * 0.7)) * talent.spellMult));
+    enemy.hp = Math.max(0, enemy.hp - damage);
+    applyEffect(enemy, 'stun');
+    ow.floatingNumbers.push({ x: enemy.x, y: enemy.y - 22, text: '❄️-' + damage, type: 'crit', life: 1.35 });
+    pushLog(`❄️ Ледяная нова: ${damage} урона, цель оглушена!`, 'success');
+    playSound('cast');
+    spawnParticles(enemy.x, enemy.y, 'ice', 16);
+    triggerShake(5, 0.18);
+    if (enemy.hp <= 0) { enemy.hp = 0; return combatVictory(); }
+    checkBossPhase(enemy);
+  } else if (abilityId === 'piercing-shot') {
+    recordPlayerStyle(ow, 'ranged');
+    consumeEnemyAdaptation(enemy, 'ranged');
+    const defense = Math.max(0, enemyDefenseForStyle(enemy, 'ranged', stats.armorPen || 0));
+    const damage = Math.max(1, Math.floor((stats.atk * 1.35 - defense * 0.25) * talent.dmgMult * enemyDamageMultiplier(enemy, 'ranged')));
+    enemy.hp = Math.max(0, enemy.hp - damage);
+    ow.floatingNumbers.push({ x: enemy.x, y: enemy.y - 22, text: '🏹-' + damage, type: 'crit', life: 1.25 });
+    pushLog(`🏹 Пробивающий выстрел: ${damage} урона, броня частично пробита!`, 'damage');
+    playSound('crit');
+    spawnParticles(enemy.x, enemy.y, 'arrow', 12);
+    if (enemy.hp <= 0) { enemy.hp = 0; return combatVictory(); }
     checkBossPhase(enemy);
   } else if (abilityId === 'charge') {
     ow.combat.playerChargeNext = true;
