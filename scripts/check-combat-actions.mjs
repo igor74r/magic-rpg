@@ -17,6 +17,8 @@ globalThis.localStorage = {
 const combatSource = readFileSync(new URL('../systems/overworld/combat.js', import.meta.url), 'utf8');
 // Narrow signature check catches common double-decoding artifacts without rejecting valid Cyrillic.
 assert.doesNotMatch(combatSource, /(?:Р.{0,2}Р|СѓСЂРѕРЅР°|рџ|в[љњћЂџ\u0098|в—Ћ])/, 'combat log must not contain UTF-8/Windows-1251 mojibake');
+assert.match(combatSource, /talent\.dmgMult\s*\*\s*resolveCriticalMultiplier\(talent\.critMult\)\s*\*\s*enemyDamageMultiplier\(enemy, 'ranged'\)/,
+  'aimed shot critical damage must use the shared 1.25x–2.5x multiplier clamp');
 
 const scheduled = [];
 const realSetTimeout = globalThis.setTimeout;
