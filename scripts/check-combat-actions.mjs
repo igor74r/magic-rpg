@@ -177,6 +177,9 @@ try {
 
 
   f = fixture('warrior');
+  // Warrior combat abilities spend rage; prime the fixture with generated resource.
+  f.player.mp = 100;
+  f.ow.player.mp = 100;
   const shieldBashHp = f.enemy.hp;
   combatUseAbility('shield-bash');
   assert.ok(f.enemy.hp < shieldBashHp, 'Shield bash must damage the target');
