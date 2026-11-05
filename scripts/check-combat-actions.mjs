@@ -217,9 +217,11 @@ try {
   console.log('PASS Warrior shield bash damages, stuns, and animates');
 
   f = fixture('mage');
+  f.enemy.effects = [{ id: 'burn', duration: 2 }];
   const frostNovaHp = f.enemy.hp;
   combatUseAbility('frost-nova');
   assert.ok(f.enemy.hp < frostNovaHp, 'Frost nova must damage the target');
+  assert.ok(!f.enemy.effects.some(effect => effect?.id === 'burn'), 'Frost nova must trigger the ice reaction and extinguish burn');
   assert.ok(f.enemy.effects.some(effect => effect?.id === 'stun'), 'Frost nova must stun the target');
   assert.ok(f.ow.particles.length > 0, 'Frost nova must produce ice particles');
   console.log('PASS Mage frost nova damages, stuns, and animates');
