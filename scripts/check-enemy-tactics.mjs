@@ -61,4 +61,15 @@ decision = getEnemyCombatDecision({
 });
 assert.equal(decision.action, 'attack', 'invalid special cadence must safely fall back to a basic attack');
 
+
+decision = getEnemyCombatDecision({
+  specialType: 'snipe', specialEvery: 4, turnCount: 1, playerHpRatio: 0.42
+});
+assert.equal(decision.reason, 'opening', 'marksmen should telegraph when the player is vulnerable, not nearly defeated');
+
+decision = getEnemyCombatDecision({
+  specialType: 'double', specialEvery: 4, turnCount: 1, enemyHpRatio: 0.25
+});
+assert.equal(decision.reason, 'survival', 'non-leech enemies should telegraph a survival move at critical health');
+
 console.log('Enemy tactical checks passed: archetype roles, telegraphs, counterplay, openings and special cadence');
