@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { getEnemyCombatRole, getEnemyCombatDecision, getEnemyEngagementRange } from '../systems/overworld/enemy-ai.js';
+import { getEnemyCombatRole, getEnemyCombatDecision, getEnemyEngagementRange, interruptEnemyTelegraph } from '../systems/overworld/enemy-ai.js';
 
 assert.equal(getEnemyCombatRole('snipe'), 'marksman', 'snipe enemies should use the marksman role');
 assert.equal(getEnemyCombatRole('double'), 'bruiser', 'double-strike enemies should use the bruiser role');
@@ -112,5 +112,16 @@ decision = getEnemyCombatDecision({
 });
 assert.equal(decision.reason, 'opening',
   'leech recovery threshold should include exactly 50% HP');
+
+// Stun must cancel a queued special, including a boss telegraph.
+const interruptedBoss = { tacticalSpecialPending: true };
+assert.equal(interruptEnemyTelegraph(interruptedBoss), true,
+  'stun should report that it interrupted a prepared boss special');
+assert.equal(interruptedBoss.tacticalSpecialPending, false,
+  'an interrupted special must not fire after the boss recovers');
+assert.equal(interruptEnemyTelegraph(interruptedBoss), false,
+  'interrupting an already-cleared telegraph must be idempotent');
+assert.equal(interruptEnemyTelegraph(null), false,
+  'missing enemy state must be handled safely');
 
 console.log('Enemy tactical checks passed: archetype roles, telegraphs, counterplay, openings and special cadence');
