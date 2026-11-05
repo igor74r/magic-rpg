@@ -396,7 +396,7 @@ export function combatAttack() {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 700);
+  scheduleEnemyCombatTurn(700);
 }
 
 export function combatCastSpell(spellId) {
@@ -471,7 +471,7 @@ export function combatCastSpell(spellId) {
     playSound('heal');
 
     ow.combat.turn = 'enemy';
-    setTimeout(enemyCombatTurn, 700);
+    scheduleEnemyCombatTurn(700);
     return;
   }
 
@@ -586,7 +586,7 @@ export function combatCastSpell(spellId) {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 700);
+  scheduleEnemyCombatTurn(700);
 }
 
 export function combatUseAbility(abilityId) {
@@ -957,7 +957,7 @@ export function combatUseAbility(abilityId) {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 700);
+  scheduleEnemyCombatTurn(700);
 }
 
 export function combatUseItem(itemId) {
@@ -1031,7 +1031,7 @@ export function combatUseItem(itemId) {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 700);
+  scheduleEnemyCombatTurn(700);
 }
 
 export function combatBlock() {
@@ -1059,7 +1059,7 @@ export function combatBlock() {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 500);
+  scheduleEnemyCombatTurn(500);
 }
 
 export function combatFlee(forced = false) {
@@ -1070,7 +1070,7 @@ export function combatFlee(forced = false) {
   if (!forced && Math.random() >= 0.6) {
     pushLog('Побег не удался!', 'info');
     ow.combat.turn = 'enemy';
-    setTimeout(enemyCombatTurn, 700);
+    scheduleEnemyCombatTurn(700);
     return;
   }
 
@@ -1142,6 +1142,18 @@ function decreaseCooldowns() {
       p.cooldowns[key] -= 1;
     }
   }
+}
+
+function scheduleEnemyCombatTurn(delay = 700) {
+  const combat = state.overworld?.combat;
+  if (!combat) return;
+
+  // A delayed response belongs to one encounter only; never let an old
+  // timer attack a player who has already started a different fight.
+  setTimeout(() => {
+    if (state.overworld?.combat !== combat) return;
+    enemyCombatTurn();
+  }, delay);
 }
 
 function enemyCombatTurn() {
@@ -1550,7 +1562,7 @@ function enemyCombatTurn() {
     pushLog('💫 Вы оглушены и пропускаете ход', 'info');
     decreaseCooldowns();
     ow.combat.turn = 'enemy';
-    setTimeout(enemyCombatTurn, 500);
+    scheduleEnemyCombatTurn(500);
     return;
   }
 
