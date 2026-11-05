@@ -32,7 +32,7 @@ import { updateQuestProgress } from '../dailyQuests.js';
 import { canCompleteMainQuest, getActiveCampaignMission, getMissionProgress, recordCampaignKill, recordCampaignShard } from '../campaign.js';
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
-import { getEnemyCombatDecision } from './enemy-ai.js';
+import { getEnemyCombatDecision, interruptEnemyTelegraph } from './enemy-ai.js';
 import {
   MODIFIERS,
   ELITE_ATK_MULT,
@@ -1176,6 +1176,9 @@ function enemyCombatTurn() {
 
   if (isStunned(enemy)) {
     consumeStun(enemy);
+    if (interruptEnemyTelegraph(enemy)) {
+      pushLog(`🛑 Подготовка особого приёма ${name} сорвана оглушением!`, 'success');
+    }
     pushLog(`💫 ${name} оглушён, пропускает ход`, 'info');
 
     tickEnemyEffects();
