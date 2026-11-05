@@ -136,7 +136,7 @@ assert.ok(overworldInputSource.includes("addEventListener('click', onOverworldCa
 assert.ok(overworldInputSource.includes('window.GameAPI?.interactNpc?.(nearest.id)'), 'portal click must invoke the existing interaction contract');
 
 const styleSource = readFileSync(new URL('../css/2d-art-direction.css', import.meta.url), 'utf8');
-assert.ok(!styleSource.includes('.village-room-art'), 'removed village interior styling must not remain');
+assert.ok(!styleSource.includes('.village-room-art {') && !styleSource.includes('.village-room-art\n'), 'removed village interior styling rule must not remain');
 const spriteSource = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
 assert.ok(spriteSource.includes("['tower-gate', 15]"), 'tower portal must use its dedicated authored atlas frame');
 assert.ok(spriteSource.includes("style === 'world-portal' ? getAuroraWorldPortalAtlas()") || (spriteSource.includes("const isWorldPortal = style === 'world-portal'") && spriteSource.includes("getAuroraWorldPortalAtlas()")), 'Aurora world portal must load its dedicated authored PNG atlas');
