@@ -130,14 +130,22 @@ export function getEnemyCombatDecision({
   }
   if (pendingSpecial) return { role, action: 'special', reason: 'telegraphed' };
 
+  // Treat malformed combat telemetry as neutral instead of accidentally
+  // triggering a tactical special from NaN, Infinity, or out-of-range ratios.
+  const safeRatio = value => Number.isFinite(value)
+    ? Math.max(0, Math.min(1, value))
+    : 1;
+  const safeTurnCount = Number.isFinite(turnCount) ? Math.max(0, Math.floor(turnCount)) : 0;
+  const safePlayerHpRatio = safeRatio(playerHpRatio);
+  const safeEnemyHpRatio = safeRatio(enemyHpRatio);
   const scheduled = Math.max(1, Math.floor(specialEvery));
-  const cadenceDue = Math.floor(turnCount) > 0 && Math.floor(turnCount) % scheduled === 0;
-  const bossEnrage = isBoss && enemyHpRatio <= 0.25;
+  const cadenceDue = safeTurnCount > 0 && safeTurnCount % scheduled === 0;
+  const bossEnrage = isBoss && safeEnemyHpRatio <= 0.25;
   const bossPunishBlock = isBoss && blocking;
-  const survivalOpening = enemyHpRatio <= 0.30 && role !== 'leech';
+  const survivalOpening = safeEnemyHpRatio <= 0.30 && role !== 'leech';
   const tacticalOpening =
-    (role === 'marksman' && playerHpRatio <= 0.45) ||
-    (role === 'leech' && enemyHpRatio <= 0.50) ||
+    (role === 'marksman' && safePlayerHpRatio <= 0.45) ||
+    (role === 'leech' && safeEnemyHpRatio <= 0.50) ||
     (role === 'bruiser' && blocking) || survivalOpening || bossEnrage || bossPunishBlock;
   if (cadenceDue || tacticalOpening) {
     return {
