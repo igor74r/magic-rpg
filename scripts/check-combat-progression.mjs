@@ -56,6 +56,25 @@ function runEnemyTurn() {
 }
 
 try {
+  // A delayed enemy response must not leak into a later encounter.
+  scheduled.length = 0;
+  const previousEncounter = fixture('warrior', 'goblin');
+  combatAttack();
+  assert.equal(scheduled.length, 1, 'first encounter should schedule one enemy response');
+  combatFlee(true);
+  const nextEncounter = fixture('warrior', 'goblin');
+  combatAttack();
+  const nextEncounterHp = nextEncounter.p.hp;
+  runEnemyTurn(); // stale callback from the encounter that was fled
+  assert.equal(nextEncounter.p.hp, nextEncounterHp,
+    'stale enemy callback must not damage the player in a new encounter');
+  assert.equal(nextEncounter.ow.combat.turn, 'enemy',
+    'stale callback must not consume the new encounter turn');
+  runEnemyTurn(); // current encounter response
+  assert.ok(nextEncounter.p.hp < nextEncounterHp,
+    'current encounter callback must still resolve the enemy response');
+  console.log('PASS delayed enemy responses stay bound to their original encounter');
+
   // Corrupted saved counters must recover safely when a real combat kill is recorded.
   const counterFixture = fixture('warrior', 'goblin');
   counterFixture.enemy.hp = 1;
@@ -92,6 +111,24 @@ try {
     if (enemyId === 'ghost') assert.ok(f.enemy.hp > enemyHpAfterPlayerAttack, 'drain must restore enemy health after dealing damage');
     console.log(`PASS ${enemyId} ${ENEMIES[enemyId].special.type} special and status effect`);
   }
+
+  // Drain must restore only the HP actually removed from a low-health player.
+  scheduled.length = 0;
+  const lowHealthDrain = fixture('warrior', 'ghost');
+  lowHealthDrain.enemy.hp = 1000;
+  lowHealthDrain.ow.combat.turnCount = 2;
+  combatAttack();
+  runEnemyTurn(); // telegraph the drain
+  lowHealthDrain.p.hp = 1;
+  lowHealthDrain.ow.player.hp = 1;
+  const enemyHpBeforeLowHealthDrain = lowHealthDrain.enemy.hp;
+  combatBlock();
+  runEnemyTurn();
+  assert.equal(lowHealthDrain.enemy.hp, enemyHpBeforeLowHealthDrain + 1,
+    'drain must heal only the one HP actually removed from a nearly defeated player');
+  assert.ok(lowHealthDrain.ow.floatingNumbers.some(number => number.text === '-1'),
+    'drain feedback must show actual damage rather than overkill');
+  console.log('PASS drain healing and combat feedback use actual HP removed');
 
   // Vampiric modifier must heal from actual multi-hit damage, not the pre-special base hit.
   scheduled.length = 0;

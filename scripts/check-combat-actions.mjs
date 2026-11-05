@@ -17,6 +17,14 @@ globalThis.localStorage = {
 const combatSource = readFileSync(new URL('../systems/overworld/combat.js', import.meta.url), 'utf8');
 // Narrow signature check catches common double-decoding artifacts without rejecting valid Cyrillic.
 assert.doesNotMatch(combatSource, /(?:Р.{0,2}Р|СѓСЂРѕРЅР°|рџ|в[љњћЂџ\u0098|в—Ћ])/, 'combat log must not contain UTF-8/Windows-1251 mojibake');
+assert.match(combatSource, /talent\.dmgMult\s*\*\s*resolveCriticalMultiplier\(talent\.critMult\)\s*\*\s*enemyDamageMultiplier\(enemy, 'ranged'\)/,
+  'aimed shot critical damage must use the shared 1.25x–2.5x multiplier clamp');
+assert.match(combatSource, /stats\.atk \* 1\.05 - defense \* 0\.65\) \* talent\.dmgMult \* enemyDamageMultiplier\(enemy, 'melee'\)/,
+  'shield bash must respect physical weakness and resistance matchups');
+assert.match(combatSource, /applyElementalReaction\(enemy, 'ice'\)/,
+  'frost nova must trigger the shared ice elemental reaction');
+assert.match(combatSource, /34 \+ Math\.floor\(stats\.mag \* 0\.7\) - Math\.floor\(defense \/ 2\)\) \* talent\.spellMult \* enemyDamageMultiplier\(enemy, 'magic'\)/,
+  'frost nova must respect enemy defense and magic weakness/resistance matchups');
 
 const scheduled = [];
 const realSetTimeout = globalThis.setTimeout;
@@ -74,6 +82,15 @@ try {
   assert.equal(f.player.mp, mpBeforeMalformedSpell, 'NaN spell damage must not consume mana');
   assert.equal(f.enemy.hp, hpBeforeMalformedSpell, 'NaN spell damage must not mutate enemy HP');
   SPELLS.fireball = fireball;
+
+  f = fixture('mage');
+  const manaBeforeInvalidStats = f.player.mp;
+  f.player.int = Number.POSITIVE_INFINITY;
+  combatCastSpell('fireball');
+  assert.equal(f.player.mp, manaBeforeInvalidStats, 'invalid derived stats must not consume spell mana');
+  assert.equal(f.ow.combat.turn, 'player', 'invalid derived stats must not consume the turn');
+  console.log('PASS Invalid derived spell stats are rejected before mana or turn changes');
+
   console.log('PASS Malformed spell cost/damage is rejected before resource or turn changes');
 
   f = fixture('mage');
@@ -111,6 +128,18 @@ try {
   CLASSES.archer.abilities = CLASSES.archer.abilities.map(item =>
     item.id === 'aimed-shot' ? archerAbility : item
   );
+
+  f = fixture('warrior');
+  f.player.mp = 100;
+  f.ow.player.mp = 100;
+  const rageBeforeInvalidStats = f.player.mp;
+  f.player.str = Number.POSITIVE_INFINITY;
+  combatUseAbility('shield-bash');
+  assert.equal(f.player.mp, rageBeforeInvalidStats, 'invalid derived stats must not consume rage');
+  assert.equal(f.player.cooldowns['shield-bash'], undefined, 'invalid derived stats must not start cooldown');
+  assert.equal(f.ow.combat.turn, 'player', 'invalid derived stats must not consume the turn');
+  console.log('PASS Invalid derived ability stats are rejected before resource/cooldown/turn changes');
+
   console.log('PASS Unsupported or malformed ability is rejected before resource/cooldown changes');
 
   f = fixture('archer');
@@ -174,6 +203,38 @@ try {
     'valid elder blessing must survive malformed-effect cleanup and victory');
 
   console.log('PASS Victory save contains post-combat effects and cooldown state');
+
+
+  f = fixture('warrior');
+  // Warrior combat abilities spend rage; prime the fixture with generated resource.
+  f.player.mp = 100;
+  f.ow.player.mp = 100;
+  const shieldBashHp = f.enemy.hp;
+  combatUseAbility('shield-bash');
+  assert.ok(f.enemy.hp < shieldBashHp, 'Shield bash must damage the target');
+  assert.ok(f.enemy.effects.some(effect => effect?.id === 'stun'), 'Shield bash must stun the target');
+  assert.ok(f.ow.particles.length > 0, 'Shield bash must produce combat feedback particles');
+  console.log('PASS Warrior shield bash damages, stuns, and animates');
+
+  f = fixture('mage');
+  f.enemy.effects = [{ id: 'burn', duration: 2 }];
+  const frostNovaHp = f.enemy.hp;
+  combatUseAbility('frost-nova');
+  assert.ok(f.enemy.hp < frostNovaHp, 'Frost nova must damage the target');
+  assert.ok(!f.enemy.effects.some(effect => effect?.id === 'burn'), 'Frost nova must trigger the ice reaction and extinguish burn');
+  assert.ok(f.enemy.effects.some(effect => effect?.id === 'stun'), 'Frost nova must stun the target');
+  assert.ok(f.ow.particles.length > 0, 'Frost nova must produce ice particles');
+  console.log('PASS Mage frost nova damages, stuns, and animates');
+
+  f = fixture('archer');
+  // Archer abilities consume concentration; prime it before testing the damage handler.
+  f.player.mp = 100;
+  f.ow.player.mp = 100;
+  const piercingHp = f.enemy.hp;
+  combatUseAbility('piercing-shot');
+  assert.ok(f.enemy.hp < piercingHp, 'Piercing shot must damage the target');
+  assert.ok(f.ow.particles.length > 0, 'Piercing shot must produce arrow particles');
+  console.log('PASS Archer piercing shot damages and animates');
 
   assert.ok(scheduled.length >= 5, 'combat actions should schedule enemy responses');
   console.log(`Combat action regression: 10/10 action checks passed; ${scheduled.length} enemy turns safely queued.`);

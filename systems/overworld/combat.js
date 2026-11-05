@@ -32,7 +32,7 @@ import { updateQuestProgress } from '../dailyQuests.js';
 import { canCompleteMainQuest, getActiveCampaignMission, getMissionProgress, recordCampaignKill, recordCampaignShard } from '../campaign.js';
 import { pushLog } from './log.js';
 import { spawnParticles } from './particles.js';
-import { getEnemyCombatDecision } from './enemy-ai.js';
+import { getEnemyCombatDecision, interruptEnemyTelegraph } from './enemy-ai.js';
 import {
   MODIFIERS,
   ELITE_ATK_MULT,
@@ -45,7 +45,8 @@ const HERB_DROP_CHANCE_ELITE = 0.70;
 
 const COMBAT_ABILITY_IDS = new Set([
   'aimed-shot', 'evasion', 'toxic-blade', 'charge', 'war-cry',
-  'bloodthirst', 'mana-shield', 'teleport', 'meteor', 'prayer', 'sanctify'
+  'bloodthirst', 'mana-shield', 'teleport', 'meteor', 'prayer', 'sanctify',
+  'shield-bash', 'frost-nova', 'piercing-shot'
 ]);
 
 function isFiniteNonNegative(value) {
@@ -395,7 +396,7 @@ export function combatAttack() {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 700);
+  scheduleEnemyCombatTurn(700);
 }
 
 export function combatCastSpell(spellId) {
@@ -470,9 +471,16 @@ export function combatCastSpell(spellId) {
     playSound('heal');
 
     ow.combat.turn = 'enemy';
-    setTimeout(enemyCombatTurn, 700);
+    scheduleEnemyCombatTurn(700);
     return;
   }
+
+  const stats = getEffStats();
+  const talent = getTalentBonus(p);
+  const enemy = ow.combat.enemy;
+
+  // Reject invalid derived stats before spending mana or changing combat state.
+  if (!hasValidCombatStats(stats, talent)) return;
 
   const freeMana = p.effects?.some(
     effect => effect?.id === 'manaShield'
@@ -489,12 +497,6 @@ export function combatCastSpell(spellId) {
   } else {
     pushLog('💧 Эликсир маны: мана не тратится', 'success');
   }
-
-  const stats = getEffStats();
-  const talent = getTalentBonus(p);
-  const enemy = ow.combat.enemy;
-
-  if (!hasValidCombatStats(stats, talent)) return;
 
   if (spell.damage) {
     recordPlayerStyle(ow, 'magic');
@@ -584,7 +586,7 @@ export function combatCastSpell(spellId) {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 700);
+  scheduleEnemyCombatTurn(700);
 }
 
 export function combatUseAbility(abilityId) {
@@ -613,6 +615,13 @@ export function combatUseAbility(abilityId) {
     pushLog(`${ability.name}: перезарядка (${cooldown})`, 'info');
     return;
   }
+
+  const enemy = ow.combat.enemy;
+  const stats = getEffStats();
+  const talent = getTalentBonus(p);
+
+  // Reject invalid derived stats before spending class resource or starting cooldown.
+  if (!hasValidCombatStats(stats, talent)) return;
 
   const freeMana = p.effects?.some(
     effect => effect?.id === 'manaShield'
@@ -644,12 +653,6 @@ export function combatUseAbility(abilityId) {
     p.cooldowns = {};
   }
 
-  const enemy = ow.combat.enemy;
-  const stats = getEffStats();
-  const talent = getTalentBonus(p);
-
-  if (!hasValidCombatStats(stats, talent)) return;
-
   p.cooldowns[abilityId] = Math.max(
     1,
     ability.cooldown + (talent.abilityCdDelta || 0)
@@ -669,7 +672,7 @@ export function combatUseAbility(abilityId) {
           )
         ) *
         talent.dmgMult *
-        talent.critMult *
+        resolveCriticalMultiplier(talent.critMult) *
         enemyDamageMultiplier(enemy, 'ranged')
       )
     );
@@ -743,6 +746,47 @@ export function combatUseAbility(abilityId) {
       return combatVictory();
     }
 
+    checkBossPhase(enemy);
+  } else if (abilityId === 'shield-bash') {
+    recordPlayerStyle(ow, 'melee');
+    consumeEnemyAdaptation(enemy, 'melee');
+    const defense = Math.max(0, enemyDefenseForStyle(enemy, 'melee', stats.armorPen || 0));
+    const damage = Math.max(1, Math.floor((stats.atk * 1.05 - defense * 0.65) * talent.dmgMult * enemyDamageMultiplier(enemy, 'melee')));
+    enemy.hp = Math.max(0, enemy.hp - damage);
+    applyEffect(enemy, 'stun');
+    ow.floatingNumbers.push({ x: enemy.x, y: enemy.y - 22, text: '🛡️-' + damage, type: 'crit', life: 1.25 });
+    pushLog(`🛡️ Щитовой удар: ${damage} урона и оглушение!`, 'success');
+    playSound('hit');
+    spawnParticles(enemy.x, enemy.y, 'impact', 12);
+    triggerShake(4, 0.14);
+    if (enemy.hp <= 0) { enemy.hp = 0; return combatVictory(); }
+    checkBossPhase(enemy);
+  } else if (abilityId === 'frost-nova') {
+    recordPlayerStyle(ow, 'magic');
+    consumeEnemyAdaptation(enemy, 'magic');
+    const elementalMultiplier = applyElementalReaction(enemy, 'ice');
+    const defense = Math.max(0, enemyDefenseForStyle(enemy, 'magic', stats.armorPen || 0));
+    const damage = Math.max(1, Math.floor((34 + Math.floor(stats.mag * 0.7) - Math.floor(defense / 2)) * talent.spellMult * enemyDamageMultiplier(enemy, 'magic') * elementalMultiplier));
+    enemy.hp = Math.max(0, enemy.hp - damage);
+    applyEffect(enemy, 'stun');
+    ow.floatingNumbers.push({ x: enemy.x, y: enemy.y - 22, text: '❄️-' + damage, type: 'crit', life: 1.35 });
+    pushLog(`❄️ Ледяная нова: ${damage} урона, цель оглушена!`, 'success');
+    playSound('cast');
+    spawnParticles(enemy.x, enemy.y, 'ice', 16);
+    triggerShake(5, 0.18);
+    if (enemy.hp <= 0) { enemy.hp = 0; return combatVictory(); }
+    checkBossPhase(enemy);
+  } else if (abilityId === 'piercing-shot') {
+    recordPlayerStyle(ow, 'ranged');
+    consumeEnemyAdaptation(enemy, 'ranged');
+    const defense = Math.max(0, enemyDefenseForStyle(enemy, 'ranged', stats.armorPen || 0));
+    const damage = Math.max(1, Math.floor((stats.atk * 1.35 - defense * 0.25) * talent.dmgMult * enemyDamageMultiplier(enemy, 'ranged')));
+    enemy.hp = Math.max(0, enemy.hp - damage);
+    ow.floatingNumbers.push({ x: enemy.x, y: enemy.y - 22, text: '🏹-' + damage, type: 'crit', life: 1.25 });
+    pushLog(`🏹 Пробивающий выстрел: ${damage} урона, броня частично пробита!`, 'damage');
+    playSound('crit');
+    spawnParticles(enemy.x, enemy.y, 'arrow', 12);
+    if (enemy.hp <= 0) { enemy.hp = 0; return combatVictory(); }
     checkBossPhase(enemy);
   } else if (abilityId === 'charge') {
     ow.combat.playerChargeNext = true;
@@ -913,7 +957,7 @@ export function combatUseAbility(abilityId) {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 700);
+  scheduleEnemyCombatTurn(700);
 }
 
 export function combatUseItem(itemId) {
@@ -987,7 +1031,7 @@ export function combatUseItem(itemId) {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 700);
+  scheduleEnemyCombatTurn(700);
 }
 
 export function combatBlock() {
@@ -1015,7 +1059,7 @@ export function combatBlock() {
   }
 
   ow.combat.turn = 'enemy';
-  setTimeout(enemyCombatTurn, 500);
+  scheduleEnemyCombatTurn(500);
 }
 
 export function combatFlee(forced = false) {
@@ -1026,7 +1070,7 @@ export function combatFlee(forced = false) {
   if (!forced && Math.random() >= 0.6) {
     pushLog('Побег не удался!', 'info');
     ow.combat.turn = 'enemy';
-    setTimeout(enemyCombatTurn, 700);
+    scheduleEnemyCombatTurn(700);
     return;
   }
 
@@ -1070,22 +1114,17 @@ function tickPlayerEffects() {
   const result = tickEffects(p);
 
   if (result.totalDamage > 0) {
-    applyPlayerDamage(p, ow, result.totalDamage);
+    const actualDamage = applyPlayerDamage(p, ow, result.totalDamage);
 
     ow.floatingNumbers.push({
       x: ow.player.x,
       y: ow.player.y - 20,
-      text: '-' + result.totalDamage,
+      text: '-' + actualDamage,
       type: 'damage',
       life: 1.2
     });
 
-    const parts = result.messages
-      .map(message => `${message.icon} ${message.name} ${message.damage}`)
-      .join(', ');
-
-    pushLog(`Эффекты на вас: ${parts}`, 'damage');
-    playSound('hurt');
+    pushLog(`Эффекты на вас: ${actualDamage} фактического урона`, 'damage');
   }
 
   if (p.hp <= 0) {
@@ -1103,6 +1142,18 @@ function decreaseCooldowns() {
       p.cooldowns[key] -= 1;
     }
   }
+}
+
+function scheduleEnemyCombatTurn(delay = 700) {
+  const combat = state.overworld?.combat;
+  if (!combat) return;
+
+  // A delayed response belongs to one encounter only; never let an old
+  // timer attack a player who has already started a different fight.
+  setTimeout(() => {
+    if (state.overworld?.combat !== combat) return;
+    enemyCombatTurn();
+  }, delay);
 }
 
 function enemyCombatTurn() {
@@ -1134,6 +1185,9 @@ function enemyCombatTurn() {
 
   if (isStunned(enemy)) {
     consumeStun(enemy);
+    if (interruptEnemyTelegraph(enemy)) {
+      pushLog(`🛑 Подготовка особого приёма ${name} сорвана оглушением!`, 'success');
+    }
     pushLog(`💫 ${name} оглушён, пропускает ход`, 'info');
 
     tickEnemyEffects();
@@ -1413,12 +1467,13 @@ function enemyCombatTurn() {
     const damage = baseDamage;
     actualDamage = applyPlayerDamage(p, ow, damage);
 
-    enemy.hp = Math.min(enemy.maxHp, enemy.hp + damage);
+    // Drain healing is limited to HP actually removed, including lethal hits.
+    enemy.hp = Math.min(enemy.maxHp, enemy.hp + actualDamage);
 
     ow.floatingNumbers.push({
       x: ow.player.x,
       y: ow.player.y - 20,
-      text: '-' + damage,
+      text: '-' + actualDamage,
       type: 'damage',
       life: 1.2
     });
@@ -1426,13 +1481,13 @@ function enemyCombatTurn() {
     ow.floatingNumbers.push({
       x: enemy.x,
       y: enemy.y - 20,
-      text: '+' + damage,
+      text: '+' + actualDamage,
       type: 'heal',
       life: 1.2
     });
 
     pushLog(
-      `${name} использовал ${special.name} (${damage} урона) и восстановил ${damage} HP`,
+      `${name} использовал ${special.name} (${actualDamage} урона) и восстановил ${actualDamage} HP`,
       'damage'
     );
 
@@ -1507,7 +1562,7 @@ function enemyCombatTurn() {
     pushLog('💫 Вы оглушены и пропускаете ход', 'info');
     decreaseCooldowns();
     ow.combat.turn = 'enemy';
-    setTimeout(enemyCombatTurn, 500);
+    scheduleEnemyCombatTurn(500);
     return;
   }
 
