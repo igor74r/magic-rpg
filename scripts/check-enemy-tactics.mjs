@@ -72,4 +72,24 @@ decision = getEnemyCombatDecision({
 });
 assert.equal(decision.reason, 'survival', 'non-leech enemies should telegraph a survival move at critical health');
 
+// Invalid telemetry must not manufacture a low-health tactical opening.
+decision = getEnemyCombatDecision({
+  specialType: 'snipe', specialEvery: 3, turnCount: 1,
+  playerHpRatio: Number.NaN, enemyHpRatio: Number.POSITIVE_INFINITY
+});
+assert.equal(decision.action, 'attack',
+  'non-finite health ratios should be treated as healthy/neutral');
+decision = getEnemyCombatDecision({
+  specialType: 'snipe', specialEvery: 3, turnCount: Number.NaN,
+  playerHpRatio: -10
+});
+assert.equal(decision.action, 'telegraph',
+  'finite out-of-range low player HP should be clamped to zero');
+decision = getEnemyCombatDecision({
+  specialType: 'double', specialEvery: 3, turnCount: Number.POSITIVE_INFINITY,
+  enemyHpRatio: 10
+});
+assert.equal(decision.action, 'attack',
+  'invalid turn count and over-max enemy HP should not trigger specials');
+
 console.log('Enemy tactical checks passed: archetype roles, telegraphs, counterplay, openings and special cadence');
