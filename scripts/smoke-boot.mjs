@@ -259,17 +259,14 @@ try {
   check('NPC-диалоги открываются/закрываются', false, String(e && e.message));
 }
 
-// Важные здания Авроры имеют отдельные интерьерные сцены и выход обратно во двор.
+// Интерьеры зданий NPC удалены; проверяем, что диалог NPC по-прежнему доступен.
 try {
   api.interactNpc('blacksmith');
-  check('Кузница предлагает вход в интерьер', byId('npc-dialog-content').innerHTML.includes('Войти внутрь'));
-  api.enterVillageInterior('forge');
-  check('Интерьер кузницы открывается', state.overworld.interior === 'forge' && byId('npc-dialog-content').innerHTML.includes('Кузница Борина'));
-  api.exitVillageInterior();
-  check('Из интерьера можно вернуться во двор', state.overworld.interior === null);
+  check('диалог кузнеца открывается без кнопки входа в интерьер',
+    byId('npc-dialog-content').innerHTML.length > 0 && !byId('npc-dialog-content').innerHTML.includes('Войти внутрь'));
   api.closeNpcAndResume();
 } catch (e) {
-  check('Интерьеры важных зданий Авроры', false, String(e && e.message));
+  check('диалог кузнеца открывается без кнопки входа в интерьер', false, String(e && e.message));
 }
 
 // Бой: деревня безопасна, поэтому переходим в лес
