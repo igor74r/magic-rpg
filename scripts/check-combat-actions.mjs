@@ -175,6 +175,30 @@ try {
 
   console.log('PASS Victory save contains post-combat effects and cooldown state');
 
+
+  f = fixture('warrior');
+  const shieldBashHp = f.enemy.hp;
+  combatUseAbility('shield-bash');
+  assert.ok(f.enemy.hp < shieldBashHp, 'Shield bash must damage the target');
+  assert.ok(f.enemy.effects.some(effect => effect?.id === 'stun'), 'Shield bash must stun the target');
+  assert.ok(f.ow.particles.length > 0, 'Shield bash must produce combat feedback particles');
+  console.log('PASS Warrior shield bash damages, stuns, and animates');
+
+  f = fixture('mage');
+  const frostNovaHp = f.enemy.hp;
+  combatUseAbility('frost-nova');
+  assert.ok(f.enemy.hp < frostNovaHp, 'Frost nova must damage the target');
+  assert.ok(f.enemy.effects.some(effect => effect?.id === 'stun'), 'Frost nova must stun the target');
+  assert.ok(f.ow.particles.length > 0, 'Frost nova must produce ice particles');
+  console.log('PASS Mage frost nova damages, stuns, and animates');
+
+  f = fixture('archer');
+  const piercingHp = f.enemy.hp;
+  combatUseAbility('piercing-shot');
+  assert.ok(f.enemy.hp < piercingHp, 'Piercing shot must damage the target');
+  assert.ok(f.ow.particles.length > 0, 'Piercing shot must produce arrow particles');
+  console.log('PASS Archer piercing shot damages and animates');
+
   assert.ok(scheduled.length >= 5, 'combat actions should schedule enemy responses');
   console.log(`Combat action regression: 10/10 action checks passed; ${scheduled.length} enemy turns safely queued.`);
 } finally {
