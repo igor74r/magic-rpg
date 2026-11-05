@@ -1114,22 +1114,17 @@ function tickPlayerEffects() {
   const result = tickEffects(p);
 
   if (result.totalDamage > 0) {
-    applyPlayerDamage(p, ow, result.totalDamage);
+    const actualDamage = applyPlayerDamage(p, ow, result.totalDamage);
 
     ow.floatingNumbers.push({
       x: ow.player.x,
       y: ow.player.y - 20,
-      text: '-' + result.totalDamage,
+      text: '-' + actualDamage,
       type: 'damage',
       life: 1.2
     });
 
-    const parts = result.messages
-      .map(message => `${message.icon} ${message.name} ${message.damage}`)
-      .join(', ');
-
-    pushLog(`Эффекты на вас: ${parts}`, 'damage');
-    playSound('hurt');
+    pushLog(`Эффекты на вас: ${actualDamage} фактического урона`, 'damage');
   }
 
   if (p.hp <= 0) {
