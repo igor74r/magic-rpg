@@ -236,77 +236,41 @@ function centerMask(rows, width = 20) {
 
 const HERO_MASKS = {
   warrior: centerMask([
-    '......oooo......',
-    '.....owwwwo.....',
-    '....owwwwwwo....',
-    '....owssesswo...',
-    '....owssesswo...',
-    '.....owwwwo.....',
-    '...oowaaaa wooo'.replaceAll(' ', ''),
-    '..owwaaaaaawwo..',
-    '..owwacaaacawwo..',
-    '..owwwwwwwwwwo..',
-    '...owwaaaawwo...',
-    '...obbaaaabbo....',
-    '....obb..bbo.....',
-    '....ooo..ooo.....',
-    '...oww....wwo....',
-    '...ooo....ooo....'
-  ]),
+    '........oooo........','.......owwwwo.......','......owwwwwwo......',
+    '.....owwwwwwwwo.....','.....owwssesswo.....','.....owwssesswo.....',
+    '......owwwwwwo......','...oowwwwwwwwwwoo...','..owwaaaaaaaaawwo...',
+    '.owwaabwwwwbbaaawwo..','.owwaabwwwwbbaaawwo..','..owwaaaaaaaaawwo...',
+    '...owwbbwwbbwwwo.....','....owwaaaawwwo......','....owwbbbbwwwo......',
+    '.....oww..wwwo.......','.....oww..wwwo.......','....owww..wwww.......',
+    '....owoo..oowwo......','.....ooo..ooo........'
+  ], 22),
   mage: centerMask([
-    '........c........',
-    '.......oco.......',
-    '......occco......',
-    '.....ocaaaco.....',
-    '....ocasssaco....',
-    '....ocasssaco....',
-    '.....ocaaaco.....',
-    '....ocaaaaaco....',
-    '...occcaaaccco...',
-    '..occcaaaaaccco..',
-    '..occcaaaaaccco..',
-    '.occcaaaaaaaccco.',
-    '.occcaaaaaaaccco.',
-    '..occcaaaaaccco..',
-    '...occcaaaccco...',
-    '....ooo..ooo.....'
-  ]),
+    '..........c..........','.........oco.........','........occco........',
+    '.......ocaaaco.......','......ocaaaaaco......','.....ocaaaaaaaco.....',
+    '....occcaaaaaccco....','....occcasssaccco....','.....ocassessaco.....',
+    '......ocasssaco......','......ocaaaaaco......','.....ocbbbaaabcco....',
+    '....ocbbbaaaabccco...','...ocbbbaaaabacccco..','..ocbbbaaaaaaabcccco.',
+    '..ocbbbaaaaaaabcccco.','...ocbbbaaaabacccco..','....ocbbbaaaabccco...',
+    '.....occcaaaccco......','......ooo..ooo........'
+  ], 22),
   archer: centerMask([
-    '......oooo......',
-    '.....owwwwo.....',
-    '....owwsswwo....',
-    '...owwssesswwo...',
-    '...owwssesswwo...',
-    '....owwwwwwo....',
-    '..oowaaaaaaawoo..',
-    '.owwaaaaaaaaawwo.',
-    '.owwacaaaaacawwo.',
-    '..owwbaaaabawwo..',
-    '...owwbaaaabwo...',
-    '...owwwwwwwwo....',
-    '....oww..wwwo.....',
-    '....oww..wwwo.....',
-    '...oww....wwo.....',
-    '...ooo....ooo.....'
-  ]),
+    '........oooooooo......','.......owwwwwwwwo.....','......owwwwwwwwwwo....',
+    '.....owwsswwwwwwwo....','....owwsssesswwwwwo...','....owwsssesswwwwwo...',
+    '.....owwsswwwwwwwo....','......owwwwwwwwwwo....','...oowwaaaaaaaaawwoo...',
+    '..owwaabaaaaaaabawwwo..','.owwaabwwaaaaaabawwwo..','.owwaabwwaaaaaabawwwo..',
+    '..owwaabaaaaaaabawwwo..','...owwaabbbbbbaawwwo...','....owwbbbbbbbbwwwo....',
+    '....owwbb....bbwwwo....','....owwbb....bbwwwo....','...owwwww....wwwwwo....',
+    '...owoo........oowwo...','....ooo........ooo.....'
+  ], 22),
   priest: centerMask([
-    '........c........',
-    '.......oco.......',
-    '......occco......',
-    '.....ocaaaco.....',
-    '....ocasssaco....',
-    '....ocasssaco....',
-    '.....ocaaaco.....',
-    '....ocaaaaaco....',
-    '...ocaaaaaacco...',
-    '..ocaaaaaaaacco..',
-    '..ocaaaaaaaacco..',
-    '..ocaaaaaaaacco..',
-    '..ocaaaaaaaacco..',
-    '...ocaaaaaacco...',
-    '....occcccc......',
-    '....ooo..ooo.....'
-  ])
+    '..........c..........','.........oco.........','........occcco........',
+    '.......ocaaaaaco......','......ocaaaaaaaco.....','.....occcaaaaaccco....',
+    '.....ocassesssaco.....','......ocassssaco......','......ocaaaaaaco......',
+    '.....ocaaaaaaaaco.....','....ocaaaaabaaaaco....','...ocaaaaabaaaaaaco...',
+    '...ocaaaaabaaaaaaco...','...ocaaaaabaaaaaaco...','...ocaaaaabaaaaaaco...',
+    '....ocaaaaabaaaaco....','.....ocaaaaaaaaco.....','......occccccaco......',
+    '.......oww..wwo.......','......ooo....ooo......'
+  ], 22)
 };
 
 // ---------- МОДЕЛИ ВРАГОВ ----------
@@ -678,7 +642,7 @@ export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false) {
 
   shadow(ctx, x, y, shadowColor, 15);
   if (moving) drawGait(ctx, x, y + 5, phase, colors, 1.25);
-  blit(ctx, sprite(HERO_MASKS[playerClass] || HUMANOID, colors, 3), x, y, bob);
+  blit(ctx, sprite(HERO_MASKS[playerClass] || HUMANOID, colors, 2.8), x, y, bob);
   drawHeroDetails(ctx, x, y, playerClass, bob);
 
   const px = Math.round(x + 17);
@@ -1055,26 +1019,26 @@ export function drawObject(ctx, obj, x, y, shadowColor) {
 }
 // ---------- ДЕТАЛИЗАЦИЯ СИЛУЭТОВ (визуальный слой, без изменения хитбоксов) ----------
 function drawHeroDetails(ctx, x, y, playerClass, bob) {
-  // Классные акценты собраны из целых пиксельных прямоугольников.
+  // Small class-specific highlights keep silhouettes readable at native game scale.
   const px = (dx, dy, w, h, color) => {
     ctx.fillStyle = color;
     ctx.fillRect(Math.round(x + dx), Math.round(y + dy + bob), w, h);
   };
   if (playerClass === 'warrior') {
-    px(-13,-22,6,5,'#dbe6f6'); px(7,-22,6,5,'#dbe6f6');
-    px(-7,-19,14,10,'#526782'); px(-5,-17,10,6,'#9fb4d0');
-    px(-2,-15,4,3,'#ffcf6e'); px(-6,-6,12,3,'#b4543a');
+    px(-7,-39,14,2,'#dbe6f6'); px(-4,-34,8,2,'#9fb4d0');
+    px(-2,-30,4,3,'#ffcf6e'); px(-11,-14,5,8,'#dbe6f6');
+    px(-10,-6,4,2,'#c9a227');
   } else if (playerClass === 'mage') {
-    px(-8,-31,16,4,'#20264e'); px(-5,-35,10,4,'#20264e');
-    px(-2,-18,4,7,'#b28dff'); px(-1,-17,2,5,'#7ce7ff');
-    px(-10,-5,20,3,'#26345e');
+    px(-3,-54,6,3,'#c7f5ff'); px(-2,-51,4,2,'#7ce7ff');
+    px(-5,-31,10,2,'#b28dff'); px(-2,-25,4,8,'#7ce7ff');
+    px(-8,-7,16,2,'#26345e');
   } else if (playerClass === 'archer') {
-    px(-7,-22,14,3,'#d8bd71'); px(-4,-19,3,12,'#8b633d');
-    px(7,-28,5,16,'#8b633d'); px(8,-30,2,4,'#e8d8b9');
-    px(11,-27,2,5,'#e8d8b9'); px(14,-24,2,5,'#e8d8b9');
+    px(-8,-34,16,2,'#d8bd71'); px(11,-34,3,18,'#8b633d');
+    px(12,-36,2,4,'#e8d8b9'); px(14,-31,2,4,'#e8d8b9');
+    px(-6,-13,12,2,'#d8bd71');
   } else if (playerClass === 'priest') {
-    px(-2,-20,4,12,'#ffd27a'); px(-7,-8,14,3,'#fff4d6');
-    px(-1,-17,2,6,'#fff4d6');
+    px(-2,-49,4,3,'#fff4d6'); px(-1,-46,2,8,'#ffd27a');
+    px(-8,-13,16,2,'#fff4d6'); px(-2,-8,4,3,'#ffd27a');
   }
 }
 function drawEnemyDetails(ctx, enemy, x, y, bob, scale) {
