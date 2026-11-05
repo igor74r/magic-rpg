@@ -1464,7 +1464,7 @@ function enemyCombatTurn() {
     ow.floatingNumbers.push({
       x: ow.player.x,
       y: ow.player.y - 20,
-      text: '-' + damage,
+      text: '-' + actualDamage,
       type: 'damage',
       life: 1.2
     });
@@ -1472,13 +1472,13 @@ function enemyCombatTurn() {
     ow.floatingNumbers.push({
       x: enemy.x,
       y: enemy.y - 20,
-      text: '+' + damage,
+      text: '+' + actualDamage,
       type: 'heal',
       life: 1.2
     });
 
     pushLog(
-      `${name} использовал ${special.name} (${damage} урона) и восстановил ${damage} HP`,
+      `${name} использовал ${special.name} (${actualDamage} урона) и восстановил ${actualDamage} HP`,
       'damage'
     );
 
