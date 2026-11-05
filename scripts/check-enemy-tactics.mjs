@@ -92,4 +92,25 @@ decision = getEnemyCombatDecision({
 assert.equal(decision.action, 'attack',
   'invalid turn count and over-max enemy HP should not trigger specials');
 
+// Threshold boundaries keep boss enrage and player counterplay deterministic.
+decision = getEnemyCombatDecision({
+  specialType: 'drain', specialEvery: 4, turnCount: 1,
+  enemyHpRatio: 0.25, isBoss: true, blocking: true
+});
+assert.equal(decision.action, 'telegraph');
+assert.equal(decision.reason, 'enrage',
+  'boss enrage should take priority when enrage and block-punish overlap');
+decision = getEnemyCombatDecision({
+  specialType: 'snipe', specialEvery: 4, turnCount: 1,
+  playerHpRatio: 0.45
+});
+assert.equal(decision.reason, 'opening',
+  'marksman vulnerability threshold should include exactly 45% HP');
+decision = getEnemyCombatDecision({
+  specialType: 'drain', specialEvery: 4, turnCount: 1,
+  enemyHpRatio: 0.50
+});
+assert.equal(decision.reason, 'opening',
+  'leech recovery threshold should include exactly 50% HP');
+
 console.log('Enemy tactical checks passed: archetype roles, telegraphs, counterplay, openings and special cadence');
