@@ -117,6 +117,14 @@ export const CLASSES = {
         cooldown: 5,
         cost: 45,
         desc: 'Мощный огненный удар и ожог.'
+      },
+      {
+        id: 'frost-nova',
+        name: 'Ледяная нова',
+        icon: '❄️',
+        cooldown: 4,
+        cost: 32,
+        desc: 'Ледяной взрыв: урон и оглушение врага на 1 ход.'
       }
     ]
   },
@@ -178,6 +186,14 @@ export const CLASSES = {
         cooldown: 3,
         cost: 20,
         desc: 'Наносит урон и отравляет цель.'
+      },
+      {
+        id: 'piercing-shot',
+        name: 'Пробивающий выстрел',
+        icon: '🏹',
+        cooldown: 3,
+        cost: 28,
+        desc: 'Точный выстрел с повышенным пробитием брони.'
       }
     ]
   },
