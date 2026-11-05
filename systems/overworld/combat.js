@@ -751,7 +751,7 @@ export function combatUseAbility(abilityId) {
     recordPlayerStyle(ow, 'melee');
     consumeEnemyAdaptation(enemy, 'melee');
     const defense = Math.max(0, enemyDefenseForStyle(enemy, 'melee', stats.armorPen || 0));
-    const damage = Math.max(1, Math.floor((stats.atk * 1.05 - defense * 0.65) * talent.dmgMult));
+    const damage = Math.max(1, Math.floor((stats.atk * 1.05 - defense * 0.65) * talent.dmgMult * enemyDamageMultiplier(enemy, 'melee')));
     enemy.hp = Math.max(0, enemy.hp - damage);
     applyEffect(enemy, 'stun');
     ow.floatingNumbers.push({ x: enemy.x, y: enemy.y - 22, text: '🛡️-' + damage, type: 'crit', life: 1.25 });
@@ -764,7 +764,9 @@ export function combatUseAbility(abilityId) {
   } else if (abilityId === 'frost-nova') {
     recordPlayerStyle(ow, 'magic');
     consumeEnemyAdaptation(enemy, 'magic');
-    const damage = Math.max(1, Math.floor((34 + Math.floor(stats.mag * 0.7)) * talent.spellMult));
+    const elementalMultiplier = applyElementalReaction(enemy, 'ice');
+    const defense = Math.max(0, enemyDefenseForStyle(enemy, 'magic', stats.armorPen || 0));
+    const damage = Math.max(1, Math.floor((34 + Math.floor(stats.mag * 0.7) - Math.floor(defense / 2)) * talent.spellMult * enemyDamageMultiplier(enemy, 'magic') * elementalMultiplier));
     enemy.hp = Math.max(0, enemy.hp - damage);
     applyEffect(enemy, 'stun');
     ow.floatingNumbers.push({ x: enemy.x, y: enemy.y - 22, text: '❄️-' + damage, type: 'crit', life: 1.35 });
