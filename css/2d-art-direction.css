@@ -141,7 +141,6 @@
 #npc-dialog-content { min-width:0; overflow-x:hidden; }
 .village-interior-view { color:#eadfc7; padding:4px 0 8px; min-width:0; max-width:100%; box-sizing:border-box; }
 .village-interior-view * { box-sizing:border-box; max-width:100%; }
-.village-room-prop { overflow-wrap:anywhere; }
 .village-interior-heading { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:12px; min-width:0; }
 /* Active campaign objective marker on the world map. */
 .world-map .wnode.quest-target {
