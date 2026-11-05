@@ -123,11 +123,9 @@ for (const building of buildings) {
 }
 
 const mainSource = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
-for (const room of ['forge', 'healer', 'alchemy', 'market', 'hall', 'tavern']) {
-  assert.ok(mainSource.includes(`${room}: { title:`), `missing ${room} interior definition`);
+for (const removedApi of ['enterVillageInterior', 'exitVillageInterior', 'VILLAGE_INTERIORS', 'addVillageInteriorButton']) {
+  assert.ok(!mainSource.includes(removedApi), `removed village interior API must not return: ${removedApi}`);
 }
-assert.ok(mainSource.includes('exitVillageInterior'), 'interiors must provide an exit to the village');
-assert.ok(mainSource.includes('openWorldPortalMenu'), 'world portal must open a navigation window');
 assert.ok(mainSource.includes('openWorldPortalMenu'), 'world portal must open a navigation window');
 assert.ok(!mainSource.includes('data-world-tower'), 'world portal menu must not duplicate the village tower entrance');
 assert.ok(mainSource.includes('aria-modal="true"'), 'world portal window must expose dialog semantics');
@@ -138,21 +136,7 @@ assert.ok(overworldInputSource.includes("addEventListener('click', onOverworldCa
 assert.ok(overworldInputSource.includes('window.GameAPI?.interactNpc?.(nearest.id)'), 'portal click must invoke the existing interaction contract');
 
 const styleSource = readFileSync(new URL('../css/2d-art-direction.css', import.meta.url), 'utf8');
-assert.ok(styleSource.includes('.village-room-art'), 'interior scenes must have their own visual styling');
-const interiorCssStart = styleSource.indexOf('.village-room-art');
-const interiorCssEnd = styleSource.indexOf('/* Active campaign objective', interiorCssStart);
-const interiorCss = styleSource.slice(interiorCssStart, interiorCssEnd < 0 ? undefined : interiorCssEnd);
-assert.ok(!/gradient|blur/i.test(interiorCss), 'Aurora interiors must use flat colors and crisp pixel edges');
-for (const room of ['forge','healer','alchemy','market','hall','tavern']) {
-  for (const item of [1,2,3]) {
-    assert.ok(interiorCss.includes(`.icon-${room}-${item}:before`), `${room}/${item}: interior prop must have a pixel-art body`);
-    assert.ok(interiorCss.includes(`.icon-${room}-${item}:after`), `${room}/${item}: interior prop must have a pixel-art highlight`);
-  }
-}
-assert.ok(mainSource.includes('village-room-pixel-icon icon-') && !mainSource.includes("['⚒️','🛏️','⚗️','📦']"),
-  'Aurora interior props must not use emoji as their visual assets');
-assert.ok(mainSource.includes('class="village-room-floor-mark" aria-hidden="true"></div>') && !mainSource.includes('village-room-floor-mark">✦'),
-  'Aurora interior floor motif must be drawn as crisp CSS pixels, not a text glyph');
+assert.ok(!styleSource.includes('.village-room-art'), 'removed village interior styling must not remain');
 const spriteSource = readFileSync(new URL('../ui/overworld/sprites.js', import.meta.url), 'utf8');
 assert.ok(spriteSource.includes("['tower-gate', 15]"), 'tower portal must use its dedicated authored atlas frame');
 assert.ok(spriteSource.includes("style === 'world-portal' ? getAuroraWorldPortalAtlas()") || (spriteSource.includes("const isWorldPortal = style === 'world-portal'") && spriteSource.includes("getAuroraWorldPortalAtlas()")), 'Aurora world portal must load its dedicated authored PNG atlas');
