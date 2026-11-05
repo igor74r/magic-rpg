@@ -61,7 +61,7 @@ try {
 
 const renderSource = readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8');
 assert.ok(renderSource.includes('const depthItems = buildDepthItems(ow);'), 'renderer must use the shared depth-order helper');
-assert.ok(renderSource.includes('drawPlayerByClass(ctx, sx + pLungeX, sy + pLungeY, state.game.player.class, theme.shadow, heroMoving)'), 'player sprite must receive screen coordinates, class, shadow and movement in the renderer signature order');
+assert.ok(/drawPlayerByClass\(ctx, sx \+ pLungeX, sy \+ pLungeY, state\.game\.player\.class, theme\.shadow, heroMoving(?:, heroDirection)?\)/.test(renderSource), 'player sprite must receive screen coordinates, class, shadow, movement and optional facing direction in the renderer signature order');
 assert.equal((renderSource.match(/drawPlayerByClass\s*\(/g) || []).length, 1,
   'player must be drawn exactly once; a later unconditional draw would cover every foreground building');
 
