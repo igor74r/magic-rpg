@@ -19,6 +19,12 @@ const combatSource = readFileSync(new URL('../systems/overworld/combat.js', impo
 assert.doesNotMatch(combatSource, /(?:Р.{0,2}Р|СѓСЂРѕРЅР°|рџ|в[љњћЂџ\u0098|в—Ћ])/, 'combat log must not contain UTF-8/Windows-1251 mojibake');
 assert.match(combatSource, /talent\.dmgMult\s*\*\s*resolveCriticalMultiplier\(talent\.critMult\)\s*\*\s*enemyDamageMultiplier\(enemy, 'ranged'\)/,
   'aimed shot critical damage must use the shared 1.25x–2.5x multiplier clamp');
+assert.match(combatSource, /stats\.atk \* 1\.05 - defense \* 0\.65\) \* talent\.dmgMult \* enemyDamageMultiplier\(enemy, 'melee'\)/,
+  'shield bash must respect physical weakness and resistance matchups');
+assert.match(combatSource, /applyElementalReaction\(enemy, 'ice'\)/,
+  'frost nova must trigger the shared ice elemental reaction');
+assert.match(combatSource, /34 \+ Math\.floor\(stats\.mag \* 0\.7\) - Math\.floor\(defense \/ 2\)\) \* talent\.spellMult \* enemyDamageMultiplier\(enemy, 'magic'\)/,
+  'frost nova must respect enemy defense and magic weakness/resistance matchups');
 
 const scheduled = [];
 const realSetTimeout = globalThis.setTimeout;
