@@ -575,6 +575,39 @@ function drawGait(ctx, x, y, phase, palette, scale = 1) {
   }
   ctx.restore();
 }
+const CLASS_SPRITE_SHEETS = Object.freeze({
+  warrior: 'knight.png',
+  mage: 'wizard.png',
+  archer: 'rogue.png'
+});
+const CLASS_SPRITE_IMAGES = new Map();
+const CLASS_SPRITE_ROWS = Object.freeze({ down: 0, left: 1, right: 2, up: 3 });
+
+function drawClassSpriteSheet(ctx, x, y, playerClass, moving, direction, bob) {
+  const filename = CLASS_SPRITE_SHEETS[playerClass];
+  if (!filename || typeof Image === 'undefined') return false;
+
+  let image = CLASS_SPRITE_IMAGES.get(filename);
+  if (!image) {
+    image = new Image();
+    image.src = new URL(`../../assets/characters/overworld/${filename}`, import.meta.url).href;
+    CLASS_SPRITE_IMAGES.set(filename, image);
+  }
+  if (!image.complete || !image.naturalWidth) return false;
+
+  const row = CLASS_SPRITE_ROWS[direction] ?? CLASS_SPRITE_ROWS.down;
+  const frame = moving ? Math.floor(performance.now() / 145) % 4 : 0;
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(
+    image,
+    frame * 48, row * 48, 48, 48,
+    Math.round(x - 24), Math.round(y - 34 + bob), 48, 48
+  );
+  ctx.restore();
+  return true;
+}
+
 function shadow(ctx, x, y, color, width = 14) {
   // Stepped rectangular footprint: crisp pixel-art shadow, no antialiased ellipse.
   const w = Math.max(6, Math.round(width));
@@ -587,13 +620,14 @@ function shadow(ctx, x, y, color, width = 14) {
 
 // ---------- ОТРИСОВКА ГЕРОЯ ----------
 
-export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false) {
+export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false, direction = 'down') {
   const colors = HEROES[playerClass] || HEROES.warrior;
   const now = performance.now();
   const phase = now / (moving ? 78 : 520);
   const bob = moving ? Math.abs(Math.sin(phase)) * 2.2 : Math.sin(phase) * 0.65;
 
   shadow(ctx, x, y, shadowColor, 15);
+  if (drawClassSpriteSheet(ctx, x, y, playerClass, moving, direction, bob)) return;
   if (moving) drawGait(ctx, x, y + 5, phase, colors, 1.25);
   blit(ctx, sprite(HUMANOID, colors, 3), x, y, bob);
   drawHeroDetails(ctx, x, y, playerClass, bob);
