@@ -708,7 +708,6 @@ export function drawHero(ctx, x, y, playerClass, shadowColor, moving = false) {
     pixel(-1,-21,5,3,playerClass === 'priest' ? '#ffd27a' : '#7ce7ff');
     pixel(1,-20,2,1,'#fff4d6');
   }
-}
   ctx.restore();
 }
 
