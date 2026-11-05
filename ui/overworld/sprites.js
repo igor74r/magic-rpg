@@ -261,7 +261,7 @@ const HERO_MASKS = {
     '..owwaabaaaaaaabawwwo..','...owwaabbbbbbaawwwo...','....owwbbbbbbbbwwwo....',
     '....owwbb....bbwwwo....','....owwbb....bbwwwo....','...owwwww....wwwwwo....',
     '...owoo........oowwo...','....ooo........ooo.....'
-  ], 22),
+  ], 24),
   priest: centerMask([
     '..........c..........','.........oco.........','........occcco........',
     '.......ocaaaaaco......','......ocaaaaaaaco.....','.....occcaaaaaccco....',
