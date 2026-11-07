@@ -23,7 +23,10 @@ import {
   createFactionState,
   ensureFactionState,
   getFactionRank,
-  changeFactionReputation
+  changeFactionReputation,
+  getFactionDamageReduction,
+  getFactionLootBonus,
+  getFactionEventGoldBonus
 } from '../systems/factions.js';
 import {
   getCampaignBranchForMission,
@@ -44,6 +47,7 @@ import {
 import { generateMap } from '../systems/overworld/map.js';
 import { spawnEnemies, spawnChests, spawnNPCs, spawnEvents } from '../systems/overworld/spawn.js';
 import { LOCATIONS } from '../data/locations.js';
+import { getLootDropChance } from '../systems/loot.js';
 import { syncWorldEventMarkers, markWorldEventMarkerCompleted } from '../systems/overworld/world-event-markers.js';
 
 assert.equal(WORLD_REGION_IDS.length, 16);
@@ -133,6 +137,23 @@ assert.equal(changeFactionReputation(factionGame, 'hub-guardians', 125, 'test re
 assert.equal(changeFactionReputation(factionGame, 'hub-guardians', -250, 'test penalty', 'test').value, -100);
 assert.equal(changeFactionReputation(factionGame, 'unknown', 10), null);
 assert.equal(factionGame.factions.changeLog.length, 2);
+assert.equal(getFactionDamageReduction(factionGame), 0);
+assert.equal(getFactionLootBonus(factionGame), 0);
+assert.equal(getFactionEventGoldBonus(factionGame, 'rift-cult'), 0);
+changeFactionReputation(factionGame, 'hub-guardians', 90, 'allied test', 'test');
+assert.equal(getFactionDamageReduction(factionGame), 0.15);
+changeFactionReputation(factionGame, 'ash-nomads', 70, 'honored test', 'test');
+assert.equal(getFactionLootBonus(factionGame), 0.10);
+assert.equal(getLootDropChance(0.2, { luck: 0 }, factionGame), 0.22,
+  'Ash Nomad standing multiplies ordinary loot drop chance');
+changeFactionReputation(factionGame, 'rift-cult', 30, 'friendly test', 'test');
+assert.equal(getFactionEventGoldBonus(factionGame, 'rift-cult'), 0.05);
+assert.equal(getFactionEventGoldBonus(factionGame, 'free-traders'), 0);
+const cultRewardGame = { factions: factionGame.factions, world: { events: { history: [
+  { id: 'cult-test', status: 'completed', rewardClaimed: false, factionId: 'rift-cult', reward: { gold: 100 } }
+] } } };
+assert.deepEqual(claimWorldEventReward(cultRewardGame, 'cult-test'), { gold: 105 },
+  'Rift Cult standing increases gold from its own completed event rewards');
 assert.equal(getFactionDamageReduction(factionGame), 0);
 assert.equal(getFactionLootBonus(factionGame), 0);
 assert.equal(getFactionEventGoldBonus(factionGame, 'rift-cult'), 0);
