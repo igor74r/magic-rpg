@@ -27,8 +27,7 @@ const events = [{ id: 'event-altar-0', resolved: false }, { id: 'event-crystal-0
 applyRegionPersistence(world, 'forest', enemies, chests, events, 1000);
 assert.equal(chests[0].opened, false);
 assert.equal(chests[1].opened, true);
-assert.equal(events[0].resolved, true, 'resolved exploration events must remain resolved after revisiting');
-assert.equal(events[1].resolved, false);
+assert.deepEqual(events.map(event => event.id), ['event-crystal-0'], 'resolved exploration events must not respawn on revisiting');
 assert.equal(enemies[0].dead, true);
 assert.equal(enemies[0].hp, 0);
 assert.equal(enemies[0].respawnAt, 901000);

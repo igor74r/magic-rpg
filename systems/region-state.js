@@ -60,8 +60,10 @@ export function applyRegionPersistence(world, regionId, enemies, chests, events 
   const opened = new Set(record.openedChests);
   const resolved = new Set(record.resolvedEvents);
   for (const chest of Array.isArray(chests) ? chests : []) chest.opened = opened.has(chest.id);
-  for (const event of Array.isArray(events) ? events : []) {
-    if (resolved.has(event.id)) event.resolved = true;
+  if (Array.isArray(events)) {
+    for (let index = events.length - 1; index >= 0; index--) {
+      if (resolved.has(events[index].id)) events.splice(index, 1);
+    }
   }
   for (const enemy of Array.isArray(enemies) ? enemies : []) {
     const respawnAtClock = record.defeatedEnemies[enemy.persistentId];
