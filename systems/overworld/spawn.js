@@ -69,6 +69,14 @@ export function createSpawnRoster(enemyIds, count, random = Math.random) {
   return result;
 }
 
+export function createEnemyPersistentId(enemyId, isBoss, occurrence = 1, spawnIndex = 0) {
+  if (isBoss) {
+    const safeOccurrence = Math.max(1, Math.floor(Number(occurrence) || 1));
+    return safeOccurrence === 1 ? `boss-${enemyId}` : `boss-${enemyId}-${safeOccurrence}`;
+  }
+  return `enemy-${Math.max(0, Math.floor(Number(spawnIndex) || 0))}`;
+}
+
 export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locationId = null, random = Math.random) {
   if (loc.safe) return [];
   const ng = getNGPlusMult();
@@ -82,6 +90,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
   const spawnRoster = createSpawnRoster(eligibleEnemyIds, count, random);
   const eliteChance = getEliteChance();
 
+  const bossOccurrences = new Map();
   for (let i = 0; i < count; i++) {
     const pos = findFreeCell(map, cols, rows, enemies, 220, playerPos, locationId, random);
     if (!pos) continue;
@@ -89,6 +98,8 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
     const def = ENEMIES[enemyId];
     if (!def) continue;
     const isBoss = !!def.boss;
+    const bossOccurrence = isBoss ? (bossOccurrences.get(enemyId) || 0) + 1 : 0;
+    if (isBoss) bossOccurrences.set(enemyId, bossOccurrence);
     const isElite = !isBoss && random() < eliteChance;
     let modifier = null;
     if (!isBoss && !isElite && random() < MODIFIER_CHANCE) {
@@ -98,7 +109,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
     const mod = modifier ? MODIFIERS[modifier] : null;
     const hp = Math.round(def.hp * (isElite ? ELITE_HP_MULT : 1) * (mod ? mod.hpMult : 1) * ng.hpMult * riftM.hpMult);
     enemies.push({
-      id: i, persistentId: isBoss ? `boss-${enemyId}` : `enemy-${i}`, enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
+      id: i, persistentId: createEnemyPersistentId(enemyId, isBoss, bossOccurrence, i), enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
       homeX: pos.x * TILE + TILE / 2, homeY: pos.y * TILE + TILE / 2,
       hp, maxHp: hp, elite: isElite, boss: isBoss, modifier, collisionRadius: ENEMY_COLLISION_RADIUS,
       effects: [], phase: 0, state: 'idle', tacticalSpecialPending: false,

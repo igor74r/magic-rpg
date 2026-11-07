@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createWorldState, ensureWorldState } from '../systems/world-state.js';
 import { readFileSync } from 'node:fs';
+import { createEnemyPersistentId, createSpawnRoster } from '../systems/overworld/spawn.js';
 import {
   ensureRegionRecord,
   recordRegionChestOpened,
@@ -12,6 +13,14 @@ import {
   recordRegionSecretLayout,
   applyRegionPersistence
 } from '../systems/region-state.js';
+
+assert.equal(createEnemyPersistentId('grave-king', true, 1), 'boss-grave-king');
+assert.equal(createEnemyPersistentId('grave-king', true, 2), 'boss-grave-king-2');
+assert.equal(createEnemyPersistentId('grave-king', true, 3), 'boss-grave-king-3');
+assert.equal(createEnemyPersistentId('wolf', false, 0, 4), 'enemy-4');
+const repeatedBossRoster = createSpawnRoster(['wolf', 'grave-king'], 4, () => 0.5);
+assert.equal(repeatedBossRoster.filter(id => id === 'grave-king').length, 2,
+  'small enemy rosters must preserve repeated boss entries for distinct encounters');
 
 const game = { world: createWorldState({ seed: 998877 }) };
 const world = ensureWorldState(game);
@@ -72,8 +81,8 @@ assert.equal(ensureRegionRecord(world, 'ruins', 1).discoveredSecrets.length, 0,
   'secret discovery must be isolated per region');
 assert.equal(ensureRegionRecord(world, 'ruins', 1).openedChests.length, 0, 'region state must be isolated');
 const spawnSource = readFileSync(new URL('../systems/overworld/spawn.js', import.meta.url), 'utf8');
-assert.ok(spawnSource.includes('persistentId: isBoss ? `boss-${enemyId}` : `enemy-${i}`'),
-  'boss persistent IDs must use the boss type rather than the mutable spawn slot');
+assert.ok(spawnSource.includes('createEnemyPersistentId(enemyId, isBoss, bossOccurrence, i)'),
+  'boss persistent IDs must use stable type and occurrence identity');
 const combatSource = readFileSync(new URL('../systems/overworld/combat.js', import.meta.url), 'utf8');
 assert.match(combatSource, /const defeatedRegionId = ow\.sourceLocationId \|\| ow\.locationId;/,
   'enemy defeat persistence must use the resolved region even when sourceLocationId is absent');
