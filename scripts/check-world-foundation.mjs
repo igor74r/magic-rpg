@@ -52,8 +52,8 @@ import { syncWorldEventMarkers, markWorldEventMarkerCompleted } from '../systems
 
 assert.equal(getRegionalEliteChance(0, 0.2), 0.2, 'secure regions retain the base elite chance');
 assert.equal(getRegionalEliteChance(1, 0.2), 0.25, 'each threat level adds five percentage points');
-assert.equal(getRegionalEliteChance(3, 0.2), 0.35, 'maximum regional threat adds fifteen percentage points');
-assert.equal(getRegionalEliteChance(99, 0.2), 0.35, 'regional threat is clamped to three levels');
+assert.ok(Math.abs(getRegionalEliteChance(3, 0.2) - 0.35) < 1e-12, 'maximum regional threat adds fifteen percentage points');
+assert.ok(Math.abs(getRegionalEliteChance(99, 0.2) - 0.35) < 1e-12, 'regional threat is clamped to three levels');
 assert.equal(getRegionalEliteChance(-2, 0.2), 0.2, 'negative regional threat cannot reduce the base chance');
 assert.equal(getRegionalEliteChance(3, 0.45), 0.5, 'elite chance is capped at fifty percent');
 assert.equal(getRegionalEliteChance(3, 0.6), 0.5, 'high difficulty chance also respects the hard cap');
