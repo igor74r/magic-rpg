@@ -105,6 +105,8 @@ jobs:
         run: node scripts/check-world-foundation.mjs
       - name: Check persistent world-event runtime
         run: node scripts/check-world-events-runtime.mjs
+      - name: Check faction and world-event status UI
+        run: node scripts/check-world-status-ui.mjs
 
       - name: Check combat actions for all playable classes
         run: node scripts/check-combat-actions.mjs

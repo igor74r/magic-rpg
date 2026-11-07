@@ -17,6 +17,7 @@ import {
 import { renderPassives } from './passives.js';
 import { renderChronicles } from './chronicles.js';
 import { renderHeroOverview, renderDashboardContext } from './dashboard.js';
+import { renderWorldOverview } from './world.js';
 import { setPaused } from './overworld/render.js';
 
 let overhaulCssLoaded = false;
@@ -338,7 +339,7 @@ function getDashboardTabTitle(tab) {
   return element?.textContent?.trim() || ({
     inventory: 'Экипировка', spells: 'Магия и навыки', quests: 'Журнал заданий',
     hero: 'Мой герой', talents: 'Древо талантов', bestiary: 'Бестиарий',
-    achievements: 'Достижения', statistics: 'Статистика', chronicles: 'Хроники мира'
+    achievements: 'Достижения', statistics: 'Статистика', chronicles: 'Хроники мира', world: 'Мир и фракции'
   }[tab] || 'Раздел игры');
 }
 
@@ -551,6 +552,8 @@ function renderTab(tab) {
     element.innerHTML = renderBestiary();
   } else if (tab === 'chronicles') {
     element.innerHTML = renderChronicles();
+  } else if (tab === 'world') {
+    element.innerHTML = renderWorldOverview();
   } else if (tab === 'hero') {
     element.innerHTML = renderHeroOverview();
   }

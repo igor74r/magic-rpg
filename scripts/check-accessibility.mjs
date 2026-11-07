@@ -17,7 +17,7 @@ const [html, main, header, menu, css, inventory, shop, npcs, overworld, overworl
 ]);
 
 const tabs = [...html.matchAll(/<(?:div|button)\b(?=[^>]*\bclass="(?:tab|settings-tab)[^"]*")(?=[^>]*\brole="tab")[^>]*>/g)];
-assert.equal(tabs.length, 14, 'all game and settings navigation items must expose tab semantics');
+assert.equal(tabs.length, 15, 'all game and settings navigation items must expose tab semantics');
 for (const [tag] of tabs) {
   assert.match(tag, /aria-selected="(?:true|false)"/);
   assert.match(tag, /aria-controls="(?:tab-content|settings-content)"/);
@@ -32,6 +32,7 @@ for (const [, labelledBy] of html.matchAll(/\baria-labelledby="([^"]+)"/g)) {
   }
 }
 assert.match(html, /id="game-tab-hero" role="tab"[^>]*data-tab="hero"/, 'the hero dossier must be reachable from primary navigation');
+assert.match(html, /id="game-tab-world" role="tab"[^>]*data-tab="world"/, 'the faction and world journal must be reachable from primary navigation');
 assert.match(html, /id="dashboard-context"[^>]*aria-label="Текущая цель"/, 'the dashboard must expose a persistent current-objective panel');
 assert.match(html, /id="game-log-search" class="log-search" type="search"/, 'the event journal must provide text search');
 for (const filter of ['all', 'combat', 'loot', 'story']) {
@@ -154,7 +155,7 @@ assert.ok(quests.includes('type="button" data-game-action="claim-quest"'),
   'daily quest reward controls must declare button type');
 assert.ok(quests.includes('role="progressbar" aria-label="Прогресс миссии: ${mission.title}" aria-valuemin="0" aria-valuemax="${mission.count}" aria-valuenow="${Math.min(missionProgress.current, mission.count)}"'),
   'campaign mission progress must expose accessible progress semantics');
-console.log('check-accessibility: PASS (14 keyboard-operable tabs, labelled settings, modal/live-region/progress semantics)');
+console.log('check-accessibility: PASS (15 keyboard-operable tabs, labelled settings, modal/live-region/progress semantics)');
 
 const npcButtons = npcs.match(/<button\b[^>]*>/g) || [];
 assert.ok(npcButtons.length > 0, 'NPC screens should render interactive buttons');

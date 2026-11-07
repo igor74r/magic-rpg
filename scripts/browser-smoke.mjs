@@ -373,8 +373,8 @@ try {
     await navSearch.fill('');
     assert.equal(await page.locator('#game-tab-inventory').isVisible(), true,
       `${viewport.name}: clearing navigation search must restore all sections`);
-    assert.equal(await page.locator('.dashboard-tablist [role="tab"]').count(), 9,
-      `${viewport.name}: all nine remaining dashboard sections must be present`);
+    assert.equal(await page.locator('.dashboard-tablist [role="tab"]').count(), 10,
+      `${viewport.name}: all ten dashboard sections must be present`);
     assert.equal(await page.locator('#dashboard-context').isVisible(), true,
       `${viewport.name}: live quest context must remain visible`);
     const missionAnnouncements = page.locator('#dashboard-context .dashboard-context-mission');
@@ -488,6 +488,21 @@ try {
     await worldDialog.locator('[data-portal-travel]').click();
     await worldDialog.waitFor({ state: 'detached' });
     await page.locator('#screen-game.overworld-active').waitFor();
+    // The world journal exposes faction standing and persistent event progress.
+    const activeEventName = await page.evaluate(id => {
+      const save = JSON.parse(localStorage.getItem('magic-rpg-save-1'));
+      return save.world.events.active.find(event => event.id === id).name;
+    }, eventId);
+    await page.evaluate(() => window.GameAPI.switchTab('world'));
+    const worldStatusModal = page.locator('#dashboard-tab-modal');
+    await worldStatusModal.waitFor({ state: 'visible' });
+    const worldStatusText = await worldStatusModal.innerText();
+    assert.match(worldStatusText, /Мир и фракции/);
+    assert.match(worldStatusText, /Стражи Хаба/);
+    assert.ok(worldStatusText.includes(activeEventName), viewport.name + ': active regional event must appear in the world journal');
+    assert.match(worldStatusText, /Изменения репутации/);
+    await worldStatusModal.locator('[data-dashboard-modal-close]').click();
+    await worldStatusModal.waitFor({ state: 'detached' });
     // The separate amber gate must launch the existing 40-floor Tower menu.
     await page.evaluate(() => window.GameAPI.interactNpc('tower-portal'));
     await page.locator('#tower-map-overlay').waitFor({ state: 'visible' });

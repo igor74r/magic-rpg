@@ -43,6 +43,10 @@ World events advance with the world clock. Visible events receive deterministic 
 - New characters are created directly with the canonical v18 equipment, world, faction and branch structures.
 - NG+ preserves the world seed but resets regional discoveries, event state and faction standing.
 
+## Player-facing status UI
+
+The World and Factions dashboard tab displays the four faction standings, reputation ranks and history, active event objectives, claimable event rewards, recent event history, current region, unlocked routes and exploration progress. Event and save-provided text is escaped before insertion into the UI.
+
 ## Verification
 
 - scripts/check-save-migrations.mjs

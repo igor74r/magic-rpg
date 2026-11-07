@@ -1,3 +1,13 @@
+## 2026-11-07 — World status UI
+
+- Added a dedicated Мир и фракции tab to the dashboard.
+- Shows all four faction reputation values, rank labels and progress bars.
+- Lists active regional events with acceptance state, objective progress, remaining time and rewards.
+- Separates completed events with unclaimed rewards from the recent event history.
+- Shows exploration progress, current region, unlocked routes, world clock and recent reputation changes.
+- Dynamic save data is HTML-escaped before rendering.
+- Verification: world status UI unit test, browser smoke on desktop/mobile/small-mobile and visual regression passed locally.
+
 ## 2026-11-07 — Open-world foundation v18
 
 - Added a persisted world state with a per-save seed, generator version, world clock, region visit counters, discovered regions and unlocked routes.

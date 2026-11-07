@@ -1910,3 +1910,63 @@ body.dashboard-modal-open #screen-game .dashboard-main > #tab-content {
   .inv-sort-group .inv-filter-row { grid-template-columns:1fr; }
 }
 @media (prefers-reduced-motion:reduce) { .inv-rarity-chip { transition:none; } }
+
+/* Open-world status, faction standing and persistent event journal */
+.world-overview{display:grid;gap:18px;min-width:0;color:#e8dfc9}
+.world-overview-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:20px;border:1px solid rgba(126,190,178,.28);border-radius:12px;background:linear-gradient(135deg,rgba(18,47,49,.96),rgba(13,22,28,.98) 62%,rgba(69,48,28,.8))}
+.world-overview-hero h2{margin:5px 0 7px;color:#f1d69b;font-size:clamp(22px,3vw,30px)}
+.world-overview-hero p{max-width:620px;margin:0;color:#b9c9c1;line-height:1.55;font-size:13px}
+.world-card-kicker{display:block;color:#86cfc2;font-size:9px;font-weight:900;letter-spacing:.16em}
+.world-overview-current{display:grid;gap:5px;min-width:160px;padding:12px 14px;border:1px solid rgba(230,199,131,.3);border-radius:9px;background:rgba(8,15,18,.6)}
+.world-overview-current span{color:#b79a67;font-size:9px;font-weight:800;letter-spacing:.13em}
+.world-overview-current b{color:#f4dfb1;font-size:15px}
+.world-overview-current small{color:#9fb3ad;font-size:11px}
+.world-overview-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.world-metric{display:grid;gap:7px;min-width:0;padding:13px;border:1px solid rgba(126,190,178,.2);border-radius:9px;background:rgba(8,18,23,.76)}
+.world-metric>span{color:#9fb8b2;font-size:11px}
+.world-metric>b{color:#f0d39a;font-size:20px}
+.world-metric>small{color:#879e9c;font-size:10px}
+.world-metric>i{display:block;height:6px;overflow:hidden;border-radius:8px;background:#1d3034}
+.world-metric>i>em{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#4c9b8d,#d3b16d)}
+.world-overview-section{display:grid;gap:11px;min-width:0;padding:15px;border:1px solid rgba(126,190,178,.2);border-radius:10px;background:rgba(8,16,21,.72)}
+.world-section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.world-section-heading h3{margin:4px 0 0;color:#f0d7a5;font-size:18px}
+.world-section-heading>span{color:#91aaa5;font-size:10px;text-align:right}
+.world-faction-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.world-faction-card{display:grid;gap:8px;min-width:0;padding:13px;border:1px solid rgba(126,190,178,.2);border-radius:9px;background:linear-gradient(145deg,rgba(24,39,42,.9),rgba(12,20,25,.92))}
+.world-faction-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.world-faction-card h3{margin:4px 0 0;color:#e8dfc9;font-size:14px}
+.world-faction-value{color:#e6c783;font-size:18px;font-variant-numeric:tabular-nums}
+.world-faction-rank{color:#9bc8b8;font-size:11px;font-weight:800}
+.world-reputation-track{position:relative;height:9px;overflow:visible;border-radius:9px;background:linear-gradient(90deg,#663b43 0%,#354347 50%,#326e5d 100%)}
+.world-reputation-fill{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#b77d69,#e1c17b);opacity:.9}
+.world-reputation-center{position:absolute;top:-3px;left:50%;width:2px;height:15px;background:#f7e6bc;box-shadow:0 0 4px #111}
+.world-reputation-scale{display:flex;justify-content:space-between;color:#718984;font-size:9px;font-variant-numeric:tabular-nums}
+.world-event-card{display:grid;gap:8px;min-width:0;padding:14px;border:1px solid rgba(126,190,178,.24);border-radius:9px;background:rgba(17,31,35,.86)}
+.world-event-card.is-accepted{border-color:rgba(116,190,155,.55)}
+.world-event-card.is-claimable{border-color:rgba(230,199,131,.58);background:rgba(49,39,25,.35)}
+.world-event-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.world-event-card h4{margin:4px 0 0;color:#f0d7a5;font-size:15px}
+.world-event-status{max-width:48%;color:#9ec9b8;font-size:10px;text-align:right}
+.world-event-card.is-pending .world-event-status{color:#d5b77d}
+.world-event-card.is-claimable .world-event-status{color:#e7ca8c}
+.world-event-location{color:#9eb4ad;font-size:10px}
+.world-event-card p{margin:0;color:#c1ccc2;font-size:12px;line-height:1.5}
+.world-event-progress-row{display:flex;justify-content:space-between;color:#a9bdb4;font-size:10px}
+.world-event-progress-row b{color:#e6d2a8;font-variant-numeric:tabular-nums}
+.world-event-progress{height:7px;overflow:hidden;border-radius:8px;background:#25373a}
+.world-event-progress i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#4f9b8c,#dfbd77)}
+.world-event-footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px;color:#9aaea5;font-size:10px}
+.world-subheading{margin:5px 0 0;color:#d8c39a;font-size:13px}
+.world-empty-note{margin:0;padding:12px;border:1px dashed rgba(126,190,178,.24);border-radius:8px;color:#8fa7a2;font-size:12px;line-height:1.55}
+.world-history-list{display:grid;gap:6px}
+.world-history-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 10px;border-bottom:1px solid rgba(126,190,178,.12);min-width:0}
+.world-history-row>div{display:grid;gap:3px;min-width:0}
+.world-history-row b{overflow-wrap:anywhere;color:#d8d9c8;font-size:11px}
+.world-history-row small{overflow-wrap:anywhere;color:#809994;font-size:10px}
+.world-history-mark{min-width:74px;padding:4px 6px;border:1px solid rgba(126,190,178,.25);border-radius:6px;color:#9bc8b8;font-size:9px;font-weight:800;text-align:center}
+.world-history-mark.completed{border-color:rgba(115,183,143,.4);color:#a8d7b4}
+.world-history-mark.failed,.world-history-mark.expired{border-color:rgba(186,115,119,.35);color:#d99a9f}
+.world-history-mark.reputation{color:#e4c57f}
+.world-history-reward{color:#bba77b;font-size:9px;text-align:right}
+@media(max-width:720px){.world-overview-hero{align-items:stretch;flex-direction:column}.world-overview-current{min-width:0}.world-overview-metrics{grid-template-columns:1fr}.world-faction-grid{grid-template-columns:1fr}.world-event-card-top{flex-direction:column}.world-event-status{max-width:none;text-align:left}.world-history-row{grid-template-columns:auto minmax(0,1fr)}.world-history-reward{grid-column:2;text-align:left}}

@@ -1,3 +1,5 @@
+The new World & Factions dashboard tab shows faction standing, active regional events, reward claims, exploration progress and recent event history.
+
 ## Open-world update — save schema v18
 
 The world is now explored through a connected region graph instead of a linear level gate. New saves begin in Aurora, reveal neighboring routes as regions are visited, and use a per-save deterministic seed for terrain and encounter placement. Persistent regional events can be accepted, progressed through combat, and claimed for rewards that also affect faction standing. Existing saves migrate from v1–v17 and keep legacy fast travel so returning players are not stranded.
