@@ -7,7 +7,8 @@ const EVENT_EMOJIS = Object.freeze({
   'rift-breach': '🌀',
   'ash-nomad-scouts': '🔥',
   'elite-hunt': '☠️',
-  'regional-boss-bounty': '🐉'
+  'regional-boss-bounty': '🐉',
+  'frontier-survey': '🧭'
 });
 
 export function createWorldEventMarker(ow, event) {
@@ -38,6 +39,7 @@ export function createWorldEventMarker(ow, event) {
     worldEventId: event.id,
     eventType: 'world-event',
     name: completed ? `Награда: ${event.name}` : event.name,
+    description: event.objectiveText || '',
     emoji: completed ? '🎁' : (EVENT_EMOJIS[event.templateId] || '⚔️'),
     completed,
     x: position.x * TILE + TILE / 2,

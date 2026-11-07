@@ -999,8 +999,9 @@ export function renderNpcPanel() {
 
   const isEvent = !!nearNpc.isEvent;
   const safeName = escapeHtml(nearNpc.name);
+  const safeDescription = isEvent ? escapeHtml(nearNpc.description || '') : '';
   const infoText = isEvent
-    ? `<b style="color:#ffd060;">✨ ${safeName}</b> — вы нашли что-то интересное.`
+    ? `<b style="color:#ffd060;">✨ ${safeName}</b> — вы нашли что-то интересное.${safeDescription ? `<div style="margin-top:6px;color:#d8c9a8;">${safeDescription}</div>` : ''}`
     : `<b style="color:#c9a227;">${safeName}</b> — вы подошли к объекту. Выберите действие:`;
   const info = document.getElementById('npc-panel-info');
   if (info) info.innerHTML = infoText;

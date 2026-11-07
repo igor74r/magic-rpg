@@ -26,3 +26,10 @@ assert.match(main, /state\.game = JSON\.parse\(snapshot\)/,
   'event acceptance and reward claims must roll back when saving fails');
 
 console.log('Persistent world-event runtime wiring: markers, timed lifecycle, combat objectives and transactional rewards passed.');
+assert.match(markers, /'frontier-survey': '🧭'/,
+  'frontier survey markers must use a compass so they are distinct from combat events');
+assert.match(markers, /description: event\.objectiveText \|\| ''/,
+  'world-event markers must carry their objective text into the interaction panel');
+assert.match((await import('node:fs')).readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8'),
+  /safeDescription = isEvent \? escapeHtml\(nearNpc\.description \|\| ''\)/,
+  'event interaction panel must display escaped objective guidance');
