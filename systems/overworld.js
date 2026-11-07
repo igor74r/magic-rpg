@@ -55,7 +55,7 @@ export function enterOverworld(locationId, opts = {}) {
   const npcs = spawnNPCs(loc, locationId, spawnRandom);
   const statics = spawnStatics(loc, locationId, cols, rows);
   const events = spawnEvents(loc, map, cols, rows, playerPos, sourceLocationId, [...enemies, ...chests], spawnRandom);
-  if (world && !opts.rifMode && !opts.towerMode) applyRegionPersistence(world, sourceLocationId, enemies, chests);
+  if (world && !opts.rifMode && !opts.towerMode) applyRegionPersistence(world, sourceLocationId, enemies, chests, events);
   const camera = initCamera(playerPos, cols, rows);
 
   const worldSeed = Number.isSafeInteger(world?.seed) ? world.seed : Number.isSafeInteger(state.game?.worldSeed) ? state.game.worldSeed : 1;

@@ -2,6 +2,7 @@ import { state } from './systems/state.js';
 import { WORLD_CONNECTIONS, WORLD_REGION_IDS, getWorldRouteKey } from './data/world.js';
 import { ensureWorldState, getAccessibleWorldRegions, canTravelToRegion, discoverWorldRegion } from './systems/world-state.js';
 import { acceptWorldEvent, claimWorldEventReward } from './systems/world-events.js';
+import { recordRegionEventResolved } from './systems/region-state.js';
 import { LOCATIONS } from './data/locations.js?v=20261102-fix1';
 import { on, emit } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
@@ -966,6 +967,7 @@ function handleWorldEvent(eventId) {
     if (reward.stored) logClass = 'warning';
   }
 
+  recordRegionEventResolved(state.game.world, ow.sourceLocationId || ow.locationId, ev.id);
   ow.events = ow.events.filter(e => e.id !== eventId);
   if (!saveGame()) {
     state.game = previousGame;
