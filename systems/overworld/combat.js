@@ -20,6 +20,7 @@ import {
 } from '../status.js';
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
+import { recordWorldEventKill } from '../world-events.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
@@ -1729,6 +1730,8 @@ function combatVictory() {
 
   p.stats.kills[enemy.enemyId] =
     incrementSafeCount(p.stats.kills[enemy.enemyId]);
+
+  recordWorldEventKill(state.game, ow.sourceLocationId || ow.locationId, enemy);
 
   const campaignUpdates = recordCampaignKill(p, ow.locationId, enemy.enemyId);
   if (campaignUpdates.length > 0) {

@@ -61,18 +61,15 @@ const overworldSource = readFileSync(new URL('../systems/overworld.js', import.m
 const portalSource = readFileSync(new URL('../main.js', import.meta.url), 'utf8');
 assert.ok(campaignSource.includes('getStoryLocationProgression'),
   'campaign must expose a single source of truth for story route order');
-assert.ok(overworldSource.includes('canEnterStoryLocation(state.game.player, locationId)'),
-  'direct overworld entry must enforce level gates');
-assert.ok(portalSource.includes('Требуется уровень') && portalSource.includes("classList.toggle('is-locked'"),
-  'Aurora world atlas must visibly mark locked destinations and explain level requirements');
-assert.ok(portalSource.includes('destinations.sort(([a], [b]) =>') && portalSource.includes('storyOrder.get(a)') && portalSource.includes('storyOrder.get(b)'),
-  'Aurora atlas must sort campaign destinations by story sequence');
-assert.ok(portalSource.includes('storyPoints') && portalSource.includes('routePoints'),
-  'the unified portal atlas must pass ordered story locations into its pixel-map renderer');
-assert.ok(portalSource.includes('if (routePoints.length > 1)') &&
-  portalSource.includes('ctx.lineTo(point.x / 4, point.y / 4)'),
-  'the pixel-map renderer must draw the ordered campaign route on canvas');
-assert.ok(portalSource.includes('canEnterStoryLocation(state.game?.player, id)'),
-  'the unified portal atlas must prevent travel to locked story destinations');
+assert.ok(!overworldSource.includes('canEnterStoryLocation'),
+  'recommended story levels must not prevent entry into an open-world region');
+assert.ok(portalSource.includes('WORLD_REGION_IDS') && portalSource.includes('WORLD_CONNECTIONS'),
+  'Aurora atlas must show regions from the connected world graph');
+assert.ok(portalSource.includes('canTravelToRegion') && portalSource.includes('discoverWorldRegion'),
+  'the atlas must allow only connected routes and reveal neighboring routes on arrival');
+assert.ok(portalSource.includes('routeLines') && portalSource.includes('ctx.lineTo(route.to.x / 4, route.to.y / 4)'),
+  'the pixel map must render the actual world graph rather than a linear campaign path');
+assert.ok(!portalSource.includes('canEnterStoryLocation(state.game?.player, id)'),
+  'the unified portal atlas must not hard-lock regions by campaign level');
 
-console.log('check-story-location-gates: OK — ordered regions, five level bands, direct-entry protection');
+console.log('check-story-location-gates: OK — story recommendations remain ordered while exploration is graph-based');

@@ -168,12 +168,12 @@ export function generateVillageMap(cols, rows) {
   return grid;
 }
 
-export function generateMap(locationId, cols, rows) {
+export function generateMap(locationId, cols, rows, random = null) {
   if (locationId === 'village') {
     return generateVillageMap(cols, rows);
   }
 
-  const rng = seededRandom(hashString(locationId));
+  const rng = typeof random === 'function' ? random : seededRandom(hashString(locationId));
   const grid = [];
 
   for (let y = 0; y < rows; y++) {

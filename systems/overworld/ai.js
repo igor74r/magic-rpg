@@ -2,6 +2,10 @@ import { state } from '../state.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { playSound } from '../audio.js';
 import { TILE } from './map.js';
+import { advanceWorldEvents, getVisibleWorldEventsForRegion } from '../world-events.js';
+import { syncWorldEventMarkers } from './world-event-markers.js';
+import { saveGame } from '../save.js';
+import { emit } from '../events.js';
 import { canOccupyPlayerPosition, canOccupyActorPosition, isActorPositionClear, PLAYER_COLLISION_RADIUS, NPC_COLLISION_RADIUS, ENEMY_COLLISION_RADIUS } from './collisions.js';
 import { openChest } from './spawn.js';
 import { enterCombat } from './combat.js';
@@ -86,6 +90,35 @@ export function updateOverworld(dt) {
   }
 
   if (ow.combat || ow.defeated) return;
+
+  const regionId = ow.sourceLocationId || ow.locationId;
+  if (state.game && regionId) {
+    let previousGame = null;
+    try { previousGame = JSON.stringify(state.game); } catch {}
+    const eventUpdate = advanceWorldEvents(state.game, dt, regionId);
+    if (eventUpdate.changed) {
+      if (!saveGame() && previousGame) {
+        try { state.game = JSON.parse(previousGame); } catch {}
+      } else {
+        for (const event of eventUpdate.started) {
+          emit('log', { channel: 'game', msg: 'Новое мировое событие: ' + event.name, cls: 'success' });
+        }
+        for (const event of eventUpdate.finished) {
+          emit('log', {
+            channel: 'game',
+            msg: (event.status === 'failed' ? 'Событие провалено: ' : 'Событие завершилось: ') + event.name,
+            cls: event.status === 'failed' ? 'warning' : 'success'
+          });
+        }
+      }
+    }
+    const visibleEvents = getVisibleWorldEventsForRegion(state.game, regionId);
+    syncWorldEventMarkers(
+      ow,
+      visibleEvents.filter(event => event.status === 'active'),
+      visibleEvents.filter(event => event.status === 'completed')
+    );
+  }
 
   const groupBehaviors = getEnemyGroupBehaviors(ow.enemies, ow.player, { aggroRange: AGGRO_RANGE, leashRange: LEASH_RANGE });
 

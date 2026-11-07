@@ -8,11 +8,11 @@ const port = 4174;
 const baseUrl = `http://127.0.0.1:${port}`;
 const output = 'test-artifacts/visual-regression';
 await mkdir(output, { recursive: true });
-const server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1'], { stdio: 'ignore' });
+const server = spawn(process.platform === 'win32' ? 'python' : 'python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1'], { stdio: 'ignore' });
 let browser;
 async function waitForServer() {
   for (let i = 0; i < 40; i++) {
-    try { if ((await fetch(baseUrl)).ok) return; } catch {}
+    try { const response = await fetch(baseUrl); await response.arrayBuffer(); if (response.ok) return; } catch {}
     await delay(250);
   }
   throw new Error('Visual test server did not start');

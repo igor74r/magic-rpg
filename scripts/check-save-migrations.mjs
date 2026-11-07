@@ -1,4 +1,4 @@
-// Migration regression: exercise every supported save version v1-v16 without touching real browser storage.
+// Migration regression: exercise every supported save version v1-v17 without touching real browser storage.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { migrateGame, loadGameData, migrateLegacySave, hasSave, deleteSave, getSlotInfo, saveGame, validateCurrentSaveShape } from '../systems/save.js';
@@ -9,7 +9,7 @@ import { getExpNext } from '../systems/progression.js';
 
 const expectedSlots = ['weapon','head','shoulders','chest','gloves','legs','boots','shield','ring1','ring2','amulet','cloak'];
 const failures = [];
-for (let version = 1; version <= 16; version++) {
+for (let version = 1; version <= 17; version++) {
   const equipped = version <= 12
     ? {
         weapon: 'iron-sword', armor: 'leather-armor',
@@ -47,7 +47,7 @@ for (let version = 1; version <= 16; version++) {
     hp: 100, maxHp: 120, mp: 40, maxMp: 80,
     str: 12, int: 8, wis: 9, con: 10, dex: 10, luck: 5,
     statPoints: 0, passivePoints: 0,
-    inventory: [{ id: 'mana-crystal', qty: 2 }, { id: 'health-potion', qty: 3 }],
+    inventory: [version < 17 ? { id: 'mana-crystal', qty: 2 } : { id: 'old-archive-seal', qty: 2 }, { id: 'health-potion', qty: 3 }],
     spells: ['fireball'],
     stats: { kills: { wolf: 17 }, deaths: 4, goldEarned: 900, chestsOpened: 2 },
     equipped,
@@ -71,9 +71,13 @@ for (let version = 1; version <= 16; version++) {
     assert.ok(Number.isSafeInteger(migrated.worldSeed) && migrated.worldSeed > 0 && migrated.worldSeed <= 0xffffffff,
       'every migrated save must receive a stable unsigned world seed');
     assert.equal(migrated.worldGeneratorVersion, 1);
+    assert.equal(migrated.world.seed, migrated.worldSeed, 'nested world state must reuse the compatibility seed');
+    assert.equal(migrated.world.generatorVersion, migrated.worldGeneratorVersion);
+    assert.equal(migrated.world.legacyFastTravel, true, 'legacy saves must retain unrestricted travel');
     const worldSeed = migrated.worldSeed;
     migrateGame(migrated);
     assert.equal(migrated.worldSeed, worldSeed, 'world seed must remain stable across repeated migrations');
+    assert.equal(migrated.world.seed, worldSeed, 'nested world seed must remain stable across repeated migrations');
     assert.equal(migrated.player.name, 'Migration Fixture');
     assert.equal(migrated.player.level, 12);
     assert.equal(migrated.player.expNext, getExpNext(12));
@@ -199,7 +203,13 @@ assert.equal(malformedLegacyCycle.player.ngPlus, 0,
 assert.doesNotThrow(() => validateCurrentSaveShape(malformedLegacyCycle),
   'normalized legacy NG+ counters must pass current schema validation');
 console.log('PASS malformed legacy NG+ counters normalize safely; current saves reject invalid counters');
-console.log('PASS new character creation runs v16/v17 migrations before first save');
+assert.equal(freshSave.world.legacyFastTravel, false, 'new characters must use the connected world graph');
+assert.deepEqual(freshSave.world.discoveredRegions, ['village'], 'new characters must start with Aurora discovered only');
+assert.equal(freshSave.world.currentRegionId, 'village', 'new characters must track their starting region');
+assert.deepEqual(freshSave.world.regionVisits, { village: 1 }, 'the starting region visit seed must be initialized exactly once');
+assert.equal(freshSave.worldSeed, freshSave.world.seed, 'top-level and nested save seeds must stay synchronized');
+assert.equal(freshSave.worldGeneratorVersion, freshSave.world.generatorVersion);
+console.log('PASS new character starts on v18 with a fresh, non-legacy world');
 storage.set('magic-rpg-save-1', JSON.stringify({
   version: 16,
   player: {
@@ -400,5 +410,5 @@ assert.equal(storage.has('magic-rpg-save'), false, 'legacy key should be removed
 assert.equal(storage.has('magic-rpg-save-1'), true, 'verified destination slot should exist');
 console.log('PASS legacy save migration preserves source data on write failure');
 
-console.log(`Save migration regression: ${16 - failures.length}/16 legacy versions + load path + future-version and malformed-save guards passed; 12 equipment slots verified.`);
+console.log(`Save migration regression: ${17 - failures.length}/17 legacy versions + load path + future-version and malformed-save guards passed; 12 equipment slots verified.`);
 if (failures.length) process.exitCode = 1;

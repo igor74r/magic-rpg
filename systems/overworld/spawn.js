@@ -109,6 +109,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
 }
 
 export function spawnNPCs(loc, locationId = '', random = Math.random) {
+  if (typeof locationId === 'function') { random = locationId; locationId = ''; }
   const baseNPCs = Array.isArray(loc.npcs) ? [...loc.npcs] : [];
   // A wandering merchant may appear in ordinary exploration, never in the Rift,
   // Tower, or story-dragon arenas. Each entry rolls independently.

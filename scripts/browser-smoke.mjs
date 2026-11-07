@@ -5,7 +5,7 @@ import { chromium } from 'playwright';
 
 const port = 4173;
 const baseUrl = `http://127.0.0.1:${port}`;
-const server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1'], {
+const server = spawn(process.platform === 'win32' ? 'python' : 'python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1'], {
   stdio: 'ignore'
 });
 let browser;
@@ -14,6 +14,7 @@ async function waitForServer() {
   for (let attempt = 0; attempt < 40; attempt++) {
     try {
       const response = await fetch(baseUrl);
+      await response.arrayBuffer();
       if (response.ok) return;
     } catch {}
     await delay(250);
@@ -416,72 +417,77 @@ try {
     assert.equal(await worldDialog.getAttribute('aria-modal'), 'true',
       `${viewport.name}: world portal must open an accessible modal`);
 
-    // A new character must not bypass the first campaign mission by selecting
-    // a later story region from the portal. The first lock is level-based.
+    // Open-world routes are driven by the connected region graph, not campaign level.
     let forestNode = worldDialog.locator('[data-portal-node="forest"]');
     await forestNode.click();
-    assert.equal((await forestNode.getAttribute('class')).includes('is-locked'), true,
-      `${viewport.name}: forest must remain visibly locked for a level-one character`);
-    assert.match(await worldDialog.locator('.portal-destination-status').innerText(), /Требуется уровень 3/i,
-      `${viewport.name}: atlas must explain the level requirement`);
-    assert.equal(await worldDialog.locator('[data-portal-travel]').isDisabled(), true,
-      `${viewport.name}: locked destinations must not be travelable`);
-    await page.keyboard.press('Escape');
+    assert.equal((await forestNode.getAttribute('class')).includes('is-available'), true,
+      viewport.name + ': forest must be available as a direct neighbor of Aurora');
+    assert.match(await worldDialog.locator('.portal-destination-status').innerText(), /новый регион/i,
+      viewport.name + ': atlas must explain that this is an unexplored region');
+    assert.equal(await worldDialog.locator('[data-portal-travel]').isDisabled(), false,
+      viewport.name + ': connected neighboring regions must be travelable without a campaign-level gate');
+    await worldDialog.locator('[data-portal-travel]').click();
     await worldDialog.waitFor({ state: 'detached' });
-
-    // Raise only the test character's level; the campaign prerequisite must
-    // still keep the forest closed until mission a1-m1 is claimed.
-    await page.evaluate(() => {
-      const raw = localStorage.getItem('magic-rpg-save-1');
-      if (!raw) throw new Error('test character save is missing');
-      const save = JSON.parse(raw);
-      save.player.level = 3;
-      localStorage.setItem('magic-rpg-save-1', JSON.stringify(save));
-      window.GameAPI.loadSlot(1);
-      if (!document.getElementById('screen-game')?.classList.contains('overworld-active')) throw new Error('Continue did not start the saved world scene');
-      window.GameAPI.interactNpc('world-portal');
-    });
-    await worldDialog.waitFor({ state: 'visible' });
-    forestNode = worldDialog.locator('[data-portal-node="forest"]');
-    await forestNode.click();
-    assert.equal((await forestNode.getAttribute('class')).includes('is-locked'), true,
-      `${viewport.name}: forest must remain locked before the first campaign mission`);
-    assert.match(await worldDialog.locator('.portal-destination-status').innerText(), /задание a1-m1/i,
-      `${viewport.name}: atlas must explain the campaign prerequisite`);
-    assert.equal(await worldDialog.locator('[data-portal-travel]').isDisabled(), true,
-      `${viewport.name}: campaign-locked destinations must not be travelable`);
-    await page.keyboard.press('Escape');
-    await worldDialog.waitFor({ state: 'detached' });
-
-    // Claim the prerequisite in the test save and reload it through the real
-    // save loader before verifying that travel becomes available.
-    await page.evaluate(() => {
-      const save = JSON.parse(localStorage.getItem('magic-rpg-save-1'));
-      save.player.campaignClaimed = { ...(save.player.campaignClaimed || {}), 'a1-m1': true };
-      localStorage.setItem('magic-rpg-save-1', JSON.stringify(save));
-      window.GameAPI.loadSlot(1);
-      if (!document.getElementById('screen-game')?.classList.contains('overworld-active')) throw new Error('Continue did not start the saved world scene');
-    });
     await page.locator('#screen-game.overworld-active').waitFor();
-    await page.locator('#overworld-canvas').waitFor({ state: 'visible' });
 
-    await page.evaluate(() => window.GameAPI.interactNpc('world-portal'));
+    const discoveredForest = await page.evaluate(() => {
+      const save = JSON.parse(localStorage.getItem('magic-rpg-save-1'));
+      return save?.world?.discoveredRegions?.includes('forest') === true;
+    });
+    assert.equal(discoveredForest, true, viewport.name + ': entering forest must persist its discovery');
+
+    // A region waystone returns only along a route that has actually been opened.
+    await page.evaluate(() => window.GameAPI.interactNpc('world-waystone'));
+    worldDialog = page.locator('#aurora-world-portal [role="dialog"][aria-labelledby="aurora-world-portal-title"]');
+    await worldDialog.waitFor({ state: 'visible' });
+    await worldDialog.locator('[data-portal-node="village"]').click();
+    assert.equal(await worldDialog.locator('[data-portal-travel]').isDisabled(), false,
+      viewport.name + ': the discovered route back to Aurora must remain available');
+    await worldDialog.locator('[data-portal-travel]').click();
+    await worldDialog.waitFor({ state: 'detached' });
+    await page.locator('#screen-game.overworld-active').waitFor();
+    // Timed world events appear on the region map and can be explicitly accepted.
+    await page.evaluate(() => window.GameAPI.openWorldPortalMenu());
     worldDialog = page.locator('#aurora-world-portal [role="dialog"][aria-labelledby="aurora-world-portal-title"]');
     await worldDialog.waitFor({ state: 'visible' });
     await worldDialog.locator('[data-portal-node="forest"]').click();
-    assert.equal(await worldDialog.locator('[data-portal-travel]').isDisabled(), false,
-      `${viewport.name}: forest travel must unlock after the campaign prerequisite`);
     await worldDialog.locator('[data-portal-travel]').click();
     await worldDialog.waitFor({ state: 'detached' });
+    await page.locator('#screen-game.overworld-active').waitFor();
 
-    // The forest has its own themed waystone two cells left of the spawn.
+    await page.reload();
+    const regionVisitCount = await page.evaluate(() => {
+      const save = JSON.parse(localStorage.getItem('magic-rpg-save-1'));
+      save.world.clockMinutes = save.world.events.nextSpawnAt;
+      const visits = save.world.regionVisits.forest;
+      localStorage.setItem('magic-rpg-save-1', JSON.stringify(save));
+      window.GameAPI.loadSlot(1);
+      return visits;
+    });
+    await page.locator('#screen-game.overworld-active').waitFor();
+    await page.waitForFunction(() => {
+      const save = JSON.parse(localStorage.getItem('magic-rpg-save-1'));
+      return save?.world?.events?.active?.some(event => event.regionId === 'forest') === true;
+    }, null, { timeout: 12000 });
+    const visitsAfterReload = await page.evaluate(() => JSON.parse(localStorage.getItem('magic-rpg-save-1')).world.regionVisits.forest);
+    assert.equal(visitsAfterReload, regionVisitCount, viewport.name + ': reloading the current region must not increment its visit seed');
+    const eventId = await page.evaluate(() => {
+      const save = JSON.parse(localStorage.getItem('magic-rpg-save-1'));
+      return save.world.events.active.find(event => event.regionId === 'forest').id;
+    });
+    await page.evaluate(id => window.GameAPI.interactNpc('event-world-' + id), eventId);
+    await page.waitForFunction(id => {
+      const save = JSON.parse(localStorage.getItem('magic-rpg-save-1'));
+      return save?.world?.events?.active?.find(event => event.id === id)?.accepted === true;
+    }, eventId, { timeout: 5000 });
+
     await page.evaluate(() => window.GameAPI.interactNpc('world-waystone'));
     worldDialog = page.locator('#aurora-world-portal [role="dialog"][aria-labelledby="aurora-world-portal-title"]');
     await worldDialog.waitFor({ state: 'visible' });
     await worldDialog.locator('[data-portal-node="village"]').click();
     await worldDialog.locator('[data-portal-travel]').click();
     await worldDialog.waitFor({ state: 'detached' });
-
+    await page.locator('#screen-game.overworld-active').waitFor();
     // The separate amber gate must launch the existing 40-floor Tower menu.
     await page.evaluate(() => window.GameAPI.interactNpc('tower-portal'));
     await page.locator('#tower-map-overlay').waitFor({ state: 'visible' });

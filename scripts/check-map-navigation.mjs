@@ -11,13 +11,15 @@ const spawn = readFileSync(new URL('../systems/overworld/spawn.js', import.meta.
 assert.match(main, /class="portal-atlas"/, 'portal must expose one unified world atlas');
 assert.match(main, /portal-map-stage/, 'the portal must render a large map viewport');
 assert.match(main, /portal-map-node/, 'destinations must be represented by map points');
-assert.match(main, /routePoints/, 'the map must preserve the ordered campaign route data');
-assert.match(main, /drawPortalPixelMap\(overlay\.querySelector\('#portal-map-art'\), points, routePoints\)/,
+assert.match(main, /routeLines/, 'the map must render edges from the connected world graph');
+assert.match(main, /drawPortalPixelMap\(overlay\.querySelector\('#portal-map-art'\), points, routeLines\)/,
   'the ordered route must be drawn on the portal canvas');
 assert.match(main, /portal-destination/, 'the selected map point must show destination details');
-assert.match(main, /canEnterStoryLocation\(state\.game\?\.player, id\)/, 'portal selection must retain campaign and level restrictions');
-assert.match(main, /latestAccess\.allowed/, 'travel must revalidate access before transition');
+assert.match(main, /canTravelToRegion\(latestWorld, currentId, id\)/, 'portal selection must follow the current connected route');
+assert.match(main, /latestAllowed/, 'travel must revalidate route access before transition');
 assert.match(main, /saveGame\(\)[\s\S]*?enterOverworld\(id\)/, 'travel must persist and enter the selected location');
+assert.match(main, /discoverWorldRegion\(latest, id, currentId\)/, 'entering a region must reveal its outgoing routes');
+assert.doesNotMatch(main, /canEnterStoryLocation\(state\.game\?\.player, id\)/, 'story level must not hard-lock graph exploration');
 assert.doesNotMatch(main, /mapSelect|mapTravel|mapEnter|ui\/locations\.js/, 'legacy radial map API must be removed');
 assert.doesNotMatch(gameExports, /locations\.js|mapSelect|mapTravel|mapEnter/, 'game module must not export the legacy map');
 assert.equal(existsSync(new URL('../ui/locations.js', import.meta.url)), false, 'legacy radial map module must be deleted');

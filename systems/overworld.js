@@ -1,13 +1,14 @@
 import { state } from './state.js';
-import { canEnterStoryLocation } from './campaign.js';
 import { LOCATIONS } from '../data/locations.js';
 import { on, emit } from './events.js';
 import { getRandomRiftLocation, getRiftLocation, getRiftLocations, endRift, recordRiftFloor } from './rift.js';
 import { getTowerLocation, recordTowerFloor, endTower } from './tower.js';
-import { TILE, generateMap, createWorldRandom } from './overworld/map.js';
+import { TILE, generateMap } from './overworld/map.js';
 import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
+import { createRegionRandom, ensureWorldState } from './world-state.js';
+import { saveGame } from './save.js';
 
 export { TILE } from './overworld/map.js';
 export { tryMovePlayer, updateOverworld } from './overworld/ai.js';
@@ -15,14 +16,6 @@ export { triggerShake, combatAttack, combatCastSpell, combatUseAbility, combatUs
 export { spawnParticles } from './overworld/particles.js';
 
 export function enterOverworld(locationId, opts = {}) {
-  if (!opts.rifMode && !opts.towerMode && state.game) {
-    const access = canEnterStoryLocation(state.game.player, locationId);
-    if (!access.allowed) {
-      const requirement = access.requirement;
-      emit('toast', `🔒 ${LOCATIONS[locationId]?.name || 'Область'} закрыта. Требуется ${requirement.recommendedLevel} уровень (${requirement.actNumber}-й акт). Ваш уровень: ${access.currentLevel}.`);
-      return false;
-    }
-  }
   const loc = LOCATIONS[locationId] || getRiftLocation(locationId) || (opts.towerMode ? getTowerLocation(opts.towerFloor || 1) : null);
   if (!loc) return;
   const sourceLocationId = loc.sourceId || locationId;
@@ -30,25 +23,38 @@ export function enterOverworld(locationId, opts = {}) {
 
   const cols = loc.mapCols || 40;
   const rows = loc.mapRows || 30;
-  const map = generateMap(locationId, cols, rows);
+  const world = state.game ? ensureWorldState(state.game, { legacy: false }) : null;
+  let random = null;
+  let seedRegionId = locationId;
+  let seedVisitIndex = 0;
+  if (world && !opts.rifMode && !opts.towerMode && world.generatorVersion > 0) {
+    const previousRegionId = world.currentRegionId;
+    seedVisitIndex = Math.max(0, Math.floor(Number(world.regionVisits[sourceLocationId]) || 0));
+    if (previousRegionId !== sourceLocationId) seedVisitIndex += 1;
+    if (seedVisitIndex < 1) seedVisitIndex = 1;
+    world.regionVisits[sourceLocationId] = seedVisitIndex;
+    world.currentRegionId = sourceLocationId;
+    state.game.location = sourceLocationId;
+    seedRegionId = sourceLocationId;
+  }
+  if (world && world.generatorVersion > 0) random = createRegionRandom(world, seedRegionId, seedVisitIndex);
+  const spawnRandom = random || Math.random;
+  const map = generateMap(locationId, cols, rows, random);
 
   const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
-
   let spawnX = cx;
   let spawnY = cy;
   if (locationId === 'village') spawnY = cy + 1;
-
   const playerPos = { x: spawnX * TILE + TILE / 2, y: spawnY * TILE + TILE / 2 };
 
-  const worldSeed = Number.isSafeInteger(state.game?.worldSeed) ? state.game.worldSeed : 1;
-  const random = createWorldRandom(worldSeed, locationId);
-  const enemies = spawnEnemies(loc, map, cols, rows, playerPos, opts, sourceLocationId, random);
-  const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, sourceLocationId, random);
-  const npcs = spawnNPCs(loc, locationId, random);
+  const enemies = spawnEnemies(loc, map, cols, rows, playerPos, opts, sourceLocationId, spawnRandom);
+  const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, sourceLocationId, spawnRandom);
+  const npcs = spawnNPCs(loc, locationId, spawnRandom);
   const statics = spawnStatics(loc, locationId, cols, rows);
-  const events = spawnEvents(loc, map, cols, rows, playerPos, sourceLocationId, [...enemies, ...chests], random);
+  const events = spawnEvents(loc, map, cols, rows, playerPos, sourceLocationId, [...enemies, ...chests], spawnRandom);
   const camera = initCamera(playerPos, cols, rows);
 
+  const worldSeed = Number.isSafeInteger(world?.seed) ? world.seed : Number.isSafeInteger(state.game?.worldSeed) ? state.game.worldSeed : 1;
   state.overworld = {
     active: true, locationId, locationName: loc.name, sourceLocationId, worldSeed, theme: loc.theme || 'default',
     safe: !!loc.safe,
@@ -66,6 +72,7 @@ export function enterOverworld(locationId, opts = {}) {
     floatingNumbers: [], particles: [], log: [],
   };
 
+  if (random) saveGame();
   emit('overworld:start');
   return true;
 }

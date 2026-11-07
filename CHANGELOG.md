@@ -1,3 +1,17 @@
+## 2026-11-07 — Open-world foundation v18
+
+- Added a persisted world state with a per-save seed, generator version, world clock, region visit counters, discovered regions and unlocked routes.
+- New characters begin in Aurora with only the village discovered. The first connected routes lead to Forest, Briar Hollow and the Ruins.
+- Region travel now follows the world graph. Entering a new region reveals its outgoing routes; returning is allowed along routes already opened.
+- Story level is now a recommendation for exploration, not a hard lock on entering a connected region. Dragon and endgame progression checks remain separate.
+- Map terrain, enemy, chest, NPC and ambient-event placement receive a deterministic per-save region random source. Legacy saves receive a stable per-save generator seed and retain unrestricted legacy fast travel.
+- Added persistent regional events: timed appearance, map markers, explicit acceptance, combat objectives, faction reputation outcomes and transactional reward claims.
+- Added faction state and independent campaign-branch state to the save schema. NG+ resets regional discoveries and faction standing while preserving the world seed.
+- Save schema is now v18. All supported saves v1–v17 migrate to v18; legacy saves retain unrestricted fast travel for compatibility. New characters are created directly as v18 and do not receive legacy fast travel.
+- Verification: save migration regression (v1–v17), world foundation, world-map navigation, event runtime wiring, static CI checks, browser smoke (1440×900, 390×844, 320×740) and browser visual regression passed locally.
+
+Next implementation slice: expose faction standing and event history in the UI, then wire independent campaign branches and the six side-story chains into the current quest screens.
+
 # Changelog
 
 ## v0.27 — карта мира и визуальная проверка биомов (01.11.2026; исходная запись локального этапа)

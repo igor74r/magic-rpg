@@ -5,6 +5,8 @@ import { addItem } from './inventory.js';
 import { migrateGame, saveGame } from './save.js';
 import { emit } from './events.js';
 import { getExpNext } from './progression.js';
+import { createWorldState } from './world-state.js';
+import { createFactionState } from './factions.js';
 
 export function createCharacter(name, className) {
   const cls = CLASSES[className];
@@ -24,7 +26,7 @@ export function createCharacter(name, className) {
   state.pendingSlot = null;
 
   state.game = {
-    version: 15,
+    version: 18,
 
     player: {
       name,
@@ -52,6 +54,7 @@ export function createCharacter(name, className) {
       campaignKills: {},
       campaignClaimed: {},
       activeCampaignMission: null,
+      activeCampaignByBranch: { intro: null, ash: null, ice: null, blood: null },
       campaignShards: {},
 
       gold: 0,
@@ -63,14 +66,14 @@ export function createCharacter(name, className) {
         head: null,
         shoulders: null,
         chest: null,
-        back: null,
-        wrists: null,
-        hands: null,
+        gloves: null,
         legs: null,
+        boots: null,
+        shield: null,
         ring1: null,
         ring2: null,
         amulet: null,
-        seal: null
+        cloak: null
       },
 
       spells: [...cls.startingSpells],
@@ -116,6 +119,8 @@ export function createCharacter(name, className) {
     },
 
     location: 'village',
+    world: createWorldState(),
+    factions: createFactionState(),
 
     storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false },
     storyShards: { flame: false, ice: false, blood: false },

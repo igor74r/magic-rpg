@@ -1,6 +1,9 @@
 import { state } from './state.js';
 import { STORY } from '../data/story.js';
 import { getExpNext } from './progression.js';
+import { ensureWorldState } from './world-state.js';
+import { ensureFactionState } from './factions.js';
+import { ensureCampaignBranchState } from './campaign-branches.js';
 
 const SLOT_PREFIX = 'magic-rpg-save-';
 const LEGACY_KEY = 'magic-rpg-save';
@@ -45,6 +48,10 @@ export function migrateLegacySave() {
 
 export function saveGame() {
   if (!state.game) return false;
+
+  ensureWorldState(state.game, { legacy: false });
+  ensureFactionState(state.game);
+  ensureCampaignBranchState(state.game.player);
 
   const slot = isValidSlot(state.currentSlot) ? state.currentSlot : 1;
   const now = Date.now();
@@ -129,6 +136,11 @@ export function validateCurrentSaveShape(game) {
       !isRecord(player.equipped) || !isRecord(player.stats) || !isRecord(player.stats.kills) ||
       !isRecord(player.campaignKills) || !isRecord(player.campaignClaimed) ||
       !isRecord(game.storyShards) || !isRecord(game.storyDragons) ||
+      !isRecord(player.activeCampaignByBranch) || !isRecord(game.world) ||
+      !Number.isSafeInteger(game.world.seed) || game.world.seed <= 0 ||
+      !Number.isSafeInteger(game.world.generatorVersion) || game.world.generatorVersion < 0 ||
+      !Array.isArray(game.world.discoveredRegions) || !Array.isArray(game.world.unlockedRoutes) ||
+      !isRecord(game.factions) || !isRecord(game.factions.reputation) || !Array.isArray(game.factions.changeLog) ||
       !(player.activeCampaignMission === null || typeof player.activeCampaignMission === 'string')) {
     throw new Error('Invalid current save structure');
   }
@@ -517,7 +529,7 @@ export function migrateGame(game) {
     game.version = 17;
   }
 
-  // Version 18: assign a stable per-save world seed without changing legacy character progress.
+  // Version 18: preserve a stable per-save seed and initialize the connected world systems.
   if (game.version < 18) {
     const source = [
       Number.isSafeInteger(game.player.createdAt) ? game.player.createdAt : 0,
@@ -525,14 +537,26 @@ export function migrateGame(game) {
       typeof game.player.class === 'string' ? game.player.class : '',
       typeof game.location === 'string' ? game.location : 'village'
     ].join('|');
-    let seed = 2166136261;
-    for (let index = 0; index < source.length; index++) {
-      seed = Math.imul(seed ^ source.charCodeAt(index), 16777619);
+    let seed = Number.isSafeInteger(game.worldSeed) && game.worldSeed > 0 ? game.worldSeed : 2166136261;
+    if (!(Number.isSafeInteger(game.worldSeed) && game.worldSeed > 0)) {
+      for (let index = 0; index < source.length; index++) {
+        seed = Math.imul(seed ^ source.charCodeAt(index), 16777619);
+      }
+      seed >>>= 0;
     }
-    seed >>>= 0;
     game.worldSeed = seed || 1;
-    game.worldGeneratorVersion = 1;
+    game.worldGeneratorVersion = Number.isSafeInteger(game.worldGeneratorVersion) && game.worldGeneratorVersion >= 1
+      ? game.worldGeneratorVersion
+      : 1;
+    ensureWorldState(game, { legacy: true });
+    ensureFactionState(game);
+    ensureCampaignBranchState(game.player);
     game.version = 18;
+  } else {
+    const hasWorldState = game.world && typeof game.world === 'object' && !Array.isArray(game.world);
+    ensureWorldState(game, { legacy: !hasWorldState });
+    ensureFactionState(game);
+    ensureCampaignBranchState(game.player);
   }
 
   // Rebase stored XP thresholds after progression balance changes while

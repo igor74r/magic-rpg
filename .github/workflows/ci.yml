@@ -101,6 +101,10 @@ jobs:
 
       - name: Check save migrations and future-version safety
         run: node scripts/check-save-migrations.mjs
+      - name: Check v18 world state, deterministic generation, factions and event lifecycle
+        run: node scripts/check-world-foundation.mjs
+      - name: Check persistent world-event runtime
+        run: node scripts/check-world-events-runtime.mjs
 
       - name: Check combat actions for all playable classes
         run: node scripts/check-combat-actions.mjs
@@ -110,6 +114,8 @@ jobs:
 
       - name: Check interactive portal world atlas and legacy list removal
         run: node scripts/check-portal-world-map.mjs
+      - name: Check connected open-world navigation
+        run: node scripts/check-world-map-navigation.mjs
 
       - name: Check story location level gates and ordered route
         run: node scripts/check-story-location-gates.mjs

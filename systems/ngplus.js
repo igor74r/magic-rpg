@@ -6,6 +6,8 @@ import { saveGame } from './save.js';
 import { emit } from './events.js';
 import { canCompleteMainQuest } from './campaign.js';
 import { getExpNext } from './progression.js';
+import { createWorldState } from './world-state.js';
+import { createFactionState } from './factions.js';
 
 function computeMaxHpFromTalents(baseHp, talents, classId) {
   let mult = 1;
@@ -47,7 +49,9 @@ export function startNGPlus() {
     riftOpenedAt: g.riftOpenedAt,
     riftClearedLocations: p.riftClearedLocations,
     shards: g.shards,
-    quests: g.quests
+    quests: g.quests,
+    world: g.world,
+    factions: g.factions
   };
 
   const carry = {
@@ -84,6 +88,7 @@ export function startNGPlus() {
     storyShards: { flame: false, ice: false, blood: false },
     storyDragons: { 'ash-herald': false, 'ice-grasp': false, 'blood-crown': false },
     activeCampaignMission: null,
+    activeCampaignByBranch: { intro: null, ash: null, ice: null, blood: null },
     spells: [...cls.startingSpells],
     cooldowns: {},
     effects: [],
@@ -104,6 +109,8 @@ export function startNGPlus() {
   g.shards = { forest: false, ruins: false, shadow: false };
   g.quests = {};
   STORY.quests.forEach(q => g.quests[q.id] = false);
+  g.world = createWorldState({ seed: gameSnapshot.world?.seed });
+  g.factions = createFactionState();
 
   if (!saveGame()) {
     Object.assign(p, playerSnapshot);
@@ -115,6 +122,8 @@ export function startNGPlus() {
     g.riftOpenedAt = gameSnapshot.riftOpenedAt;
     g.shards = gameSnapshot.shards;
     g.quests = gameSnapshot.quests;
+    g.world = gameSnapshot.world;
+    g.factions = gameSnapshot.factions;
     p.riftClearedLocations = gameSnapshot.riftClearedLocations;
     emit('toast', 'Не удалось сохранить новую игру+. Прогресс кампании восстановлен.');
     return false;

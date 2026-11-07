@@ -1,4 +1,7 @@
 import { state } from './systems/state.js';
+import { WORLD_CONNECTIONS, WORLD_REGION_IDS, getWorldRouteKey } from './data/world.js';
+import { ensureWorldState, getAccessibleWorldRegions, canTravelToRegion, discoverWorldRegion } from './systems/world-state.js';
+import { acceptWorldEvent, claimWorldEventReward } from './systems/world-events.js';
 import { LOCATIONS } from './data/locations.js?v=20261102-fix1';
 import { on, emit } from './systems/events.js';
 import { saveGame, loadSettings, migrateLegacySave } from './systems/save.js';
@@ -38,7 +41,7 @@ import {
 import { openDailyChest } from './ui/village.js';
 import { exitOverworld, enterOverworld } from './systems/overworld.js';
 import { isRiftReady, getRiftLocations, getRiftClearedCount } from './systems/rift.js';
-import { getStoryLocationProgression, canEnterStoryLocation, countStoryShards } from './systems/campaign.js';
+import { getStoryLocationProgression, countStoryShards } from './systems/campaign.js';
 import { getTotalKills, getSafeCount } from './systems/stats.js';
 import { getTowerBest, getTowerStartFloor, TOWER_MAX_FLOOR } from './systems/tower.js';
 import { startNGPlus } from './systems/ngplus.js';
@@ -583,16 +586,17 @@ function drawPortalPixelMap(canvas, points, routePoints) {
     ctx.fillRect(x + width - 13, y + 6, 3, 3);
   }
 
-  if (routePoints.length > 1) {
+  for (const route of routePoints || []) {
+    if (!route.from || !route.to) continue;
     ctx.beginPath();
-    ctx.moveTo(routePoints[0].x / 4, routePoints[0].y / 4);
-    for (const point of routePoints.slice(1)) ctx.lineTo(point.x / 4, point.y / 4);
-    ctx.strokeStyle = '#d2b16d';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 2]);
+    ctx.moveTo(route.from.x / 4, route.from.y / 4);
+    ctx.lineTo(route.to.x / 4, route.to.y / 4);
+    ctx.strokeStyle = route.unlocked ? '#d2b16d' : '#36534e';
+    ctx.lineWidth = route.unlocked ? 1.5 : 1;
+    ctx.setLineDash(route.unlocked ? [3, 2] : [1, 3]);
     ctx.stroke();
-    ctx.setLineDash([]);
   }
+  ctx.setLineDash([]);
 
   for (const point of points) {
     const x = Math.round(point.x / 4);
@@ -613,9 +617,10 @@ function openWorldPortalMenu() {
   if (!ow || ow.combat || ow.defeated) return;
   ow.active = false;
   const currentId = ow.sourceLocationId || ow.locationId;
-  const destinations = Object.entries(LOCATIONS).filter(([id, loc]) =>
-    id !== 'village' && id !== 'rift' && (loc.safe || (Array.isArray(loc.enemies) && loc.enemies.length))
-  );
+  const world = ensureWorldState(state.game, { legacy: false });
+  const destinations = WORLD_REGION_IDS
+    .filter(id => id !== 'village' && LOCATIONS[id])
+    .map(id => [id, LOCATIONS[id]]);
   const storyOrder = new Map(getStoryLocationProgression().map(item => [item.id, item]));
   destinations.sort(([a], [b]) =>
     (storyOrder.get(a)?.sequence ?? Number.MAX_SAFE_INTEGER) -
@@ -626,22 +631,40 @@ function openWorldPortalMenu() {
 
   const points = [['village', LOCATIONS.village], ...destinations].map(([id, loc], index) => {
     const story = storyOrder.get(id);
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-    // Distribute all destination points around a fixed perimeter. Random
-    // radial rings caused overlapping buttons, making some map points
-    // impossible to click with a pointer on desktop and mobile.
     const angle = -Math.PI / 2 + (index - 1) * (Math.PI * 2 / Math.max(1, destinations.length));
     const x = id === 'village' ? 500 : 500 + Math.cos(angle) * 360;
     const y = id === 'village' ? 310 : 310 + Math.sin(angle) * 220;
-    return { id, loc, story, x, y, index };
+    return {
+      id, loc, story, x, y, index,
+      discovered: id === 'rift' || world.discoveredRegions.includes(id)
+    };
   });
-  const storyPoints = points.filter(point => point.story)
-    .sort((a, b) => a.story.sequence - b.story.sequence);
-  const routePoints = [{ x: 500, y: 310 }, ...storyPoints];
+  const pointsById = new Map(points.map(point => [point.id, point]));
+  const unlockedRoutes = new Set(world.unlockedRoutes || []);
+  const routeLines = Object.entries(WORLD_CONNECTIONS).flatMap(([fromId, neighbors]) =>
+    neighbors.filter(toId => fromId < toId).map(toId => {
+      const from = pointsById.get(fromId);
+      const to = pointsById.get(toId);
+      return from && to ? {
+        from, to,
+        unlocked: unlockedRoutes.has(getWorldRouteKey(fromId, toId))
+      } : null;
+    }).filter(Boolean)
+  );
+  const accessible = new Set(getAccessibleWorldRegions(world, currentId));
   const nodeMarkup = points.map(point => {
+    const here = point.id === currentId;
+    const canTravel = point.id === 'rift' ? isRiftReady() : accessible.has(point.id);
+    const classes = [
+      'portal-map-node',
+      point.id === 'village' ? 'portal-map-village-node' : '',
+      !canTravel && !here ? 'is-locked' : '',
+      canTravel && !here ? 'is-available' : '',
+      point.discovered ? 'is-discovered' : 'is-undiscovered',
+      here ? 'is-current' : ''
+    ].filter(Boolean).join(' ');
     const label = point.story ? '#' + point.story.sequence + ' · ' + point.loc.name : point.loc.name;
-    return '<button type="button" class="portal-map-node' + (point.id === 'village' ? ' portal-map-village-node' : '') + '" data-portal-node="' + escapeHtml(point.id) +
+    return '<button type="button" class="' + classes + '" data-portal-node="' + escapeHtml(point.id) +
       '" data-x="' + point.x.toFixed(1) + '" data-y="' + point.y.toFixed(1) +
       '" style="left:' + (point.x / 10) + '%;top:' + (point.y / 6.2) + '%" aria-pressed="false" aria-label="' +
       escapeHtml(label) + '"><span class="portal-map-node-icon">' + (point.loc.emoji || '✦') +
@@ -660,13 +683,12 @@ function openWorldPortalMenu() {
     '#aurora-world-portal .portal-close{border:1px solid #719b9b;border-radius:0;background:#182a32;color:#e9ffff;padding:9px 13px;font:inherit;cursor:pointer}' +
     '#aurora-world-portal .portal-atlas-body{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px;min-height:0;flex:1;padding:14px}' +
     '#aurora-world-portal .portal-map-stage{position:relative;min-width:0;min-height:0;overflow:hidden;border:1px solid #52766b;border-radius:0;background:#0d1d26}' +
-    '#aurora-world-portal .portal-map-stage:before{display:none}' +
-    '#aurora-world-portal .portal-map-art{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}' +
-    '' +
+    '#aurora-world-portal .portal-map-stage:before{display:none}#aurora-world-portal .portal-map-art{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}' +
     '#aurora-world-portal .portal-map-node{position:absolute;z-index:2;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;min-width:58px;max-width:130px;padding:5px 7px;border:1px solid rgba(125,191,177,.5);border-radius:0;background:#0a161e;color:#edf4e8;cursor:pointer;font:inherit;box-shadow:none;transition:none}' +
     '#aurora-world-portal .portal-map-node:hover,#aurora-world-portal .portal-map-node:focus-visible{z-index:4;transform:translate(-50%,-50%);outline:2px solid #a8ded0;outline-offset:2px}' +
     '#aurora-world-portal .portal-map-node[aria-pressed="true"]{border:2px solid #e6c783;background:#42351f;box-shadow:none}' +
-    '#aurora-world-portal .portal-map-node.is-locked{border-color:#815c66;background:#241822}#aurora-world-portal .portal-map-node.is-current{border-color:#e6c783}' +
+    '#aurora-world-portal .portal-map-node.is-locked{border-color:#815c66;background:#241822;opacity:.68}#aurora-world-portal .portal-map-node.is-available{border-color:#8ec9ae}' +
+    '#aurora-world-portal .portal-map-node.is-current{border-color:#e6c783}#aurora-world-portal .portal-map-node.is-undiscovered .portal-map-node-icon{opacity:.72}' +
     '#aurora-world-portal .portal-map-node-icon{font-size:clamp(17px,2vw,25px);line-height:1.2}#aurora-world-portal .portal-map-node-label{max-width:118px;font-size:9px;line-height:1.2;text-align:center;color:#d6e4dc;pointer-events:none;user-select:none}' +
     '#aurora-world-portal .portal-map-village-node{width:82px;min-width:82px;max-width:none;height:82px;border:2px solid #e6c783;border-radius:0;background:#66512c;box-shadow:none}#aurora-world-portal .portal-map-village-node .portal-map-node-icon{font-size:31px}#aurora-world-portal .portal-map-village-node .portal-map-node-label{position:absolute;top:84px;max-width:150px;white-space:nowrap;color:#f3dba5;font-size:11px;font-weight:800}' +
     '#aurora-world-portal .portal-map-legend{position:absolute;left:12px;bottom:10px;display:flex;gap:12px;flex-wrap:wrap;color:#b7c9c1;font-size:10px;background:#07121a;border:1px solid #29464a;padding:7px 10px;border-radius:0}' +
@@ -680,23 +702,22 @@ function openWorldPortalMenu() {
     '@media(max-width:650px){#aurora-world-portal .portal-atlas{height:96vh;min-height:0}#aurora-world-portal .portal-atlas-head{padding:12px 14px}#aurora-world-portal .portal-atlas-body{grid-template-columns:1fr;grid-template-rows:minmax(260px,1fr) auto;gap:9px;padding:9px}#aurora-world-portal .portal-map-stage{min-height:260px}#aurora-world-portal .portal-destination{max-height:205px;padding:12px;gap:7px}#aurora-world-portal .portal-destination h2{font-size:18px}#aurora-world-portal .portal-destination p{font-size:11px}#aurora-world-portal .portal-travel{padding:10px}#aurora-world-portal .portal-map-node{min-width:42px;padding:4px}#aurora-world-portal .portal-map-node-label{font-size:8px;max-width:82px}#aurora-world-portal .portal-map-village-node{width:58px;min-width:58px;height:58px}#aurora-world-portal .portal-map-village-node .portal-map-node-icon{font-size:24px}#aurora-world-portal .portal-map-village-node .portal-map-node-label{top:59px;font-size:9px}}' +
     '</style>' +
     '<section class="portal-atlas" role="dialog" aria-modal="true" aria-labelledby="aurora-world-portal-title">' +
-      '<header class="portal-atlas-head"><div><small>АТЛАС МИРА · СЕТЬ ПЕРЕХОДОВ</small><h1 id="aurora-world-portal-title">Карта земель Авроры</h1></div><button type="button" class="portal-close" data-world-close aria-label="Закрыть карту">✕</button></header>' +
+      '<header class="portal-atlas-head"><div><small>ОТКРЫТЫЙ МИР · СЕТЬ ПУТЕЙ</small><h1 id="aurora-world-portal-title">Карта земель Разлома</h1></div><button type="button" class="portal-close" data-world-close aria-label="Закрыть карту">✕</button></header>' +
       '<div class="portal-atlas-body">' +
-        '<div class="portal-map-stage" role="group" aria-label="Интерактивная карта мира">' +
+        '<div class="portal-map-stage" role="group" aria-label="Интерактивная карта регионов">' +
           '<canvas class="portal-map-art" id="portal-map-art" width="250" height="155" aria-hidden="true"></canvas>' +
           nodeMarkup +
-          '<div class="portal-map-legend"><span><i></i>Доступно</span><span><i class="locked"></i>Закрыто</span><span><i class="here"></i>Вы здесь</span></div>' +
+          '<div class="portal-map-legend"><span><i></i>Доступный путь</span><span><i class="locked"></i>Закрытый путь</span><span><i class="here"></i>Вы здесь</span></div>' +
         '</div>' +
         '<aside class="portal-destination" id="portal-destination" aria-live="polite"></aside>' +
       '</div>' +
-      '<footer class="portal-atlas-foot">Выберите точку на карте, чтобы изучить область и условия путешествия. Сюжетный маршрут отмечен пунктиром.</footer>' +
+      '<footer class="portal-atlas-foot">Исследуйте соседние земли, открывайте новые маршруты и возвращайтесь в уже посещённые регионы. Уровень опасности — рекомендация, а не запрет.</footer>' +
     '</section>';
   document.body.appendChild(overlay);
-  drawPortalPixelMap(overlay.querySelector('#portal-map-art'), points, routePoints);
+  drawPortalPixelMap(overlay.querySelector('#portal-map-art'), points, routeLines);
 
   const nodeButtons = [...overlay.querySelectorAll('[data-portal-node]')];
   const detail = overlay.querySelector('#portal-destination');
-  let selectedId = currentId;
   const resume = () => {
     overlay.remove();
     if (state.overworld) {
@@ -707,71 +728,72 @@ function openWorldPortalMenu() {
   const selectDestination = id => {
     const point = points.find(item => item.id === id);
     if (!point) return;
-    selectedId = id;
-    const access = canEnterStoryLocation(state.game?.player, id);
-    const locked = !access.allowed;
+    const latestWorld = ensureWorldState(state.game, { legacy: false });
     const here = id === currentId;
+    const discovered = id === 'rift' || latestWorld.discoveredRegions.includes(id);
+    const allowed = id === 'rift' ? isRiftReady() : canTravelToRegion(latestWorld, currentId, id);
     nodeButtons.forEach(button => {
       const active = button.dataset.portalNode === id;
-      const item = points.find(pointItem => pointItem.id === button.dataset.portalNode);
-      const itemAccess = canEnterStoryLocation(state.game?.player, button.dataset.portalNode);
+      const buttonId = button.dataset.portalNode;
+      const buttonHere = buttonId === currentId;
+      const buttonAllowed = buttonId === 'rift' ? isRiftReady() : canTravelToRegion(latestWorld, currentId, buttonId);
       button.setAttribute('aria-pressed', String(active));
-      button.classList.toggle('is-locked', !itemAccess.allowed);
-      button.classList.toggle('is-current', button.dataset.portalNode === currentId);
+      button.classList.toggle('is-locked', !buttonAllowed && !buttonHere);
+      button.classList.toggle('is-available', buttonAllowed && !buttonHere);
+      button.classList.toggle('is-discovered', buttonId === 'rift' || latestWorld.discoveredRegions.includes(buttonId));
+      button.classList.toggle('is-undiscovered', buttonId !== 'rift' && !latestWorld.discoveredRegions.includes(buttonId));
+      button.classList.toggle('is-current', buttonHere);
       if (active) button.focus({ preventScroll: true });
     });
     const story = point.story;
-    const status = here ? '● ВЫ ЗДЕСЬ' : locked
-      ? access.reason === 'campaign'
-        ? '🔒 Сначала завершите сюжетное задание ' + access.requiredMissionId
-        : '🔒 Требуется уровень ' + (access.requirement?.requiredLevel || access.requirement?.recommendedLevel || 'выше')
-      : '● МАРШРУТ ОТКРЫТ · МОЖНО ПУТЕШЕСТВОВАТЬ';
+    const status = here ? 'Вы уже находитесь в этом регионе.' : !allowed
+      ? 'Маршрут пока закрыт. Сначала исследуйте соседнюю область.'
+      : !discovered
+        ? 'Новый регион. Переход откроет его и покажет следующие пути.'
+        : 'Регион открыт. Вы можете вернуться сюда по доступному маршруту.';
     const level = story
-      ? '<div><b>Уровень доступа:</b> ' + story.requiredLevel + ' · <b>Рекомендуемый:</b> ' + story.recommendedLevel + '</div>'
+      ? '<div><b>Рекомендуемый уровень:</b> ' + story.recommendedLevel + '</div>'
       : '<div><b>Тип области:</b> свободное исследование</div>';
     const chapter = story
-      ? '<div><b>Акт:</b> ' + story.actNumber + ' · <b>Позиция маршрута:</b> ' + story.sequence + '</div>'
+      ? '<div><b>Глава:</b> ' + story.actNumber + ' · <b>Сюжетная отметка:</b> ' + story.sequence + '</div>'
       : '';
     detail.innerHTML =
-      '<div class="portal-destination-kicker">' + (story ? 'ГЛАВА ' + story.actNumber + ' · ТОЧКА ' + story.sequence : 'ОБЛАСТЬ МИРА') + '</div>' +
+      '<div class="portal-destination-kicker">' + (story ? 'СЮЖЕТНАЯ ОБЛАСТЬ · ' + story.actNumber + ' АКТ' : 'РЕГИОН ОТКРЫТОГО МИРА') + '</div>' +
       '<h2>' + escapeHtml(point.loc.emoji || '✦') + ' ' + escapeHtml(point.loc.name) + '</h2>' +
-      '<p>' + escapeHtml(point.loc.desc || 'Неизведанная область') + '</p>' +
+      '<p>' + escapeHtml(point.loc.desc || 'Неизведанная область мира.') + '</p>' +
       '<div class="portal-destination-meta">' + level + chapter + '<div><b>Опасность:</b> ' +
         (point.loc.safe ? 'безопасная зона' : 'враждебная территория') + '</div></div>' +
-      '<div class="portal-destination-status' + (locked ? ' locked' : '') + '" role="status">' + status + '</div>' +
-      '<button type="button" class="portal-travel" data-portal-travel ' + (here || locked ? 'disabled' : '') + '>' +
-        (here ? 'Вы уже здесь' : locked ? 'Путешествие закрыто' : 'Путешествовать →') + '</button>';
-    const travelButton = detail.querySelector('[data-portal-travel]');
-    travelButton?.addEventListener('click', () => {
-      const latestAccess = canEnterStoryLocation(state.game?.player, id);
-      if (!latestAccess.allowed) {
+      '<div class="portal-destination-status' + (!allowed && !here ? ' locked' : '') + '" role="status">' + status + '</div>' +
+      '<button type="button" class="portal-travel" data-portal-travel ' + (here || !allowed ? 'disabled' : '') + '>' +
+        (here ? 'Вы здесь' : !allowed ? 'Маршрут закрыт' : discovered ? 'Перейти в регион' : 'Исследовать регион') + '</button>';
+    detail.querySelector('[data-portal-travel]')?.addEventListener('click', () => {
+      const latest = ensureWorldState(state.game, { legacy: false });
+      const latestAllowed = id === 'rift' ? isRiftReady() : canTravelToRegion(latest, currentId, id);
+      if (!latestAllowed) {
         selectDestination(id);
-        toast(latestAccess.reason === 'campaign'
-          ? '🔒 Сначала завершите сюжетное задание ' + latestAccess.requiredMissionId + '.'
-          : '🔒 Для перехода требуется ' + latestAccess.requirement.requiredLevel + ' уровень.');
+        toast('Сначала откройте путь из соседнего региона.');
         return;
       }
       overlay.remove();
       exitOverworld();
       if (id === 'rift') { enterRift(); return; }
+      discoverWorldRegion(latest, id, currentId);
       state.game.location = id;
       saveGame();
-      enterOverworld(id);
+      if (!enterOverworld(id)) {
+        state.game.location = currentId;
+        saveGame();
+        return;
+      }
     });
   };
-  nodeButtons.forEach(button => {
-    const id = button.dataset.portalNode;
-    const access = canEnterStoryLocation(state.game?.player, id);
-    button.classList.toggle('is-locked', !access.allowed);
-    button.classList.toggle('is-current', id === currentId);
-    button.addEventListener('click', () => selectDestination(id));
-  });
+  nodeButtons.forEach(button => button.addEventListener('click', () => selectDestination(button.dataset.portalNode)));
   overlay.querySelector('[data-world-close]')?.addEventListener('click', resume);
   overlay.addEventListener('keydown', event => {
     if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); resume(); }
   });
   overlay.addEventListener('click', event => { if (event.target === overlay) resume(); });
-  const initial = points.some(point => point.id === currentId) ? currentId : (points[0]?.id || 'village');
+  const initial = points.some(point => point.id === currentId) ? currentId : 'village';
   selectDestination(initial);
 }
 function interactNpc(npcId) {
@@ -796,6 +818,77 @@ function interactNpc(npcId) {
   else if (npcId === 'questBoard') openQuestBoard();
 }
 
+function handlePersistentWorldEvent(marker) {
+  const eventId = marker.worldEventId;
+  const game = state.game;
+  const active = game?.world?.events?.active?.find(event => event.id === eventId);
+  const completed = game?.world?.events?.history?.find(event => event.id === eventId && event.status === 'completed' && event.rewardClaimed !== true);
+  const close = () => import('./ui/overworld.js').then(module => module.closeDialogAndResume());
+
+  if (active) {
+    if (active.accepted) {
+      toast(active.name + ': ' + active.progress + '/' + active.targetCount + '. ' + active.objectiveText);
+      close();
+      return;
+    }
+    let snapshot;
+    try { snapshot = JSON.stringify(game); } catch {
+      toast('Не удалось подготовить сохранение события. Попробуйте ещё раз.');
+      close();
+      return;
+    }
+    if (!acceptWorldEvent(game, eventId) || !saveGame()) {
+      try { state.game = JSON.parse(snapshot); } catch {}
+      toast('Не удалось принять событие: прогресс не сохранён.');
+      close();
+      return;
+    }
+    emit('log', { channel: 'game', msg: 'Принято мировое событие: ' + active.name, cls: 'success' });
+    toast('Событие принято: ' + active.name + '. ' + active.objectiveText);
+    close();
+    return;
+  }
+
+  if (!completed) {
+    toast('Это событие уже завершилось.');
+    close();
+    return;
+  }
+
+  let snapshot;
+  try { snapshot = JSON.stringify(game); } catch {
+    toast('Не удалось подготовить награду события.');
+    close();
+    return;
+  }
+  const reward = claimWorldEventReward(game, eventId);
+  if (!reward) {
+    toast('Награда за это событие уже получена.');
+    close();
+    return;
+  }
+  const totals = getGoldRewardTotals(game.player, reward.gold);
+  if (!totals) {
+    try { state.game = JSON.parse(snapshot); } catch {}
+    toast('Награда не помещается в безопасный лимит золота.');
+    close();
+    return;
+  }
+  game.player.gold = totals.gold;
+  if (!game.player.stats || typeof game.player.stats !== 'object' || Array.isArray(game.player.stats)) game.player.stats = {};
+  game.player.stats.goldEarned = totals.goldEarned;
+  if (!saveGame()) {
+    try { state.game = JSON.parse(snapshot); } catch {}
+    toast('Не удалось сохранить награду. Событие осталось доступным.');
+    close();
+    return;
+  }
+  state.overworld.events = state.overworld.events.filter(item => item.worldEventId !== eventId);
+  emit('log', { channel: 'game', msg: 'Получена награда за событие: ' + completed.name + ' (+' + reward.gold + ' золота)', cls: 'success' });
+  toast('Награда получена: +' + reward.gold + ' золота. Репутация фракции уже обновлена.');
+  close();
+}
+
 function handleWorldEvent(eventId) {
   const ow = state.overworld;
   if (!ow) return;
@@ -803,6 +896,7 @@ function handleWorldEvent(eventId) {
   if (!ev) return;
 
   if (ev.resolved) return;
+  if (ev.worldEventId) { handlePersistentWorldEvent(ev); return; }
   let previousGame;
   try {
     previousGame = JSON.parse(JSON.stringify(state.game));
