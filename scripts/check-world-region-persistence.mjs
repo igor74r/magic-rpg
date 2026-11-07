@@ -7,6 +7,7 @@ import {
   recordRegionEnemyRespawned,
   recordRegionEventResolved,
   recordRegionSecretDiscovered,
+  recordRegionSecretLayout,
   applyRegionPersistence
 } from '../systems/region-state.js';
 
@@ -23,6 +24,9 @@ assert.equal(recordRegionEventResolved(world, 'forest', 'event-altar-0'), true);
 assert.equal(recordRegionEventResolved(world, 'forest', 'event-altar-0'), false);
 assert.equal(recordRegionSecretDiscovered(world, 'forest', 'secret-12-8', { id: 'secret-12-8-chest', x: 320, y: 240 }), true);
 assert.equal(recordRegionSecretDiscovered(world, 'forest', 'secret-12-8'), false);
+const secretLayout = [{ id: 'secret-12-8', tx: 12, ty: 8, wx: 600, wy: 408, ax: 13, ay: 8, rewardType: 'chest' }];
+assert.equal(recordRegionSecretLayout(world, 'forest', secretLayout), true);
+assert.equal(recordRegionSecretLayout(world, 'forest', []), false, 'generated secret layout must not be rerolled on revisits');
 world.clockMinutes = 20;
 const enemies = [{ persistentId: 'enemy-2', hp: 40, dead: false, effects: [] }, { persistentId: 'enemy-1', hp: 30, dead: false }];
 const chests = [{ id: 'chest-0', opened: false }, { id: 'chest-1', opened: false }];
@@ -45,6 +49,9 @@ assert.deepEqual(roundTrip.world.regions.forest.discoveredSecrets, ['secret-12-8
   'discovered secret IDs must survive save serialization and world-state sanitization');
 assert.deepEqual(roundTrip.world.regions.forest.secretChests, [{ id: 'secret-12-8-chest', x: 320, y: 240 }],
   'revealed secret treasure chests must survive save serialization until opened');
+assert.equal(roundTrip.world.regions.forest.secretLayoutGenerated, true);
+assert.deepEqual(roundTrip.world.regions.forest.secretWalls, secretLayout,
+  'the exact secret wall layout and reward type must survive save serialization');
 assert.equal(ensureRegionRecord(world, 'ruins', 1).discoveredSecrets.length, 0,
   'secret discovery must be isolated per region');
 assert.equal(ensureRegionRecord(world, 'ruins', 1).openedChests.length, 0, 'region state must be isolated');

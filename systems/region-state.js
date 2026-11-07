@@ -11,7 +11,9 @@ export function ensureRegionRecord(world, regionId, generationVisit = 1) {
       defeatedEnemies: {},
       resolvedEvents: [],
       discoveredSecrets: [],
-      secretChests: []
+      secretChests: [],
+      secretLayoutGenerated: false,
+      secretWalls: []
     };
   }
   if (!Number.isSafeInteger(record.generationVisit) || record.generationVisit < 1) {
@@ -25,6 +27,12 @@ export function ensureRegionRecord(world, regionId, generationVisit = 1) {
   record.discoveredSecrets = [...new Set(record.discoveredSecrets.filter(id => typeof id === 'string' && id.length <= 80))];
   if (!Array.isArray(record.secretChests)) record.secretChests = [];
   record.secretChests = record.secretChests.filter(chest => chest && typeof chest.id === 'string' && chest.id.length <= 80 && Number.isFinite(chest.x) && Number.isFinite(chest.y));
+  record.secretLayoutGenerated = record.secretLayoutGenerated === true;
+  if (!Array.isArray(record.secretWalls)) record.secretWalls = [];
+  record.secretWalls = record.secretWalls.filter(wall => wall && typeof wall.id === 'string' && wall.id.length <= 80
+    && Number.isFinite(wall.tx) && Number.isFinite(wall.ty) && Number.isFinite(wall.wx) && Number.isFinite(wall.wy)
+    && Number.isFinite(wall.ax) && Number.isFinite(wall.ay)
+    && ['chest', 'elite', 'loot'].includes(wall.rewardType));
   return record;
 }
 
@@ -53,6 +61,22 @@ export function recordRegionSecretDiscovered(world, regionId, secretId, chest = 
     if (!Array.isArray(record.secretChests)) record.secretChests = [];
     if (!record.secretChests.some(item => item.id === chest.id)) record.secretChests.push({ id: chest.id, x: chest.x, y: chest.y });
   }
+  return true;
+}
+
+export function recordRegionSecretLayout(world, regionId, walls) {
+  const record = ensureRegionRecord(world, regionId);
+  if (!record || record.secretLayoutGenerated || !Array.isArray(walls)) return false;
+  record.secretWalls = walls.filter(wall => wall && typeof wall.id === 'string'
+    && Number.isFinite(wall.tx) && Number.isFinite(wall.ty)
+    && Number.isFinite(wall.wx) && Number.isFinite(wall.wy)
+    && Number.isFinite(wall.ax) && Number.isFinite(wall.ay)
+    && ['chest', 'elite', 'loot'].includes(wall.rewardType))
+    .map(wall => ({
+      id: wall.id, tx: wall.tx, ty: wall.ty, wx: wall.wx, wy: wall.wy,
+      ax: wall.ax, ay: wall.ay, rewardType: wall.rewardType
+    }));
+  record.secretLayoutGenerated = true;
   return true;
 }
 

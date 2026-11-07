@@ -146,6 +146,12 @@ export function ensureWorldState(game, { legacy = false } = {}) {
     record.discoveredSecrets = [...new Set(record.discoveredSecrets.filter(id => typeof id === 'string' && id.length <= 80))];
     if (!Array.isArray(record.secretChests)) record.secretChests = [];
     record.secretChests = record.secretChests.filter(chest => chest && typeof chest.id === 'string' && chest.id.length <= 80 && Number.isFinite(chest.x) && Number.isFinite(chest.y));
+    record.secretLayoutGenerated = record.secretLayoutGenerated === true;
+    if (!Array.isArray(record.secretWalls)) record.secretWalls = [];
+    record.secretWalls = record.secretWalls.filter(wall => wall && typeof wall.id === 'string' && wall.id.length <= 80
+      && Number.isFinite(wall.tx) && Number.isFinite(wall.ty) && Number.isFinite(wall.wx) && Number.isFinite(wall.wy)
+      && Number.isFinite(wall.ax) && Number.isFinite(wall.ay)
+      && ['chest', 'elite', 'loot'].includes(wall.rewardType));
     for (const [enemyId, respawnAt] of Object.entries(record.defeatedEnemies)) {
       if (typeof enemyId !== 'string' || !Number.isFinite(respawnAt) || respawnAt < 0) delete record.defeatedEnemies[enemyId];
     }

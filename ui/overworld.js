@@ -14,7 +14,7 @@ import { emit, on } from '../systems/events.js';
 import { escapeHtml } from './screens.js';
 import { getSecretWallCount } from '../systems/overworld/secrets.js';
 import { createRegionRandom } from '../systems/world-state.js';
-import { recordRegionSecretDiscovered } from '../systems/region-state.js';
+import { ensureRegionRecord, recordRegionSecretDiscovered, recordRegionSecretLayout } from '../systems/region-state.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic, EFFECTS_DATA, MODIFIERS_LABEL } from './overworld/models.js';
 import { 
   renderCombatPanel, getSubPanel, setSubPanel, 
@@ -38,9 +38,13 @@ function generateSecrets(ow) {
   // в 20% случаев появляется вторая. Добыча остаётся случайной.
   const regionId = ow.sourceLocationId || ow.locationId;
   const world = state.game?.world;
-  const generationVisit = world?.regions?.[regionId]?.generationVisit || 1;
+  const regionRecord = world ? ensureRegionRecord(world, regionId) : null;
+  const generationVisit = regionRecord?.generationVisit || 1;
+  const discovered = new Set(regionRecord?.discoveredSecrets || []);
+  if (regionRecord?.secretLayoutGenerated) {
+    return regionRecord.secretWalls.filter(wall => !discovered.has(wall.id)).map(wall => ({ ...wall, opened: false, startedAt: performance.now() }));
+  }
   const random = world ? createRegionRandom(world, regionId, generationVisit) : Math.random;
-  const discovered = new Set(world?.regions?.[regionId]?.discoveredSecrets || []);
   const count = getSecretWallCount(random);
 
   // Ищем кандидатов — «стены» (камни 4 или деревья 2), рядом с которыми проходимый тайл
@@ -79,6 +83,7 @@ function generateSecrets(ow) {
       startedAt: performance.now()
     });
   }
+  if (world && recordRegionSecretLayout(world, regionId, secrets)) saveGame();
   return secrets;
 }
 
