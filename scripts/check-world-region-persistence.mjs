@@ -32,7 +32,10 @@ assert.equal(ensureRegionRecord(world, 'forest', 9).generationVisit, 2,
 assert.equal(recordRegionChestOpened(world, 'forest', 'chest-1'), true);
 assert.equal(recordRegionChestOpened(world, 'forest', 'chest-1'), false);
 assert.equal(recordRegionEnemyDefeat(world, 'forest', 'enemy-2', 35), true);
+assert.equal(recordRegionBossProgress(world, 'forest', 'boss-ancient-ent', { hp: 100, maxHp: 500, phase: 1 }, 3), true);
 assert.equal(recordRegionBossDefeat(world, 'forest', 'boss-ancient-ent'), true);
+assert.equal(Object.hasOwn(first.bossProgress, 'boss-ancient-ent'), false,
+  'defeating a boss must immediately clear its stale encounter progress');
 assert.equal(recordRegionBossProgress(world, 'forest', 'boss-ash-herald', { hp: 210, maxHp: 420, phase: 2, tacticalSpecialPending: true }, 7), true,
   'a surviving boss must persist health, phase, tactical turn count and a pending special');
 assert.equal(recordRegionBossDefeat(world, 'forest', 'boss-ancient-ent'), false,

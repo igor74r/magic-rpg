@@ -108,6 +108,7 @@ export function recordRegionBossDefeat(world, regionId, bossId) {
   const record = ensureRegionRecord(world, regionId);
   if (!record || record.defeatedBosses.includes(bossId)) return false;
   record.defeatedBosses.push(bossId);
+  delete record.bossProgress[bossId];
   delete record.defeatedEnemies[bossId];
   return true;
 }
