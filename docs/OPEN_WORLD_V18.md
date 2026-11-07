@@ -45,7 +45,7 @@ World events advance with the world clock. Visible events receive deterministic 
 
 ## Player-facing status UI
 
-The World and Factions dashboard tab displays the four faction standings, reputation ranks and history, active event objectives, claimable event rewards, recent event history, current region, unlocked routes and exploration progress. Faction perks are calculated from the existing saved reputation: Free Traders grant 5/10/15% merchant discounts, Hub Guardians grant 5/10/15% incoming overworld damage reduction, Ash Nomads grant 5/10/15% ordinary enemy loot-drop chance, and Rift Cult grants 5/10/15% extra gold on its own event claims at reputation +30/+70/+90. No save schema migration is required. Event and save-provided text is escaped before insertion into the UI.
+The World and Factions dashboard tab displays the four faction standings, reputation ranks and history, active event objectives, claimable event rewards, recent event history, current region, unlocked routes and exploration progress. Faction cards show the next reputation threshold for locked and partially unlocked perks. Perks are calculated from the existing saved reputation: Free Traders grant 5/10/15% merchant discounts, Hub Guardians grant 5/10/15% incoming overworld damage reduction, Ash Nomads grant 5/10/15% ordinary enemy loot-drop chance, and Rift Cult grants 5/10/15% extra gold on its own event claims at reputation +30/+70/+90. No save schema migration is required. Event and save-provided text is escaped before insertion into the UI.
 
 ## Verification
 

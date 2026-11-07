@@ -22,15 +22,26 @@ function regionName(regionId) {
   return LOCATIONS[regionId]?.name || regionId || 'Неизвестный регион';
 }
 
+function factionPerkProgressLabel(label, bonus, reputation) {
+  const percent = Math.round(bonus * 100);
+  const nextThreshold = [30, 70, 90].find(threshold => reputation < threshold);
+  const hint = percent === 0
+    ? 'откроется при +30'
+    : nextThreshold
+      ? 'следующий уровень +' + nextThreshold
+      : 'максимальный уровень';
+  return label + ': ' + percent + '% · ' + hint;
+}
+
 function renderFactionCard(game, faction) {
   const reputation = getFactionReputation(game, faction.id);
   const rank = getFactionRank(reputation);
   const percent = Math.max(0, Math.min(100, Math.round((reputation + 100) / 2)));
   const benefits = {
     'free-traders': '🛒 ' + getFactionTradeBenefitLabel(game),
-    'hub-guardians': '🛡️ Защита: ' + Math.round(getFactionDamageReduction(game) * 100) + '%',
-    'ash-nomads': '🎒 Шанс добычи: +' + Math.round(getFactionLootBonus(game) * 100) + '%',
-    'rift-cult': '🌀 Золото событий: +' + Math.round(getFactionEventGoldBonus(game, 'rift-cult') * 100) + '%'
+    'hub-guardians': '🛡️ ' + factionPerkProgressLabel('Защита', getFactionDamageReduction(game), reputation),
+    'ash-nomads': '🎒 ' + factionPerkProgressLabel('Шанс добычи', getFactionLootBonus(game), reputation),
+    'rift-cult': '🌀 ' + factionPerkProgressLabel('Золото событий', getFactionEventGoldBonus(game, 'rift-cult'), reputation)
   };
   const benefit = benefits[faction.id] || '';
   return [

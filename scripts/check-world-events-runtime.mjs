@@ -46,3 +46,10 @@ assert.match(worldUi, /Math\.round\(baseReward \* \(1 \+ getFactionEventGoldBonu
   'event cards must display the same faction-adjusted gold amount that reward claims pay');
 assert.match(worldUi, /renderEventCard\(event, world, game, true\)/,
   'claimable event cards must receive current game reputation for accurate reward display');
+
+assert.match(worldUi, /откроется при \+30/,
+  'faction cards must explain how to unlock a currently inactive perk');
+assert.match(worldUi, /следующий уровень/,
+  'faction cards must show the next reputation threshold after a perk unlocks');
+assert.match(worldUi, /максимальный уровень/,
+  'faction cards must indicate when the final perk tier is reached');
