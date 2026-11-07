@@ -140,7 +140,7 @@ assert.equal(factionGame.factions.changeLog.length, 2);
 assert.equal(getFactionDamageReduction(factionGame), 0);
 assert.equal(getFactionLootBonus(factionGame), 0);
 assert.equal(getFactionEventGoldBonus(factionGame, 'rift-cult'), 0);
-changeFactionReputation(factionGame, 'hub-guardians', 90, 'allied test', 'test');
+changeFactionReputation(factionGame, 'hub-guardians', 190, 'allied test', 'test');
 assert.equal(getFactionDamageReduction(factionGame), 0.15);
 changeFactionReputation(factionGame, 'ash-nomads', 70, 'honored test', 'test');
 assert.equal(getFactionLootBonus(factionGame), 0.10);
@@ -154,16 +154,6 @@ const cultRewardGame = { factions: factionGame.factions, world: { events: { hist
 ] } } };
 assert.deepEqual(claimWorldEventReward(cultRewardGame, 'cult-test'), { gold: 105 },
   'Rift Cult standing increases gold from its own completed event rewards');
-assert.equal(getFactionDamageReduction(factionGame), 0);
-assert.equal(getFactionLootBonus(factionGame), 0);
-assert.equal(getFactionEventGoldBonus(factionGame, 'rift-cult'), 0);
-changeFactionReputation(factionGame, 'hub-guardians', 90, 'test', 'test');
-assert.equal(getFactionDamageReduction(factionGame), 0.15);
-changeFactionReputation(factionGame, 'ash-nomads', 70, 'test', 'test');
-assert.equal(getFactionLootBonus(factionGame), 0.10);
-changeFactionReputation(factionGame, 'rift-cult', 30, 'test', 'test');
-assert.equal(getFactionEventGoldBonus(factionGame, 'rift-cult'), 0.05);
-assert.equal(getFactionEventGoldBonus(factionGame, 'free-traders'), 0);
 
 function findSeedForTemplate(regionId, templateId) {
   const available = WORLD_EVENT_TEMPLATES.filter(template => template.regions.includes(regionId));
