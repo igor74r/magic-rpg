@@ -181,6 +181,8 @@ export function ensureWorldState(game, { legacy = false } = {}) {
       continue;
     }
     if (!Number.isSafeInteger(record.generationVisit) || record.generationVisit < 1) record.generationVisit = 1;
+    record.securityThreat = Number.isSafeInteger(record.securityThreat)
+      ? Math.max(0, Math.min(3, record.securityThreat)) : 0;
     if (!Array.isArray(record.openedChests)) record.openedChests = [];
     record.openedChests = [...new Set(record.openedChests.filter(id => typeof id === 'string' && id.length <= 80))];
     if (!record.defeatedEnemies || typeof record.defeatedEnemies !== 'object' || Array.isArray(record.defeatedEnemies)) record.defeatedEnemies = {};

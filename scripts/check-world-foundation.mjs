@@ -164,6 +164,18 @@ function findSeedForTemplate(regionId, templateId) {
   throw new Error(`Could not find deterministic seed for ${templateId} in ${regionId}`);
 }
 // The former standalone commander bounty is now represented by stage II of the persistent campaign.
+const securityGame = { world: createWorldState({ seed: 91 }), factions: createFactionState() };
+const securityRecord = ensureWorldState(securityGame, { legacy: false });
+securityRecord.regions.forest = { generationVisit: 1, securityThreat: 2 };
+const securityRoundTrip = JSON.parse(JSON.stringify(securityGame));
+ensureWorldState(securityRoundTrip, { legacy: false });
+assert.equal(securityRoundTrip.world.regions.forest.securityThreat, 2,
+  'regional security threat must survive save/load normalization');
+securityRoundTrip.world.regions.forest.securityThreat = 99;
+ensureWorldState(securityRoundTrip, { legacy: false });
+assert.equal(securityRoundTrip.world.regions.forest.securityThreat, 3,
+  'regional security threat must be clamped to its supported range');
+
 const defenseSeed = findSeedForTemplate('forest', 'hub-outpost-defense');
 const defenseGame = { world: createWorldState({ seed: defenseSeed }), factions: createFactionState() };
 defenseGame.world.events.nextSpawnAt = 0;
@@ -187,6 +199,17 @@ for (let frame = 0; frame < 120; frame++) advanceWorldEvents(defenseGame, 1, 'fo
 assert.equal(defenseGame.world.events.active.length, 0);
 assert.equal(defenseGame.world.events.history[0].status, 'completed');
 assert.equal(defenseGame.factions.reputation['hub-guardians'], 10);
+assert.equal(defenseGame.world.regions.forest.securityThreat, 0,
+  'successful Guardian defense must improve regional security');
+const failedDefense = { world: createWorldState({ seed: defenseSeed }), factions: createFactionState() };
+failedDefense.world.regions.forest = { generationVisit: 1, securityThreat: 1 };
+failedDefense.world.events.nextSpawnAt = 0;
+const failedDefenseEvent = advanceWorldEvents(failedDefense, 1, 'forest').started[0];
+assert.equal(acceptWorldEvent(failedDefense, failedDefenseEvent.id), true);
+failedDefense.world.events.active[0].expiresAt = failedDefense.world.clockMinutes + 0.001;
+advanceWorldEvents(failedDefense, 1, 'forest');
+assert.equal(failedDefense.world.regions.forest.securityThreat, 2,
+  'failed Guardian operations must increase regional security threat');
 
 const ashChainSeed = findSeedForTemplate('volcano', 'ash-warband-scouting');
 const ashChainGame = { world: createWorldState({ seed: ashChainSeed }), factions: createFactionState() };

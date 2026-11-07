@@ -50,7 +50,10 @@ export function enterOverworld(locationId, opts = {}) {
   if (locationId === 'village') spawnY = cy + 1;
   const playerPos = { x: spawnX * TILE + TILE / 2, y: spawnY * TILE + TILE / 2 };
 
-  const enemies = spawnEnemies(loc, map, cols, rows, playerPos, opts, sourceLocationId, spawnRandom);
+  const regionSecurityThreat = world && !opts.rifMode && !opts.towerMode
+    ? Math.max(0, Math.min(3, Number(world.regions?.[sourceLocationId]?.securityThreat) || 0)) : 0;
+  const spawnOptions = regionSecurityThreat ? { ...opts, regionSecurityThreat } : opts;
+  const enemies = spawnEnemies(loc, map, cols, rows, playerPos, spawnOptions, sourceLocationId, spawnRandom);
   const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, sourceLocationId, spawnRandom);
   const npcs = spawnNPCs(loc, locationId, spawnRandom);
   const statics = spawnStatics(loc, locationId, cols, rows);

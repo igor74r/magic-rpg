@@ -88,7 +88,9 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
   const eligibleEnemyIds = getEligibleSpawnEnemyIds(loc.enemies, locationId, opts);
   const count = Math.min(Math.max(eligibleEnemyIds.length, 4), 7);
   const spawnRoster = createSpawnRoster(eligibleEnemyIds, count, random);
-  const eliteChance = getEliteChance();
+  const securityThreat = Math.max(0, Math.min(3, Number(opts.regionSecurityThreat) || 0));
+  // Neglected regions attract more elite threats; successful Guardian operations restore security.
+  const eliteChance = Math.min(0.5, getEliteChance() + securityThreat * 0.05);
 
   const bossOccurrences = new Map();
   for (let i = 0; i < count; i++) {

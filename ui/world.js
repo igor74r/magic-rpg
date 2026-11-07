@@ -132,6 +132,8 @@ export function renderWorldOverview() {
   const routes = Array.isArray(world.unlockedRoutes) ? world.unlockedRoutes : [];
   const currentRegion = world.currentRegionId || game.location;
   const currentVisits = Math.max(1, Number(world.regionVisits?.[currentRegion]) || 1);
+  const currentSecurityThreat = Math.max(0, Math.min(3, Number(world.regions?.[currentRegion]?.securityThreat) || 0));
+  const securityLabel = ['Безопасно', 'Низкая угроза', 'Повышенная угроза', 'Опасная зона'][currentSecurityThreat];
   const discoveredSecrets = Object.values(world.regions || {}).reduce((total, record) =>
     total + (Array.isArray(record?.discoveredSecrets) ? record.discoveredSecrets.length : 0), 0);
   const clock = Math.max(0, Number(world.clockMinutes) || 0);
@@ -158,7 +160,7 @@ export function renderWorldOverview() {
     '<section class="world-overview" aria-labelledby="world-overview-title">',
       '<header class="world-overview-hero"><div><span class="world-card-kicker">ХРОНИКИ ПУТЕШЕСТВЕННИКА</span><h2 id="world-overview-title">Мир и фракции</h2>',
       '<p>Ваши поступки меняют отношение организаций, а события оставляют след в истории регионов.</p></div>',
-      '<div class="world-overview-current"><span>СЕЙЧАС ВЫ ЗДЕСЬ</span><b>' + escapeHtml(regionName(currentRegion)) + '</b><small>Посещение №' + currentVisits + '</small></div></header>',
+      '<div class="world-overview-current"><span>СЕЙЧАС ВЫ ЗДЕСЬ</span><b>' + escapeHtml(regionName(currentRegion)) + '</b><small>Посещение №' + currentVisits + '</small><small>Безопасность: ' + securityLabel + '</small></div></header>',
       '<div class="world-overview-metrics">',
         '<div class="world-metric"><span>Открыто регионов</span><b>' + discovered.length + ' / ' + WORLD_REGION_IDS.length + '</b><i role="progressbar" aria-label="Исследование мира" aria-valuemin="0" aria-valuemax="' + WORLD_REGION_IDS.length + '" aria-valuenow="' + discovered.length + '"><em style="width:' + discoveredPercent + '%"></em></i></div>',
         '<div class="world-metric"><span>Открыто маршрутов</span><b>' + routes.length + '</b><small>Связи между областями</small></div>',

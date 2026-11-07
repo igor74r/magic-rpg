@@ -2,6 +2,7 @@ import { WORLD_REGION_IDS, WORLD_CONNECTIONS } from '../data/world.js';
 import { LOCATIONS } from '../data/locations.js';
 import { createSeededRandom, deriveWorldSeed, ensureWorldState } from './world-state.js';
 import { changeFactionReputation, getFactionEventGoldBonus, getFactionReputation } from './factions.js';
+import { ensureRegionRecord } from './region-state.js';
 
 export const WORLD_EVENT_MIN_INTERVAL = 480;
 export const WORLD_EVENT_INTERVAL_VARIANCE = 240;
@@ -170,6 +171,13 @@ function finishEvent(game, event, status, now) {
     if (campaign && campaign.status === 'active' && campaign.stage === event.campaignStage) {
       if (status === 'completed' && event.campaignStage < 2) campaign.stage = event.campaignStage + 1;
       else campaign.status = status === 'completed' ? 'completed' : 'failed';
+    }
+  }
+  if (event.factionId === 'hub-guardians' && ['completed', 'failed'].includes(status)) {
+    const region = ensureRegionRecord(game.world, event.regionId);
+    if (region) {
+      const currentThreat = Number.isSafeInteger(region.securityThreat) ? region.securityThreat : 0;
+      region.securityThreat = Math.max(0, Math.min(3, currentThreat + (status === 'completed' ? -1 : 1)));
     }
   }
   if (status === 'completed' && event.factionId && event.reputationReward) {
