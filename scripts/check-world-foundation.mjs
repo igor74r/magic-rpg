@@ -163,6 +163,26 @@ function findSeedForTemplate(regionId, templateId) {
   }
   throw new Error(`Could not find deterministic seed for ${templateId} in ${regionId}`);
 }
+const ashWarbandSeed = findSeedForTemplate('volcano', 'ash-nomad-warband');
+const lockedAshWarbandGame = { world: createWorldState({ seed: ashWarbandSeed }), factions: createFactionState() };
+lockedAshWarbandGame.world.events.nextSpawnAt = 0;
+const lockedAshWarband = advanceWorldEvents(lockedAshWarbandGame, 1, 'volcano').started[0];
+assert.notEqual(lockedAshWarband?.templateId, 'ash-nomad-warband',
+  'the Ash Nomad commander contract must remain locked below +50 reputation');
+const ashWarbandGame = { world: createWorldState({ seed: ashWarbandSeed }), factions: createFactionState() };
+changeFactionReputation(ashWarbandGame, 'ash-nomads', 50, 'test access', 'test');
+ashWarbandGame.world.events.nextSpawnAt = 0;
+const ashWarband = advanceWorldEvents(ashWarbandGame, 1, 'volcano').started[0];
+assert.equal(ashWarband.templateId, 'ash-nomad-warband');
+assert.equal(ashWarband.requiredFactionReputation, 50);
+assert.equal(acceptWorldEvent(ashWarbandGame, ashWarband.id), true);
+assert.equal(recordWorldEventKill(ashWarbandGame, 'volcano', { elite: true, boss: false }).length, 0,
+  'elite enemies cannot complete the Ash Nomad commander contract');
+const ashWarbandCompleted = recordWorldEventKill(ashWarbandGame, 'volcano', { elite: true, boss: true });
+assert.equal(ashWarbandCompleted.length, 1);
+assert.equal(ashWarbandGame.factions.reputation['ash-nomads'], 62,
+  'completing the commander contract advances Ash Nomad standing');
+
 const bossBountySeed = findSeedForTemplate('shadow', 'regional-boss-bounty');
 const lockedBossBountyGame = { world: createWorldState({ seed: bossBountySeed }), factions: createFactionState() };
 lockedBossBountyGame.world.events.nextSpawnAt = 0;
