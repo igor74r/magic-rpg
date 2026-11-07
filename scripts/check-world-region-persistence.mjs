@@ -73,6 +73,6 @@ const combatSource = readFileSync(new URL('../systems/overworld/combat.js', impo
 assert.match(combatSource, /const defeatedRegionId = ow\.sourceLocationId \|\| ow\.locationId;/,
   'enemy defeat persistence must use the resolved region even when sourceLocationId is absent');
 
-assert.match(combatSource, /if \\(enemy\\.boss\\) \\{\\s+recordRegionBossDefeat\\(/,
+assert.ok(combatSource.includes('recordRegionBossDefeat(state.game.world, defeatedRegionId, enemy.persistentId)'),
   'regional boss victories must use permanent defeat persistence');
 console.log('Persistent region state: stable generation, opened chests, defeated enemies, permanent bosses and respawn cooldown passed.');
