@@ -82,7 +82,7 @@ try {
   runImport({ version: 999, player: { name: 'Future save', level: 10 } });
   assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE', 'unsupported future save must not overwrite the slot');
 
-  runImport({ version: 17, player: { name: 'Broken save', level: 10 } });
+  runImport({ version: 18, player: { name: 'Broken save', level: 10 } });
   assert.equal(storage.get('magic-rpg-save-1'), 'KEEP-EXISTING-SAVE', 'incomplete current save must not overwrite the slot');
 
   failFileRead = true;
@@ -131,7 +131,7 @@ try {
   assert.notEqual(importedText, 'KEEP-EXISTING-SAVE',
     `legacy import should persist; last notification: ${toastMessages.at(-1) || 'none'}`);
   const imported = JSON.parse(importedText);
-  assert.equal(imported.version, 17, 'legacy save should be migrated before storage');
+  assert.equal(imported.version, 18, 'legacy save should be migrated before storage');
   assert.equal(imported.player.inventory[0].id, 'old-archive-seal', 'legacy quest item migration should be retained');
   assert.equal(imported.player.name, 'Legacy hero');
   console.log('check-import-save: PASS (invalid files and failed writes preserve existing saves; legacy saves migrate before import)');
