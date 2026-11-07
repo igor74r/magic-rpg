@@ -1844,9 +1844,10 @@ function combatVictory() {
 
   enemy.dead = true;
   enemy.respawnAt = performance.now() + getRespawnMs();
-  if (state.game?.world && ow.sourceLocationId && enemy.persistentId) {
+  const defeatedRegionId = ow.sourceLocationId || ow.locationId;
+  if (state.game?.world && defeatedRegionId && enemy.persistentId) {
     const respawnMinutes = getRespawnMs() / 60000;
-    recordRegionEnemyDefeat(state.game.world, ow.sourceLocationId, enemy.persistentId,
+    recordRegionEnemyDefeat(state.game.world, defeatedRegionId, enemy.persistentId,
       (Number(state.game.world.clockMinutes) || 0) + respawnMinutes);
   }
   enemy.effects = [];

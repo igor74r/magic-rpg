@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createWorldState, ensureWorldState } from '../systems/world-state.js';
+import { readFileSync } from 'node:fs';
 import {
   ensureRegionRecord,
   recordRegionChestOpened,
@@ -55,4 +56,8 @@ assert.deepEqual(roundTrip.world.regions.forest.secretWalls, secretLayout,
 assert.equal(ensureRegionRecord(world, 'ruins', 1).discoveredSecrets.length, 0,
   'secret discovery must be isolated per region');
 assert.equal(ensureRegionRecord(world, 'ruins', 1).openedChests.length, 0, 'region state must be isolated');
+const combatSource = readFileSync(new URL('../systems/overworld/combat.js', import.meta.url), 'utf8');
+assert.match(combatSource, /const defeatedRegionId = ow\.sourceLocationId \|\| ow\.locationId;/,
+  'enemy defeat persistence must use the resolved region even when sourceLocationId is absent');
+
 console.log('Persistent region state: stable generation, opened chests, defeated enemies and respawn cooldown passed.');
