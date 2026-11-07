@@ -10,6 +10,7 @@ export function ensureRegionRecord(world, regionId, generationVisit = 1) {
       openedChests: [],
       defeatedEnemies: {},
       defeatedBosses: [],
+      bossProgress: {},
       resolvedEvents: [],
       discoveredSecrets: [],
       secretChests: [],
@@ -24,6 +25,17 @@ export function ensureRegionRecord(world, regionId, generationVisit = 1) {
   if (!record.defeatedEnemies || typeof record.defeatedEnemies !== 'object' || Array.isArray(record.defeatedEnemies)) record.defeatedEnemies = {};
   if (!Array.isArray(record.defeatedBosses)) record.defeatedBosses = [];
   record.defeatedBosses = [...new Set(record.defeatedBosses.filter(id => typeof id === 'string' && id.length <= 80))];
+  if (!record.bossProgress || typeof record.bossProgress !== 'object' || Array.isArray(record.bossProgress)) record.bossProgress = {};
+  for (const [id, progress] of Object.entries(record.bossProgress)) {
+    if (!id || id.length > 80 || !progress || typeof progress !== 'object' || Array.isArray(progress)
+      || !Number.isFinite(progress.hpRatio) || progress.hpRatio <= 0 || progress.hpRatio > 1
+      || !Number.isSafeInteger(progress.phase) || progress.phase < 0 || progress.phase > 20
+      || !Number.isSafeInteger(progress.turnCount) || progress.turnCount < 0 || progress.turnCount > 100000) {
+      delete record.bossProgress[id];
+      continue;
+    }
+    record.bossProgress[id] = { hpRatio: progress.hpRatio, phase: progress.phase, turnCount: progress.turnCount, pendingSpecial: progress.pendingSpecial === true };
+  }
   if (!Array.isArray(record.resolvedEvents)) record.resolvedEvents = [];
   record.resolvedEvents = [...new Set(record.resolvedEvents.filter(id => typeof id === 'string' && id.length <= 80))];
   if (!Array.isArray(record.discoveredSecrets)) record.discoveredSecrets = [];
@@ -100,6 +112,22 @@ export function recordRegionBossDefeat(world, regionId, bossId) {
   return true;
 }
 
+export function recordRegionBossProgress(world, regionId, bossId, boss, turnCount = 0) {
+  if (typeof bossId !== 'string' || !bossId || bossId.length > 80 || !boss || boss.dead
+    || !Number.isFinite(boss.hp) || !Number.isFinite(boss.maxHp) || boss.maxHp <= 0 || boss.hp <= 0) return false;
+  const record = ensureRegionRecord(world, regionId);
+  if (!record || record.defeatedBosses.includes(bossId)) return false;
+  const phase = Math.max(0, Math.min(20, Math.floor(Number(boss.phase) || 0)));
+  const turns = Math.max(0, Math.min(100000, Math.floor(Number(turnCount) || 0)));
+  record.bossProgress[bossId] = {
+    hpRatio: Math.max(0.001, Math.min(1, boss.hp / boss.maxHp)),
+    phase,
+    turnCount: turns,
+    pendingSpecial: boss.tacticalSpecialPending === true
+  };
+  return true;
+}
+
 export function recordRegionEnemyRespawned(world, regionId, enemyId) {
   const record = ensureRegionRecord(world, regionId);
   if (!record || !Object.prototype.hasOwnProperty.call(record.defeatedEnemies, enemyId)) return false;
@@ -126,8 +154,16 @@ export function applyRegionPersistence(world, regionId, enemies, chests, events 
       enemy.hp = 0;
       enemy.respawnAt = 0;
       enemy.effects = [];
+      delete record.bossProgress[enemy.persistentId];
       if (enemy.state === 'combat') enemy.state = 'dead';
       continue;
+    }
+    if (enemy?.boss && record.bossProgress[enemy.persistentId]) {
+      const progress = record.bossProgress[enemy.persistentId];
+      enemy.hp = Math.max(1, Math.min(enemy.maxHp, Math.round(enemy.maxHp * progress.hpRatio)));
+      enemy.phase = progress.phase;
+      enemy.persistentTurnCount = progress.turnCount;
+      enemy.tacticalSpecialPending = progress.pendingSpecial;
     }
     const respawnAtClock = record.defeatedEnemies[enemy.persistentId];
     if (!Number.isFinite(respawnAtClock)) continue;

@@ -142,6 +142,17 @@ export function ensureWorldState(game, { legacy = false } = {}) {
     if (!record.defeatedEnemies || typeof record.defeatedEnemies !== 'object' || Array.isArray(record.defeatedEnemies)) record.defeatedEnemies = {};
     if (!Array.isArray(record.defeatedBosses)) record.defeatedBosses = [];
     record.defeatedBosses = [...new Set(record.defeatedBosses.filter(id => typeof id === 'string' && id.length <= 80))];
+    if (!record.bossProgress || typeof record.bossProgress !== 'object' || Array.isArray(record.bossProgress)) record.bossProgress = {};
+    for (const [id, progress] of Object.entries(record.bossProgress)) {
+      if (!id || id.length > 80 || !progress || typeof progress !== 'object' || Array.isArray(progress)
+        || !Number.isFinite(progress.hpRatio) || progress.hpRatio <= 0 || progress.hpRatio > 1
+        || !Number.isSafeInteger(progress.phase) || progress.phase < 0 || progress.phase > 20
+        || !Number.isSafeInteger(progress.turnCount) || progress.turnCount < 0 || progress.turnCount > 100000) {
+        delete record.bossProgress[id];
+        continue;
+      }
+      record.bossProgress[id] = { hpRatio: progress.hpRatio, phase: progress.phase, turnCount: progress.turnCount, pendingSpecial: progress.pendingSpecial === true };
+    }
     if (!Array.isArray(record.resolvedEvents)) record.resolvedEvents = [];
     record.resolvedEvents = [...new Set(record.resolvedEvents.filter(id => typeof id === 'string' && id.length <= 80))];
     if (!Array.isArray(record.discoveredSecrets)) record.discoveredSecrets = [];

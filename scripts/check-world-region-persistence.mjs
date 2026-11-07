@@ -7,6 +7,7 @@ import {
   recordRegionChestOpened,
   recordRegionEnemyDefeat,
   recordRegionBossDefeat,
+  recordRegionBossProgress,
   recordRegionEnemyRespawned,
   recordRegionEventResolved,
   recordRegionSecretDiscovered,
@@ -32,6 +33,8 @@ assert.equal(recordRegionChestOpened(world, 'forest', 'chest-1'), true);
 assert.equal(recordRegionChestOpened(world, 'forest', 'chest-1'), false);
 assert.equal(recordRegionEnemyDefeat(world, 'forest', 'enemy-2', 35), true);
 assert.equal(recordRegionBossDefeat(world, 'forest', 'boss-ancient-ent'), true);
+assert.equal(recordRegionBossProgress(world, 'forest', 'boss-ash-herald', { hp: 210, maxHp: 420, phase: 2, tacticalSpecialPending: true }, 7), true,
+  'a surviving boss must persist health, phase, tactical turn count and a pending special');
 assert.equal(recordRegionBossDefeat(world, 'forest', 'boss-ancient-ent'), false,
   'a regional boss defeat must be recorded only once');
 assert.equal(recordRegionEventResolved(world, 'forest', 'event-altar-0'), true);
@@ -46,7 +49,7 @@ const enemies = [
   { persistentId: 'enemy-2', hp: 40, dead: false, effects: [] },
   { persistentId: 'enemy-1', hp: 30, dead: false },
   { id: 6, persistentId: 'boss-ancient-ent', boss: true, hp: 500, maxHp: 500, dead: false, state: 'idle', effects: [] },
-  { id: 6, persistentId: 'boss-ash-herald', boss: true, hp: 450, maxHp: 450, dead: false, state: 'idle', effects: [] }
+  { id: 6, persistentId: 'boss-ash-herald', boss: true, hp: 450, maxHp: 450, dead: false, state: 'idle', phase: 0, effects: [] }
 ];
 const chests = [{ id: 'chest-0', opened: false }, { id: 'chest-1', opened: false }];
 const events = [{ id: 'event-altar-0', resolved: false }, { id: 'event-crystal-0', resolved: false }];
@@ -62,12 +65,18 @@ assert.equal(enemies[2].dead, true, 'a defeated regional boss must stay defeated
 assert.equal(enemies[2].hp, 0);
 assert.equal(enemies[2].respawnAt, 0);
 assert.equal(enemies[3].dead, false, 'a different boss occupying the same spawn slot must not inherit the previous boss defeat');
+assert.equal(enemies[3].hp, 225, 'a surviving boss must resume at its persisted health ratio');
+assert.equal(enemies[3].phase, 2, 'boss phase must survive a retreat and region reload');
+assert.equal(enemies[3].persistentTurnCount, 7, 'boss tactical turn count must survive a retreat');
+assert.equal(enemies[3].tacticalSpecialPending, true, 'a telegraphed boss special must remain pending after a retreat');
 world.clockMinutes = 36;
 applyRegionPersistence(world, 'forest', enemies, chests, events, 2000);
 assert.equal(enemies[0].dead, false, 'expired defeat cooldown must not keep an enemy dead');
 assert.equal(recordRegionEnemyRespawned(world, 'forest', 'enemy-2'), false);
 const roundTrip = JSON.parse(JSON.stringify(game));
 ensureWorldState(roundTrip);
+assert.deepEqual(roundTrip.world.regions.forest.bossProgress['boss-ash-herald'], { hpRatio: 0.5, phase: 2, turnCount: 7, pendingSpecial: true },
+  'boss encounter progress must survive save serialization and world-state sanitization');
 assert.deepEqual(roundTrip.world.regions.forest.defeatedBosses, ['boss-ancient-ent'],
   'regional boss victories must survive save serialization and sanitization');
 assert.deepEqual(roundTrip.world.regions.forest.discoveredSecrets, ['secret-12-8'],
@@ -89,4 +98,6 @@ assert.match(combatSource, /const defeatedRegionId = ow\.sourceLocationId \|\| o
 
 assert.ok(combatSource.includes('recordRegionBossDefeat(state.game.world, defeatedRegionId, enemy.persistentId)'),
   'regional boss victories must use permanent defeat persistence');
-console.log('Persistent region state: stable generation, opened chests, defeated enemies, permanent bosses and respawn cooldown passed.');
+assert.ok(combatSource.includes('recordRegionBossProgress(state.game.world, regionId, enemy.persistentId, enemy, ow.combat.turnCount)'),
+  'retreating from a regional boss must persist its encounter progress');
+console.log('Persistent region state: stable generation, opened chests, defeated enemies, boss progress, permanent victories and respawn cooldown passed.');

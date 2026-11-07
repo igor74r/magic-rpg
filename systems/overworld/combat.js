@@ -21,7 +21,7 @@ import {
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
 import { recordWorldEventKill } from '../world-events.js';
-import { recordRegionBossDefeat, recordRegionEnemyDefeat } from '../region-state.js';
+import { recordRegionBossDefeat, recordRegionBossProgress, recordRegionEnemyDefeat } from '../region-state.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
@@ -239,13 +239,13 @@ export function enterCombat(enemy) {
   if (!ow || !enemy || enemy.dead || enemy.hp <= 0 || ow.combat) return;
 
   enemy.state = 'combat';
-  enemy.tacticalSpecialPending = false;
+  enemy.tacticalSpecialPending = enemy.tacticalSpecialPending === true;
 
   ow.combat = {
     enemy,
     turn: 'player',
     over: false,
-    turnCount: 0,
+    turnCount: Math.max(0, Math.floor(Number(enemy.persistentTurnCount) || 0)),
     blocking: false,
     guaranteedDodge: false,
     playerChargeNext: false,
@@ -1077,8 +1077,18 @@ export function combatFlee(forced = false) {
   }
 
   pushLog('Вы сбежали', 'info');
+  const enemy = ow.combat.enemy;
+  const regionId = ow.sourceLocationId || ow.locationId;
+  if (enemy?.boss && !ow.rifMode && !ow.towerMode && state.game?.world && regionId && enemy.persistentId) {
+    recordRegionBossProgress(state.game.world, regionId, enemy.persistentId, enemy, ow.combat.turnCount);
+  }
   clearPlayerEffects();
   endCombat();
+  if (enemy?.boss && !ow.rifMode && !ow.towerMode && !saveGame()) {
+    const warning = 'Не удалось сохранить прогресс босса. Победа не потеряна, но перед выходом сохраните игру повторно.';
+    pushLog(warning, 'warning');
+    emit('toast', warning);
+  }
 }
 
 function tickEnemyEffects() {
