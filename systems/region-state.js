@@ -53,6 +53,11 @@ export function applyRegionPersistence(world, regionId, enemies, chests, now = g
     if (!Number.isFinite(respawnAtClock)) continue;
     if (respawnAtClock <= clock) {
       delete record.defeatedEnemies[enemy.persistentId];
+      enemy.dead = false;
+      if (Number.isFinite(enemy.maxHp)) enemy.hp = enemy.maxHp;
+      enemy.respawnAt = 0;
+      enemy.effects = [];
+      if (enemy.state === 'dead') enemy.state = 'idle';
       continue;
     }
     enemy.dead = true;
