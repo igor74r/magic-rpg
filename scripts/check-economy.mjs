@@ -6,6 +6,7 @@ import { getMissionReward } from '../systems/campaign.js';
 import { state } from '../systems/state.js';
 import { buyItem, buybackItem, getBuybackItems, sellItemsByIndices } from '../systems/shop.js';
 import { NPCS } from '../data/npcs.js';
+import { createFactionState, changeFactionReputation } from '../systems/factions.js';
 
 const player = { campaignClaimed: {} };
 assert.deepEqual(getGoldRewardTotals({ gold: 10, stats: { goldEarned: 20 } }, 5),
@@ -22,6 +23,16 @@ for (const invalid of [
 assert.equal(getCurrentActIndex(player), 0);
 assert.equal(getActPriceMultiplier(player), 1);
 assert.equal(getBuyPrice('health-potion', player), ITEMS['health-potion'].price);
+const factionPricingGame = { factions: createFactionState() };
+assert.equal(getBuyPrice('health-potion', player, factionPricingGame), ITEMS['health-potion'].price);
+changeFactionReputation(factionPricingGame, 'free-traders', 30, 'test', 'test');
+assert.equal(getBuyPrice('health-potion', player, factionPricingGame), Math.round(ITEMS['health-potion'].price * 0.95));
+changeFactionReputation(factionPricingGame, 'free-traders', 40, 'test', 'test');
+assert.equal(getBuyPrice('health-potion', player, factionPricingGame), Math.round(ITEMS['health-potion'].price * 0.90));
+changeFactionReputation(factionPricingGame, 'free-traders', 20, 'test', 'test');
+assert.equal(getBuyPrice('health-potion', player, factionPricingGame), Math.round(ITEMS['health-potion'].price * 0.85));
+changeFactionReputation(factionPricingGame, 'free-traders', -100, 'test', 'test');
+assert.equal(getBuyPrice('health-potion', player, factionPricingGame), ITEMS['health-potion'].price);
 assert.equal(getBuyPrice('old-archive-seal', player), 0);
 assert.equal(getBuyPrice('missing-item', player), 0);
 assert.equal(getSellPrice({ id: 'old-archive-seal', qty: 1 }, player), 0);
