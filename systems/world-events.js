@@ -1,7 +1,7 @@
 import { WORLD_REGION_IDS, WORLD_CONNECTIONS } from '../data/world.js';
 import { LOCATIONS } from '../data/locations.js';
 import { createSeededRandom, deriveWorldSeed, ensureWorldState } from './world-state.js';
-import { changeFactionReputation } from './factions.js';
+import { changeFactionReputation, getFactionEventGoldBonus } from './factions.js';
 
 export const WORLD_EVENT_MIN_INTERVAL = 480;
 export const WORLD_EVENT_INTERVAL_VARIANCE = 240;
@@ -276,7 +276,11 @@ export function claimWorldEventReward(game, eventId) {
   const event = history.find(item => item.id === eventId);
   if (!event || event.status !== 'completed' || event.rewardClaimed) return null;
   event.rewardClaimed = true;
-  return { ...event.reward };
+  const reward = { ...event.reward };
+  if (Number.isSafeInteger(reward.gold) && reward.gold > 0) {
+    reward.gold = Math.max(1, Math.round(reward.gold * (1 + getFactionEventGoldBonus(game, event.factionId))));
+  }
+  return reward;
 }
 
 export function recordWorldEventDiscovery(game, regionId) {

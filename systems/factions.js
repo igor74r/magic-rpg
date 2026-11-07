@@ -93,3 +93,29 @@ export function getFactionTradeBenefitLabel(game) {
   return discount > 0 ? 'Скидка торговцев: ' + Math.round(discount * 100) + '%' :
     'Скидка торговцев откроется при репутации +30';
 }
+
+/** Guardian allies blunt incoming overworld combat damage. */
+export function getFactionDamageReduction(game) {
+  const reputation = getFactionReputation(game, 'hub-guardians');
+  if (reputation >= 90) return 0.15;
+  if (reputation >= 70) return 0.10;
+  if (reputation >= 30) return 0.05;
+  return 0;
+}
+/** Ash Nomads improve the chance of ordinary enemy loot drops. */
+export function getFactionLootBonus(game) {
+  const reputation = getFactionReputation(game, 'ash-nomads');
+  if (reputation >= 90) return 0.15;
+  if (reputation >= 70) return 0.10;
+  if (reputation >= 30) return 0.05;
+  return 0;
+}
+/** Rift Cult influence increases gold from its own completed world events. */
+export function getFactionEventGoldBonus(game, factionId) {
+  if (factionId !== 'rift-cult') return 0;
+  const reputation = getFactionReputation(game, factionId);
+  if (reputation >= 90) return 0.15;
+  if (reputation >= 70) return 0.10;
+  if (reputation >= 30) return 0.05;
+  return 0;
+}

@@ -30,6 +30,7 @@ import { getTowerMult } from '../tower.js';
 import { claimStoryDragonReward } from '../story-dragons.js';
 import { getActPriceMultiplier } from '../economy.js';
 import { getLootDropChance } from '../loot.js';
+import { getFactionDamageReduction } from '../factions.js';
 import { updateQuestProgress } from '../dailyQuests.js';
 import { canCompleteMainQuest, getActiveCampaignMission, getMissionProgress, recordCampaignKill, recordCampaignShard } from '../campaign.js';
 import { pushLog } from './log.js';
@@ -174,7 +175,9 @@ function applyPlayerDamage(player, overworld, amount) {
   if (!player || !overworld?.player) return 0;
   const safeHp = Number.isFinite(player.hp) ? Math.max(0, player.hp) : 0;
   const safeDamage = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-  const actual = Math.min(safeHp, safeDamage);
+  const factionReduction = getFactionDamageReduction(state.game);
+  const mitigatedDamage = safeDamage > 0 ? Math.max(1, Math.floor(safeDamage * (1 - factionReduction))) : 0;
+  const actual = Math.min(safeHp, mitigatedDamage);
   player.hp = safeHp - actual;
   overworld.player.hp = player.hp;
   overworld.player.maxHp = Number.isFinite(player.maxHp) ? Math.max(1, player.maxHp) : 1;
@@ -1791,11 +1794,11 @@ function combatVictory() {
   // Elites have a high chance for each listed drop. Bosses guarantee
   // their first signature drop; additional drops still use normal difficulty odds.
   const baseDropChance = enemy.elite ? 0.85 : getDropChance();
-  const dropChance = getLootDropChance(baseDropChance, p);
+  const dropChance = getLootDropChance(baseDropChance, p, state.game);
 
   def.drops.forEach((id, index) => {
     const shouldDrop = enemy.boss
-      ? index === 0 || Math.random() < getLootDropChance(getDropChance(), p)
+      ? index === 0 || Math.random() < getLootDropChance(getDropChance(), p, state.game)
       : Math.random() < dropChance;
 
     if (shouldDrop) {

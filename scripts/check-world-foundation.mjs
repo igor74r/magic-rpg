@@ -133,6 +133,16 @@ assert.equal(changeFactionReputation(factionGame, 'hub-guardians', 125, 'test re
 assert.equal(changeFactionReputation(factionGame, 'hub-guardians', -250, 'test penalty', 'test').value, -100);
 assert.equal(changeFactionReputation(factionGame, 'unknown', 10), null);
 assert.equal(factionGame.factions.changeLog.length, 2);
+assert.equal(getFactionDamageReduction(factionGame), 0);
+assert.equal(getFactionLootBonus(factionGame), 0);
+assert.equal(getFactionEventGoldBonus(factionGame, 'rift-cult'), 0);
+changeFactionReputation(factionGame, 'hub-guardians', 90, 'test', 'test');
+assert.equal(getFactionDamageReduction(factionGame), 0.15);
+changeFactionReputation(factionGame, 'ash-nomads', 70, 'test', 'test');
+assert.equal(getFactionLootBonus(factionGame), 0.10);
+changeFactionReputation(factionGame, 'rift-cult', 30, 'test', 'test');
+assert.equal(getFactionEventGoldBonus(factionGame, 'rift-cult'), 0.05);
+assert.equal(getFactionEventGoldBonus(factionGame, 'free-traders'), 0);
 
 function findSeedForTemplate(regionId, templateId) {
   const available = WORLD_EVENT_TEMPLATES.filter(template => template.regions.includes(regionId));

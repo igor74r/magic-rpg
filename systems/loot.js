@@ -1,3 +1,5 @@
+import { getFactionLootBonus } from './factions.js';
+
 /**
  * Shared loot modifiers for enemy drops and rarity rolls.
  * Luck contributes +0.5% per point (maximum +50% at 100 Luck).
@@ -19,13 +21,14 @@ export function getLootReputationModifier(player) {
   return Math.max(-0.9, Math.min(1, raw));
 }
 
-export function getLootDropChance(baseChance, player) {
+export function getLootDropChance(baseChance, player, game = null) {
   const base = Number.isFinite(baseChance)
     ? Math.max(0, Math.min(1, baseChance))
     : 0;
   const luckMultiplier = 1 + getLootLuck(player) * 0.005;
   const reputationMultiplier = 1 + getLootReputationModifier(player);
-  return Math.max(0, Math.min(1, base * luckMultiplier * reputationMultiplier));
+  const factionMultiplier = 1 + getFactionLootBonus(game);
+  return Math.max(0, Math.min(1, base * luckMultiplier * reputationMultiplier * factionMultiplier));
 }
 
 export function getRiftLootTierBonus(player) {
