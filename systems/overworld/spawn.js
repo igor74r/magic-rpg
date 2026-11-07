@@ -34,6 +34,12 @@ export const MODIFIERS = {
 
 export function getRespawnMs() { const d = state.settings.difficulty; return d === 'easy' ? 15000 : d === 'hard' ? 60000 : 30000; }
 export function getEliteChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.15 : d === 'hard' ? 0.35 : 0.20; }
+
+export function getRegionalEliteChance(securityThreat = 0, baseChance = getEliteChance()) {
+  const threat = Math.max(0, Math.min(3, Number(securityThreat) || 0));
+  const base = Number.isFinite(Number(baseChance)) ? Math.max(0, Number(baseChance)) : 0;
+  return Math.min(0.5, base + threat * 0.05);
+}
 export function getDropChance() { const d = state.settings.difficulty; return d === 'easy' ? 0.70 : d === 'hard' ? 0.30 : 0.50; }
 
 export function getEligibleSpawnEnemyIds(enemyIds, locationId, opts = {}, activeMissionId = state.game?.player?.activeCampaignMission || null, playerLevel = state.game?.player?.level || 1) {
@@ -88,9 +94,8 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
   const eligibleEnemyIds = getEligibleSpawnEnemyIds(loc.enemies, locationId, opts);
   const count = Math.min(Math.max(eligibleEnemyIds.length, 4), 7);
   const spawnRoster = createSpawnRoster(eligibleEnemyIds, count, random);
-  const securityThreat = Math.max(0, Math.min(3, Number(opts.regionSecurityThreat) || 0));
   // Neglected regions attract more elite threats; successful Guardian operations restore security.
-  const eliteChance = Math.min(0.5, getEliteChance() + securityThreat * 0.05);
+  const eliteChance = getRegionalEliteChance(opts.regionSecurityThreat);
 
   const bossOccurrences = new Map();
   for (let i = 0; i < count; i++) {

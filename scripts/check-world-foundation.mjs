@@ -45,10 +45,18 @@ import {
   claimWorldEventReward
 } from '../systems/world-events.js';
 import { generateMap } from '../systems/overworld/map.js';
-import { spawnEnemies, spawnChests, spawnNPCs, spawnEvents } from '../systems/overworld/spawn.js';
+import { spawnEnemies, spawnChests, spawnNPCs, spawnEvents, getRegionalEliteChance } from '../systems/overworld/spawn.js';
 import { LOCATIONS } from '../data/locations.js';
 import { getLootDropChance } from '../systems/loot.js';
 import { syncWorldEventMarkers, markWorldEventMarkerCompleted } from '../systems/overworld/world-event-markers.js';
+
+assert.equal(getRegionalEliteChance(0, 0.2), 0.2, 'secure regions retain the base elite chance');
+assert.equal(getRegionalEliteChance(1, 0.2), 0.25, 'each threat level adds five percentage points');
+assert.equal(getRegionalEliteChance(3, 0.2), 0.35, 'maximum regional threat adds fifteen percentage points');
+assert.equal(getRegionalEliteChance(99, 0.2), 0.35, 'regional threat is clamped to three levels');
+assert.equal(getRegionalEliteChance(-2, 0.2), 0.2, 'negative regional threat cannot reduce the base chance');
+assert.equal(getRegionalEliteChance(3, 0.45), 0.5, 'elite chance is capped at fifty percent');
+assert.equal(getRegionalEliteChance(3, 0.6), 0.5, 'high difficulty chance also respects the hard cap');
 
 assert.equal(WORLD_REGION_IDS.length, 16);
 for (const [fromId, neighbors] of Object.entries(WORLD_CONNECTIONS)) {
