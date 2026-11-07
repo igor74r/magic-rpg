@@ -103,6 +103,8 @@ jobs:
         run: node scripts/check-save-migrations.mjs
       - name: Check v18 world state, deterministic generation, factions and event lifecycle
         run: node scripts/check-world-foundation.mjs
+      - name: Check persistent region state across visits
+        run: node scripts/check-world-region-persistence.mjs
       - name: Check persistent world-event runtime
         run: node scripts/check-world-events-runtime.mjs
       - name: Check faction and world-event status UI

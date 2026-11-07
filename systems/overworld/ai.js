@@ -8,6 +8,7 @@ import { saveGame } from '../save.js';
 import { emit } from '../events.js';
 import { canOccupyPlayerPosition, canOccupyActorPosition, isActorPositionClear, PLAYER_COLLISION_RADIUS, NPC_COLLISION_RADIUS, ENEMY_COLLISION_RADIUS } from './collisions.js';
 import { openChest } from './spawn.js';
+import { recordRegionEnemyRespawned } from '../region-state.js';
 import { enterCombat } from './combat.js';
 import { updateParticles } from './particles.js';
 import { getMovementDelta, resolveSweptMovement, getCameraPosition } from './movement.js';
@@ -86,6 +87,7 @@ export function updateOverworld(dt) {
     const e = ow.enemies[enemyIndex];
     if (e.dead && e.respawnAt && now >= e.respawnAt) {
       e.dead = false; e.hp = e.maxHp; e.x = e.homeX; e.y = e.homeY; e.state = 'idle'; e.respawnAt = 0; e.effects = []; e.phase = 0; e.tacticalSpecialPending = false;
+      if (state.game?.world && (ow.sourceLocationId || ow.locationId) && e.persistentId) recordRegionEnemyRespawned(state.game.world, ow.sourceLocationId || ow.locationId, e.persistentId);
     }
   }
 

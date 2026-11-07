@@ -13,6 +13,7 @@ import { findFreeCell, TILE } from './map.js';
 import { NPC_COLLISION_RADIUS, ENEMY_COLLISION_RADIUS } from './collisions.js';
 import { spawnParticles } from './particles.js';
 import { pushLog } from './log.js';
+import { recordRegionChestOpened } from '../region-state.js';
 import { updateQuestProgress } from '../dailyQuests.js';
 import { STORY_DRAGON_BY_ENEMY } from '../story-dragons.js';
 import { STORY_MINI_BOSS_LEVELS } from '../story-mini-bosses.js';
@@ -97,7 +98,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
     const mod = modifier ? MODIFIERS[modifier] : null;
     const hp = Math.round(def.hp * (isElite ? ELITE_HP_MULT : 1) * (mod ? mod.hpMult : 1) * ng.hpMult * riftM.hpMult);
     enemies.push({
-      id: i, enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
+      id: i, persistentId: `enemy-${i}`, enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
       homeX: pos.x * TILE + TILE / 2, homeY: pos.y * TILE + TILE / 2,
       hp, maxHp: hp, elite: isElite, boss: isBoss, modifier, collisionRadius: ENEMY_COLLISION_RADIUS,
       effects: [], phase: 0, state: 'idle', tacticalSpecialPending: false,
@@ -185,7 +186,7 @@ export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId
   const chestsCount = loc.chestsCount || 3;
   for (let i = 0; i < chestsCount; i++) {
     const pos = findFreeCell(map, cols, rows, [...enemies, ...chests], 150, playerPos, locationId, random);
-    if (pos) chests.push({ x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2, opened: false });
+    if (pos) chests.push({ id: `chest-${i}`, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2, opened: false });
   }
   return chests;
 }
@@ -229,6 +230,7 @@ export function openChest(chest) {
     return false;
   }
   chest.opened = true;
+  if (state.game.world && ow.sourceLocationId) recordRegionChestOpened(state.game.world, ow.sourceLocationId, chest.id);
   const pool = ['health-potion', 'mana-potion', 'iron-sword', 'apprentice-staff', 'leather-armor'];
   const id = pool[Math.floor(Math.random() * pool.length)];
   const result = addItemOrStore(id);

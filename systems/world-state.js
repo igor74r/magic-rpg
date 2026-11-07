@@ -130,6 +130,20 @@ export function ensureWorldState(game, { legacy = false } = {}) {
   if (!world.regionVisits || typeof world.regionVisits !== 'object' || Array.isArray(world.regionVisits)) {
     world.regionVisits = {};
   }
+  if (!world.regions || typeof world.regions !== 'object' || Array.isArray(world.regions)) world.regions = {};
+  for (const [regionId, record] of Object.entries(world.regions)) {
+    if (!WORLD_REGION_IDS.includes(regionId) || !record || typeof record !== 'object' || Array.isArray(record)) {
+      delete world.regions[regionId];
+      continue;
+    }
+    if (!Number.isSafeInteger(record.generationVisit) || record.generationVisit < 1) record.generationVisit = 1;
+    if (!Array.isArray(record.openedChests)) record.openedChests = [];
+    record.openedChests = [...new Set(record.openedChests.filter(id => typeof id === 'string' && id.length <= 80))];
+    if (!record.defeatedEnemies || typeof record.defeatedEnemies !== 'object' || Array.isArray(record.defeatedEnemies)) record.defeatedEnemies = {};
+    for (const [enemyId, respawnAt] of Object.entries(record.defeatedEnemies)) {
+      if (typeof enemyId !== 'string' || !Number.isFinite(respawnAt) || respawnAt < 0) delete record.defeatedEnemies[enemyId];
+    }
+  }
   for (const [id, count] of Object.entries(world.regionVisits)) {
     world.regionVisits[id] = WORLD_REGION_IDS.includes(id) && Number.isFinite(count)
       ? Math.max(0, Math.floor(count))

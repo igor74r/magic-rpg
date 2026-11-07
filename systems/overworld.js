@@ -8,6 +8,7 @@ import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from 
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
 import { createRegionRandom, ensureWorldState } from './world-state.js';
+import { ensureRegionRecord, applyRegionPersistence } from './region-state.js';
 import { saveGame } from './save.js';
 
 export { TILE } from './overworld/map.js';
@@ -33,6 +34,8 @@ export function enterOverworld(locationId, opts = {}) {
     if (previousRegionId !== sourceLocationId) seedVisitIndex += 1;
     if (seedVisitIndex < 1) seedVisitIndex = 1;
     world.regionVisits[sourceLocationId] = seedVisitIndex;
+    const regionRecord = ensureRegionRecord(world, sourceLocationId, seedVisitIndex);
+    seedVisitIndex = regionRecord.generationVisit;
     world.currentRegionId = sourceLocationId;
     state.game.location = sourceLocationId;
     seedRegionId = sourceLocationId;
@@ -52,6 +55,7 @@ export function enterOverworld(locationId, opts = {}) {
   const npcs = spawnNPCs(loc, locationId, spawnRandom);
   const statics = spawnStatics(loc, locationId, cols, rows);
   const events = spawnEvents(loc, map, cols, rows, playerPos, sourceLocationId, [...enemies, ...chests], spawnRandom);
+  if (world && !opts.rifMode && !opts.towerMode) applyRegionPersistence(world, sourceLocationId, enemies, chests);
   const camera = initCamera(playerPos, cols, rows);
 
   const worldSeed = Number.isSafeInteger(world?.seed) ? world.seed : Number.isSafeInteger(state.game?.worldSeed) ? state.game.worldSeed : 1;
