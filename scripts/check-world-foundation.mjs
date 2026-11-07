@@ -183,6 +183,31 @@ assert.equal(ashWarbandCompleted.length, 1);
 assert.equal(ashWarbandGame.factions.reputation['ash-nomads'], 62,
   'completing the commander contract advances Ash Nomad standing');
 
+const ashChainSeed = findSeedForTemplate('volcano', 'ash-warband-scouting');
+const ashChainGame = { world: createWorldState({ seed: ashChainSeed }), factions: createFactionState() };
+changeFactionReputation(ashChainGame, 'ash-nomads', 50, 'test access', 'test');
+ashChainGame.world.events.nextSpawnAt = 0;
+const ashChainStageOne = advanceWorldEvents(ashChainGame, 1, 'volcano').started[0];
+assert.equal(ashChainStageOne.templateId, 'ash-warband-scouting');
+assert.equal(ashChainGame.world.factionCampaigns['ash-nomad-warband'].stage, 1);
+assert.equal(acceptWorldEvent(ashChainGame, ashChainStageOne.id), true);
+const ashChainStageOneDone = recordWorldEventKill(ashChainGame, 'volcano', { elite: true, boss: false });
+assert.equal(ashChainStageOneDone.length, 1);
+assert.equal(ashChainGame.world.factionCampaigns['ash-nomad-warband'].stage, 2,
+  'the first contract must unlock the second campaign stage');
+const ashChainRoundTrip = JSON.parse(JSON.stringify(ashChainGame));
+ensureWorldState(ashChainRoundTrip, { legacy: false });
+assert.equal(ashChainRoundTrip.world.factionCampaigns['ash-nomad-warband'].stage, 2,
+  'faction campaign progress must survive save/load normalization');
+ashChainGame.world.events.nextSpawnAt = 0;
+const ashChainStageTwo = advanceWorldEvents(ashChainGame, 1, 'volcano').started[0];
+assert.equal(ashChainStageTwo.templateId, 'ash-warband-champion');
+assert.equal(acceptWorldEvent(ashChainGame, ashChainStageTwo.id), true);
+assert.equal(recordWorldEventKill(ashChainGame, 'volcano', { elite: true, boss: false }).length, 0);
+assert.equal(recordWorldEventKill(ashChainGame, 'volcano', { elite: true, boss: true }).length, 1);
+assert.equal(ashChainGame.world.factionCampaigns['ash-nomad-warband'].status, 'completed',
+  'defeating the commander must complete the two-stage faction chain');
+
 const bossBountySeed = findSeedForTemplate('shadow', 'regional-boss-bounty');
 const lockedBossBountyGame = { world: createWorldState({ seed: bossBountySeed }), factions: createFactionState() };
 lockedBossBountyGame.world.events.nextSpawnAt = 0;

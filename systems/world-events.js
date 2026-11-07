@@ -77,6 +77,37 @@ export const WORLD_EVENT_TEMPLATES = Object.freeze([
     objectiveText: 'Найдите и победите предводителя пепельного отряда.'
   }),
   Object.freeze({
+    id: 'ash-warband-scouting',
+    name: 'I. Следы военного отряда',
+    regions: ['wasteland', 'volcano', 'obsidian-fields'],
+    factionId: 'ash-nomads',
+    minFactionReputation: 50,
+    campaignId: 'ash-nomad-warband',
+    campaignStage: 1,
+    goldMin: 45,
+    goldMax: 60,
+    reputationReward: 8,
+    failureReputationDelta: -4,
+    objectiveType: 'elite-kill',
+    targetCount: 2,
+    objectiveText: 'Победите двух элитных разведчиков пепельного отряда.'
+  }),
+  Object.freeze({
+    id: 'ash-warband-champion',
+    name: 'II. Вызов предводителю',
+    regions: ['wasteland', 'volcano', 'obsidian-fields'],
+    factionId: 'ash-nomads',
+    campaignId: 'ash-nomad-warband',
+    campaignStage: 2,
+    goldMin: 100,
+    goldMax: 140,
+    reputationReward: 12,
+    failureReputationDelta: -8,
+    objectiveType: 'boss-kill',
+    targetCount: 1,
+    objectiveText: 'Найдите и победите предводителя пепельного отряда.'
+  }),
+  Object.freeze({
     id: 'regional-boss-bounty',
     name: 'Охота на регионального босса',
     regions: ['shadow', 'sunken-necropolis', 'volcano', 'obsidian-fields', 'void-crater'],
@@ -135,6 +166,13 @@ function finishEvent(game, event, status, now) {
     finishedAt: now,
     rewardClaimed: false
   };
+  if (event.campaignId && Number.isSafeInteger(event.campaignStage)) {
+    const campaign = game.world.factionCampaigns?.[event.campaignId];
+    if (campaign && campaign.status === 'active' && campaign.stage === event.campaignStage) {
+      if (status === 'completed' && event.campaignStage < 2) campaign.stage = event.campaignStage + 1;
+      else campaign.status = status === 'completed' ? 'completed' : 'failed';
+    }
+  }
   if (status === 'completed' && event.factionId && event.reputationReward) {
     changeFactionReputation(game, event.factionId, event.reputationReward, event.name, 'world-event');
   } else if (status === 'failed' && event.accepted && event.factionId && event.failureReputationDelta) {
@@ -199,6 +237,9 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
     const available = WORLD_EVENT_TEMPLATES.filter(template =>
       template.regions.includes(regionId) &&
       (template.objectiveType !== 'region-discovery' || (WORLD_CONNECTIONS[regionId] || []).some(id => !world.discoveredRegions.includes(id))) &&
+      (!template.campaignId || (template.campaignStage === 1
+        ? !world.factionCampaigns[template.campaignId]
+        : world.factionCampaigns[template.campaignId]?.status === 'active' && world.factionCampaigns[template.campaignId]?.stage === template.campaignStage)) &&
       (!template.factionId || !Number.isFinite(template.minFactionReputation) || getFactionReputation(game, template.factionId) >= template.minFactionReputation) &&
       (!events.cooldowns[template.id] || events.cooldowns[template.id] <= now)
     );
@@ -214,6 +255,8 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
         : null;
       const event = {
         id: `world-event-${sequence + 1}`,
+        campaignId: template.campaignId || null,
+        campaignStage: Number.isSafeInteger(template.campaignStage) ? template.campaignStage : null,
         templateId: template.id,
         name: template.name,
         factionId: template.factionId,
@@ -240,6 +283,9 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
           gold: template.goldMin + Math.floor(rewardRandom() * (template.goldMax - template.goldMin + 1))
         }
       };
+      if (event.campaignId && event.campaignStage === 1 && !world.factionCampaigns[event.campaignId]) {
+        world.factionCampaigns[event.campaignId] = { status: 'active', stage: 1, startedAt: now };
+      }
       events.active.push(event);
       started.push(event);
       events.nextSpawnAt = now + WORLD_EVENT_MIN_INTERVAL + Math.floor(random() * WORLD_EVENT_INTERVAL_VARIANCE);

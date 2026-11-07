@@ -142,6 +142,10 @@ export function renderWorldOverview() {
         return '<div class="world-history-row"><span class="world-history-mark reputation">' + signed(entry.delta) + '</span><div><b>' + escapeHtml(faction?.name || entry.factionId) + '</b><small>' + escapeHtml(entry.reason || 'Изменение репутации') + '</small></div><span class="world-history-reward">' + signed(entry.value) + '</span></div>';
       }).join('') + '</div>'
     : '<p class="world-empty-note">Репутация пока не менялась. Решения и мировые события повлияют на отношение фракций.</p>';
+  const ashCampaign = world.factionCampaigns?.['ash-nomad-warband'];
+  const campaignHtml = ashCampaign
+    ? '<article class="world-event-card ' + (ashCampaign.status === 'completed' ? 'is-claimable' : ashCampaign.status === 'failed' ? 'is-pending' : 'is-accepted') + '"><span class="world-card-kicker">ЦЕПОЧКА ФРАКЦИИ · ПЕПЕЛЬНЫЕ КОЧЕВНИКИ</span><h4>Военный вызов пепельного отряда</h4><p>' + (ashCampaign.status === 'completed' ? 'Цепочка завершена. Предводитель признал вашу силу.' : ashCampaign.status === 'failed' ? 'Цепочка прервана. Проверьте репутацию и продолжайте сотрудничество с кочевниками.' : ashCampaign.stage === 1 ? 'Этап I из II: найдите и победите двух элитных разведчиков.' : 'Этап II из II: победите предводителя отряда.') + '</p><b>' + (ashCampaign.status === 'completed' ? 'Завершено' : ashCampaign.status === 'failed' ? 'Провалено' : 'Этап ' + ashCampaign.stage + ' / 2') + '</b></article>'
+    : '<p class="world-empty-note">Фракционная цепочка Пепельных кочевников откроется при репутации +50 в одном из пепельных регионов.</p>';
   const activeHtml = activeEvents.map(event => renderEventCard(event, world, game)).join('');
   const claimableHtml = claimableEvents.map(event => renderEventCard(event, world, game, true)).join('');
   const discoveredPercent = Math.round(Math.min(WORLD_REGION_IDS.length, discovered.length) / WORLD_REGION_IDS.length * 100);
@@ -161,6 +165,7 @@ export function renderWorldOverview() {
       '</div>',
       '<section class="world-overview-section" aria-labelledby="world-factions-title"><div class="world-section-heading"><div><span class="world-card-kicker">ОТНОШЕНИЯ</span><h3 id="world-factions-title">Четыре фракции</h3></div><span>' + Object.keys(FACTIONS).length + ' организаций</span></div>',
       '<div class="world-faction-grid">' + factionCards + '</div></section>',
+      '<section class="world-overview-section" aria-labelledby="world-campaign-title"><div class="world-section-heading"><div><span class="world-card-kicker">ДОЛГИЕ ОБЯЗАТЕЛЬСТВА</span><h3 id="world-campaign-title">Фракционные цепочки</h3></div></div>' + campaignHtml + '</section>',
       '<section class="world-overview-section" aria-labelledby="world-events-title"><div class="world-section-heading"><div><span class="world-card-kicker">ЖИВОЙ МИР</span><h3 id="world-events-title">Мировые события</h3></div><span>' + activeEvents.length + ' активно · ' + claimableEvents.length + ' ожидают награды</span></div>',
       activeHtml || '<p class="world-empty-note">Сейчас нет активных событий. Исследуйте регионы — новые ситуации возникают со временем.</p>',
       claimableHtml ? '<h4 class="world-subheading">Завершённые события</h4>' + claimableHtml : '',

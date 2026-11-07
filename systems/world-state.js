@@ -85,6 +85,7 @@ export function createWorldState({ seed, legacy = false } = {}) {
     unlockedRoutes,
     currentRegionId: null,
     regionVisits: {},
+    factionCampaigns: {},
     events: {
       active: [],
       cooldowns: {},
@@ -116,6 +117,10 @@ function sanitizeWorldEvent(event) {
   if (typeof event.objectiveText !== 'string') event.objectiveText = '';
   if (event.objectiveText.length > 240) event.objectiveText = event.objectiveText.slice(0, 240);
   if (typeof event.accepted !== 'boolean') event.accepted = false;
+  if (event.campaignId !== 'ash-nomad-warband' || ![1, 2].includes(event.campaignStage)) {
+    event.campaignId = null;
+    event.campaignStage = null;
+  }
   return event;
 }
 
@@ -127,6 +132,16 @@ export function ensureWorldState(game, { legacy = false } = {}) {
 
   const world = game.world;
   world.schemaVersion = WORLD_STATE_VERSION;
+  if (!world.factionCampaigns || typeof world.factionCampaigns !== 'object' || Array.isArray(world.factionCampaigns)) world.factionCampaigns = {};
+  for (const [id, campaign] of Object.entries(world.factionCampaigns)) {
+    if (id !== 'ash-nomad-warband' || !campaign || typeof campaign !== 'object' || Array.isArray(campaign)) {
+      delete world.factionCampaigns[id];
+      continue;
+    }
+    if (!['active', 'completed', 'failed'].includes(campaign.status)) campaign.status = 'failed';
+    campaign.stage = Number.isSafeInteger(campaign.stage) ? Math.max(1, Math.min(2, campaign.stage)) : 1;
+    campaign.startedAt = Number.isFinite(campaign.startedAt) ? Math.max(0, campaign.startedAt) : 0;
+  }
   if (!Number.isFinite(world.seed)) world.seed = Number.isFinite(game.worldSeed) ? game.worldSeed : createWorldSeed();
   world.seed = toUint32(world.seed) || 1;
   if (!Number.isFinite(world.generatorVersion) || world.generatorVersion < 1) world.generatorVersion = Number.isFinite(game.worldGeneratorVersion) && game.worldGeneratorVersion >= 1 ? Math.floor(game.worldGeneratorVersion) : WORLD_GENERATOR_VERSION;

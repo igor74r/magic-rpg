@@ -16,7 +16,7 @@ game.world stores:
 - currentRegionId: last entered region, so loading a save does not consume another visit seed.
 - events: active events, cooldowns, history, sequence and next spawn time.
 
-game.factions stores standing and reputation change history. Free Traders grant merchant discounts at +30 (5%), +70 (10%) and +90 (15%) reputation; both the displayed shop price and purchase transaction use the same discount. Other factions do not modify merchant prices. player.activeCampaignByBranch stores the active mission per independent story branch.
+game.world.factionCampaigns stores normalized multi-stage faction contract progress. The Ash Nomad warband chain unlocks at +50: defeat two elite scouts, then defeat their commander; the active stage and completion status survive save/load. game.factions stores standing and reputation change history. Free Traders grant merchant discounts at +30 (5%), +70 (10%) and +90 (15%) reputation; both the displayed shop price and purchase transaction use the same discount. Other factions do not modify merchant prices. player.activeCampaignByBranch stores the active mission per independent story branch.
 
 ## Exploration rules
 
