@@ -1,5 +1,5 @@
 import { state } from '../systems/state.js';
-import { FACTIONS, getFactionRank, getFactionReputation } from '../systems/factions.js';
+import { FACTIONS, getFactionRank, getFactionReputation, getFactionTradeBenefitLabel } from '../systems/factions.js';
 import { WORLD_REGION_IDS } from '../data/world.js';
 import { LOCATIONS } from '../data/locations.js';
 import { escapeHtml } from './screens.js';
@@ -26,11 +26,13 @@ function renderFactionCard(game, faction) {
   const reputation = getFactionReputation(game, faction.id);
   const rank = getFactionRank(reputation);
   const percent = Math.max(0, Math.min(100, Math.round((reputation + 100) / 2)));
+  const benefit = faction.id === 'free-traders' ? getFactionTradeBenefitLabel(game) : '';
   return [
     '<article class="world-faction-card" data-faction-id="' + escapeHtml(faction.id) + '">',
       '<div class="world-faction-card-top"><div><span class="world-card-kicker">ФРАКЦИЯ</span><h3>' + escapeHtml(faction.name) + '</h3></div>',
       '<b class="world-faction-value">' + signed(reputation) + '</b></div>',
       '<div class="world-faction-rank">' + escapeHtml(FACTION_RANK_LABELS[rank] || rank) + '</div>',
+      benefit ? '<div class="world-faction-benefit">🛒 ' + escapeHtml(benefit) + '</div>' : '',
       '<div class="world-reputation-track" role="progressbar" aria-label="Репутация: ' + escapeHtml(faction.name) + '" aria-valuemin="-100" aria-valuemax="100" aria-valuenow="' + reputation + '" aria-valuetext="' + signed(reputation) + ' — ' + escapeHtml(FACTION_RANK_LABELS[rank] || rank) + '">',
         '<i class="world-reputation-fill" style="width:' + percent + '%"></i><span class="world-reputation-center" aria-hidden="true"></span>',
       '</div>',

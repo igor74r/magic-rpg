@@ -13,7 +13,7 @@ export function buyItem(id) {
     emit('toast', 'Этот предмет не продаётся у торговца');
     return false;
   }
-  const price = getBuyPrice(id, p);
+  const price = getBuyPrice(id, p, state.game);
   if (!Number.isSafeInteger(price) || price <= 0) {
     emit('toast', 'Этот предмет нельзя купить');
     return false;

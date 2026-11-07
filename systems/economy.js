@@ -1,5 +1,6 @@
 import { ITEMS, RARITIES } from '../data/items.js';
 import { STORY } from '../data/story.js';
+import { getFactionTradeDiscount } from './factions.js';
 
 /**
  * Economic progression: prices scale by campaign act, never by player-controlled
@@ -26,10 +27,11 @@ export function getActPriceMultiplier(player) {
   return ACT_PRICE_MULTIPLIERS[getCurrentActIndex(player)] ?? 1;
 }
 
-export function getBuyPrice(id, player) {
+export function getBuyPrice(id, player, game = null) {
   const item = ITEMS[id];
   if (!item || item.type === 'quest' || item.storyShard || item.bossOnly || RARITIES[item.rarity]?.bossOnly || !Number.isFinite(item.price) || item.price <= 0) return 0;
-  return Math.max(1, Math.round(item.price * getActPriceMultiplier(player)));
+  const campaignPrice = item.price * getActPriceMultiplier(player);
+  return Math.max(1, Math.round(campaignPrice * (1 - getFactionTradeDiscount(game))));
 }
 
 export function getSellPrice(instance, player) {

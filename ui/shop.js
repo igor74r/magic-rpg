@@ -39,7 +39,7 @@ export function openShop() {
   const html = getPresetItems().map(id => {
     const item = ITEMS[id];
     if (!item) return '';
-    const price = getBuyPrice(id, p);
+    const price = getBuyPrice(id, p, state.game);
     return `<div class="item" data-shop-item="${escapeHtml(id)}"><div class="item-info"><div class="item-name">${escapeHtml(item.icon)} ${escapeHtml(item.name)}</div><div class="item-desc">${escapeHtml(item.desc)} · 💰 ${escapeHtml(price)}</div></div><button type="button" data-shop-buy="${escapeHtml(id)}" ${p.gold < price || price <= 0 ? 'disabled' : ''} style="font-size:12px;padding:6px 12px;">Купить</button></div>`;
   }).join('');
   const buyback = getBuybackItems();

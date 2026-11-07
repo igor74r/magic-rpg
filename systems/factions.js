@@ -79,3 +79,17 @@ export function changeFactionReputation(game, factionId, amount, reason = 'unkno
   }
   return { factionId, previous, value, delta, rank: getFactionRank(value) };
 }
+
+/** Free Traders reward trusted allies with a capped merchant discount. */
+export function getFactionTradeDiscount(game) {
+  const reputation = getFactionReputation(game, 'free-traders');
+  if (reputation >= 90) return 0.15;
+  if (reputation >= 70) return 0.10;
+  if (reputation >= 30) return 0.05;
+  return 0;
+}
+export function getFactionTradeBenefitLabel(game) {
+  const discount = getFactionTradeDiscount(game);
+  return discount > 0 ? 'Скидка торговцев: ' + Math.round(discount * 100) + '%' :
+    'Скидка торговцев откроется при репутации +30';
+}
