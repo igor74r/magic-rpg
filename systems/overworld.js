@@ -4,7 +4,7 @@ import { LOCATIONS } from '../data/locations.js';
 import { on, emit } from './events.js';
 import { getRandomRiftLocation, getRiftLocation, getRiftLocations, endRift, recordRiftFloor } from './rift.js';
 import { getTowerLocation, recordTowerFloor, endTower } from './tower.js';
-import { TILE, generateMap } from './overworld/map.js';
+import { TILE, generateMap, createWorldRandom } from './overworld/map.js';
 import { spawnEnemies, spawnChests, spawnNPCs, spawnStatics, spawnEvents } from './overworld/spawn.js';
 import { initCamera } from './overworld/ai.js';
 import { combatFlee, clearPlayerEffects } from './overworld/combat.js';
@@ -40,15 +40,17 @@ export function enterOverworld(locationId, opts = {}) {
 
   const playerPos = { x: spawnX * TILE + TILE / 2, y: spawnY * TILE + TILE / 2 };
 
-  const enemies = spawnEnemies(loc, map, cols, rows, playerPos, opts, sourceLocationId);
-  const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, sourceLocationId);
-  const npcs = spawnNPCs(loc, locationId);
+  const worldSeed = Number.isSafeInteger(state.game?.worldSeed) ? state.game.worldSeed : 1;
+  const random = createWorldRandom(worldSeed, locationId);
+  const enemies = spawnEnemies(loc, map, cols, rows, playerPos, opts, sourceLocationId, random);
+  const chests = spawnChests(loc, map, cols, rows, enemies, playerPos, sourceLocationId, random);
+  const npcs = spawnNPCs(loc, locationId, random);
   const statics = spawnStatics(loc, locationId, cols, rows);
-  const events = spawnEvents(loc, map, cols, rows, playerPos, sourceLocationId, [...enemies, ...chests]);
+  const events = spawnEvents(loc, map, cols, rows, playerPos, sourceLocationId, [...enemies, ...chests], random);
   const camera = initCamera(playerPos, cols, rows);
 
   state.overworld = {
-    active: true, locationId, locationName: loc.name, sourceLocationId, theme: loc.theme || 'default',
+    active: true, locationId, locationName: loc.name, sourceLocationId, worldSeed, theme: loc.theme || 'default',
     safe: !!loc.safe,
     rifMode: !!opts.rifMode, rifFloor: opts.rifFloor || 1,
     towerMode: !!opts.towerMode, towerFloor: opts.towerFloor || 1,

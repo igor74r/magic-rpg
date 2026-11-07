@@ -10,6 +10,22 @@ export function seededRandom(seed) {
   };
 }
 
+export function createWorldRandom(worldSeed, locationId = '') {
+  const input = `${Number.isSafeInteger(worldSeed) ? worldSeed >>> 0 : 1}:${String(locationId)}`;
+  let seed = 2166136261;
+  for (let index = 0; index < input.length; index++) {
+    seed = Math.imul(seed ^ input.charCodeAt(index), 16777619);
+  }
+  let state = seed >>> 0;
+  return () => {
+    state += 0x6D2B79F5;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 export function hashString(str) {
   let h = 0;
 

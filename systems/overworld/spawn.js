@@ -68,7 +68,7 @@ export function createSpawnRoster(enemyIds, count, random = Math.random) {
   return result;
 }
 
-export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locationId = null) {
+export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locationId = null, random = Math.random) {
   if (loc.safe) return [];
   const ng = getNGPlusMult();
   const riftM = opts.rifMode ? getRiftMult(opts.rifFloor || 1) : opts.towerMode ? getTowerMult(opts.towerFloor || 1) : { hpMult: 1 };
@@ -78,21 +78,21 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
   // in their designated finale region while that exact campaign mission is active.
   const eligibleEnemyIds = getEligibleSpawnEnemyIds(loc.enemies, locationId, opts);
   const count = Math.min(Math.max(eligibleEnemyIds.length, 4), 7);
-  const spawnRoster = createSpawnRoster(eligibleEnemyIds, count);
+  const spawnRoster = createSpawnRoster(eligibleEnemyIds, count, random);
   const eliteChance = getEliteChance();
 
   for (let i = 0; i < count; i++) {
-    const pos = findFreeCell(map, cols, rows, enemies, 220, playerPos, locationId);
+    const pos = findFreeCell(map, cols, rows, enemies, 220, playerPos, locationId, random);
     if (!pos) continue;
     const enemyId = spawnRoster[i];
     const def = ENEMIES[enemyId];
     if (!def) continue;
     const isBoss = !!def.boss;
-    const isElite = !isBoss && Math.random() < eliteChance;
+    const isElite = !isBoss && random() < eliteChance;
     let modifier = null;
-    if (!isBoss && !isElite && Math.random() < MODIFIER_CHANCE) {
+    if (!isBoss && !isElite && random() < MODIFIER_CHANCE) {
       const keys = Object.keys(MODIFIERS);
-      modifier = keys[Math.floor(Math.random() * keys.length)];
+      modifier = keys[Math.floor(random() * keys.length)];
     }
     const mod = modifier ? MODIFIERS[modifier] : null;
     const hp = Math.round(def.hp * (isElite ? ELITE_HP_MULT : 1) * (mod ? mod.hpMult : 1) * ng.hpMult * riftM.hpMult);
@@ -101,26 +101,26 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
       homeX: pos.x * TILE + TILE / 2, homeY: pos.y * TILE + TILE / 2,
       hp, maxHp: hp, elite: isElite, boss: isBoss, modifier, collisionRadius: ENEMY_COLLISION_RADIUS,
       effects: [], phase: 0, state: 'idle', tacticalSpecialPending: false,
-      wanderTimer: 1 + Math.random() * 2, wanderDx: 0, wanderDy: 0,
+      wanderTimer: 1 + random() * 2, wanderDx: 0, wanderDy: 0,
       dead: false, respawnAt: 0,
     });
   }
   return enemies;
 }
 
-export function spawnNPCs(loc, locationId = '') {
+export function spawnNPCs(loc, locationId = '', random = Math.random) {
   const baseNPCs = Array.isArray(loc.npcs) ? [...loc.npcs] : [];
   // A wandering merchant may appear in ordinary exploration, never in the Rift,
   // Tower, or story-dragon arenas. Each entry rolls independently.
   const specialInstance = /^(rift|tower-floor-)/.test(locationId) ||
     loc.storyDragon || loc.bossArena || loc.safe;
-  if (!specialInstance && Math.random() < 0.16 && !baseNPCs.some(n => n.id === 'wandering-merchant')) {
+  if (!specialInstance && random() < 0.16 && !baseNPCs.some(n => n.id === 'wandering-merchant')) {
     const cols = loc.mapCols || 40, rows = loc.mapRows || 30;
     baseNPCs.push({
       id: 'wandering-merchant', npcType: 'merchant',
       name: 'Странствующий торговец', emoji: '🧳',
-      x: 3 + Math.floor(Math.random() * Math.max(1, cols - 6)),
-      y: 3 + Math.floor(Math.random() * Math.max(1, rows - 6)),
+      x: 3 + Math.floor(random() * Math.max(1, cols - 6)),
+      y: 3 + Math.floor(random() * Math.max(1, rows - 6)),
       greetings: ['Удача привела нас друг к другу.', 'Есть кое-что из дальних земель.', 'Редкости долго не залеживаются!']
     });
   }
@@ -132,7 +132,7 @@ export function spawnNPCs(loc, locationId = '') {
     homeY: npc.y * TILE + TILE / 2,
     interactionRadius: npc.ambient ? 0 : 65,
     collisionRadius: NPC_COLLISION_RADIUS,
-    wanderTimer: Math.random() * 3,
+    wanderTimer: random() * 3,
     wanderDx: 0, wanderDy: 0,
     facing: 'down'
   }));
@@ -178,30 +178,30 @@ export function spawnStatics(loc, locationId = null, cols = loc.mapCols || 40, r
   return objects;
 }
 
-export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId = null) {
+export function spawnChests(loc, map, cols, rows, enemies, playerPos, locationId = null, random = Math.random) {
   if (loc.safe) return [];
   const chests = [];
   const chestsCount = loc.chestsCount || 3;
   for (let i = 0; i < chestsCount; i++) {
-    const pos = findFreeCell(map, cols, rows, [...enemies, ...chests], 150, playerPos, locationId);
+    const pos = findFreeCell(map, cols, rows, [...enemies, ...chests], 150, playerPos, locationId, random);
     if (pos) chests.push({ x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2, opened: false });
   }
   return chests;
 }
 
 // ⬇️ НОВОЕ: спавн случайных событий на карте
-export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null, avoidList = []) {
+export function spawnEvents(loc, map, cols, rows, playerPos, locationId = null, avoidList = [], random = Math.random) {
   if (loc.safe) return [];
   const events = [];
-  const count = 1 + Math.floor(Math.random() * 2);
+  const count = 1 + Math.floor(random() * 2);
   const types = ['altar', 'mimic', 'crystal', 'traveler'];
   const NAMES = { altar: 'Древний алтарь', mimic: 'Подозрительный сундук', crystal: 'Кристалл сырой магии', traveler: 'Странник' };
   const EMOJIS = { altar: '⛩️', mimic: '🎁', crystal: '💎', traveler: '🧙' };
 
   for (let i = 0; i < count; i++) {
-    const pos = findFreeCell(map, cols, rows, avoidList.concat(events), 200, playerPos, locationId);
+    const pos = findFreeCell(map, cols, rows, avoidList.concat(events), 200, playerPos, locationId, random);
     if (!pos) continue;
-    const type = types[Math.floor(Math.random() * types.length)];
+    const type = types[Math.floor(random() * types.length)];
     events.push({
       id: `event-${type}-${i}`,
       eventType: type,
