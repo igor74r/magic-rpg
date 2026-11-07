@@ -95,6 +95,30 @@ export function createWorldState({ seed, legacy = false } = {}) {
   };
 }
 
+function sanitizeWorldEvent(event) {
+  if (!event || typeof event !== 'object' || Array.isArray(event)) return null;
+  if (typeof event.id !== 'string' || !event.id || event.id.length > 100) return null;
+  if (!WORLD_REGION_IDS.includes(event.regionId)) return null;
+  if (event.objectiveType === 'region-discovery') {
+    const validTarget = WORLD_REGION_IDS.includes(event.targetRegionId)
+      && (WORLD_CONNECTIONS[event.regionId] || []).includes(event.targetRegionId);
+    if (!validTarget) {
+      event.targetRegionId = null;
+      event.objectiveText = 'Цель разведки недоступна. Обратитесь к доске объявлений.';
+    }
+  }
+  const targetCount = Number.isSafeInteger(event.targetCount) && event.targetCount > 0
+    ? Math.min(1000, event.targetCount) : 1;
+  event.targetCount = targetCount;
+  event.progress = Number.isSafeInteger(event.progress)
+    ? Math.max(0, Math.min(targetCount, event.progress)) : 0;
+  event.phase = event.progress;
+  if (typeof event.objectiveText !== 'string') event.objectiveText = '';
+  if (event.objectiveText.length > 240) event.objectiveText = event.objectiveText.slice(0, 240);
+  if (typeof event.accepted !== 'boolean') event.accepted = false;
+  return event;
+}
+
 export function ensureWorldState(game, { legacy = false } = {}) {
   if (!game || typeof game !== 'object') return null;
   if (!game.world || typeof game.world !== 'object' || Array.isArray(game.world)) {
@@ -183,8 +207,10 @@ export function ensureWorldState(game, { legacy = false } = {}) {
     world.events = { active: [], cooldowns: {}, history: [] };
   }
   if (!Array.isArray(world.events.active)) world.events.active = [];
+  world.events.active = world.events.active.map(sanitizeWorldEvent).filter(Boolean);
   if (!world.events.cooldowns || typeof world.events.cooldowns !== 'object' || Array.isArray(world.events.cooldowns)) world.events.cooldowns = {};
   if (!Array.isArray(world.events.history)) world.events.history = [];
+  world.events.history = world.events.history.map(sanitizeWorldEvent).filter(Boolean);
   if (world.events.history.length > 50) {
     const pendingRewards = world.events.history.filter(event => event?.status === 'completed' && event.rewardClaimed !== true);
     const otherHistory = world.events.history.filter(event => !(event?.status === 'completed' && event.rewardClaimed !== true));

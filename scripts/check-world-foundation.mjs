@@ -172,6 +172,26 @@ const surveyCompleted = recordWorldEventDiscovery(surveyGame, survey.targetRegio
 assert.equal(surveyCompleted.length, 1);
 assert.equal(surveyCompleted[0].status, 'completed');
 assert.equal(surveyGame.factions.reputation['free-traders'], 10);
+const surveyRoundTrip = JSON.parse(JSON.stringify(surveyGame));
+ensureWorldState(surveyRoundTrip, { legacy: false });
+assert.equal(surveyRoundTrip.world.events.history[0].targetRegionId, survey.targetRegionId,
+  'the exact survey destination must survive save/load normalization');
+assert.equal(surveyRoundTrip.world.events.history[0].progress, 1);
+const malformedSurvey = {
+  world: {
+    ...createWorldState({ seed: 77 }),
+    events: {
+      active: [{ id: 'bad-survey', regionId: 'forest', objectiveType: 'region-discovery',
+        targetRegionId: 'void-crater', targetCount: 1, progress: 99, accepted: true }],
+      history: [], cooldowns: {}, sequence: 1, nextSpawnAt: 999
+    }
+  }
+};
+ensureWorldState(malformedSurvey, { legacy: false });
+assert.equal(malformedSurvey.world.events.active[0].targetRegionId, null,
+  'invalid non-adjacent survey destinations must be rejected during save normalization');
+assert.equal(malformedSurvey.world.events.active[0].progress, 1,
+  'saved event progress must be clamped to its objective count');
 assert.equal(recordWorldEventDiscovery(surveyGame, survey.targetRegionId).length, 0, 'completed survey cannot be counted twice');
 
 const hubPatrolSeed = findSeedForTemplate('forest', 'hub-patrol');
