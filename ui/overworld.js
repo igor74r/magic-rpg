@@ -120,6 +120,7 @@ function openSecret(sw) {
 
   if (sw.rewardType === 'chest') {
     (ow.chests ||= []).push({
+      id: `${sw.id}-chest`,
       x: sw.ax, y: sw.ay,
       opened: false,
       _secret: true
@@ -156,7 +157,8 @@ function openSecret(sw) {
   }
 
   const regionId = ow.sourceLocationId || ow.locationId;
-  if (!recordRegionSecretDiscovered(state.game.world, regionId, sw.id) || !saveGame()) {
+  const secretChest = sw.rewardType === 'chest' ? { id: `${sw.id}-chest`, x: sw.ax, y: sw.ay } : null;
+  if (!recordRegionSecretDiscovered(state.game.world, regionId, sw.id, secretChest) || !saveGame()) {
     state.game = previousGame;
     if (ow.chests) ow.chests.length = previousChestCount;
     if (ow.enemies) ow.enemies.length = previousEnemyCount;
@@ -227,6 +229,14 @@ export function initOverworld() {
   // Генерируем секреты для текущей локации
   if (state.overworld) {
     state.overworld.secretWalls = generateSecrets(state.overworld);
+    const regionId = state.overworld.sourceLocationId || state.overworld.locationId;
+    const regionRecord = state.game?.world?.regions?.[regionId];
+    const openedChests = new Set(regionRecord?.openedChests || []);
+    for (const chest of regionRecord?.secretChests || []) {
+      if (!openedChests.has(chest.id) && !state.overworld.chests.some(item => item.id === chest.id)) {
+        state.overworld.chests.push({ ...chest, opened: false, _secret: true });
+      }
+    }
     if (state.overworld.secretWalls.length > 0) {
       console.log('[secrets] на карте спрятано:', state.overworld.secretWalls.length);
     }

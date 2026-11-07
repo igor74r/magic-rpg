@@ -144,6 +144,8 @@ export function ensureWorldState(game, { legacy = false } = {}) {
     record.resolvedEvents = [...new Set(record.resolvedEvents.filter(id => typeof id === 'string' && id.length <= 80))];
     if (!Array.isArray(record.discoveredSecrets)) record.discoveredSecrets = [];
     record.discoveredSecrets = [...new Set(record.discoveredSecrets.filter(id => typeof id === 'string' && id.length <= 80))];
+    if (!Array.isArray(record.secretChests)) record.secretChests = [];
+    record.secretChests = record.secretChests.filter(chest => chest && typeof chest.id === 'string' && chest.id.length <= 80 && Number.isFinite(chest.x) && Number.isFinite(chest.y));
     for (const [enemyId, respawnAt] of Object.entries(record.defeatedEnemies)) {
       if (typeof enemyId !== 'string' || !Number.isFinite(respawnAt) || respawnAt < 0) delete record.defeatedEnemies[enemyId];
     }
