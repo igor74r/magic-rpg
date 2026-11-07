@@ -558,7 +558,7 @@ function prepareImportedSave(raw) {
   // version-aware precheck yet still contain invalid core player values.
   validateCurrentSaveShape(candidate);
   const player = candidate.player;
-  if (candidate.version !== 17 ||
+  if (candidate.version !== 18 ||
       !Array.isArray(player.inventory) ||
       !player.inventory.every(item => item && typeof item === 'object' && !Array.isArray(item) && typeof item.id === 'string' && item.id.trim() && (item.qty == null || (Number.isSafeInteger(item.qty) && item.qty > 0))) ||
       !Array.isArray(player.spells) ||
