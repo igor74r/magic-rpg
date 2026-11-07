@@ -182,7 +182,8 @@ assert.equal(bossBountyGame.world.events.active[0].progress, 0);
 const bossBountyCompleted = recordWorldEventKill(bossBountyGame, 'shadow', { elite: true, boss: true });
 assert.equal(bossBountyCompleted.length, 1, 'only a boss victory completes the regional bounty');
 assert.equal(bossBountyCompleted[0].status, 'completed');
-assert.equal(bossBountyGame.factions.reputation['rift-cult'], -12);
+assert.equal(bossBountyGame.factions.reputation['rift-cult'], 18,
+  'the bounty penalty must apply to the +30 reputation required to unlock it');
 
 
 const surveySeed = findSeedForTemplate('forest', 'frontier-survey');
