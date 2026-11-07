@@ -47,7 +47,7 @@ function renderFactionCard(game, faction) {
   ].join('');
 }
 
-function renderEventCard(event, world, claimable = false) {
+function renderEventCard(event, world, game, claimable = false) {
   const target = Math.max(1, Number(event.targetCount) || 1);
   const progress = Math.max(0, Math.min(target, Number(event.progress) || 0));
   const percent = Math.round(progress / target * 100);
@@ -58,7 +58,10 @@ function renderEventCard(event, world, claimable = false) {
     : event.accepted
       ? 'Принято · задача выполняется'
       : 'Ожидает принятия на карте региона';
-  const reward = Number(event.reward?.gold) || 0;
+  const baseReward = Number(event.reward?.gold) || 0;
+  const reward = baseReward > 0
+    ? Math.max(1, Math.round(baseReward * (1 + getFactionEventGoldBonus(game, event.factionId))))
+    : 0;
   const rewardText = reward > 0 ? reward + ' золота' : 'награда по результату';
   const successReputation = Number(event.reputationReward) || 0;
   const failureReputation = Number(event.failureReputationDelta) || 0;
@@ -124,8 +127,8 @@ export function renderWorldOverview() {
         return '<div class="world-history-row"><span class="world-history-mark reputation">' + signed(entry.delta) + '</span><div><b>' + escapeHtml(faction?.name || entry.factionId) + '</b><small>' + escapeHtml(entry.reason || 'Изменение репутации') + '</small></div><span class="world-history-reward">' + signed(entry.value) + '</span></div>';
       }).join('') + '</div>'
     : '<p class="world-empty-note">Репутация пока не менялась. Решения и мировые события повлияют на отношение фракций.</p>';
-  const activeHtml = activeEvents.map(event => renderEventCard(event, world)).join('');
-  const claimableHtml = claimableEvents.map(event => renderEventCard(event, world, true)).join('');
+  const activeHtml = activeEvents.map(event => renderEventCard(event, world, game)).join('');
+  const claimableHtml = claimableEvents.map(event => renderEventCard(event, world, game, true)).join('');
   const discoveredPercent = Math.round(Math.min(WORLD_REGION_IDS.length, discovered.length) / WORLD_REGION_IDS.length * 100);
   const worldHours = Math.floor(clock / 60);
   const worldMinutes = Math.floor(clock % 60);

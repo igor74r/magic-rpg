@@ -41,3 +41,8 @@ assert.match(worldUi, /Репутация за событие: ' \+ signed\(succ
   'claimable event cards must show the reputation change already applied');
 assert.match(worldUi, /escapeHtml\(reputationText\)/,
   'event reputation details must be escaped before UI insertion');
+
+assert.match(worldUi, /Math\.round\(baseReward \* \(1 \+ getFactionEventGoldBonus\(game, event\.factionId\)\)\)/,
+  'event cards must display the same faction-adjusted gold amount that reward claims pay');
+assert.match(worldUi, /renderEventCard\(event, world, game, true\)/,
+  'claimable event cards must receive current game reputation for accurate reward display');
