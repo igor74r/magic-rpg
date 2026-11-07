@@ -1,7 +1,7 @@
 import { WORLD_REGION_IDS, WORLD_CONNECTIONS } from '../data/world.js';
 import { LOCATIONS } from '../data/locations.js';
 import { createSeededRandom, deriveWorldSeed, ensureWorldState } from './world-state.js';
-import { changeFactionReputation, getFactionEventGoldBonus } from './factions.js';
+import { changeFactionReputation, getFactionEventGoldBonus, getFactionReputation } from './factions.js';
 
 export const WORLD_EVENT_MIN_INTERVAL = 480;
 export const WORLD_EVENT_INTERVAL_VARIANCE = 240;
@@ -67,6 +67,7 @@ export const WORLD_EVENT_TEMPLATES = Object.freeze([
     name: 'Охота на регионального босса',
     regions: ['shadow', 'sunken-necropolis', 'volcano', 'obsidian-fields', 'void-crater'],
     factionId: 'rift-cult',
+    minFactionReputation: 30,
     goldMin: 90,
     goldMax: 130,
     reputationReward: -12,
@@ -184,6 +185,7 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
     const available = WORLD_EVENT_TEMPLATES.filter(template =>
       template.regions.includes(regionId) &&
       (template.objectiveType !== 'region-discovery' || (WORLD_CONNECTIONS[regionId] || []).some(id => !world.discoveredRegions.includes(id))) &&
+      (!template.factionId || !Number.isFinite(template.minFactionReputation) || getFactionReputation(game, template.factionId) >= template.minFactionReputation) &&
       (!events.cooldowns[template.id] || events.cooldowns[template.id] <= now)
     );
 
@@ -201,6 +203,7 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
         templateId: template.id,
         name: template.name,
         factionId: template.factionId,
+        requiredFactionReputation: Number.isFinite(template.minFactionReputation) ? template.minFactionReputation : null,
         regionId,
         seed: eventSeed,
         status: 'active',

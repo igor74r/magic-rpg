@@ -164,7 +164,13 @@ function findSeedForTemplate(regionId, templateId) {
   throw new Error(`Could not find deterministic seed for ${templateId} in ${regionId}`);
 }
 const bossBountySeed = findSeedForTemplate('shadow', 'regional-boss-bounty');
+const lockedBossBountyGame = { world: createWorldState({ seed: bossBountySeed }), factions: createFactionState() };
+lockedBossBountyGame.world.events.nextSpawnAt = 0;
+const lockedBossBounty = advanceWorldEvents(lockedBossBountyGame, 1, 'shadow').started[0];
+assert.notEqual(lockedBossBounty?.templateId, 'regional-boss-bounty',
+  'rift-cult boss bounties must remain unavailable below +30 reputation');
 const bossBountyGame = { world: createWorldState({ seed: bossBountySeed }), factions: createFactionState() };
+changeFactionReputation(bossBountyGame, 'rift-cult', 30, 'test access', 'test');
 bossBountyGame.world.events.nextSpawnAt = 0;
 const bossBounty = advanceWorldEvents(bossBountyGame, 1, 'shadow').started[0];
 assert.equal(bossBounty.templateId, 'regional-boss-bounty');

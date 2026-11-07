@@ -63,6 +63,9 @@ function renderEventCard(event, world, game, claimable = false) {
   const progress = Math.max(0, Math.min(target, Number(event.progress) || 0));
   const percent = Math.round(progress / target * 100);
   const faction = FACTIONS[event.factionId];
+  const accessText = faction && Number.isFinite(event.requiredFactionReputation)
+    ? 'Доступно при репутации ' + signed(event.requiredFactionReputation) + ' с фракцией «' + faction.name + '».'
+    : '';
   const remaining = Math.max(0, Math.ceil((Number(event.expiresAt) || 0) - (Number(world.clockMinutes) || 0)));
   const status = claimable
     ? 'Завершено · Награда ожидает получения'
@@ -87,6 +90,7 @@ function renderEventCard(event, world, game, claimable = false) {
       '<span class="world-event-status">' + status + '</span></div>',
       '<div class="world-event-location">📍 ' + escapeHtml(regionName(event.regionId)) + (faction ? ' · ' + escapeHtml(faction.name) : '') + '</div>',
       '<p>' + escapeHtml(event.objectiveText || 'Особое событие региона.') + '</p>',
+      accessText ? '<div class="world-event-reputation">🔒 ' + escapeHtml(accessText) + '</div>' : '',
       '<div class="world-event-progress-row"><span>Прогресс</span><b>' + progress + ' / ' + target + '</b></div>',
       '<div class="world-event-progress" role="progressbar" aria-label="Прогресс события: ' + escapeHtml(event.name) + '" aria-valuemin="0" aria-valuemax="' + target + '" aria-valuenow="' + progress + '"><i style="width:' + percent + '%"></i></div>',
       reputationText ? '<div class="world-event-reputation">⚖️ ' + escapeHtml(reputationText) + '</div>' : '',
