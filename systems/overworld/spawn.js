@@ -98,7 +98,7 @@ export function spawnEnemies(loc, map, cols, rows, playerPos, opts = {}, locatio
     const mod = modifier ? MODIFIERS[modifier] : null;
     const hp = Math.round(def.hp * (isElite ? ELITE_HP_MULT : 1) * (mod ? mod.hpMult : 1) * ng.hpMult * riftM.hpMult);
     enemies.push({
-      id: i, persistentId: `enemy-${i}`, enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
+      id: i, persistentId: isBoss ? `boss-${enemyId}` : `enemy-${i}`, enemyId, x: pos.x * TILE + TILE / 2, y: pos.y * TILE + TILE / 2,
       homeX: pos.x * TILE + TILE / 2, homeY: pos.y * TILE + TILE / 2,
       hp, maxHp: hp, elite: isElite, boss: isBoss, modifier, collisionRadius: ENEMY_COLLISION_RADIUS,
       effects: [], phase: 0, state: 'idle', tacticalSpecialPending: false,
