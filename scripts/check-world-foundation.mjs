@@ -202,6 +202,7 @@ assert.equal(defenseGame.factions.reputation['hub-guardians'], 10);
 assert.equal(defenseGame.world.regions.forest.securityThreat, 0,
   'successful Guardian defense must improve regional security');
 const failedDefense = { world: createWorldState({ seed: defenseSeed }), factions: createFactionState() };
+ensureWorldState(failedDefense, { legacy: false });
 failedDefense.world.regions.forest = { generationVisit: 1, securityThreat: 1 };
 failedDefense.world.events.nextSpawnAt = 0;
 const failedDefenseEvent = advanceWorldEvents(failedDefense, 1, 'forest').started[0];
