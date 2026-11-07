@@ -229,11 +229,18 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
       (!template.factionId || !Number.isFinite(template.minFactionReputation) || getFactionReputation(game, template.factionId) >= template.minFactionReputation) &&
       (!events.cooldowns[template.id] || events.cooldowns[template.id] <= now)
     );
+    // An active campaign's next chapter takes priority over unrelated random events.
+    const campaignCandidates = available.filter(template =>
+      template.campaignId &&
+      world.factionCampaigns[template.campaignId]?.status === 'active' &&
+      world.factionCampaigns[template.campaignId]?.stage === template.campaignStage
+    );
+    const spawnCandidates = campaignCandidates.length ? campaignCandidates : available;
 
-    if (available.length) {
+    if (spawnCandidates.length) {
       const sequence = events.sequence++;
       const random = createSeededRandom(deriveWorldSeed(world.seed, 'world-event', sequence, regionId));
-      const template = available[Math.floor(random() * available.length)];
+      const template = spawnCandidates[Math.floor(random() * spawnCandidates.length)];
       const eventSeed = deriveWorldSeed(world.seed, template.id, sequence, regionId);
       const rewardRandom = createSeededRandom(eventSeed);
       const targetRegionId = template.objectiveType === 'region-discovery'
