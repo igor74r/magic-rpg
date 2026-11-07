@@ -52,6 +52,13 @@ function renderEventCard(event, world, claimable = false) {
       : 'Ожидает принятия на карте региона';
   const reward = Number(event.reward?.gold) || 0;
   const rewardText = reward > 0 ? reward + ' золота' : 'награда по результату';
+  const successReputation = Number(event.reputationReward) || 0;
+  const failureReputation = Number(event.failureReputationDelta) || 0;
+  const reputationText = faction && (successReputation || failureReputation)
+    ? claimable
+      ? 'Репутация за событие: ' + signed(successReputation)
+      : 'При успехе: ' + signed(successReputation) + ' · при провале: ' + signed(failureReputation)
+    : '';
   return [
     '<article class="world-event-card ' + (claimable ? 'is-claimable' : event.accepted ? 'is-accepted' : 'is-pending') + '" data-world-event-id="' + escapeHtml(event.id) + '">',
       '<div class="world-event-card-top"><div><span class="world-card-kicker">' + (claimable ? 'НАГРАДА' : 'МИРОВОЕ СОБЫТИЕ') + '</span><h4>' + escapeHtml(event.name) + '</h4></div>',
@@ -60,6 +67,7 @@ function renderEventCard(event, world, claimable = false) {
       '<p>' + escapeHtml(event.objectiveText || 'Особое событие региона.') + '</p>',
       '<div class="world-event-progress-row"><span>Прогресс</span><b>' + progress + ' / ' + target + '</b></div>',
       '<div class="world-event-progress" role="progressbar" aria-label="Прогресс события: ' + escapeHtml(event.name) + '" aria-valuemin="0" aria-valuemax="' + target + '" aria-valuenow="' + progress + '"><i style="width:' + percent + '%"></i></div>',
+      reputationText ? '<div class="world-event-reputation">⚖️ ' + escapeHtml(reputationText) + '</div>' : '',
       '<div class="world-event-footer"><span>🎁 ' + rewardText + '</span>',
       claimable ? '<span>Вернитесь к маркеру события в регионе</span>' : '<span>⌛ Осталось: ' + remaining + ' игровых мин.</span>',
       '</div>',

@@ -33,3 +33,11 @@ assert.match(markers, /description: event\.objectiveText \|\| ''/,
 assert.match((await import('node:fs')).readFileSync(new URL('../ui/overworld/render.js', import.meta.url), 'utf8'),
   /safeDescription = isEvent \? escapeHtml\(nearNpc\.description \|\| ''\)/,
   'event interaction panel must display escaped objective guidance');
+
+const worldUi = (await import('node:fs')).readFileSync(new URL('../ui/world.js', import.meta.url), 'utf8');
+assert.match(worldUi, /При успехе: ' \+ signed\(successReputation\) \+ ' · при провале: ' \+ signed\(failureReputation\)/,
+  'active event cards must disclose success and failure faction reputation consequences');
+assert.match(worldUi, /Репутация за событие: ' \+ signed\(successReputation\)/,
+  'claimable event cards must show the reputation change already applied');
+assert.match(worldUi, /escapeHtml\(reputationText\)/,
+  'event reputation details must be escaped before UI insertion');
