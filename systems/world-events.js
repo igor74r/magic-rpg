@@ -62,6 +62,19 @@ export const WORLD_EVENT_TEMPLATES = Object.freeze([
     objectiveText: 'Победите 2 элитных противников.'
   }),
   Object.freeze({
+    id: 'regional-boss-bounty',
+    name: 'Охота на регионального босса',
+    regions: ['shadow', 'sunken-necropolis', 'volcano', 'obsidian-fields', 'void-crater'],
+    factionId: 'rift-cult',
+    goldMin: 90,
+    goldMax: 130,
+    reputationReward: -12,
+    failureReputationDelta: 6,
+    objectiveType: 'boss-kill',
+    targetCount: 1,
+    objectiveText: 'Найдите и победите регионального босса.'
+  }),
+  Object.freeze({
     id: 'elite-hunt',
     name: 'Охота на элиту',
     regions: WORLD_REGION_IDS.filter(id => id !== 'village'),
@@ -224,7 +237,8 @@ export function recordWorldEventKill(game, regionId, enemy) {
   for (const event of [...world.events.active]) {
     if (event.status !== 'active' || !event.accepted || event.regionId !== regionId) continue;
     if (event.objectiveType === 'elite-kill' && !enemy.elite && !enemy.boss) continue;
-    if (!['enemy-kill', 'elite-kill'].includes(event.objectiveType)) continue;
+    if (event.objectiveType === 'boss-kill' && !enemy.boss) continue;
+    if (!['enemy-kill', 'elite-kill', 'boss-kill'].includes(event.objectiveType)) continue;
 
     event.progress = Math.min(event.targetCount || 1, (Number(event.progress) || 0) + 1);
     event.phase = event.progress;

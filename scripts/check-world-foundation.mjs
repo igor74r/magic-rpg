@@ -141,6 +141,21 @@ function findSeedForTemplate(regionId, templateId) {
   }
   throw new Error(`Could not find deterministic seed for ${templateId} in ${regionId}`);
 }
+const bossBountySeed = findSeedForTemplate('shadow', 'regional-boss-bounty');
+const bossBountyGame = { world: createWorldState({ seed: bossBountySeed }), factions: createFactionState() };
+bossBountyGame.world.events.nextSpawnAt = 0;
+const bossBounty = advanceWorldEvents(bossBountyGame, 1, 'shadow').started[0];
+assert.equal(bossBounty.templateId, 'regional-boss-bounty');
+assert.equal(bossBounty.objectiveType, 'boss-kill');
+assert.equal(acceptWorldEvent(bossBountyGame, bossBounty.id), true);
+assert.equal(recordWorldEventKill(bossBountyGame, 'shadow', { elite: true, boss: false }).length, 0,
+  'elite enemies must not satisfy a regional boss bounty');
+assert.equal(bossBountyGame.world.events.active[0].progress, 0);
+const bossBountyCompleted = recordWorldEventKill(bossBountyGame, 'shadow', { elite: true, boss: true });
+assert.equal(bossBountyCompleted.length, 1, 'only a boss victory completes the regional bounty');
+assert.equal(bossBountyCompleted[0].status, 'completed');
+assert.equal(bossBountyGame.factions.reputation['rift-cult'], -12);
+
 const hubPatrolSeed = findSeedForTemplate('forest', 'hub-patrol');
 const eventGame = { world: createWorldState({ seed: hubPatrolSeed }), factions: createFactionState() };
 eventGame.world.events.nextSpawnAt = 0;

@@ -6,7 +6,8 @@ const EVENT_EMOJIS = Object.freeze({
   'free-trader-caravan': '🐎',
   'rift-breach': '🌀',
   'ash-nomad-scouts': '🔥',
-  'elite-hunt': '☠️'
+  'elite-hunt': '☠️',
+  'regional-boss-bounty': '🐉'
 });
 
 export function createWorldEventMarker(ow, event) {
