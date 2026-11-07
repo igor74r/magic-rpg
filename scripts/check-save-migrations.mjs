@@ -67,7 +67,13 @@ for (let version = 1; version <= 16; version++) {
   try {
     assert.doesNotThrow(() => validateCurrentSaveShape(migrated),
       'every supported legacy version must migrate into a valid current save');
-    assert.equal(migrated.version, 17);
+    assert.equal(migrated.version, 18);
+    assert.ok(Number.isSafeInteger(migrated.worldSeed) && migrated.worldSeed > 0 && migrated.worldSeed <= 0xffffffff,
+      'every migrated save must receive a stable unsigned world seed');
+    assert.equal(migrated.worldGeneratorVersion, 1);
+    const worldSeed = migrated.worldSeed;
+    migrateGame(migrated);
+    assert.equal(migrated.worldSeed, worldSeed, 'world seed must remain stable across repeated migrations');
     assert.equal(migrated.player.name, 'Migration Fixture');
     assert.equal(migrated.player.level, 12);
     assert.equal(migrated.player.expNext, getExpNext(12));
@@ -97,10 +103,10 @@ for (let version = 1; version <= 16; version++) {
     const snapshot = JSON.stringify(migrated);
     migrateGame(migrated);
     assert.equal(JSON.stringify(migrated), snapshot, 'migration must be idempotent');
-    console.log(`PASS save v${version} -> v17 (data, slots, shards, Luck, idempotence)`);
+    console.log(`PASS save v${version} -> v18 (data, slots, shards, Luck, idempotence)`);
   } catch (error) {
     failures.push({ version, error: error.message });
-    console.log(`FAIL save v${version} -> v17: ${error.message}`);
+    console.log(`FAIL save v${version} -> v18: ${error.message}`);
   }
 }
 assert.deepEqual(EQUIPMENT_SLOTS, expectedSlots);
@@ -151,7 +157,7 @@ state.game = null;
 state.currentSlot = 1;
 assert.equal(createCharacter('Fresh Schema Hero', 'warrior'), true);
 const freshSave = JSON.parse(storage.get('magic-rpg-save-1'));
-assert.equal(freshSave.version, 17, 'new character must be saved with current schema');
+assert.equal(freshSave.version, 18, 'new character must be saved with current schema');
 assert.deepEqual(Object.keys(freshSave.player.equipped).sort(), [...expectedSlots].sort(),
   'new character must pass equipment-slot migrations before first save');
 assert.ok(!['back', 'wrists', 'hands', 'seal'].some(slot => slot in freshSave.player.equipped),
@@ -211,7 +217,7 @@ storage.set('magic-rpg-save-1', JSON.stringify({
 state.game = null;
 const loaded = loadGameData(1);
 const rewritten = JSON.parse(storage.get('magic-rpg-save-1'));
-const storagePathOk = loaded && state.game?.version === 17 && rewritten.version === 17 &&
+const storagePathOk = loaded && state.game?.version === 18 && rewritten.version === 18 &&
   rewritten.player.inventory[0]?.id === 'old-archive-seal' && rewritten.player.inventory[0]?.qty === 4 &&
   storage.get('magic-rpg-settings') === '{"sentinel":"keep"}';
 console.log(`${storagePathOk ? 'PASS' : 'FAIL'} loadGameData migrates and rewrites v16 slot without changing settings`);
@@ -280,7 +286,7 @@ assert.equal(storage.has('magic-rpg-save'), false, 'legacy key is removed only a
 console.log('PASS legacy save migrates when slot 1 is empty');
 
 // Newer and malformed schema versions must be rejected without rewriting the slot.
-for (const unsupportedVersion of [18, 'future', 17.5, -1, true]) {
+for (const unsupportedVersion of [19, 'future', 17.5, -1, true]) {
   const original = JSON.stringify({
     version: unsupportedVersion,
     player: { name: 'Future Save', level: 20, inventory: [{ id: 'future-item', qty: 1 }] },
@@ -302,7 +308,7 @@ for (const unsupportedVersion of [18, 'future', 17.5, -1, true]) {
   console.log(`PASS future/malformed save version ${String(unsupportedVersion)} is rejected without mutation`);
 }
 
-const malformedSave = JSON.stringify({ version: 17, inventory: [{ id: 'health-potion', qty: 1 }] });
+const malformedSave = JSON.stringify({ version: 18, inventory: [{ id: 'health-potion', qty: 1 }] });
 storage.set('magic-rpg-save-1', malformedSave);
 state.game = null;
 const realConsoleError = console.error;
@@ -318,7 +324,7 @@ assert.equal(storage.get('magic-rpg-save-1'), malformedSave, 'malformed save mus
 assert.equal(state.game, null, 'malformed save must not replace active game state');
 console.log('PASS malformed save structure is rejected without mutation');
 
-const incompleteCurrentSave = JSON.stringify({ version: 17, player: { name: 'Incomplete Current Save', level: 10 } });
+const incompleteCurrentSave = JSON.stringify({ version: 18, player: { name: 'Incomplete Current Save', level: 10 } });
 storage.set('magic-rpg-save-1', incompleteCurrentSave);
 state.game = null;
 console.error = () => {};
@@ -328,9 +334,9 @@ try {
 } finally {
   console.error = realConsoleError;
 }
-assert.equal(incompleteCurrentRejected, true, 'incomplete v17 save must be rejected');
-assert.equal(storage.get('magic-rpg-save-1'), incompleteCurrentSave, 'incomplete v17 save must not be rewritten');
-assert.equal(state.game, null, 'incomplete v17 save must not replace active game state');
+assert.equal(incompleteCurrentRejected, true, 'incomplete v18 save must be rejected');
+assert.equal(storage.get('magic-rpg-save-1'), incompleteCurrentSave, 'incomplete v18 save must not be rewritten');
+assert.equal(state.game, null, 'incomplete v18 save must not replace active game state');
 console.log('PASS incomplete current-version save is rejected without mutation');
 
 // Failed writes must not mutate live schema/playtime or replace the active slot.

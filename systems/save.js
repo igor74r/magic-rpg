@@ -6,7 +6,7 @@ const SLOT_PREFIX = 'magic-rpg-save-';
 const LEGACY_KEY = 'magic-rpg-save';
 const SETTINGS_KEY = 'magic-rpg-settings';
 
-const SAVE_VERSION = 17;
+const SAVE_VERSION = 18;
 const SETTINGS_VERSION = 6;
 const MAX_SLOT = 3;
 
@@ -110,7 +110,9 @@ export function validateCurrentSaveShape(game) {
   const player = game.player;
   const isRecord = value => !!value && typeof value === 'object' && !Array.isArray(value);
   const finitePlayerFields = ['hp', 'maxHp', 'mp', 'maxMp', 'str', 'int', 'wis', 'con', 'dex', 'luck'];
-  if (finitePlayerFields.some(key => !Number.isFinite(player[key])) ||
+  if (!Number.isSafeInteger(game.worldSeed) || game.worldSeed < 1 || game.worldSeed > 0xffffffff ||
+      game.worldGeneratorVersion !== 1 ||
+      finitePlayerFields.some(key => !Number.isFinite(player[key])) ||
       player.hp < 0 || player.maxHp <= 0 || player.mp < 0 || player.maxMp <= 0 ||
       !Number.isSafeInteger(player.exp) || player.exp < 0 ||
       !Number.isSafeInteger(player.statPoints) || player.statPoints < 0 ||
@@ -513,6 +515,24 @@ export function migrateGame(game) {
       else if (entry && typeof entry === 'object' && entry.id === 'mana-crystal') entry.id = 'old-archive-seal';
     }
     game.version = 17;
+  }
+
+  // Version 18: assign a stable per-save world seed without changing legacy character progress.
+  if (game.version < 18) {
+    const source = [
+      Number.isSafeInteger(game.player.createdAt) ? game.player.createdAt : 0,
+      typeof game.player.name === 'string' ? game.player.name : '',
+      typeof game.player.class === 'string' ? game.player.class : '',
+      typeof game.location === 'string' ? game.location : 'village'
+    ].join('|');
+    let seed = 2166136261;
+    for (let index = 0; index < source.length; index++) {
+      seed = Math.imul(seed ^ source.charCodeAt(index), 16777619);
+    }
+    seed >>>= 0;
+    game.worldSeed = seed || 1;
+    game.worldGeneratorVersion = 1;
+    game.version = 18;
   }
 
   // Rebase stored XP thresholds after progression balance changes while
