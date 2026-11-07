@@ -144,7 +144,7 @@ changeFactionReputation(factionGame, 'hub-guardians', 190, 'allied test', 'test'
 assert.equal(getFactionDamageReduction(factionGame), 0.15);
 changeFactionReputation(factionGame, 'ash-nomads', 70, 'honored test', 'test');
 assert.equal(getFactionLootBonus(factionGame), 0.10);
-assert.equal(getLootDropChance(0.2, { luck: 0 }, factionGame), 0.22,
+assert.ok(Math.abs(getLootDropChance(0.2, { luck: 0 }, factionGame) - 0.22) < 1e-12,
   'Ash Nomad standing multiplies ordinary loot drop chance');
 changeFactionReputation(factionGame, 'rift-cult', 30, 'friendly test', 'test');
 assert.equal(getFactionEventGoldBonus(factionGame, 'rift-cult'), 0.05);
