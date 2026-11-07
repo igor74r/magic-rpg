@@ -17,6 +17,7 @@ game.world.currentRegionId = 'forest';
 game.world.regionVisits.forest = 1;
 game.world.discoveredRegions = ['village', 'forest'];
 game.world.unlockedRoutes = ['village::forest', 'forest::village'];
+game.world.regions = { forest: { discoveredSecrets: ['secret-2-3', 'secret-8-5'] } };
 game.world.clockMinutes = 125;
 game.world.events.nextSpawnAt = 400;
 game.world.events.active = [{
@@ -59,6 +60,8 @@ assert.match(html, /Засада на патруль/);
 assert.match(html, /Награда ожидает получения/);
 assert.match(html, /Открыто регионов/);
 assert.match(html, /Открыто маршрутов/);
+assert.match(html, /Найдено тайников/);
+assert.match(html, />2<\/b>/, 'world overview must display persistent discovered-secret total');
 assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/, 'reputation log text must be escaped');
 assert.doesNotMatch(html, /<img src=x onerror=alert\(1\)>/);
 

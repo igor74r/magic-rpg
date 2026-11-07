@@ -105,6 +105,9 @@ function openSecret(sw) {
   const previousEnemyCount = ow.enemies?.length || 0;
   const previousParticleCount = ow.particles?.length || 0;
   sw.opened = true;
+  let toastMessage = '';
+  let logMessage = '';
+  let logClass = 'success';
 
   // Эффект: взрыв искр
   for (let i = 0; i < 30; i++) {
@@ -125,8 +128,8 @@ function openSecret(sw) {
       opened: false,
       _secret: true
     });
-    emit('toast', '🪙 Найден древний сундук!');
-    emit('log', { channel: 'game', msg: '✨ Вы обнаружили скрытую нишу с сундуком.', cls: 'success' });
+    toastMessage = '🪙 Найден древний сундук!';
+    logMessage = '✨ Вы обнаружили скрытую нишу с сундуком.';
   } else if (sw.rewardType === 'elite') {
     const pool = (LOCATIONS[ow.locationId]?.enemies) || ['goblin', 'skeleton', 'wolf'];
     const enemyId = pool[Math.floor(Math.random() * pool.length)];
@@ -144,16 +147,17 @@ function openSecret(sw) {
         wanderTimer: 0, chaseCooldown: 0
       });
     }
-    emit('toast', '⚠️ Пробуждён древний страж!');
-    emit('log', { channel: 'game', msg: '👁️ Из тьмы вышел страж.', cls: 'danger' });
+    toastMessage = '⚠️ Пробуждён древний страж!';
+    logMessage = '👁️ Из тьмы вышел страж.';
+    logClass = 'danger';
   } else {
     // Лут — золото и зелья
     const gold = 5 + Math.floor(Math.random() * 9);
     p.gold = (p.gold || 0) + gold;
     addItem('health-potion', 1);
     addItem('mana-potion', 1);
-    emit('toast', `💰 +${gold} золота, +2 зелья`);
-    emit('log', { channel: 'game', msg: `✨ Скрытая ниша: +${gold}💰, +2 зелья.`, cls: 'success' });
+    toastMessage = `💰 +${gold} золота, +2 зелья`;
+    logMessage = `✨ Скрытая ниша: +${gold}💰, +2 зелья.`;
   }
 
   const regionId = ow.sourceLocationId || ow.locationId;
@@ -165,7 +169,10 @@ function openSecret(sw) {
     if (ow.particles) ow.particles.length = previousParticleCount;
     sw.opened = false;
     emit('toast', '⚠️ Тайник не сохранён. Попробуйте открыть его ещё раз.');
+    return;
   }
+  if (toastMessage) emit('toast', toastMessage);
+  if (logMessage) emit('log', { channel: 'game', msg: logMessage, cls: logClass });
 }
 
 

@@ -96,6 +96,8 @@ export function renderWorldOverview() {
   const routes = Array.isArray(world.unlockedRoutes) ? world.unlockedRoutes : [];
   const currentRegion = world.currentRegionId || game.location;
   const currentVisits = Math.max(1, Number(world.regionVisits?.[currentRegion]) || 1);
+  const discoveredSecrets = Object.values(world.regions || {}).reduce((total, record) =>
+    total + (Array.isArray(record?.discoveredSecrets) ? record.discoveredSecrets.length : 0), 0);
   const clock = Math.max(0, Number(world.clockMinutes) || 0);
   const nextEventIn = Math.max(0, Math.ceil((Number(events.nextSpawnAt) || 0) - clock));
   const factionCards = Object.values(FACTIONS).map(faction => renderFactionCard(game, faction)).join('');
@@ -120,6 +122,7 @@ export function renderWorldOverview() {
       '<div class="world-overview-metrics">',
         '<div class="world-metric"><span>Открыто регионов</span><b>' + discovered.length + ' / ' + WORLD_REGION_IDS.length + '</b><i role="progressbar" aria-label="Исследование мира" aria-valuemin="0" aria-valuemax="' + WORLD_REGION_IDS.length + '" aria-valuenow="' + discovered.length + '"><em style="width:' + discoveredPercent + '%"></em></i></div>',
         '<div class="world-metric"><span>Открыто маршрутов</span><b>' + routes.length + '</b><small>Связи между областями</small></div>',
+        '<div class="world-metric"><span>Найдено тайников</span><b>' + discoveredSecrets + '</b><small>Секретные места, раскрытые в регионах</small></div>',
         '<div class="world-metric"><span>Мировое время</span><b>' + worldHours + ' ч ' + worldMinutes + ' мин.</b><small>До следующего события: ' + nextEventIn + ' игровых мин.</small></div>',
       '</div>',
       '<section class="world-overview-section" aria-labelledby="world-factions-title"><div class="world-section-heading"><div><span class="world-card-kicker">ОТНОШЕНИЯ</span><h3 id="world-factions-title">Четыре фракции</h3></div><span>' + Object.keys(FACTIONS).length + ' организаций</span></div>',
