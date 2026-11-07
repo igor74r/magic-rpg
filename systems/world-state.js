@@ -140,6 +140,8 @@ export function ensureWorldState(game, { legacy = false } = {}) {
     if (!Array.isArray(record.openedChests)) record.openedChests = [];
     record.openedChests = [...new Set(record.openedChests.filter(id => typeof id === 'string' && id.length <= 80))];
     if (!record.defeatedEnemies || typeof record.defeatedEnemies !== 'object' || Array.isArray(record.defeatedEnemies)) record.defeatedEnemies = {};
+    if (!Array.isArray(record.defeatedBosses)) record.defeatedBosses = [];
+    record.defeatedBosses = [...new Set(record.defeatedBosses.filter(id => typeof id === 'string' && id.length <= 80))];
     if (!Array.isArray(record.resolvedEvents)) record.resolvedEvents = [];
     record.resolvedEvents = [...new Set(record.resolvedEvents.filter(id => typeof id === 'string' && id.length <= 80))];
     if (!Array.isArray(record.discoveredSecrets)) record.discoveredSecrets = [];

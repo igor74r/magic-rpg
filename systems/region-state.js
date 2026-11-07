@@ -9,6 +9,7 @@ export function ensureRegionRecord(world, regionId, generationVisit = 1) {
       generationVisit: Math.max(1, Math.floor(Number(generationVisit) || 1)),
       openedChests: [],
       defeatedEnemies: {},
+      defeatedBosses: [],
       resolvedEvents: [],
       discoveredSecrets: [],
       secretChests: [],
@@ -21,6 +22,8 @@ export function ensureRegionRecord(world, regionId, generationVisit = 1) {
   }
   if (!Array.isArray(record.openedChests)) record.openedChests = [];
   if (!record.defeatedEnemies || typeof record.defeatedEnemies !== 'object' || Array.isArray(record.defeatedEnemies)) record.defeatedEnemies = {};
+  if (!Array.isArray(record.defeatedBosses)) record.defeatedBosses = [];
+  record.defeatedBosses = [...new Set(record.defeatedBosses.filter(id => typeof id === 'string' && id.length <= 80))];
   if (!Array.isArray(record.resolvedEvents)) record.resolvedEvents = [];
   record.resolvedEvents = [...new Set(record.resolvedEvents.filter(id => typeof id === 'string' && id.length <= 80))];
   if (!Array.isArray(record.discoveredSecrets)) record.discoveredSecrets = [];
@@ -88,6 +91,15 @@ export function recordRegionEnemyDefeat(world, regionId, enemyId, respawnAtClock
   return true;
 }
 
+export function recordRegionBossDefeat(world, regionId, bossId) {
+  if (typeof bossId !== 'string' || !bossId || bossId.length > 80) return false;
+  const record = ensureRegionRecord(world, regionId);
+  if (!record || record.defeatedBosses.includes(bossId)) return false;
+  record.defeatedBosses.push(bossId);
+  delete record.defeatedEnemies[bossId];
+  return true;
+}
+
 export function recordRegionEnemyRespawned(world, regionId, enemyId) {
   const record = ensureRegionRecord(world, regionId);
   if (!record || !Object.prototype.hasOwnProperty.call(record.defeatedEnemies, enemyId)) return false;
@@ -101,6 +113,7 @@ export function applyRegionPersistence(world, regionId, enemies, chests, events 
   const clock = Math.max(0, Number(world.clockMinutes) || 0);
   const opened = new Set(record.openedChests);
   const resolved = new Set(record.resolvedEvents);
+  const defeatedBosses = new Set(record.defeatedBosses);
   for (const chest of Array.isArray(chests) ? chests : []) chest.opened = opened.has(chest.id);
   if (Array.isArray(events)) {
     for (let index = events.length - 1; index >= 0; index--) {
@@ -108,6 +121,14 @@ export function applyRegionPersistence(world, regionId, enemies, chests, events 
     }
   }
   for (const enemy of Array.isArray(enemies) ? enemies : []) {
+    if (enemy?.boss && defeatedBosses.has(enemy.persistentId)) {
+      enemy.dead = true;
+      enemy.hp = 0;
+      enemy.respawnAt = 0;
+      enemy.effects = [];
+      if (enemy.state === 'combat') enemy.state = 'dead';
+      continue;
+    }
     const respawnAtClock = record.defeatedEnemies[enemy.persistentId];
     if (!Number.isFinite(respawnAtClock)) continue;
     if (respawnAtClock <= clock) {

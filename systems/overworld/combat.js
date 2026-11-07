@@ -21,7 +21,7 @@ import {
 import { emit } from '../events.js';
 import { saveGame } from '../save.js';
 import { recordWorldEventKill } from '../world-events.js';
-import { recordRegionEnemyDefeat } from '../region-state.js';
+import { recordRegionBossDefeat, recordRegionEnemyDefeat } from '../region-state.js';
 import { playSound } from '../audio.js';
 import { getNGPlusMult } from '../ngplus.js';
 import { getTalentBonus } from '../talents.js';
@@ -1846,9 +1846,13 @@ function combatVictory() {
   enemy.respawnAt = performance.now() + getRespawnMs();
   const defeatedRegionId = ow.sourceLocationId || ow.locationId;
   if (state.game?.world && defeatedRegionId && enemy.persistentId) {
-    const respawnMinutes = getRespawnMs() / 60000;
-    recordRegionEnemyDefeat(state.game.world, defeatedRegionId, enemy.persistentId,
-      (Number(state.game.world.clockMinutes) || 0) + respawnMinutes);
+    if (enemy.boss) {
+      recordRegionBossDefeat(state.game.world, defeatedRegionId, enemy.persistentId);
+    } else {
+      const respawnMinutes = getRespawnMs() / 60000;
+      recordRegionEnemyDefeat(state.game.world, defeatedRegionId, enemy.persistentId,
+        (Number(state.game.world.clockMinutes) || 0) + respawnMinutes);
+    }
   }
   enemy.effects = [];
 

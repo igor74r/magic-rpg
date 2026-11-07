@@ -5,6 +5,7 @@ import {
   ensureRegionRecord,
   recordRegionChestOpened,
   recordRegionEnemyDefeat,
+  recordRegionBossDefeat,
   recordRegionEnemyRespawned,
   recordRegionEventResolved,
   recordRegionSecretDiscovered,
@@ -21,6 +22,9 @@ assert.equal(ensureRegionRecord(world, 'forest', 9).generationVisit, 2,
 assert.equal(recordRegionChestOpened(world, 'forest', 'chest-1'), true);
 assert.equal(recordRegionChestOpened(world, 'forest', 'chest-1'), false);
 assert.equal(recordRegionEnemyDefeat(world, 'forest', 'enemy-2', 35), true);
+assert.equal(recordRegionBossDefeat(world, 'forest', 'enemy-6'), true);
+assert.equal(recordRegionBossDefeat(world, 'forest', 'enemy-6'), false,
+  'a regional boss defeat must be recorded only once');
 assert.equal(recordRegionEventResolved(world, 'forest', 'event-altar-0'), true);
 assert.equal(recordRegionEventResolved(world, 'forest', 'event-altar-0'), false);
 assert.equal(recordRegionSecretDiscovered(world, 'forest', 'secret-12-8', { id: 'secret-12-8-chest', x: 320, y: 240 }), true);
@@ -29,7 +33,11 @@ const secretLayout = [{ id: 'secret-12-8', tx: 12, ty: 8, wx: 600, wy: 408, ax: 
 assert.equal(recordRegionSecretLayout(world, 'forest', secretLayout), true);
 assert.equal(recordRegionSecretLayout(world, 'forest', []), false, 'generated secret layout must not be rerolled on revisits');
 world.clockMinutes = 20;
-const enemies = [{ persistentId: 'enemy-2', hp: 40, dead: false, effects: [] }, { persistentId: 'enemy-1', hp: 30, dead: false }];
+const enemies = [
+  { persistentId: 'enemy-2', hp: 40, dead: false, effects: [] },
+  { persistentId: 'enemy-1', hp: 30, dead: false },
+  { persistentId: 'enemy-6', boss: true, hp: 500, maxHp: 500, dead: false, state: 'idle', effects: [] }
+];
 const chests = [{ id: 'chest-0', opened: false }, { id: 'chest-1', opened: false }];
 const events = [{ id: 'event-altar-0', resolved: false }, { id: 'event-crystal-0', resolved: false }];
 applyRegionPersistence(world, 'forest', enemies, chests, events, 1000);
@@ -40,12 +48,17 @@ assert.equal(enemies[0].dead, true);
 assert.equal(enemies[0].hp, 0);
 assert.equal(enemies[0].respawnAt, 901000);
 assert.equal(enemies[1].dead, false);
+assert.equal(enemies[2].dead, true, 'a defeated regional boss must stay defeated without a respawn timer');
+assert.equal(enemies[2].hp, 0);
+assert.equal(enemies[2].respawnAt, 0);
 world.clockMinutes = 36;
 applyRegionPersistence(world, 'forest', enemies, chests, events, 2000);
 assert.equal(enemies[0].dead, false, 'expired defeat cooldown must not keep an enemy dead');
 assert.equal(recordRegionEnemyRespawned(world, 'forest', 'enemy-2'), false);
 const roundTrip = JSON.parse(JSON.stringify(game));
 ensureWorldState(roundTrip);
+assert.deepEqual(roundTrip.world.regions.forest.defeatedBosses, ['enemy-6'],
+  'regional boss victories must survive save serialization and sanitization');
 assert.deepEqual(roundTrip.world.regions.forest.discoveredSecrets, ['secret-12-8'],
   'discovered secret IDs must survive save serialization and world-state sanitization');
 assert.deepEqual(roundTrip.world.regions.forest.secretChests, [{ id: 'secret-12-8-chest', x: 320, y: 240 }],
@@ -60,4 +73,6 @@ const combatSource = readFileSync(new URL('../systems/overworld/combat.js', impo
 assert.match(combatSource, /const defeatedRegionId = ow\.sourceLocationId \|\| ow\.locationId;/,
   'enemy defeat persistence must use the resolved region even when sourceLocationId is absent');
 
-console.log('Persistent region state: stable generation, opened chests, defeated enemies and respawn cooldown passed.');
+assert.match(combatSource, /if \\(enemy\\.boss\\) \\{\\s+recordRegionBossDefeat\\(/,
+  'regional boss victories must use permanent defeat persistence');
+console.log('Persistent region state: stable generation, opened chests, defeated enemies, permanent bosses and respawn cooldown passed.');
