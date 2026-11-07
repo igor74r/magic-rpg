@@ -26,6 +26,8 @@ assert.match(main, /state\.game = JSON\.parse\(snapshot\)/,
   'event acceptance and reward claims must roll back when saving fails');
 
 console.log('Persistent world-event runtime wiring: markers, timed lifecycle, combat objectives and transactional rewards passed.');
+assert.match(markers, /'hub-outpost-defense': '🏰'/,
+  'Hub Guardian defense events must have a distinct fortress marker');
 assert.match(markers, /'frontier-survey': '🧭'/,
   'frontier survey markers must use a compass so they are distinct from combat events');
 assert.match(markers, /description: event\.objectiveText \|\| ''/,

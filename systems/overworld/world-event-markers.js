@@ -3,6 +3,7 @@ import { createSeededRandom } from '../world-state.js';
 
 const EVENT_EMOJIS = Object.freeze({
   'hub-patrol': '🛡️',
+  'hub-outpost-defense': '🏰',
   'free-trader-caravan': '🐎',
   'rift-breach': '🌀',
   'ash-nomad-scouts': '🔥',

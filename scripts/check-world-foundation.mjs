@@ -164,6 +164,30 @@ function findSeedForTemplate(regionId, templateId) {
   throw new Error(`Could not find deterministic seed for ${templateId} in ${regionId}`);
 }
 // The former standalone commander bounty is now represented by stage II of the persistent campaign.
+const defenseSeed = findSeedForTemplate('forest', 'hub-outpost-defense');
+const defenseGame = { world: createWorldState({ seed: defenseSeed }), factions: createFactionState() };
+defenseGame.world.events.nextSpawnAt = 0;
+const defenseEvent = advanceWorldEvents(defenseGame, 1, 'forest').started[0];
+assert.equal(defenseEvent.templateId, 'hub-outpost-defense');
+assert.equal(defenseEvent.objectiveType, 'defend-region');
+assert.equal(acceptWorldEvent(defenseGame, defenseEvent.id), true);
+for (let frame = 0; frame < 30; frame++) advanceWorldEvents(defenseGame, 1, 'forest');
+assert.equal(defenseGame.world.events.active[0].progress, 0);
+assert.ok(Math.abs(defenseGame.world.events.active[0].holdElapsedMinutes - 0.5) < 1e-9);
+const defenseRoundTrip = JSON.parse(JSON.stringify(defenseGame));
+ensureWorldState(defenseRoundTrip, { legacy: false });
+assert.ok(Math.abs(defenseRoundTrip.world.events.active[0].holdElapsedMinutes - 0.5) < 1e-9,
+  'partial outpost defense time must survive save/load normalization');
+for (let frame = 0; frame < 30; frame++) advanceWorldEvents(defenseGame, 1, 'forest');
+assert.equal(defenseGame.world.events.active[0].progress, 1);
+for (let frame = 0; frame < 60; frame++) advanceWorldEvents(defenseGame, 1, 'briar-hollow');
+assert.equal(defenseGame.world.events.active[0].progress, 1,
+  'leaving the defended region must pause, not advance, the hold objective');
+for (let frame = 0; frame < 120; frame++) advanceWorldEvents(defenseGame, 1, 'forest');
+assert.equal(defenseGame.world.events.active.length, 0);
+assert.equal(defenseGame.world.events.history[0].status, 'completed');
+assert.equal(defenseGame.factions.reputation['hub-guardians'], 10);
+
 const ashChainSeed = findSeedForTemplate('volcano', 'ash-warband-scouting');
 const ashChainGame = { world: createWorldState({ seed: ashChainSeed }), factions: createFactionState() };
 changeFactionReputation(ashChainGame, 'ash-nomads', 50, 'test access', 'test');

@@ -24,6 +24,19 @@ export const WORLD_EVENT_TEMPLATES = Object.freeze([
     objectiveText: 'Победите 3 противников, угрожающих патрулю.'
   }),
   Object.freeze({
+    id: 'hub-outpost-defense',
+    name: 'Оборона пограничной заставы',
+    regions: ['forest', 'briar-hollow', 'ruins'],
+    factionId: 'hub-guardians',
+    goldMin: 50,
+    goldMax: 75,
+    reputationReward: 10,
+    failureReputationDelta: -6,
+    objectiveType: 'defend-region',
+    targetCount: 3,
+    objectiveText: 'Удерживайте заставу в этом регионе 3 игровых минуты. Если покинете регион, оборона приостановится.'
+  }),
+  Object.freeze({
     id: 'free-trader-caravan',
     name: 'Караван торговцев',
     regions: ['forest', 'briar-hollow', 'swamp', 'graveyard', 'wasteland'],
@@ -204,8 +217,22 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
   const now = world.clockMinutes;
   const finished = [];
 
+  let objectiveProgressed = false;
   for (const event of [...events.active]) {
-    if (event.status !== 'active' || now < event.expiresAt) continue;
+    if (event.status !== 'active') continue;
+    if (event.accepted && event.objectiveType === 'defend-region' && event.regionId === regionId && now < event.expiresAt) {
+      const previousProgress = Number(event.progress) || 0;
+      event.holdElapsedMinutes = Math.min(event.targetCount || 1,
+        Math.max(0, Number(event.holdElapsedMinutes) || 0) + delta);
+      event.progress = Math.min(event.targetCount || 1, Math.floor(event.holdElapsedMinutes + 1e-9));
+      event.phase = event.progress;
+      if (event.progress > previousProgress) objectiveProgressed = true;
+      if (event.progress >= (event.targetCount || 1)) {
+        finished.push(finishEvent(game, event, 'completed', now));
+        continue;
+      }
+    }
+    if (now < event.expiresAt) continue;
     finished.push(finishEvent(game, event, event.accepted ? 'failed' : 'expired', now));
   }
 
@@ -272,6 +299,7 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
         targetRegionId,
         targetCount: template.targetCount,
         progress: 0,
+        ...(template.objectiveType === 'defend-region' ? { holdElapsedMinutes: 0 } : {}),
         reward: {
           gold: template.goldMin + Math.floor(rewardRandom() * (template.goldMax - template.goldMin + 1))
         }
@@ -287,7 +315,7 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
     }
   }
 
-  return { changed: started.length > 0 || finished.length > 0, started, finished };
+  return { changed: started.length > 0 || finished.length > 0 || objectiveProgressed, started, finished };
 }
 
 export function acceptWorldEvent(game, eventId) {

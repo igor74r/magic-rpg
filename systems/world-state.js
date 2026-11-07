@@ -113,6 +113,11 @@ function sanitizeWorldEvent(event) {
   event.targetCount = targetCount;
   event.progress = Number.isSafeInteger(event.progress)
     ? Math.max(0, Math.min(targetCount, event.progress)) : 0;
+  if (event.objectiveType === 'defend-region') {
+    event.holdElapsedMinutes = Number.isFinite(event.holdElapsedMinutes)
+      ? Math.max(event.progress, Math.min(targetCount, event.holdElapsedMinutes))
+      : event.progress;
+  }
   event.phase = event.progress;
   if (typeof event.objectiveText !== 'string') event.objectiveText = '';
   if (event.objectiveText.length > 240) event.objectiveText = event.objectiveText.slice(0, 240);
