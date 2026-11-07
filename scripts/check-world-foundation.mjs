@@ -172,6 +172,8 @@ const ashChainStageOne = advanceWorldEvents(ashChainGame, 1, 'volcano').started[
 assert.equal(ashChainStageOne.templateId, 'ash-warband-scouting');
 assert.equal(ashChainGame.world.factionCampaigns['ash-nomad-warband'].stage, 1);
 assert.equal(acceptWorldEvent(ashChainGame, ashChainStageOne.id), true);
+assert.equal(recordWorldEventKill(ashChainGame, 'volcano', { elite: true, boss: false }).length, 0,
+  'one elite kill must not complete a two-target scouting contract');
 const ashChainStageOneDone = recordWorldEventKill(ashChainGame, 'volcano', { elite: true, boss: false });
 assert.equal(ashChainStageOneDone.length, 1);
 assert.equal(ashChainGame.world.factionCampaigns['ash-nomad-warband'].stage, 2,
