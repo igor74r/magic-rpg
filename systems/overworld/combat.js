@@ -1168,6 +1168,18 @@ function scheduleEnemyCombatTurn(delay = 700) {
   }, delay);
 }
 
+function persistRegionalBossCheckpoint(ow) {
+  const enemy = ow?.combat?.enemy;
+  const regionId = ow?.sourceLocationId || ow?.locationId;
+  if (!enemy?.boss || ow.rifMode || ow.towerMode || !state.game?.world || !regionId || !enemy.persistentId) return;
+  if (!recordRegionBossProgress(state.game.world, regionId, enemy.persistentId, enemy, ow.combat.turnCount)) return;
+  if (!saveGame()) {
+    const warning = 'Не удалось сохранить контрольную точку босса. Текущий прогресс останется в памяти до следующего успешного сохранения.';
+    pushLog(warning, 'warning');
+    emit('toast', warning);
+  }
+}
+
 function enemyCombatTurn() {
   const ow = state.overworld;
 
@@ -1218,6 +1230,7 @@ function enemyCombatTurn() {
     ow.combat.turn = 'player';
     ow.combat.turnCount = (ow.combat.turnCount || 0) + 1;
     ow.combat.blocking = false;
+    persistRegionalBossCheckpoint(ow);
 
     return;
   }
@@ -1312,6 +1325,7 @@ function enemyCombatTurn() {
 
     decreaseCooldowns();
     ow.combat.turn = 'player';
+    persistRegionalBossCheckpoint(ow);
 
     return;
   }
@@ -1600,6 +1614,7 @@ function enemyCombatTurn() {
 
   decreaseCooldowns();
   ow.combat.turn = 'player';
+  persistRegionalBossCheckpoint(ow);
 }
 
 function combatVictory() {
