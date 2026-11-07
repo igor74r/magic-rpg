@@ -21,7 +21,7 @@ assert.equal(recordRegionChestOpened(world, 'forest', 'chest-1'), false);
 assert.equal(recordRegionEnemyDefeat(world, 'forest', 'enemy-2', 35), true);
 assert.equal(recordRegionEventResolved(world, 'forest', 'event-altar-0'), true);
 assert.equal(recordRegionEventResolved(world, 'forest', 'event-altar-0'), false);
-assert.equal(recordRegionSecretDiscovered(world, 'forest', 'secret-12-8'), true);
+assert.equal(recordRegionSecretDiscovered(world, 'forest', 'secret-12-8', { id: 'secret-12-8-chest', x: 320, y: 240 }), true);
 assert.equal(recordRegionSecretDiscovered(world, 'forest', 'secret-12-8'), false);
 world.clockMinutes = 20;
 const enemies = [{ persistentId: 'enemy-2', hp: 40, dead: false, effects: [] }, { persistentId: 'enemy-1', hp: 30, dead: false }];
@@ -43,6 +43,8 @@ const roundTrip = JSON.parse(JSON.stringify(game));
 ensureWorldState(roundTrip);
 assert.deepEqual(roundTrip.world.regions.forest.discoveredSecrets, ['secret-12-8'],
   'discovered secret IDs must survive save serialization and world-state sanitization');
+assert.deepEqual(roundTrip.world.regions.forest.secretChests, [{ id: 'secret-12-8-chest', x: 320, y: 240 }],
+  'revealed secret treasure chests must survive save serialization until opened');
 assert.equal(ensureRegionRecord(world, 'ruins', 1).discoveredSecrets.length, 0,
   'secret discovery must be isolated per region');
 assert.equal(ensureRegionRecord(world, 'ruins', 1).openedChests.length, 0, 'region state must be isolated');
