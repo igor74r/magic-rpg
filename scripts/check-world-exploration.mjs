@@ -1,6 +1,18 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { getSecretWallCount } from '../systems/overworld/secrets.js';
+import { createWorldRandom } from '../systems/overworld/map.js';
+
+const worldRolls = (seed, region) => {
+  const random = createWorldRandom(seed, region);
+  return Array.from({ length: 12 }, () => random());
+};
+assert.deepEqual(worldRolls(12345, 'forest'), worldRolls(12345, 'forest'),
+  'the same save seed and region must reproduce the same initial world rolls');
+assert.notDeepEqual(worldRolls(12345, 'forest'), worldRolls(12345, 'ruins'),
+  'different regions must not share the same initial world sequence');
+assert.notDeepEqual(worldRolls(12345, 'forest'), worldRolls(54321, 'forest'),
+  'different saves must generate different initial world sequences');
 
 assert.equal(getSecretWallCount(() => 0), 2, 'lowest roll should create a second secret');
 assert.equal(getSecretWallCount(() => 0.199999), 2, '20% bonus-secret threshold is inclusive below 0.2');
