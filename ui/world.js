@@ -1,5 +1,5 @@
 import { state } from '../systems/state.js';
-import { FACTIONS, getFactionRank, getFactionReputation, getFactionTradeBenefitLabel, getFactionDamageReduction, getFactionLootBonus, getFactionEventGoldBonus } from '../systems/factions.js';
+import { FACTIONS, getFactionRank, getFactionReputation, getFactionTradeDiscount, getFactionDamageReduction, getFactionLootBonus, getFactionEventGoldBonus } from '../systems/factions.js';
 import { WORLD_REGION_IDS } from '../data/world.js';
 import { LOCATIONS } from '../data/locations.js';
 import { escapeHtml } from './screens.js';
@@ -38,7 +38,7 @@ function renderFactionCard(game, faction) {
   const rank = getFactionRank(reputation);
   const percent = Math.max(0, Math.min(100, Math.round((reputation + 100) / 2)));
   const benefits = {
-    'free-traders': '🛒 ' + getFactionTradeBenefitLabel(game),
+    'free-traders': '🛒 ' + factionPerkProgressLabel('Скидка торговцев', getFactionTradeDiscount(game), reputation),
     'hub-guardians': '🛡️ ' + factionPerkProgressLabel('Защита', getFactionDamageReduction(game), reputation),
     'ash-nomads': '🎒 ' + factionPerkProgressLabel('Шанс добычи', getFactionLootBonus(game), reputation),
     'rift-cult': '🌀 ' + factionPerkProgressLabel('Золото событий', getFactionEventGoldBonus(game, 'rift-cult'), reputation)
