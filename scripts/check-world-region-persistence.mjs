@@ -6,6 +6,7 @@ import {
   recordRegionEnemyDefeat,
   recordRegionEnemyRespawned,
   recordRegionEventResolved,
+  recordRegionSecretDiscovered,
   applyRegionPersistence
 } from '../systems/region-state.js';
 
@@ -20,6 +21,8 @@ assert.equal(recordRegionChestOpened(world, 'forest', 'chest-1'), false);
 assert.equal(recordRegionEnemyDefeat(world, 'forest', 'enemy-2', 35), true);
 assert.equal(recordRegionEventResolved(world, 'forest', 'event-altar-0'), true);
 assert.equal(recordRegionEventResolved(world, 'forest', 'event-altar-0'), false);
+assert.equal(recordRegionSecretDiscovered(world, 'forest', 'secret-12-8'), true);
+assert.equal(recordRegionSecretDiscovered(world, 'forest', 'secret-12-8'), false);
 world.clockMinutes = 20;
 const enemies = [{ persistentId: 'enemy-2', hp: 40, dead: false, effects: [] }, { persistentId: 'enemy-1', hp: 30, dead: false }];
 const chests = [{ id: 'chest-0', opened: false }, { id: 'chest-1', opened: false }];
@@ -36,5 +39,11 @@ world.clockMinutes = 36;
 applyRegionPersistence(world, 'forest', enemies, chests, events, 2000);
 assert.equal(enemies[0].dead, false, 'expired defeat cooldown must not keep an enemy dead');
 assert.equal(recordRegionEnemyRespawned(world, 'forest', 'enemy-2'), false);
+const roundTrip = JSON.parse(JSON.stringify(game));
+ensureWorldState(roundTrip);
+assert.deepEqual(roundTrip.world.regions.forest.discoveredSecrets, ['secret-12-8'],
+  'discovered secret IDs must survive save serialization and world-state sanitization');
+assert.equal(ensureRegionRecord(world, 'ruins', 1).discoveredSecrets.length, 0,
+  'secret discovery must be isolated per region');
 assert.equal(ensureRegionRecord(world, 'ruins', 1).openedChests.length, 0, 'region state must be isolated');
 console.log('Persistent region state: stable generation, opened chests, defeated enemies and respawn cooldown passed.');

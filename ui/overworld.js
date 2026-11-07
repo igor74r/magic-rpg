@@ -13,6 +13,8 @@ import { CLASSES } from '../data/classes.js';
 import { emit, on } from '../systems/events.js';
 import { escapeHtml } from './screens.js';
 import { getSecretWallCount } from '../systems/overworld/secrets.js';
+import { createRegionRandom } from '../systems/world-state.js';
+import { recordRegionSecretDiscovered } from '../systems/region-state.js';
 import { drawPlayerByClass, drawEnemyByType, drawStatic, EFFECTS_DATA, MODIFIERS_LABEL } from './overworld/models.js';
 import { 
   renderCombatPanel, getSubPanel, setSubPanel, 
@@ -34,7 +36,12 @@ function generateSecrets(ow) {
 
   // В каждой боевой локации есть хотя бы одна секретная стена;
   // в 20% случаев появляется вторая. Добыча остаётся случайной.
-  const count = getSecretWallCount();
+  const regionId = ow.sourceLocationId || ow.locationId;
+  const world = state.game?.world;
+  const generationVisit = world?.regions?.[regionId]?.generationVisit || 1;
+  const random = world ? createRegionRandom(world, regionId, generationVisit) : Math.random;
+  const discovered = new Set(world?.regions?.[regionId]?.discoveredSecrets || []);
+  const count = getSecretWallCount(random);
 
   // Ищем кандидатов — «стены» (камни 4 или деревья 2), рядом с которыми проходимый тайл
   const candidates = [];
@@ -54,11 +61,14 @@ function generateSecrets(ow) {
   if (!candidates.length) return secrets;
 
   for (let i = 0; i < count && candidates.length; i++) {
-    const idx = Math.floor(Math.random() * candidates.length);
+    const idx = Math.floor(random() * candidates.length);
     const c = candidates.splice(idx, 1)[0];
-    const typeRoll = Math.random();
+    const typeRoll = random();
     const rewardType = typeRoll < 0.60 ? 'chest' : typeRoll < 0.90 ? 'elite' : 'loot';
+    const id = `secret-${c.x}-${c.y}`;
+    if (discovered.has(id)) continue;
     secrets.push({
+      id,
       tx: c.x, ty: c.y,
       wx: c.x * ow.tile + ow.tile / 2,
       wy: c.y * ow.tile + ow.tile / 2,
@@ -90,6 +100,10 @@ function tryOpenSecret() {
 function openSecret(sw) {
   const ow = state.overworld;
   const p = state.game.player;
+  const previousGame = JSON.parse(JSON.stringify(state.game));
+  const previousChestCount = ow.chests?.length || 0;
+  const previousEnemyCount = ow.enemies?.length || 0;
+  const previousParticleCount = ow.particles?.length || 0;
   sw.opened = true;
 
   // Эффект: взрыв искр
@@ -139,6 +153,16 @@ function openSecret(sw) {
     addItem('mana-potion', 1);
     emit('toast', `💰 +${gold} золота, +2 зелья`);
     emit('log', { channel: 'game', msg: `✨ Скрытая ниша: +${gold}💰, +2 зелья.`, cls: 'success' });
+  }
+
+  const regionId = ow.sourceLocationId || ow.locationId;
+  if (!recordRegionSecretDiscovered(state.game.world, regionId, sw.id) || !saveGame()) {
+    state.game = previousGame;
+    if (ow.chests) ow.chests.length = previousChestCount;
+    if (ow.enemies) ow.enemies.length = previousEnemyCount;
+    if (ow.particles) ow.particles.length = previousParticleCount;
+    sw.opened = false;
+    emit('toast', '⚠️ Тайник не сохранён. Попробуйте открыть его ещё раз.');
   }
 }
 

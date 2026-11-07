@@ -9,7 +9,8 @@ export function ensureRegionRecord(world, regionId, generationVisit = 1) {
       generationVisit: Math.max(1, Math.floor(Number(generationVisit) || 1)),
       openedChests: [],
       defeatedEnemies: {},
-      resolvedEvents: []
+      resolvedEvents: [],
+      discoveredSecrets: []
     };
   }
   if (!Number.isSafeInteger(record.generationVisit) || record.generationVisit < 1) {
@@ -19,6 +20,8 @@ export function ensureRegionRecord(world, regionId, generationVisit = 1) {
   if (!record.defeatedEnemies || typeof record.defeatedEnemies !== 'object' || Array.isArray(record.defeatedEnemies)) record.defeatedEnemies = {};
   if (!Array.isArray(record.resolvedEvents)) record.resolvedEvents = [];
   record.resolvedEvents = [...new Set(record.resolvedEvents.filter(id => typeof id === 'string' && id.length <= 80))];
+  if (!Array.isArray(record.discoveredSecrets)) record.discoveredSecrets = [];
+  record.discoveredSecrets = [...new Set(record.discoveredSecrets.filter(id => typeof id === 'string' && id.length <= 80))];
   return record;
 }
 
@@ -35,6 +38,14 @@ export function recordRegionEventResolved(world, regionId, eventId) {
   const record = ensureRegionRecord(world, regionId);
   if (!record || record.resolvedEvents.includes(eventId)) return false;
   record.resolvedEvents.push(eventId);
+  return true;
+}
+
+export function recordRegionSecretDiscovered(world, regionId, secretId) {
+  if (typeof secretId !== 'string' || !secretId) return false;
+  const record = ensureRegionRecord(world, regionId);
+  if (!record || record.discoveredSecrets.includes(secretId)) return false;
+  record.discoveredSecrets.push(secretId);
   return true;
 }
 
