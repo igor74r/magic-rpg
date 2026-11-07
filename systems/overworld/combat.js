@@ -1988,6 +1988,7 @@ function combatDefeat() {
     spawnParticles(ow.player.x, ow.player.y, 'levelup', 20);
 
     ow.combat.turn = 'player';
+    persistRegionalBossCheckpoint(ow);
     return;
   }
 
@@ -2026,6 +2027,13 @@ function combatDefeat() {
 
   p.hp = 0;
   ow.player.hp = 0;
+
+  // A defeat ends the encounter, but it must not erase damage already dealt
+  // to a persistent regional boss. The normal defeat save below commits both.
+  const regionId = ow.sourceLocationId || ow.locationId;
+  if (enemy?.boss && !ow.rifMode && !ow.towerMode && state.game?.world && regionId && enemy.persistentId) {
+    recordRegionBossProgress(state.game.world, regionId, enemy.persistentId, enemy, ow.combat.turnCount);
+  }
 
   enemy.state = 'idle';
   ow.defeated = true;

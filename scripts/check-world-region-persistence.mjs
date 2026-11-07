@@ -109,4 +109,8 @@ assert.equal((combatSource.match(/persistRegionalBossCheckpoint\(ow\);/g) || [])
   'boss progress must be checkpointed after every enemy-turn completion path');
 assert.ok(combatSource.includes("if (!saveGame()) {\n    const warning = 'Не удалось сохранить контрольную точку босса."),
   'failed boss checkpoints must notify the player instead of silently losing progress');
+assert.match(combatSource, /function combatDefeat\(\)[\s\S]*?persistRegionalBossCheckpoint\(ow\);/,
+  'a boss checkpoint must be saved when the player is resurrected');
+assert.match(combatSource, /const regionId = ow\.sourceLocationId \|\| ow\.locationId;[\s\S]*?recordRegionBossProgress\(state\.game\.world, regionId, enemy\.persistentId, enemy, ow\.combat\.turnCount\);[\s\S]*?enemy\.state = 'idle';/,
+  'player defeat must preserve regional boss progress before ending the encounter');
 console.log('Persistent region state: stable generation, opened chests, defeated enemies, boss progress, permanent victories and respawn cooldown passed.');

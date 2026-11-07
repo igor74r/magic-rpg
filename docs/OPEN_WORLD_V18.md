@@ -34,7 +34,7 @@ The region seed is derived from the save seed, region ID and visit index. The ma
 
 ## Persistent events
 
-World events advance with the world clock. Visible events receive deterministic map markers. The player must accept an event before its objective progresses. Combat victories update accepted objectives. Completed events apply their faction outcome and remain available for an explicit reward claim. Event acceptance and reward claims are rolled back if persistence fails. Regional boss health, phase, tactical turn count and pending special are checkpointed after each completed enemy turn and when retreating; boss victory remains permanent.
+World events advance with the world clock. Visible events receive deterministic map markers. The player must accept an event before its objective progresses. Combat victories update accepted objectives. Completed events apply their faction outcome and remain available for an explicit reward claim. Event acceptance and reward claims are rolled back if persistence fails. Regional boss health, phase, tactical turn count and pending special are checkpointed after each completed enemy turn, on retreat, and on player defeat/resurrection; boss victory remains permanent.
 
 ## Migration and NG+
 
