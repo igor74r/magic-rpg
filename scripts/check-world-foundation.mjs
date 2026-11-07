@@ -38,6 +38,7 @@ import {
   advanceWorldEvents,
   acceptWorldEvent,
   recordWorldEventKill,
+  recordWorldEventDiscovery,
   claimWorldEventReward
 } from '../systems/world-events.js';
 import { generateMap } from '../systems/overworld/map.js';
@@ -155,6 +156,23 @@ const bossBountyCompleted = recordWorldEventKill(bossBountyGame, 'shadow', { eli
 assert.equal(bossBountyCompleted.length, 1, 'only a boss victory completes the regional bounty');
 assert.equal(bossBountyCompleted[0].status, 'completed');
 assert.equal(bossBountyGame.factions.reputation['rift-cult'], -12);
+
+
+const surveySeed = findSeedForTemplate('forest', 'frontier-survey');
+const surveyGame = { world: createWorldState({ seed: surveySeed }), factions: createFactionState() };
+surveyGame.world.events.nextSpawnAt = 0;
+const survey = advanceWorldEvents(surveyGame, 1, 'forest').started[0];
+assert.equal(survey.templateId, 'frontier-survey');
+assert.equal(survey.objectiveType, 'region-discovery');
+assert.ok(['shadow', 'swamp'].includes(survey.targetRegionId) || survey.targetRegionId === 'briar-hollow' || survey.targetRegionId === 'village',
+  'survey target must be a connected undiscovered region');
+assert.equal(acceptWorldEvent(surveyGame, survey.id), true);
+assert.equal(recordWorldEventDiscovery(surveyGame, 'ruins').length, 0, 'unrelated discoveries do not progress a survey');
+const surveyCompleted = recordWorldEventDiscovery(surveyGame, survey.targetRegionId);
+assert.equal(surveyCompleted.length, 1);
+assert.equal(surveyCompleted[0].status, 'completed');
+assert.equal(surveyGame.factions.reputation['free-traders'], 10);
+assert.equal(recordWorldEventDiscovery(surveyGame, survey.targetRegionId).length, 0, 'completed survey cannot be counted twice');
 
 const hubPatrolSeed = findSeedForTemplate('forest', 'hub-patrol');
 const eventGame = { world: createWorldState({ seed: hubPatrolSeed }), factions: createFactionState() };

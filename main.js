@@ -1,7 +1,7 @@
 import { state } from './systems/state.js';
 import { WORLD_CONNECTIONS, WORLD_REGION_IDS, getWorldRouteKey } from './data/world.js';
 import { ensureWorldState, getAccessibleWorldRegions, canTravelToRegion, discoverWorldRegion } from './systems/world-state.js';
-import { acceptWorldEvent, claimWorldEventReward } from './systems/world-events.js';
+import { acceptWorldEvent, claimWorldEventReward, recordWorldEventDiscovery } from './systems/world-events.js';
 import { recordRegionEventResolved } from './systems/region-state.js';
 import { LOCATIONS } from './data/locations.js?v=20261102-fix1';
 import { on, emit } from './systems/events.js';
@@ -779,6 +779,8 @@ function openWorldPortalMenu() {
       exitOverworld();
       if (id === 'rift') { enterRift(); return; }
       discoverWorldRegion(latest, id, currentId);
+      const discoveryCompletions = recordWorldEventDiscovery(state.game, id);
+      for (const event of discoveryCompletions) toast(`Задание выполнено: ${event.name}`);
       state.game.location = id;
       saveGame();
       if (!enterOverworld(id)) {

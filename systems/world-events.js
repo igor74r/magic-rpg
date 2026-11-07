@@ -1,4 +1,5 @@
-import { WORLD_REGION_IDS } from '../data/world.js';
+import { WORLD_REGION_IDS, WORLD_CONNECTIONS } from '../data/world.js';
+import { LOCATIONS } from '../data/locations.js';
 import { createSeededRandom, deriveWorldSeed, ensureWorldState } from './world-state.js';
 import { changeFactionReputation } from './factions.js';
 
@@ -73,6 +74,19 @@ export const WORLD_EVENT_TEMPLATES = Object.freeze([
     objectiveType: 'boss-kill',
     targetCount: 1,
     objectiveText: 'Найдите и победите регионального босса.'
+  }),
+  Object.freeze({
+    id: 'frontier-survey',
+    name: 'Разведка неизведанной границы',
+    regions: WORLD_REGION_IDS.filter(id => id !== 'village'),
+    factionId: 'free-traders',
+    goldMin: 55,
+    goldMax: 80,
+    reputationReward: 10,
+    failureReputationDelta: -4,
+    objectiveType: 'region-discovery',
+    targetCount: 1,
+    objectiveText: 'Откройте соседний неизведанный регион.'
   }),
   Object.freeze({
     id: 'elite-hunt',
@@ -169,6 +183,7 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
   ) {
     const available = WORLD_EVENT_TEMPLATES.filter(template =>
       template.regions.includes(regionId) &&
+      (template.objectiveType !== 'region-discovery' || (WORLD_CONNECTIONS[regionId] || []).some(id => !world.discoveredRegions.includes(id))) &&
       (!events.cooldowns[template.id] || events.cooldowns[template.id] <= now)
     );
 
@@ -178,6 +193,9 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
       const template = available[Math.floor(random() * available.length)];
       const eventSeed = deriveWorldSeed(world.seed, template.id, sequence, regionId);
       const rewardRandom = createSeededRandom(eventSeed);
+      const targetRegionId = template.objectiveType === 'region-discovery'
+        ? (WORLD_CONNECTIONS[regionId] || []).filter(id => !world.discoveredRegions.includes(id))[Math.floor(rewardRandom() * (WORLD_CONNECTIONS[regionId] || []).filter(id => !world.discoveredRegions.includes(id)).length)]
+        : null;
       const event = {
         id: `world-event-${sequence + 1}`,
         templateId: template.id,
@@ -195,7 +213,10 @@ export function advanceWorldEvents(game, deltaFrames, regionId) {
         reputationReward: template.reputationReward,
         failureReputationDelta: template.failureReputationDelta,
         objectiveType: template.objectiveType,
-        objectiveText: template.objectiveText,
+        objectiveText: targetRegionId
+          ? `Откройте регион «${LOCATIONS[targetRegionId]?.name || targetRegionId}».`
+          : template.objectiveText,
+        targetRegionId,
         targetCount: template.targetCount,
         progress: 0,
         reward: {
@@ -256,4 +277,20 @@ export function claimWorldEventReward(game, eventId) {
   if (!event || event.status !== 'completed' || event.rewardClaimed) return null;
   event.rewardClaimed = true;
   return { ...event.reward };
+}
+
+export function recordWorldEventDiscovery(game, regionId) {
+  const world = ensureWorldState(game, { legacy: false });
+  if (!world || !WORLD_REGION_IDS.includes(regionId)) return [];
+  const completed = [];
+  for (const event of [...world.events.active]) {
+    if (event.status !== 'active' || !event.accepted
+      || event.objectiveType !== 'region-discovery' || event.targetRegionId !== regionId) continue;
+    event.progress = Math.min(event.targetCount || 1, (Number(event.progress) || 0) + 1);
+    event.phase = event.progress;
+    if (event.progress >= (event.targetCount || 1)) {
+      completed.push(finishEvent(game, event, 'completed', world.clockMinutes));
+    }
+  }
+  return completed;
 }
