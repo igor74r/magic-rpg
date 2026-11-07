@@ -58,3 +58,7 @@ The World and Factions dashboard tab displays the four faction standings, reputa
 - scripts/check-story-location-gates.mjs
 - scripts/browser-smoke.mjs
 - scripts/browser-visual-regression.mjs
+
+### Ash Nomad commander campaign compatibility
+
+The former standalone `ash-nomad-warband` bounty template is no longer part of random event discovery; its boss encounter is now the second stage of the persistent two-stage campaign. Already active or completed events remain self-contained in their saved event records and continue to resolve and award rewards without looking up the removed template.

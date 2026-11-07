@@ -63,20 +63,6 @@ export const WORLD_EVENT_TEMPLATES = Object.freeze([
     objectiveText: 'Победите 2 элитных противников.'
   }),
   Object.freeze({
-    id: 'ash-nomad-warband',
-    name: 'Предводитель пепельного отряда',
-    regions: ['wasteland', 'volcano', 'obsidian-fields'],
-    factionId: 'ash-nomads',
-    minFactionReputation: 50,
-    goldMin: 100,
-    goldMax: 140,
-    reputationReward: 12,
-    failureReputationDelta: -8,
-    objectiveType: 'boss-kill',
-    targetCount: 1,
-    objectiveText: 'Найдите и победите предводителя пепельного отряда.'
-  }),
-  Object.freeze({
     id: 'ash-warband-scouting',
     name: 'I. Следы военного отряда',
     regions: ['wasteland', 'volcano', 'obsidian-fields'],
