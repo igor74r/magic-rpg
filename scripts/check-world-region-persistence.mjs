@@ -105,7 +105,7 @@ assert.ok(combatSource.includes('recordRegionBossProgress(state.game.world, regi
   'retreating from a regional boss must persist its encounter progress');
 assert.ok(combatSource.includes('function persistRegionalBossCheckpoint(ow)'),
   'regional boss rounds must have a dedicated save checkpoint');
-assert.equal((combatSource.match(/persistRegionalBossCheckpoint\(ow\);/g) || []).length, 3,
+assert.equal((combatSource.match(/persistRegionalBossCheckpoint\(ow\);/g) || []).length, 4,
   'boss progress must be checkpointed after every enemy-turn completion path');
 assert.ok(combatSource.includes("if (!saveGame()) {\n    const warning = 'Не удалось сохранить контрольную точку босса."),
   'failed boss checkpoints must notify the player instead of silently losing progress');
