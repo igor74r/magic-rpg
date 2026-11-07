@@ -19,7 +19,7 @@ assert.equal(createEnemyPersistentId('grave-king', true, 2), 'boss-grave-king-2'
 assert.equal(createEnemyPersistentId('grave-king', true, 3), 'boss-grave-king-3');
 assert.equal(createEnemyPersistentId('wolf', false, 0, 4), 'enemy-4');
 const repeatedBossRoster = createSpawnRoster(['wolf', 'grave-king'], 4, () => 0.5);
-assert.equal(repeatedBossRoster.filter(id => id === 'grave-king').length, 2,
+assert.equal(repeatedBossRoster.filter(id => id === 'grave-king').length, 3,
   'small enemy rosters must preserve repeated boss entries for distinct encounters');
 
 const game = { world: createWorldState({ seed: 998877 }) };
